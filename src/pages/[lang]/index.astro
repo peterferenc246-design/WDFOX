@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Landing from "../../components/Landing.astro";
+import { getLandingContent } from "../../lib/sanity";
+import { locales, type Locale } from "../../data/content";
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang }, props: { lang } }));
+}
+
+const lang = Astro.props.lang as Locale;
+const content = await getLandingContent(lang);
+---
+<BaseLayout locale={lang} title={content.title} description={content.heroDescription}>
+  <Fragment slot="navigation">
+    <a class="nav-link active" href={`/${lang}/#domov`}>{content.nav.home}</a>
+    <a class="nav-link" href={`/${lang}/#sluzby`}>{content.nav.services}</a>
+    <a class="nav-link" href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
+    <a class="nav-link" href={`/${lang}/#o-mne`}>{content.nav.about}</a>
+    <a class="nav-link" href={`/${lang}/#proces`}>{content.nav.process}</a>
+    <a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
+  </Fragment>
+  <Landing content={content} />
+  <Fragment slot="footer-links">
+    <a href={`/${lang}/#domov`}>{content.nav.home}</a>
+    <a href={`/${lang}/#sluzby`}>{content.nav.services}</a>
+    <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
+    <a href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
+  </Fragment>
+</BaseLayout>
