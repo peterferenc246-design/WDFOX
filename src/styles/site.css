@@ -355,7 +355,7 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .contact-socials a { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; text-decoration: none !important; }
 @media (max-width: 760px) { .register-contact-grid { grid-template-columns: 1fr; } }
 
-.register-person { align-items: center; justify-content: space-between; }
+.register-person { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; width: 100%; }
 .register-person img { width: 180px; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 0; border: 0; }
 
 .register-person strong, .register-person small { display: block; }
