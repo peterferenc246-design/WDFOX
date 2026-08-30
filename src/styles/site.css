@@ -393,3 +393,8 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 @media (max-width: 760px) { .register-person { grid-template-columns: 1fr 140px; } .register-person > img { width: 140px; } .register-left-details { width: 140px; } }
 
 .register-right-details { display: grid; gap: .55rem; line-height: 1.55; margin-bottom: 1.5rem; }
+
+.register-under-person { display: grid; grid-template-columns: 1fr 180px; gap: 1.5rem; margin-top: 1.5rem; align-items: start; }
+.register-under-person .register-left-details, .register-under-person .register-right-details { width: auto; margin: 0; }
+.register-under-person .register-right-details { display: grid; gap: .55rem; line-height: 1.55; }
+@media (max-width: 760px) { .register-under-person { grid-template-columns: 1fr; } .register-under-person .register-right-details { width: 100%; } }
