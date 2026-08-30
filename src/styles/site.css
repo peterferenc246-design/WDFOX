@@ -442,3 +442,7 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 @media (max-width: 760px) { .register-identity-grid { display: grid; grid-template-columns: 1fr; grid-template-rows: auto; } .register-identity-left, .register-identity-right { display: contents; } .register-identity-left .register-person-name, .register-identity-right > img, .register-identity-left .register-address, .register-identity-right .register-right-details { grid-column: 1; grid-row: auto; justify-self: start; width: 100%; max-width: 270px; } .register-identity-right .register-right-details { white-space: normal; } .register-identity-right > img { height: auto; } }
 
 .register-contact-form input[name="_honey"] { display: none; }
+
+.contact-form-status { margin-top: .8rem; color: #ffb07a; font-size: .9rem; }
+.contact-form-status.success { color: #9ee6b0; font-weight: 700; }
+.register-contact-form button:disabled { opacity: .65; cursor: wait; }
