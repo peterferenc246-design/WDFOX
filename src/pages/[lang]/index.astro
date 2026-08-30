@@ -14,7 +14,6 @@ const content = await getLandingContent(lang);
 <BaseLayout locale={lang} title={content.title} description={content.heroDescription}>
   <Fragment slot="navigation">
     <a class="nav-link active" href={`/${lang}/#domov`}>{content.nav.home}</a>
-    <a class="nav-link" href={`/${lang}/#sluzby`}>{content.nav.services}</a>
     <a class="nav-link" href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
     <a class="nav-link" href={`/${lang}/#o-mne`}>{content.nav.about}</a>
     <a class="nav-link" href={`/${lang}/#proces`}>{content.nav.process}</a>
@@ -23,7 +22,6 @@ const content = await getLandingContent(lang);
   <Landing content={content} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
-    <a href={`/${lang}/#sluzby`}>{content.nav.services}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
     <a href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
