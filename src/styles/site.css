@@ -407,3 +407,11 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .register-identity-right .register-right-details { width: 220px; margin: 0; }
 .register-person, .register-under-person, .register-left-details { display: none !important; }
 @media (max-width: 760px) { .register-identity-grid { grid-template-columns: 1fr; } .register-identity-right { justify-items: start; } .register-identity-right > img, .register-identity-right .register-right-details { width: 100%; max-width: 260px; } }
+
+/* Larger portrait with the contact column to its left; keep phone/fax on one line */
+.register-identity-grid { grid-template-columns: minmax(0, 1fr) 520px; }
+.register-identity-right { display: grid; grid-template-columns: 220px 270px; gap: 1.5rem; align-items: start; justify-items: stretch; }
+.register-identity-right .register-right-details { width: 220px; margin: 0; white-space: nowrap; }
+.register-identity-right > img { grid-column: 2; width: 270px; height: 180px; }
+@media (max-width: 1100px) { .register-identity-grid { grid-template-columns: minmax(0, 1fr) 470px; } .register-identity-right { grid-template-columns: 190px 240px; } .register-identity-right .register-right-details { width: 190px; } .register-identity-right > img { width: 240px; height: 160px; } }
+@media (max-width: 760px) { .register-identity-grid { grid-template-columns: 1fr; } .register-identity-right { grid-template-columns: 1fr; justify-items: start; } .register-identity-right .register-right-details { width: 100%; white-space: normal; } .register-identity-right > img { grid-column: 1; width: 100%; max-width: 270px; height: auto; } }
