@@ -423,3 +423,10 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .register-identity-right > img { width: 240px; height: 160px; }
 @media (max-width: 1100px) { .register-identity-grid { grid-template-columns: minmax(0, 1fr) minmax(350px, 400px); } .register-identity-right { grid-template-columns: minmax(140px, 1fr) 220px; } .register-identity-right > img { width: 220px; height: 147px; } }
 @media (max-width: 760px) { .register-identity-grid { grid-template-columns: 1fr; } .register-identity-right { grid-template-columns: 1fr; } .register-identity-right .register-right-details { white-space: normal; } .register-identity-right > img { width: 100%; max-width: 270px; height: auto; } }
+
+/* Exact requested layout: portrait above the contact column, opposite the address */
+.register-identity-right { display: grid; grid-template-columns: 1fr; gap: 1.25rem; justify-items: start; width: 270px; }
+.register-identity-right > img { grid-column: 1; width: 270px; height: 180px; }
+.register-identity-right .register-right-details { grid-column: 1; width: 270px; margin: 0; white-space: nowrap; }
+@media (max-width: 1100px) { .register-identity-right, .register-identity-right .register-right-details { width: 240px; } .register-identity-right > img { width: 240px; height: 160px; } }
+@media (max-width: 760px) { .register-identity-right { width: 100%; } .register-identity-right, .register-identity-right .register-right-details { width: 100%; } .register-identity-right > img { width: 100%; max-width: 270px; height: auto; } .register-identity-right .register-right-details { white-space: normal; } }
