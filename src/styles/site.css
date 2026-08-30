@@ -415,3 +415,11 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .register-identity-right > img { grid-column: 2; width: 270px; height: 180px; }
 @media (max-width: 1100px) { .register-identity-grid { grid-template-columns: minmax(0, 1fr) 470px; } .register-identity-right { grid-template-columns: 190px 240px; } .register-identity-right .register-right-details { width: 190px; } .register-identity-right > img { width: 240px; height: 160px; } }
 @media (max-width: 760px) { .register-identity-grid { grid-template-columns: 1fr; } .register-identity-right { grid-template-columns: 1fr; justify-items: start; } .register-identity-right .register-right-details { width: 100%; white-space: normal; } .register-identity-right > img { grid-column: 1; width: 100%; max-width: 270px; height: auto; } }
+
+/* Final fitted desktop layout: contact details left, portrait right, no overflow */
+.register-identity-grid { grid-template-columns: minmax(0, 1fr) minmax(390px, 430px); gap: 1.25rem; }
+.register-identity-right { grid-template-columns: minmax(150px, 1fr) 240px; gap: 1rem; width: 100%; }
+.register-identity-right .register-right-details { width: auto; min-width: 0; white-space: nowrap; }
+.register-identity-right > img { width: 240px; height: 160px; }
+@media (max-width: 1100px) { .register-identity-grid { grid-template-columns: minmax(0, 1fr) minmax(350px, 400px); } .register-identity-right { grid-template-columns: minmax(140px, 1fr) 220px; } .register-identity-right > img { width: 220px; height: 147px; } }
+@media (max-width: 760px) { .register-identity-grid { grid-template-columns: 1fr; } .register-identity-right { grid-template-columns: 1fr; } .register-identity-right .register-right-details { white-space: normal; } .register-identity-right > img { width: 100%; max-width: 270px; height: auto; } }
