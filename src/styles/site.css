@@ -398,3 +398,12 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .register-under-person .register-left-details, .register-under-person .register-right-details { width: auto; margin: 0; }
 .register-under-person .register-right-details { display: grid; gap: .55rem; line-height: 1.55; }
 @media (max-width: 760px) { .register-under-person { grid-template-columns: 1fr; } .register-under-person .register-right-details { width: 100%; } }
+
+/* Fixed identity columns: name/address left, portrait/contact details right */
+.register-identity-grid { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 2rem; margin-top: 1.5rem; align-items: start; }
+.register-identity-left { display: grid; gap: 1.5rem; text-align: left; }
+.register-identity-right { display: grid; gap: 1.5rem; justify-items: end; text-align: left; }
+.register-identity-right > img { width: 180px; height: 120px; object-fit: cover; border-radius: 0; }
+.register-identity-right .register-right-details { width: 220px; margin: 0; }
+.register-person, .register-under-person, .register-left-details { display: none !important; }
+@media (max-width: 760px) { .register-identity-grid { grid-template-columns: 1fr; } .register-identity-right { justify-items: start; } .register-identity-right > img, .register-identity-right .register-right-details { width: 100%; max-width: 260px; } }
