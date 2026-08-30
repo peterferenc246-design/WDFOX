@@ -369,3 +369,12 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .register-contact-grid { grid-template-columns: 1fr 1fr; align-items: start; }
 .register-contact-form, .register-follow, .contact-socials { text-align: left; }
 @media (max-width: 760px) { .register-contact-grid { grid-template-columns: 1fr; } }
+
+/* Align identity and contact details in the left column with the message form */
+.register-contact-banner { display: grid; grid-template-columns: 1fr .8fr; gap: 80px; text-align: left; }
+.register-contact-banner .contact-copy { max-width: none; margin: 0; }
+.register-person { justify-content: space-between; margin-top: 1.5rem; }
+.register-left-details { margin-top: 1.5rem; display: grid; gap: .55rem; line-height: 1.55; }
+.register-left-details .register-address { margin-top: 0; }
+.register-contact-content { max-width: none; margin: 0; text-align: left; }
+@media (max-width: 760px) { .register-contact-banner { grid-template-columns: 1fr; gap: 40px; } }
