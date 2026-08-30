@@ -354,3 +354,6 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .contact-socials { display: flex; gap: .65rem; }
 .contact-socials a { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; text-decoration: none !important; }
 @media (max-width: 760px) { .register-contact-grid { grid-template-columns: 1fr; } }
+
+.register-person { align-items: center; }
+.register-person img { width: 72px; height: 72px; object-fit: cover; border-radius: 50%; border: 2px solid var(--orange); }
