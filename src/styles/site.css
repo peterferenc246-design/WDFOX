@@ -357,3 +357,6 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 
 .register-person { align-items: center; }
 .register-person img { width: 180px; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 0; border: 0; }
+
+.register-person strong, .register-person small { display: block; }
+.register-person small { margin-top: .2rem; color: #7A7A7A; font-style: italic; }
