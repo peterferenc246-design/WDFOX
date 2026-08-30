@@ -391,3 +391,5 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .register-person > img { grid-column: 2; justify-self: end; }
 .register-left-details { width: 180px; margin-left: auto; margin-right: 0; }
 @media (max-width: 760px) { .register-person { grid-template-columns: 1fr 140px; } .register-person > img { width: 140px; } .register-left-details { width: 140px; } }
+
+.register-right-details { display: grid; gap: .55rem; line-height: 1.55; margin-bottom: 1.5rem; }
