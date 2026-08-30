@@ -329,3 +329,10 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Contact banner details */
+.contact-person, .contact-address, .contact-fax { margin-top: 1.25rem; display: flex; gap: .75rem; align-items: flex-start; }
+.contact-person strong, .contact-address strong, .contact-fax strong { display: block; }
+.contact-person small, .contact-address small, .contact-fax small { display: block; color: #6d7480; margin-top: .2rem; }
+.contact-socials { display: flex; flex-wrap: wrap; gap: .75rem 1rem; margin-top: 1.25rem; }
+.contact-socials a { color: inherit; text-decoration: underline; text-underline-offset: .2em; }
