@@ -360,3 +360,12 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 
 .register-person strong, .register-person small { display: block; }
 .register-person small { margin-top: .2rem; color: #7A7A7A; font-style: italic; }
+
+/* Symmetric contact banner layout */
+.register-contact-banner { display: block; text-align: center; }
+.register-contact-banner .contact-copy { max-width: 760px; margin: 0 auto 2rem; }
+.register-person { justify-content: center; }
+.register-contact-content { max-width: 760px; margin: 0 auto; text-align: left; }
+.register-contact-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+.register-contact-form, .register-follow, .contact-socials { text-align: left; }
+@media (max-width: 760px) { .register-contact-grid { grid-template-columns: 1fr; } }
