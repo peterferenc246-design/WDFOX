@@ -11,7 +11,7 @@
     // Current widget supplied by the owner; keep as temporary fallback.
     sk: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1b9121q" },
     de: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb2aln" },
-    en: null,
+    en: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb9ast" },
     fr: null,
     hr: null,
     pl: null,
