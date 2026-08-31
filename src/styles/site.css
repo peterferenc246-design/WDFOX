@@ -452,3 +452,6 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .language-flag { display: inline-flex; width: 24px; height: 18px; padding: 0; border: 2px solid transparent; border-radius: 3px; overflow: hidden; opacity: .78; transition: opacity .2s ease, transform .2s ease, border-color .2s ease; }
 .language-flag img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .language-flag:hover, .language-flag.active { opacity: 1; transform: translateY(-1px); border-color: var(--orange); }
+
+.language-switcher { position: relative; z-index: 20; }
+.language-flag { cursor: pointer; pointer-events: auto; }
