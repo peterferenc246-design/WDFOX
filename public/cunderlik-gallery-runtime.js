@@ -31,7 +31,7 @@
 #cunderlik-gallery-modal{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;padding:28px;background:rgba(9,13,20,.80);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}\
 #cunderlik-gallery-modal.is-open{display:flex}\
 #cunderlik-gallery-modal .cunderlik-modal-frame{position:relative;width:min(1080px,94vw);height:min(810px,88vh);border-radius:18px;overflow:hidden;background:#111;border:3px solid #fff;box-shadow:0 24px 70px rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center}\
-#cunderlik-gallery-modal img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;image-rendering:auto}\
+#cunderlik-gallery-modal img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;image-rendering:auto;transition:opacity .28s ease}\
 #cunderlik-gallery-modal .cunderlik-modal-close{position:absolute;right:12px;top:12px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.68);color:#fff;font-size:28px;line-height:1;cursor:pointer;z-index:2}\
 @media(max-width:640px){.window-honda .cunderlik-gallery-photo{left:10px;top:10px;width:96px;height:72px;border-radius:10px}#cunderlik-gallery-modal{padding:14px}#cunderlik-gallery-modal .cunderlik-modal-frame{width:94vw;height:78vh;border-radius:14px}}';
     if(!document.getElementById(style.id))document.head.appendChild(style);
@@ -67,13 +67,18 @@
     var index=0;
     var timer=null;
 
+    function setImage(target,src){
+      target.style.opacity='0';
+      var next=new Image();
+      next.onload=function(){target.src=src;target.style.opacity='1';};
+      next.onerror=function(){target.src=src;target.style.opacity='1';};
+      next.src=src;
+    }
+
     function renderCurrent(){
       var src=images[index];
-      img.style.opacity='0';
-      var next=new Image();
-      next.onload=function(){img.src=src;img.style.opacity='1';};
-      next.onerror=function(){img.src=src;img.style.opacity='1';};
-      next.src=src;
+      setImage(img,src);
+      if(modal.classList.contains('is-open'))setImage(modalImg,src);
     }
 
     function advance(){
@@ -91,10 +96,10 @@
     }
 
     function openModal(){
-      modalImg.src=img.src;
+      setImage(modalImg,images[index]);
       modal.classList.add('is-open');
       document.body.style.overflow='hidden';
-      stop();
+      start();
     }
 
     function closeModal(){
@@ -114,7 +119,7 @@
 
     document.addEventListener('visibilitychange',function(){
       if(document.hidden)stop();
-      else if(!modal.classList.contains('is-open'))start();
+      else start();
     });
 
     return true;
