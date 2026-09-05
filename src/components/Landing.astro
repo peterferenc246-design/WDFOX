@@ -4,16 +4,80 @@ interface Props { content: LandingContent; }
 const { content } = Astro.props;
 const heroFox = "https://webdizain-bbyygbqm.manus.space/manus-storage/webdizainfox-fox-hero_22939d0f.png";
 const serviceGlyphs = ["▣", "✎", "◎", "▤", "⌁", "⚙"];
+const hondaCrf450r = "https://powersports.honda.com/motorcycle/motocross/crf450r/2027/-/media/products/family/crf450r/campaign/desktop/2027/2027-crf450rwe-campaign-desktop.jpg";
 ---
 <section class="hero-section section-wrap" id="domov"><div class="hero-copy reveal-up"><p class="eyebrow"><span></span>{content.heroEyebrow}</p><h1>{content.heroTitle}<br /><em>{content.heroAccent}</em></h1><p class="hero-lede">{content.heroDescription}</p><div class="hero-actions"><a class="button button-primary" href="#kontakt">✦ {content.heroPrimary} <span>→</span></a><a class="button button-secondary" href="#portfolio"><span class="eye-icon">◉</span> {content.heroSecondary}</a></div><div class="benefit-row" aria-label="Benefits">{content.benefits.map((benefit) => <span class="benefit"><span aria-hidden="true">✓</span> {benefit}</span>)}</div></div><div class="hero-visual reveal-up-delay"><div class="hero-orbit orbit-one" aria-hidden="true"></div><div class="hero-orbit orbit-two" aria-hidden="true"></div><span class="scribble scribble-one" aria-hidden="true">⌁</span><span class="scribble scribble-two" aria-hidden="true">⌁</span><span class="spark spark-one" aria-hidden="true">✧</span><span class="spark spark-two" aria-hidden="true">○</span><img class="hero-mascot" src={heroFox} alt="WebDesignFOX mascot" /><div class="hero-note"><span class="note-arrow">↗</span><span>{content.locale === "de" ? "Ihr Partner für" : content.locale === "en" ? "Your partner for" : content.locale === "sk" ? "Váš partner pre" : ""}<br /><strong>{content.locale === "de" ? "erfolgreiche Websites!" : content.locale === "en" ? "successful websites!" : content.locale === "sk" ? "úspešný web!" : ""}</strong></span></div></div></section>
+
 <section class="services-section section-wrap" id="sluzby"><div class="section-heading centered"><p class="eyebrow eyebrow-center">{content.servicesEyebrow}</p><h2>{content.servicesTitle}<br /><span>{content.servicesAccent}</span></h2></div><div class="services-grid">{content.services.map((service, index) => <a class="service-card" href="#kontakt"><span class="service-icon">{serviceGlyphs[index]}</span><h3>{service.title}</h3><p>{service.text}</p><span class="card-arrow">↗</span></a>)}</div></section>
+
 <section class="about-panel section-wrap" id="o-mne"><div class="panel-noise" aria-hidden="true"></div><div class="about-copy"><p class="eyebrow">{content.aboutEyebrow}</p><h2>{content.aboutTitle}<br /><em>{content.aboutAccent}</em></h2><p>{content.aboutDescription}</p><a class="text-link" href="#kontakt">{content.aboutLink} →</a></div><div class="about-mascot-wrap"><div class="about-burst" aria-hidden="true"></div><img class="about-mascot" src={heroFox} alt="WebDesignFOX mascot" /></div><ul class="about-list">{content.aboutBenefits.map((benefit) => <li><span>✓</span><div><strong>{benefit.title}</strong><small>{benefit.text}</small></div></li>)}</ul></section>
-<section class="portfolio-section section-wrap" id="portfolio"><div class="section-heading split-heading"><div><p class="eyebrow">{content.portfolioEyebrow}</p><h2>{content.portfolioTitle}<br /><span>{content.portfolioAccent}</span></h2></div><a class="text-link" href="#kontakt">{content.portfolioLink} →</a></div><div class="project-grid"><article class="project-card project-orange"><div class="project-topline"><span>E-commerce</span><span>↗</span></div><div class="project-window window-sunrise"><div class="window-nav"><i></i><i></i><i></i></div><div class="window-lines"><b>DISCOVER YOUR</b><strong>new rhythm.</strong><small>Storytelling in every detail.</small></div><div class="window-shape"></div></div><div class="project-info"><h3>Ovocie & spol.</h3><span>Branding · WebDesign · Vývoj</span></div></article><article class="project-card project-ink"><div class="project-topline"><span>Prezentačný web</span><span>↗</span></div><div class="project-window window-ink"><div class="window-nav"><i></i><i></i><i></i></div><div class="ink-copy"><small>THE ART OF</small><strong>DETAIL.</strong><span>Crafted for people<br />who notice.</span></div><div class="ink-circle"></div></div><div class="project-info"><h3>Ateliér Forma</h3><span>Stratégia · Dizajn · Vývoj</span></div></article></div></section>
+
+<section class="portfolio-section section-wrap" id="portfolio">
+  <div class="section-heading split-heading"><div><p class="eyebrow">{content.portfolioEyebrow}</p><h2>{content.portfolioTitle}<br /><span>{content.portfolioAccent}</span></h2></div><a class="text-link" href="#kontakt">{content.portfolioLink} →</a></div>
+  <div class="portfolio-carousel" data-carousel>
+    <div class="portfolio-viewport">
+      <div class="portfolio-track" data-track>
+        <a class="project-card project-honda" href="https://cunderlikmx.vercel.app/#home" target="_blank" rel="noreferrer" data-slide>
+          <div class="project-topline"><span>Motokros · Prezentačný web</span><span>↗</span></div>
+          <div class="project-window window-honda"><img src={hondaCrf450r} alt="Honda CRF450R 2027 – Cunderlik MX Academy" loading="lazy" /></div>
+          <div class="project-info"><h3>Cunderlik MX Academy</h3><span>Webdesign · Vývoj · Vercel</span></div>
+        </a>
+        <article class="project-card project-orange" data-slide><div class="project-topline"><span>E-commerce</span><span>↗</span></div><div class="project-window window-sunrise"><div class="window-nav"><i></i><i></i><i></i></div><div class="window-lines"><b>DISCOVER YOUR</b><strong>new rhythm.</strong><small>Storytelling in every detail.</small></div><div class="window-shape"></div></div><div class="project-info"><h3>Ovocie & spol.</h3><span>Branding · WebDesign · Vývoj</span></div></article>
+        <article class="project-card project-ink" data-slide><div class="project-topline"><span>Prezentačný web</span><span>↗</span></div><div class="project-window window-ink"><div class="window-nav"><i></i><i></i><i></i></div><div class="ink-copy"><small>THE ART OF</small><strong>DETAIL.</strong><span>Crafted for people<br />who notice.</span></div><div class="ink-circle"></div></div><div class="project-info"><h3>Ateliér Forma</h3><span>Stratégia · Dizajn · Vývoj</span></div></article>
+      </div>
+    </div>
+    <div class="portfolio-controls" aria-label="Ovládanie referencií">
+      <button type="button" class="portfolio-arrow" data-prev aria-label="Predchádzajúci projekt">‹</button>
+      <div class="portfolio-dots"><button class="portfolio-dot is-active" data-dot="0" aria-label="Projekt 1"></button><button class="portfolio-dot" data-dot="1" aria-label="Projekt 2"></button><button class="portfolio-dot" data-dot="2" aria-label="Projekt 3"></button></div>
+      <button type="button" class="portfolio-arrow" data-next aria-label="Ďalší projekt">›</button>
+    </div>
+  </div>
+</section>
+
 <section class="process-section section-wrap" id="proces"><div class="process-intro"><p class="eyebrow">{content.processEyebrow}</p><h2>{content.processTitle}<br /><em>{content.processAccent}</em></h2><p>{content.processDescription}</p><div class="process-arrow" aria-hidden="true">↓</div></div><div class="process-list">{content.process.map((step, index) => <div class="process-step"><span class="step-number">0{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div><span class="step-chevron">›</span></div>)}</div></section>
+
 <section class="workspace-panel section-wrap"><div class="workspace-visual" aria-hidden="true"><span class="workspace-orb orb-large"></span><span class="workspace-orb orb-small"></span><span class="workspace-browser"><i></i><i></i><i></i><b></b><em></em></span><span class="workspace-spark">✦</span></div><div class="workspace-copy"><p class="eyebrow">{content.workspaceEyebrow}</p><h2>{content.workspaceTitle}<br /><em>{content.workspaceAccent}</em></h2><a class="button button-primary" href="#kontakt">{content.workspaceCta} →</a></div></section>
+
 <section class="contact-section section-wrap" id="kontakt"><div class="contact-card register-contact-banner"><div class="contact-copy"><p class="eyebrow">{content.contactEyebrow}</p><h2>{content.contactTitle}<br /><em>{content.contactAccent}</em></h2><p>{content.contactDescription}</p><div class="register-identity-grid"><div class="register-identity-left"><div class="register-person-name"><strong>Peter Ferenc</strong><br /><small>Iniciátor a koordinátor</small></div><div class="register-address"><span>📍</span><div><strong>Anschrift</strong><br />Rammelkam 2<br />84036 Kumhausen<br />Deutschland</div></div></div><div class="register-identity-right"><img src="/images/peter-ferenc.jpg" alt="Peter Ferenc" /><div class="register-right-details"><div>📧 <strong>E-Mail:</strong> <a href="mailto:info@foxprof.club">info@foxprof.club</a></div><div>🌐 <strong>Web:</strong> <a href="https://foxprof.club/" target="_blank" rel="noreferrer">foxprof.club</a></div><div>📞 <strong>Telefon:</strong> <a href="tel:+4915731733332">+49 157 317 33332</a></div><div>📠 <strong>Fax:</strong> +1 231 538 6409</div></div></div></div></div><div class="register-contact-content"><form class="register-contact-form" id="contact-form"><label for="contact-name">Name <span>*</span></label><input id="contact-name" name="name" required /><label for="contact-email">E-Mail <span>*</span></label><input id="contact-email" name="email" type="email" required /><label for="contact-message">Nachricht <span>*</span></label><textarea id="contact-message" name="message" required minlength="5"></textarea><button type="submit">Absenden</button></form><p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p><h4 class="register-follow">Folgen Sie uns</h4><div class="contact-socials"><a href="https://www.facebook.com/StopTelekomKartellEuropa" target="_blank" rel="noreferrer" title="Facebook">f</a><a href="https://x.com/FOXtiptop" target="_blank" rel="noreferrer" title="X">X</a><a href="https://www.instagram.com/fiasfoxspravodlivost/" target="_blank" rel="noreferrer" title="Instagram">IG</a><a href="https://www.linkedin.com/in/foxpro-peter-ferenc-025913196/" target="_blank" rel="noreferrer" title="LinkedIn">in</a></div><a class="live-chat-bubble" href="#" aria-label="Live chat"><span class="live-chat-icon">✦</span><span>Live chat</span></a></div></div></section>
 
+<style>
+.portfolio-carousel{position:relative;margin-top:8px}.portfolio-viewport{overflow:hidden}.portfolio-track{display:flex;gap:22px;transition:transform .55s cubic-bezier(.22,.61,.36,1);will-change:transform}.portfolio-track>.project-card{flex:0 0 calc((100% - 44px)/3);min-width:0}.project-honda{color:inherit;text-decoration:none;background:#fff}.window-honda{position:relative;overflow:hidden;background:#111}.window-honda img{display:block;width:100%;height:100%;min-height:250px;object-fit:cover}.window-honda:after{content:"2027 HONDA CRF450R";position:absolute;left:15px;bottom:14px;padding:7px 10px;border-radius:999px;background:rgba(0,0,0,.76);color:#fff;font-size:11px;font-weight:800;letter-spacing:.07em}.portfolio-controls{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:18px}.portfolio-arrow{width:42px;height:42px;border-radius:50%;border:1px solid #ddd;background:#fff;font-size:27px;line-height:1;cursor:pointer}.portfolio-arrow:hover{border-color:#f36a0a;color:#f36a0a}.portfolio-dots{display:flex;gap:8px}.portfolio-dot{width:9px;height:9px;border:0;border-radius:999px;background:#d6d6d6;padding:0;cursor:pointer;transition:.2s}.portfolio-dot.is-active{width:26px;background:#f36a0a}@media(max-width:900px){.portfolio-track>.project-card{flex-basis:calc((100% - 18px)/2)}}@media(max-width:640px){.portfolio-track{gap:14px}.portfolio-track>.project-card{flex-basis:100%}.window-honda img{min-height:220px}}
+</style>
+
 <script>
+const carousel = document.querySelector('[data-carousel]');
+if (carousel) {
+  const track = carousel.querySelector('[data-track]');
+  const slides = Array.from(carousel.querySelectorAll('[data-slide]'));
+  const dots = Array.from(carousel.querySelectorAll('[data-dot]'));
+  let index = 0;
+  let paused = false;
+  let timer;
+  let touchStart = 0;
+  const visibleCount = () => window.innerWidth <= 640 ? 1 : window.innerWidth <= 900 ? 2 : 3;
+  const render = () => {
+    const slide = slides[0];
+    if (!slide || !track) return;
+    const gap = window.innerWidth <= 640 ? 14 : 22;
+    const step = slide.getBoundingClientRect().width + gap;
+    track.style.transform = `translateX(${-index * step}px)`;
+    dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+  };
+  const maxIndex = () => Math.max(0, slides.length - visibleCount());
+  const next = () => { index = index >= maxIndex() ? 0 : index + 1; render(); };
+  const prev = () => { index = index <= 0 ? maxIndex() : index - 1; render(); };
+  const start = () => { clearInterval(timer); timer = setInterval(() => { if (!paused) next(); }, 5000); };
+  carousel.querySelector('[data-next]')?.addEventListener('click', () => { next(); start(); });
+  carousel.querySelector('[data-prev]')?.addEventListener('click', () => { prev(); start(); });
+  dots.forEach((dot, i) => dot.addEventListener('click', () => { index = Math.min(i, maxIndex()); render(); start(); }));
+  carousel.addEventListener('mouseenter', () => paused = true);
+  carousel.addEventListener('mouseleave', () => paused = false);
+  carousel.addEventListener('touchstart', e => { touchStart = e.touches[0]?.clientX || 0; }, {passive:true});
+  carousel.addEventListener('touchend', e => { const end = e.changedTouches[0]?.clientX || touchStart; if (touchStart - end > 45) next(); else if (end - touchStart > 45) prev(); start(); }, {passive:true});
+  window.addEventListener('resize', () => { index = Math.min(index, maxIndex()); render(); });
+  render(); start();
+}
+
 const contactForm = document.getElementById("contact-form");
 const contactStatus = document.getElementById("contact-form-status");
 if (contactForm && contactStatus) {
@@ -23,28 +87,14 @@ if (contactForm && contactStatus) {
     const name = contactForm.querySelector("[name=name]")?.value.trim() || "";
     const email = contactForm.querySelector("[name=email]")?.value.trim() || "";
     const message = contactForm.querySelector("[name=message]")?.value.trim() || "";
-    if (!name || !email || message.length < 5) {
-      contactStatus.textContent = "Zadajte prosím platné meno, e-mail a dlhšiu správu (min. 5 znakov).";
-      return;
-    }
+    if (!name || !email || message.length < 5) { contactStatus.textContent = "Zadajte prosím platné meno, e-mail a dlhšiu správu (min. 5 znakov)."; return; }
     if (button) { button.disabled = true; button.textContent = "Odosielam…"; }
     contactStatus.textContent = "";
     try {
-      const response = await fetch("https://fia-fox-web-stripe.peter-ferenc246.workers.dev/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, lang: document.documentElement.lang || "sk", ts: Date.now() })
-      });
+      const response = await fetch("https://fia-fox-web-stripe.peter-ferenc246.workers.dev/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, email, message, lang: document.documentElement.lang || "sk", ts: Date.now() }) });
       const result = await response.json();
-      if (result && result.ok) {
-        contactForm.replaceWith(Object.assign(document.createElement("p"), { className: "contact-form-status success", textContent: "Ďakujeme! Správa bola odoslaná." }));
-      } else {
-        throw new Error("send failed");
-      }
-    } catch (error) {
-      contactStatus.textContent = "Chyba pri odosielaní. Skúste to prosím neskôr.";
-      if (button) { button.disabled = false; button.textContent = "Absenden"; }
-    }
+      if (result && result.ok) { contactForm.replaceWith(Object.assign(document.createElement("p"), { className: "contact-form-status success", textContent: "Ďakujeme! Správa bola odoslaná." })); } else { throw new Error("send failed"); }
+    } catch (error) { contactStatus.textContent = "Chyba pri odosielaní. Skúste to prosím neskôr."; if (button) { button.disabled = false; button.textContent = "Absenden"; } }
   });
 }
 </script>
