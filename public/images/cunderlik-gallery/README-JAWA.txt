@@ -1,0 +1,1 @@
+Jawa image will be stored as JPEG and used as the fifth rotating gallery image.
