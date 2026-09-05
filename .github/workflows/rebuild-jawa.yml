@@ -1,0 +1,45 @@
+name: Rebuild Jawa gallery image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/jawa-upload/**'
+      - '.github/workflows/rebuild-jawa.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Rebuild and verify WebP
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat public/jawa-upload/chunk01.txt \
+              public/jawa-upload/chunk02.txt \
+              public/jawa-upload/chunk03.txt \
+              public/jawa-upload/chunk04.txt \
+              public/jawa-upload/chunk05.txt \
+              public/jawa-upload/chunk06.txt \
+              public/jawa-upload/chunk07.txt \
+              public/jawa-upload/chunk08.txt | tr -d '\r\n' | base64 -d > public/images/cunderlik-gallery/cunderlik-jawa-final.webp
+          test "$(wc -c < public/images/cunderlik-gallery/cunderlik-jawa-final.webp)" -eq 49574
+          file public/images/cunderlik-gallery/cunderlik-jawa-final.webp | grep -qi 'webp'
+          echo "1663b05e84fd3dc0d6a9bda0828ef93c7537bcedb593cb0564c3f7bcd47ba002  public/images/cunderlik-gallery/cunderlik-jawa-final.webp" | sha256sum -c -
+      - name: Commit rebuilt image
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/images/cunderlik-gallery/cunderlik-jawa-final.webp
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Rebuild verified Jawa gallery image'
+          git pull --rebase origin main
+          git push origin HEAD:main
