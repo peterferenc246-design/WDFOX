@@ -1,23 +1,21 @@
 /*
  * WebDesignFOX – Tawk.to language-aware widget loader
  *
- * Add one Tawk.to widget per language in the map below.
- * Only one widget is loaded on a page.
+ * Loads exactly one Tawk.to widget based on the language in the URL.
  */
 (function () {
   "use strict";
 
   var widgets = {
-    // Current widget supplied by the owner; keep as temporary fallback.
     sk: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1b9121q" },
     de: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb2aln" },
     en: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb9ast" },
-    fr: null,
-    hr: null,
-    pl: null,
-    it: null,
-    es: null,
-    sv: null
+    hr: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bjvbjq" },
+    fr: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1blk6o4" },
+    it: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bovo5t" },
+    pl: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bp5qda" },
+    es: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bp6lk5" },
+    sv: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bpdngj" }
   };
 
   var supported = Object.keys(widgets);
@@ -26,9 +24,7 @@
   var language = supported.indexOf(urlLang) !== -1 ? urlLang : htmlLang;
   if (supported.indexOf(language) === -1) language = "sk";
 
-  // Use the current widget until the language-specific IDs are supplied.
   var widget = widgets[language] || widgets.sk;
-  if (!widget) return;
 
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = new Date();
