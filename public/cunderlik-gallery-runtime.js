@@ -8,13 +8,14 @@
   var title=card.querySelector('.project-info h3');
   if(title&&lang==='sk') title.textContent='Čunderlík MX Academy';
 
-  // Original JPG files uploaded to the repository. Čunderlík1.jpg is intentionally
-  // excluded because it is the photograph with the bottle.
+  // Original gallery photos + generated Jawa artwork. Čunderlík1.jpg is intentionally
+  // excluded from the public gallery because it is the reference photograph with the bottle.
   var images=[
     '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk2.jpg',
     '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk3.jpg',
     '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk4.jpg',
-    '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg'
+    '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg',
+    '/images/cunderlik-gallery/cunderlik-jawa.webp'
   ];
 
   var style=document.createElement('style');
