@@ -16,8 +16,7 @@
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk2.jpg',
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk3.jpg',
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk4.jpg',
-      '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg',
-      '/images/cunderlik-gallery/cunderlik-jawa.webp'
+      '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg'
     ];
 
     images.forEach(function(src){var p=new Image();p.src=src;});
@@ -71,7 +70,7 @@
       target.style.opacity='0';
       var next=new Image();
       next.onload=function(){target.src=src;target.style.opacity='1';};
-      next.onerror=function(){target.src=src;target.style.opacity='1';};
+      next.onerror=function(){target.style.opacity='1';};
       next.src=src;
     }
 
