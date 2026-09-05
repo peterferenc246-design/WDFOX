@@ -17,7 +17,7 @@
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk3.jpg',
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk4.jpg',
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg',
-      '/images/cunderlik-gallery/cunderlik-jawa-fixed.jpg'
+      '/images/cunderlik-gallery/cunderlik-jawa-fixed.jpg?v=2'
     ];
 
     images.forEach(function(src){var p=new Image();p.src=src;});
