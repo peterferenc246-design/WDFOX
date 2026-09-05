@@ -16,7 +16,8 @@
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk2.jpg',
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk3.jpg',
       '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk4.jpg',
-      '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg'
+      '/images/cunderlik-gallery/%C4%8Cunderl%C3%ADk5.jpg',
+      '/images/cunderlik-gallery/cunderlik-jawa-fixed.jpg'
     ];
 
     images.forEach(function(src){var p=new Image();p.src=src;});
@@ -73,10 +74,12 @@
     var timer=null;
 
     function setImage(target,src){
+      var token=String(Date.now())+Math.random();
+      target.dataset.galleryToken=token;
       target.style.opacity='0';
       var next=new Image();
-      next.onload=function(){target.src=src;target.style.opacity='1';};
-      next.onerror=function(){target.style.opacity='1';};
+      next.onload=function(){if(target.dataset.galleryToken!==token)return;target.src=src;target.style.opacity='1';};
+      next.onerror=function(){if(target.dataset.galleryToken!==token)return;target.style.opacity='1';};
       next.src=src;
     }
 
@@ -92,9 +95,9 @@
     function stop(){if(timer){clearInterval(timer);timer=null;}}
 
     function openModal(){
-      setImage(modalImg,images[index]);
       modal.classList.add('is-open');
       document.body.style.overflow='hidden';
+      setImage(modalImg,images[index]);
       start();
     }
 
