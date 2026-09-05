@@ -1,6 +1,3 @@
-Sem nahraj originalne obrazky pre galeriu Cunderlik MX Academy.
-
-Prosim ponechat obrazky v povodnom rozliseni a bez rekompresie.
-Fotografiu s flasou do galerie nepouzivame.
-
-Po nahrati obrazkov ich pripojime priamo do galerie webu.
+Sem patria originálne obrázky pre galériu Čunderlík MX Academy na WebDesignFOX.
+Fotografia s fľašou sa verejne nezobrazuje; zostáva iba ako referenčný podklad pre grafiky.
+Galéria používa Čunderlík2.jpg až Čunderlík5.jpg a cunderlik-jawa.webp.
