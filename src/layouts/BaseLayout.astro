@@ -17,7 +17,15 @@ const footerCopy: Record<Locale, { contact: string; note: string; online: string
   sv: { contact: "Kontakt", note: "Moderna webbplatser som skapar resultat. Teknik som aldrig bromsar dig.", online: "Tyskland · online" },
 };
 const consultationCta: Record<Locale, string> = {
-  de: "Beratung", en: "Consultation", sk: "Konzultácia", fr: "Consultation", hr: "Savjetovanje", pl: "Konsultacja", it: "Consulenza", es: "Consulta", sv: "Konsultation",
+  de: "Beratung",
+  en: "Consultation",
+  sk: "Konzultácia",
+  fr: "Consultation",
+  hr: "Savjetovanje",
+  pl: "Konsultacja",
+  it: "Consulenza",
+  es: "Consulta",
+  sv: "Konsultation",
 };
 ---
 <!doctype html><html lang={locale}><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="description" content={description} /><meta name="theme-color" content="#f36a0a" /><link rel="icon" type="image/svg+xml" href="/favicon.svg" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" /><link rel="canonical" href={`${siteUrl}${pathFor(locale)}`} />{locales.map((code) => <link rel="alternate" hreflang={code} href={`${siteUrl}${pathFor(code)}`} />)}<title>{title}</title><style is:inline>
@@ -26,9 +34,8 @@ const consultationCta: Record<Locale, string> = {
 .header-actions{padding-top:22px!important}
 @media(max-width:900px){#fixed-lang-layer{top:6px!important;right:76px!important;max-width:210px!important;gap:4px!important;padding:4px 5px!important}.header-actions{padding-top:18px!important}}
 @media(max-width:560px){#fixed-lang-layer{top:5px!important;right:64px!important;max-width:170px!important}#fixed-lang-layer .language-flag{flex-basis:22px!important;width:22px!important;height:16px!important}.header-actions{padding-top:16px!important}}
-/* Portrait source is a Flickr photo explicitly titled “Emil Cunderlik - EC Enduro Noiretable, France 16-09-2006”. */
-.window-honda:before{content:""!important;position:absolute!important;left:14px!important;top:14px!important;width:92px!important;height:92px!important;border-radius:16px!important;background-image:url('https://live.staticflickr.com/3589/3391997346_6db9919d24.jpg')!important;background-size:cover!important;background-position:center 24%!important;background-repeat:no-repeat!important;border:3px solid #fff!important;box-shadow:0 8px 22px rgba(0,0,0,.34)!important;z-index:5!important;pointer-events:none!important}
-@media(max-width:640px){.window-honda:before{left:10px!important;top:10px!important;width:76px!important;height:76px!important;border-radius:13px!important}}
+
+/* Hard override: contact identity block must never disappear after CSS hydration/load. */
 #kontakt .contact-copy,#kontakt .register-identity-grid,#kontakt .register-identity-left,#kontakt .register-identity-right,#kontakt .register-person-name,#kontakt .register-address,#kontakt .register-right-details,#kontakt .register-identity-right>img{visibility:visible!important;opacity:1!important}
 #kontakt .register-identity-grid{display:grid!important;grid-template-columns:minmax(0,1fr) 270px!important;gap:1.5rem!important;align-items:start!important;margin-top:1.5rem!important}
 #kontakt .register-identity-left,#kontakt .register-identity-right{display:grid!important;position:relative!important;transform:none!important}
@@ -43,6 +50,26 @@ const consultationCta: Record<Locale, string> = {
 <div id="fixed-lang-layer" class="language-switcher" aria-label="Language selector" style="position:fixed;top:6px;right:190px;z-index:2147483646;transform:none;visibility:visible;opacity:1;">{locales.map((code) => <a class:list={{ "language-flag": true, active: code === locale }} href={`${siteUrl}${pathFor(code)}`} title={localeLabels[code]} aria-label={localeLabels[code]}><img src={`https://flagcdn.com/${code === "en" ? "gb" : code === "sv" ? "se" : code}.svg`} alt={code.toUpperCase()} /></a>)}</div>
 <div class="site-shell" id="domov"><div class="topline" aria-hidden="true"></div><header class="site-header"><div class="header-inner"><a class="brand" href={pathFor(locale)} aria-label="WebDesignFOX – domov"><span class="brand-mark" aria-hidden="true"><span class="fox-symbol"><i></i><b></b></span></span><span class="brand-copy"><span class="brand-name">WebDesign<span>FOX</span></span><span class="brand-tagline">{localeLabels[locale]} · WebDesign & Technik</span></span></a><nav class="main-nav" aria-label="Hauptnavigation"><slot name="navigation" /></nav><div class="header-actions"><a class="nav-cta" href="#kontakt">✦ {consultationCta[locale]}</a></div><button class="menu-toggle" type="button">☰</button></div></header><main><slot /></main><footer class="site-footer section-wrap"><div class="footer-main"><div><a class="brand" href={pathFor(locale)}><span class="brand-name">WebDesign<span>FOX</span></span></a><p class="footer-note">{footerCopy[locale].note}</p></div><div class="footer-links"><strong>{footerCopy[locale].contact}</strong><a href="mailto:info@foxprof.club">info@foxprof.club</a><a href="tel:+4915731733332">+49 157 31733332</a><span>{footerCopy[locale].online}</span></div></div><div class="footer-bottom"><span>© 2026 WebDesignFOX</span></div></footer></div>
 <script is:inline>
-(function(){const lang=document.getElementById('fixed-lang-layer');if(!lang)return;const enforce=()=>{const mobile=window.innerWidth<=900;const tiny=window.innerWidth<=560;lang.style.setProperty('position','fixed','important');lang.style.setProperty('top',tiny?'5px':mobile?'6px':'6px','important');lang.style.setProperty('right',tiny?'64px':mobile?'76px':'190px','important');lang.style.setProperty('left','auto','important');lang.style.setProperty('bottom','auto','important');lang.style.setProperty('z-index','2147483646','important');lang.style.setProperty('transform','none','important');lang.style.setProperty('visibility','visible','important');lang.style.setProperty('opacity','1','important');};enforce();window.addEventListener('scroll',enforce,{passive:true});window.addEventListener('resize',enforce,{passive:true});new MutationObserver(enforce).observe(lang,{attributes:true,attributeFilter:['style','class']});})();
+(function(){
+  const lang=document.getElementById('fixed-lang-layer');
+  if(!lang)return;
+  const enforce=()=>{
+    const mobile=window.innerWidth<=900;
+    const tiny=window.innerWidth<=560;
+    lang.style.setProperty('position','fixed','important');
+    lang.style.setProperty('top',tiny?'5px':mobile?'6px':'6px','important');
+    lang.style.setProperty('right',tiny?'64px':mobile?'76px':'190px','important');
+    lang.style.setProperty('left','auto','important');
+    lang.style.setProperty('bottom','auto','important');
+    lang.style.setProperty('z-index','2147483646','important');
+    lang.style.setProperty('transform','none','important');
+    lang.style.setProperty('visibility','visible','important');
+    lang.style.setProperty('opacity','1','important');
+  };
+  enforce();
+  window.addEventListener('scroll',enforce,{passive:true});
+  window.addEventListener('resize',enforce,{passive:true});
+  new MutationObserver(enforce).observe(lang,{attributes:true,attributeFilter:['style','class']});
+})();
 </script>
 <script is:inline src="/tawk-language-loader.js?v=ee97e723"></script></body></html>
