@@ -31,8 +31,12 @@
 #cunderlik-gallery-modal.is-open{display:flex}\
 #cunderlik-gallery-modal .cunderlik-modal-frame{position:relative;width:min(1080px,94vw);height:min(810px,88vh);border-radius:18px;overflow:hidden;background:#111;border:3px solid #fff;box-shadow:0 24px 70px rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center}\
 #cunderlik-gallery-modal img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;image-rendering:auto;transition:opacity .28s ease}\
-#cunderlik-gallery-modal .cunderlik-modal-close{position:absolute;right:12px;top:12px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.68);color:#fff;font-size:28px;line-height:1;cursor:pointer;z-index:2}\
-@media(max-width:640px){.window-honda .cunderlik-gallery-photo{left:10px;top:10px;width:96px;height:72px;border-radius:10px}#cunderlik-gallery-modal{padding:14px}#cunderlik-gallery-modal .cunderlik-modal-frame{width:94vw;height:78vh;border-radius:14px}}';
+#cunderlik-gallery-modal .cunderlik-modal-close{position:absolute;right:12px;top:12px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.68);color:#fff;font-size:28px;line-height:1;cursor:pointer;z-index:3}\
+#cunderlik-gallery-modal .cunderlik-modal-arrow{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border:0;border-radius:50%;background:rgba(0,0,0,.58);color:#fff;font-size:34px;line-height:1;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center}\
+#cunderlik-gallery-modal .cunderlik-modal-prev{left:14px}\
+#cunderlik-gallery-modal .cunderlik-modal-next{right:14px}\
+#cunderlik-gallery-modal .cunderlik-modal-arrow:hover{background:rgba(0,0,0,.78)}\
+@media(max-width:640px){.window-honda .cunderlik-gallery-photo{left:10px;top:10px;width:96px;height:72px;border-radius:10px}#cunderlik-gallery-modal{padding:14px}#cunderlik-gallery-modal .cunderlik-modal-frame{width:94vw;height:78vh;border-radius:14px}#cunderlik-gallery-modal .cunderlik-modal-arrow{width:44px;height:44px;font-size:28px}.cunderlik-modal-prev{left:8px!important}.cunderlik-modal-next{right:8px!important}}';
     if(!document.getElementById(style.id))document.head.appendChild(style);
 
     var old=win.querySelector('.cunderlik-extra-photo');
@@ -57,12 +61,14 @@
       modal.setAttribute('role','dialog');
       modal.setAttribute('aria-modal','true');
       modal.setAttribute('aria-label','Galéria Čunderlík MX Academy');
-      modal.innerHTML='<div class="cunderlik-modal-frame"><button type="button" class="cunderlik-modal-close" aria-label="Zavrieť">×</button><img alt="Čunderlík MX Academy – zväčšená fotografia"></div>';
+      modal.innerHTML='<div class="cunderlik-modal-frame"><button type="button" class="cunderlik-modal-close" aria-label="Zavrieť">×</button><button type="button" class="cunderlik-modal-arrow cunderlik-modal-prev" aria-label="Predchádzajúci obrázok">‹</button><img alt="Čunderlík MX Academy – zväčšená fotografia"><button type="button" class="cunderlik-modal-arrow cunderlik-modal-next" aria-label="Ďalší obrázok">›</button></div>';
       document.body.appendChild(modal);
     }
 
     var modalImg=modal.querySelector('img');
     var closeBtn=modal.querySelector('.cunderlik-modal-close');
+    var prevBtn=modal.querySelector('.cunderlik-modal-prev');
+    var nextBtn=modal.querySelector('.cunderlik-modal-next');
     var index=0;
     var timer=null;
 
@@ -80,19 +86,10 @@
       if(modal.classList.contains('is-open'))setImage(modalImg,src);
     }
 
-    function advance(){
-      index=(index+1)%images.length;
-      renderCurrent();
-    }
-
-    function start(){
-      stop();
-      timer=setInterval(advance,4000);
-    }
-
-    function stop(){
-      if(timer){clearInterval(timer);timer=null;}
-    }
+    function advance(){index=(index+1)%images.length;renderCurrent();}
+    function back(){index=(index-1+images.length)%images.length;renderCurrent();}
+    function start(){stop();timer=setInterval(advance,4000);}
+    function stop(){if(timer){clearInterval(timer);timer=null;}}
 
     function openModal(){
       setImage(modalImg,images[index]);
@@ -107,14 +104,24 @@
       start();
     }
 
+    function manualPrev(e){if(e){e.preventDefault();e.stopPropagation();}back();start();}
+    function manualNext(e){if(e){e.preventDefault();e.stopPropagation();}advance();start();}
+
     renderCurrent();
     start();
 
     img.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();openModal();});
     img.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal();}});
     closeBtn.addEventListener('click',function(e){e.stopPropagation();closeModal();});
+    prevBtn.addEventListener('click',manualPrev);
+    nextBtn.addEventListener('click',manualNext);
     modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
-    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('is-open'))closeModal();});
+    document.addEventListener('keydown',function(e){
+      if(!modal.classList.contains('is-open'))return;
+      if(e.key==='Escape')closeModal();
+      else if(e.key==='ArrowLeft')manualPrev(e);
+      else if(e.key==='ArrowRight')manualNext(e);
+    });
 
     document.addEventListener('visibilitychange',function(){
       if(document.hidden)stop();
