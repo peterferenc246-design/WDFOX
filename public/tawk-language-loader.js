@@ -6,6 +6,13 @@
 (function () {
   "use strict";
 
+  if (document.querySelector(".window-honda")) {
+    var galleryStyle = document.createElement("link");
+    galleryStyle.rel = "stylesheet";
+    galleryStyle.href = "/cunderlik-gallery.css?v=1";
+    document.head.appendChild(galleryStyle);
+  }
+
   var widgets = {
     sk: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1b9121q" },
     de: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb2aln" },
