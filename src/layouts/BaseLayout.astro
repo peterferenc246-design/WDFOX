@@ -18,10 +18,10 @@ const footerCopy: Record<Locale, { contact: string; note: string; online: string
 };
 ---
 <!doctype html><html lang={locale}><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="description" content={description} /><meta name="theme-color" content="#f36a0a" /><link rel="icon" type="image/svg+xml" href="/favicon.svg" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" /><link rel="canonical" href={`${siteUrl}${pathFor(locale)}`} />{locales.map((code) => <link rel="alternate" hreflang={code} href={`${siteUrl}${pathFor(code)}`} />)}<title>{title}</title><style is:inline>
-.floating-language-switcher{position:fixed!important;top:18px;right:170px;z-index:2147483000!important;margin:0!important;display:flex!important;gap:6px!important;flex-wrap:wrap!important;max-width:290px;padding:5px 7px;border-radius:8px;background:rgba(255,255,255,.94);box-shadow:0 6px 18px rgba(20,28,42,.12);backdrop-filter:blur(10px);transform:none!important;visibility:visible!important;opacity:1!important}
-.floating-language-switcher .language-flag{display:inline-flex!important;flex:0 0 24px!important}
-@media(max-width:900px){.floating-language-switcher{top:10px;right:68px;max-width:210px;gap:4px!important;padding:4px 5px}}
-@media(max-width:560px){.floating-language-switcher{top:8px;right:58px;max-width:170px}.floating-language-switcher .language-flag{flex-basis:22px!important;width:22px;height:16px}}
+#fixed-lang-layer{position:fixed!important;top:18px!important;right:170px!important;left:auto!important;bottom:auto!important;z-index:2147483646!important;margin:0!important;padding:5px 7px!important;display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important;max-width:290px!important;border-radius:8px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 6px 18px rgba(20,28,42,.14)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;transform:none!important;translate:none!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;overflow:visible!important}
+#fixed-lang-layer .language-flag{display:inline-flex!important;flex:0 0 24px!important;width:24px!important;height:18px!important}
+@media(max-width:900px){#fixed-lang-layer{top:10px!important;right:68px!important;max-width:210px!important;gap:4px!important;padding:4px 5px!important}}
+@media(max-width:560px){#fixed-lang-layer{top:8px!important;right:58px!important;max-width:170px!important}#fixed-lang-layer .language-flag{flex-basis:22px!important;width:22px!important;height:16px!important}}
 
 /* Hard override: contact identity block must never disappear after CSS hydration/load. */
 #kontakt .contact-copy,#kontakt .register-identity-grid,#kontakt .register-identity-left,#kontakt .register-identity-right,#kontakt .register-person-name,#kontakt .register-address,#kontakt .register-right-details,#kontakt .register-identity-right>img{visibility:visible!important;opacity:1!important}
@@ -35,6 +35,29 @@ const footerCopy: Record<Locale, { contact: string; note: string; online: string
 #kontakt .register-right-details{width:270px!important;white-space:nowrap!important}
 @media(max-width:760px){#kontakt .register-identity-grid{grid-template-columns:1fr!important}#kontakt .register-identity-right,#kontakt .register-right-details{width:100%!important}#kontakt .register-identity-right>img{width:100%!important;max-width:270px!important;height:auto!important}#kontakt .register-right-details{white-space:normal!important}}
 </style></head><body>
-<div class="language-switcher floating-language-switcher" aria-label="Language selector">{locales.map((code) => <a class:list={{ "language-flag": true, active: code === locale }} href={`${siteUrl}${pathFor(code)}`} title={localeLabels[code]} aria-label={localeLabels[code]}><img src={`https://flagcdn.com/${code === "en" ? "gb" : code === "sv" ? "se" : code}.svg`} alt={code.toUpperCase()} /></a>)}</div>
+<div id="fixed-lang-layer" class="language-switcher" aria-label="Language selector" style="position:fixed;top:18px;right:170px;z-index:2147483646;transform:none;visibility:visible;opacity:1;">{locales.map((code) => <a class:list={{ "language-flag": true, active: code === locale }} href={`${siteUrl}${pathFor(code)}`} title={localeLabels[code]} aria-label={localeLabels[code]}><img src={`https://flagcdn.com/${code === "en" ? "gb" : code === "sv" ? "se" : code}.svg`} alt={code.toUpperCase()} /></a>)}</div>
 <div class="site-shell" id="domov"><div class="topline" aria-hidden="true"></div><header class="site-header"><div class="header-inner"><a class="brand" href={pathFor(locale)} aria-label="WebDesignFOX – domov"><span class="brand-mark" aria-hidden="true"><span class="fox-symbol"><i></i><b></b></span></span><span class="brand-copy"><span class="brand-name">WebDesign<span>FOX</span></span><span class="brand-tagline">{localeLabels[locale]} · WebDesign & Technik</span></span></a><nav class="main-nav" aria-label="Hauptnavigation"><slot name="navigation" /></nav><div class="header-actions"><a class="nav-cta" href="#kontakt">✦ Beratung</a></div><button class="menu-toggle" type="button">☰</button></div></header><main><slot /></main><footer class="site-footer section-wrap"><div class="footer-main"><div><a class="brand" href={pathFor(locale)}><span class="brand-name">WebDesign<span>FOX</span></span></a><p class="footer-note">{footerCopy[locale].note}</p></div><div class="footer-links"><strong>{footerCopy[locale].contact}</strong><a href="mailto:info@foxprof.club">info@foxprof.club</a><a href="tel:+4915731733332">+49 157 31733332</a><span>{footerCopy[locale].online}</span></div></div><div class="footer-bottom"><span>© 2026 WebDesignFOX</span></div></footer></div>
+<script is:inline>
+(function(){
+  const lang=document.getElementById('fixed-lang-layer');
+  if(!lang)return;
+  const enforce=()=>{
+    const mobile=window.innerWidth<=900;
+    const tiny=window.innerWidth<=560;
+    lang.style.setProperty('position','fixed','important');
+    lang.style.setProperty('top',tiny?'8px':mobile?'10px':'18px','important');
+    lang.style.setProperty('right',tiny?'58px':mobile?'68px':'170px','important');
+    lang.style.setProperty('left','auto','important');
+    lang.style.setProperty('bottom','auto','important');
+    lang.style.setProperty('z-index','2147483646','important');
+    lang.style.setProperty('transform','none','important');
+    lang.style.setProperty('visibility','visible','important');
+    lang.style.setProperty('opacity','1','important');
+  };
+  enforce();
+  window.addEventListener('scroll',enforce,{passive:true});
+  window.addEventListener('resize',enforce,{passive:true});
+  new MutationObserver(enforce).observe(lang,{attributes:true,attributeFilter:['style','class']});
+})();
+</script>
 <script is:inline src="/tawk-language-loader.js?v=ee97e723"></script></body></html>
