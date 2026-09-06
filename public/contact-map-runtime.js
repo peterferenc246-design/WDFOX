@@ -35,7 +35,7 @@
     if(!map){
       map=document.createElement('div');
       map.className='register-google-map';
-      map.innerHTML='<iframe title="Google Maps – Rammelkam 2, 84036 Kumhausen" src="https://www.google.com/maps?q=Rammelkam%202%2C%2084036%20Kumhausen%2C%20Deutschland&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-address-overlay"><span class="map-pin">📍</span><div><strong>Anschrift</strong><br>Rammelkam 2<br>84036 Kumhausen<br>Deutschland</div></div>';
+      map.innerHTML='<iframe title="Google Maps – Rammelkam 2, 84036 Kumhausen" src="https://www.google.com/maps?output=embed&q=Rammelkam%202%2C%2084036%20Kumhausen%2C%20Deutschland&z=9" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-address-overlay"><span class="map-pin">📍</span><div><strong>Anschrift</strong><br>Rammelkam 2<br>84036 Kumhausen<br>Deutschland</div></div>';
       left.insertBefore(map,address);
     }
 
