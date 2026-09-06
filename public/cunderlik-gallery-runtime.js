@@ -83,64 +83,28 @@
       next.src=src;
     }
 
-    function renderCurrent(){
-      var src=images[index];
-      setImage(img,src);
-      if(modal.classList.contains('is-open'))setImage(modalImg,src);
-    }
-
+    function renderCurrent(){var src=images[index];setImage(img,src);if(modal.classList.contains('is-open'))setImage(modalImg,src);}
     function advance(){index=(index+1)%images.length;renderCurrent();}
     function back(){index=(index-1+images.length)%images.length;renderCurrent();}
     function start(){stop();timer=setInterval(advance,4000);}
     function stop(){if(timer){clearInterval(timer);timer=null;}}
-
-    function openModal(){
-      modal.classList.add('is-open');
-      document.body.style.overflow='hidden';
-      setImage(modalImg,images[index]);
-      start();
-    }
-
-    function closeModal(){
-      modal.classList.remove('is-open');
-      document.body.style.overflow='';
-      start();
-    }
-
+    function openModal(){modal.classList.add('is-open');document.body.style.overflow='hidden';setImage(modalImg,images[index]);start();}
+    function closeModal(){modal.classList.remove('is-open');document.body.style.overflow='';start();}
     function manualPrev(e){if(e){e.preventDefault();e.stopPropagation();}back();start();}
     function manualNext(e){if(e){e.preventDefault();e.stopPropagation();}advance();start();}
 
-    renderCurrent();
-    start();
-
+    renderCurrent();start();
     img.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();openModal();});
     img.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal();}});
     closeBtn.addEventListener('click',function(e){e.stopPropagation();closeModal();});
-    prevBtn.addEventListener('click',manualPrev);
-    nextBtn.addEventListener('click',manualNext);
+    prevBtn.addEventListener('click',manualPrev);nextBtn.addEventListener('click',manualNext);
     modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
-    document.addEventListener('keydown',function(e){
-      if(!modal.classList.contains('is-open'))return;
-      if(e.key==='Escape')closeModal();
-      else if(e.key==='ArrowLeft')manualPrev(e);
-      else if(e.key==='ArrowRight')manualNext(e);
-    });
-
-    document.addEventListener('visibilitychange',function(){
-      if(document.hidden)stop();
-      else start();
-    });
-
+    document.addEventListener('keydown',function(e){if(!modal.classList.contains('is-open'))return;if(e.key==='Escape')closeModal();else if(e.key==='ArrowLeft')manualPrev(e);else if(e.key==='ArrowRight')manualNext(e);});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)stop();else start();});
     return true;
   }
-
-  if(!init()){
-    var tries=0;
-    var wait=setInterval(function(){
-      tries++;
-      if(init()||tries>20)clearInterval(wait);
-    },250);
-  }
+  if(!init()){var tries=0;var wait=setInterval(function(){tries++;if(init()||tries>20)clearInterval(wait);},250);}
 })();
 
-(function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=2';s.defer=true;document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=3';s.defer=true;document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=1';s.defer=true;document.head.appendChild(s);})();
