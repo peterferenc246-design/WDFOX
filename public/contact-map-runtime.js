@@ -35,29 +35,34 @@
     if(!map){
       map=document.createElement('div');
       map.className='register-google-map';
-      map.innerHTML='<iframe title="Google Maps – Rammelkam 2, 84036 Kumhausen" src="https://www.google.com/maps?q=Rammelkam%202%2C%2084036%20Kumhausen%2C%20Deutschland&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>';
+      map.innerHTML='<iframe title="Google Maps – Rammelkam 2, 84036 Kumhausen" src="https://www.google.com/maps?q=Rammelkam%202%2C%2084036%20Kumhausen%2C%20Deutschland&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-address-overlay"><span class="map-pin">📍</span><div><strong>Anschrift</strong><br>Rammelkam 2<br>84036 Kumhausen<br>Deutschland</div></div>';
       left.insertBefore(map,address);
     }
 
+    address.style.display='none';
     grid.classList.add('contact-map-layout');
   }
 
   const style=document.createElement('style');
   style.textContent=`
   #kontakt .contact-project-intro{width:100%!important;max-width:none!important;display:block!important}
-  #kontakt .register-identity-grid.contact-map-layout{display:grid!important;grid-template-columns:255px minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;column-gap:1rem!important;row-gap:.7rem!important;align-items:start!important}
+  #kontakt .register-identity-grid.contact-map-layout{display:grid!important;grid-template-columns:255px minmax(0,1fr)!important;grid-template-rows:auto 170px auto!important;column-gap:1rem!important;row-gap:.7rem!important;align-items:start!important}
   #kontakt .contact-map-layout .register-identity-left,#kontakt .contact-map-layout .register-identity-right{display:contents!important}
   #kontakt .contact-map-layout .register-person-name{grid-column:1!important;grid-row:1!important;margin:0!important}
   #kontakt .contact-map-layout .register-identity-right>img{grid-column:1!important;grid-row:2!important;justify-self:start!important;align-self:start!important;width:255px!important;height:170px!important;object-fit:cover!important}
-  #kontakt .contact-map-layout .register-google-map{grid-column:2!important;grid-row:2!important;width:100%!important;height:170px!important;border-radius:12px!important;overflow:hidden!important;box-shadow:0 8px 24px rgba(0,0,0,.12)!important;background:#eee!important;align-self:start!important}
-  #kontakt .contact-map-layout .register-google-map iframe{display:block!important;width:100%!important;height:170px!important;border:0!important}
+  #kontakt .contact-map-layout .register-google-map{position:relative!important;grid-column:2!important;grid-row:2 / 4!important;width:100%!important;height:100%!important;min-height:285px!important;border-radius:12px!important;overflow:hidden!important;box-shadow:0 8px 24px rgba(0,0,0,.14)!important;background:#eee!important;align-self:stretch!important}
+  #kontakt .contact-map-layout .register-google-map iframe{display:block!important;width:100%!important;height:100%!important;min-height:285px!important;border:0!important}
+  #kontakt .contact-map-layout .map-address-overlay{position:absolute!important;left:14px!important;bottom:14px!important;z-index:3!important;display:flex!important;gap:.65rem!important;align-items:flex-start!important;max-width:calc(100% - 28px)!important;padding:12px 15px!important;border:1px solid rgba(255,255,255,.62)!important;border-radius:12px!important;background:rgba(20,24,30,.78)!important;color:#fff!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;font-size:.92rem!important;line-height:1.4!important;pointer-events:none!important}
+  #kontakt .contact-map-layout .map-address-overlay strong{color:#fff!important;font-weight:800!important}
+  #kontakt .contact-map-layout .map-pin{font-size:1.1rem!important;line-height:1.25!important}
   #kontakt .contact-map-layout .register-right-details{grid-column:1!important;grid-row:3!important;width:255px!important;margin:.55rem 0 0!important;justify-self:start!important;white-space:nowrap!important}
-  #kontakt .contact-map-layout .register-address{grid-column:2!important;grid-row:3!important;margin:.55rem 0 0!important;align-self:start!important;display:flex!important;gap:.65rem!important}
+  #kontakt .contact-map-layout .register-address{display:none!important}
   @media(max-width:760px){
     #kontakt .register-identity-grid.contact-map-layout{grid-template-columns:1fr!important;grid-template-rows:auto!important;row-gap:1rem!important}
-    #kontakt .contact-map-layout .register-person-name,#kontakt .contact-map-layout .register-google-map,#kontakt .contact-map-layout .register-identity-right>img,#kontakt .contact-map-layout .register-address,#kontakt .contact-map-layout .register-right-details{grid-column:1!important;grid-row:auto!important;width:100%!important;max-width:100%!important;margin:0!important}
-    #kontakt .contact-map-layout .register-google-map,#kontakt .contact-map-layout .register-google-map iframe{height:210px!important}
+    #kontakt .contact-map-layout .register-person-name,#kontakt .contact-map-layout .register-google-map,#kontakt .contact-map-layout .register-identity-right>img,#kontakt .contact-map-layout .register-right-details{grid-column:1!important;grid-row:auto!important;width:100%!important;max-width:100%!important;margin:0!important}
     #kontakt .contact-map-layout .register-identity-right>img{max-width:255px!important;height:auto!important}
+    #kontakt .contact-map-layout .register-google-map,#kontakt .contact-map-layout .register-google-map iframe{height:280px!important;min-height:280px!important}
+    #kontakt .contact-map-layout .map-address-overlay{left:10px!important;bottom:10px!important;padding:10px 12px!important;font-size:.86rem!important}
     #kontakt .contact-map-layout .register-right-details{white-space:normal!important}
   }`;
   document.head.appendChild(style);
