@@ -43,9 +43,7 @@
     var old=win.querySelector('.cunderlik-extra-photo');
     if(old)old.remove();
     var img=win.querySelector('.cunderlik-gallery-photo');
-    if(!img){
-      img=document.createElement('img');img.className='cunderlik-gallery-photo';img.alt='Čunderlík MX Academy – galéria';img.loading='eager';img.decoding='async';img.tabIndex=0;img.setAttribute('role','button');img.setAttribute('aria-label','Zväčšiť galériu Čunderlík MX Academy');win.appendChild(img);
-    }
+    if(!img){img=document.createElement('img');img.className='cunderlik-gallery-photo';img.alt='Čunderlík MX Academy – galéria';img.loading='eager';img.decoding='async';img.tabIndex=0;img.setAttribute('role','button');img.setAttribute('aria-label','Zväčšiť galériu Čunderlík MX Academy');win.appendChild(img);}
     var modal=document.getElementById('cunderlik-gallery-modal');
     if(!modal){modal=document.createElement('div');modal.id='cunderlik-gallery-modal';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Galéria Čunderlík MX Academy');modal.innerHTML='<div class="cunderlik-modal-frame"><button type="button" class="cunderlik-modal-close" aria-label="Zavrieť">×</button><button type="button" class="cunderlik-modal-arrow cunderlik-modal-prev" aria-label="Predchádzajúci obrázok">‹</button><img alt="Čunderlík MX Academy – zväčšená fotografia"><button type="button" class="cunderlik-modal-arrow cunderlik-modal-next" aria-label="Ďalší obrázok">›</button></div>';document.body.appendChild(modal);}
     var modalImg=modal.querySelector('img');var closeBtn=modal.querySelector('.cunderlik-modal-close');var prevBtn=modal.querySelector('.cunderlik-modal-prev');var nextBtn=modal.querySelector('.cunderlik-modal-next');var index=0;var timer=null;
@@ -59,5 +57,5 @@
   if(!init()){var tries=0;var wait=setInterval(function(){tries++;if(init()||tries>20)clearInterval(wait);},250);}
 })();
 
-(function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=4';s.defer=true;document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=5';s.defer=true;document.head.appendChild(s);})();
 (function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=1';s.defer=true;document.head.appendChild(s);})();
