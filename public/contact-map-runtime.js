@@ -16,6 +16,7 @@
     const intro=grid.previousElementSibling;
     if(lang==='sk'&&intro&&intro.tagName==='P'){
       intro.textContent='Stačí pár viet o vašom projekte. Ešte lepšie bude, ak nám pošlete podrobný, voľne písaný obsah vašej budúcej stránky – čo všetko na nej chcete mať a v akých farbách. Obratom vám pripravíme prvotný návrh na odsúhlasenie dizajnu. Ozveme sa do jedného pracovného dňa.';
+      intro.classList.add('contact-project-intro');
     }
 
     let map=grid.querySelector('.register-google-map');
@@ -31,6 +32,7 @@
 
   const style=document.createElement('style');
   style.textContent=`
+  #kontakt .contact-project-intro{width:100%!important;max-width:none!important;display:block!important}
   #kontakt .register-identity-grid.contact-map-layout{display:grid!important;grid-template-columns:minmax(0,1fr) 255px!important;grid-template-rows:auto auto auto!important;column-gap:1rem!important;row-gap:.7rem!important;align-items:start!important}
   #kontakt .contact-map-layout .register-identity-left,#kontakt .contact-map-layout .register-identity-right{display:contents!important}
   #kontakt .contact-map-layout .register-person-name{grid-column:1!important;grid-row:1!important;margin:0!important}
