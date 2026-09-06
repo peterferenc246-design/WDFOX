@@ -9,6 +9,9 @@
     const details=right?.querySelector('.register-right-details');
     if(!grid||!left||!right||!name||!address||!portrait||!details)return;
 
+    const role=name.querySelector('small');
+    if(role)role.textContent='Iniciátor, koordinátor a realizátor';
+
     let map=grid.querySelector('.register-google-map');
     if(!map){
       map=document.createElement('div');
