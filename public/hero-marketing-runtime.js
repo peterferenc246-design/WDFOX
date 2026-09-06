@@ -15,6 +15,17 @@
       sv:'Kompletta lösningar från webbdesign och teknisk implementation till omfattande marknadsföringskampanjer på Facebook, Google Ads, TikTok, Instagram, WhatsApp och många andra plattformar, med fokus på att skaffa nya kunder.'
     };
     var ranking={sk:'Lepšie pozície vo vyhľadávačoch',de:'Bessere Positionen in Suchmaschinen',en:'Better search engine rankings',fr:'Meilleur classement dans les moteurs de recherche',hr:'Bolje pozicije u tražilicama',pl:'Lepsze pozycje w wyszukiwarkach',it:'Migliori posizioni nei motori di ricerca',es:'Mejores posiciones en los buscadores',sv:'Bättre placeringar i sökmotorer'};
+    var servicesEyebrow={
+      sk:'ČO PRE VÁS ZABEZPEČÍM?',
+      de:'WAS KANN ICH FÜR SIE ÜBERNEHMEN?',
+      en:'WHAT CAN I PROVIDE FOR YOU?',
+      fr:'QUE PUIS-JE VOUS PROPOSER ?',
+      hr:'ŠTO MOGU OSIGURATI ZA VAS?',
+      pl:'CO MOGĘ DLA PAŃSTWA ZAPEWNIĆ?',
+      it:'COSA POSSO OFFRIRVI?',
+      es:'¿QUÉ PUEDO OFRECERLE?',
+      sv:'VAD KAN JAG ERBJUDA ER?'
+    };
     el.textContent=copy[lang]||copy.de;
     var row=document.querySelector('.hero-section .benefit-row');
     if(row&&!row.querySelector('.search-ranking-benefit')){
@@ -23,6 +34,8 @@
       item.innerHTML='<span aria-hidden="true">✓</span> '+(ranking[lang]||ranking.de);
       row.appendChild(item);
     }
+    var servicesLabel=document.querySelector('.services-section .section-heading .eyebrow');
+    if(servicesLabel)servicesLabel.textContent=servicesEyebrow[lang]||servicesEyebrow.de;
     return true;
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
