@@ -44,67 +44,20 @@
     if(old)old.remove();
     var img=win.querySelector('.cunderlik-gallery-photo');
     if(!img){
-      img=document.createElement('img');
-      img.className='cunderlik-gallery-photo';
-      img.alt='Čunderlík MX Academy – galéria';
-      img.loading='eager';
-      img.decoding='async';
-      img.tabIndex=0;
-      img.setAttribute('role','button');
-      img.setAttribute('aria-label','Zväčšiť galériu Čunderlík MX Academy');
-      win.appendChild(img);
+      img=document.createElement('img');img.className='cunderlik-gallery-photo';img.alt='Čunderlík MX Academy – galéria';img.loading='eager';img.decoding='async';img.tabIndex=0;img.setAttribute('role','button');img.setAttribute('aria-label','Zväčšiť galériu Čunderlík MX Academy');win.appendChild(img);
     }
-
     var modal=document.getElementById('cunderlik-gallery-modal');
-    if(!modal){
-      modal=document.createElement('div');
-      modal.id='cunderlik-gallery-modal';
-      modal.setAttribute('role','dialog');
-      modal.setAttribute('aria-modal','true');
-      modal.setAttribute('aria-label','Galéria Čunderlík MX Academy');
-      modal.innerHTML='<div class="cunderlik-modal-frame"><button type="button" class="cunderlik-modal-close" aria-label="Zavrieť">×</button><button type="button" class="cunderlik-modal-arrow cunderlik-modal-prev" aria-label="Predchádzajúci obrázok">‹</button><img alt="Čunderlík MX Academy – zväčšená fotografia"><button type="button" class="cunderlik-modal-arrow cunderlik-modal-next" aria-label="Ďalší obrázok">›</button></div>';
-      document.body.appendChild(modal);
-    }
-
-    var modalImg=modal.querySelector('img');
-    var closeBtn=modal.querySelector('.cunderlik-modal-close');
-    var prevBtn=modal.querySelector('.cunderlik-modal-prev');
-    var nextBtn=modal.querySelector('.cunderlik-modal-next');
-    var index=0;
-    var timer=null;
-
-    function setImage(target,src){
-      var token=String(Date.now())+Math.random();
-      target.dataset.galleryToken=token;
-      target.style.opacity='0';
-      var next=new Image();
-      next.onload=function(){if(target.dataset.galleryToken!==token)return;target.src=src;target.style.opacity='1';};
-      next.onerror=function(){if(target.dataset.galleryToken!==token)return;target.style.opacity='1';};
-      next.src=src;
-    }
-
+    if(!modal){modal=document.createElement('div');modal.id='cunderlik-gallery-modal';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Galéria Čunderlík MX Academy');modal.innerHTML='<div class="cunderlik-modal-frame"><button type="button" class="cunderlik-modal-close" aria-label="Zavrieť">×</button><button type="button" class="cunderlik-modal-arrow cunderlik-modal-prev" aria-label="Predchádzajúci obrázok">‹</button><img alt="Čunderlík MX Academy – zväčšená fotografia"><button type="button" class="cunderlik-modal-arrow cunderlik-modal-next" aria-label="Ďalší obrázok">›</button></div>';document.body.appendChild(modal);}
+    var modalImg=modal.querySelector('img');var closeBtn=modal.querySelector('.cunderlik-modal-close');var prevBtn=modal.querySelector('.cunderlik-modal-prev');var nextBtn=modal.querySelector('.cunderlik-modal-next');var index=0;var timer=null;
+    function setImage(target,src){var token=String(Date.now())+Math.random();target.dataset.galleryToken=token;target.style.opacity='0';var next=new Image();next.onload=function(){if(target.dataset.galleryToken!==token)return;target.src=src;target.style.opacity='1';};next.onerror=function(){if(target.dataset.galleryToken!==token)return;target.style.opacity='1';};next.src=src;}
     function renderCurrent(){var src=images[index];setImage(img,src);if(modal.classList.contains('is-open'))setImage(modalImg,src);}
-    function advance(){index=(index+1)%images.length;renderCurrent();}
-    function back(){index=(index-1+images.length)%images.length;renderCurrent();}
-    function start(){stop();timer=setInterval(advance,4000);}
-    function stop(){if(timer){clearInterval(timer);timer=null;}}
-    function openModal(){modal.classList.add('is-open');document.body.style.overflow='hidden';setImage(modalImg,images[index]);start();}
-    function closeModal(){modal.classList.remove('is-open');document.body.style.overflow='';start();}
-    function manualPrev(e){if(e){e.preventDefault();e.stopPropagation();}back();start();}
-    function manualNext(e){if(e){e.preventDefault();e.stopPropagation();}advance();start();}
-
-    renderCurrent();start();
-    img.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();openModal();});
-    img.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal();}});
-    closeBtn.addEventListener('click',function(e){e.stopPropagation();closeModal();});
-    prevBtn.addEventListener('click',manualPrev);nextBtn.addEventListener('click',manualNext);
-    modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
-    document.addEventListener('keydown',function(e){if(!modal.classList.contains('is-open'))return;if(e.key==='Escape')closeModal();else if(e.key==='ArrowLeft')manualPrev(e);else if(e.key==='ArrowRight')manualNext(e);});
-    document.addEventListener('visibilitychange',function(){if(document.hidden)stop();else start();});
-    return true;
+    function advance(){index=(index+1)%images.length;renderCurrent();}function back(){index=(index-1+images.length)%images.length;renderCurrent();}function start(){stop();timer=setInterval(advance,4000);}function stop(){if(timer){clearInterval(timer);timer=null;}}
+    function openModal(){modal.classList.add('is-open');document.body.style.overflow='hidden';setImage(modalImg,images[index]);start();}function closeModal(){modal.classList.remove('is-open');document.body.style.overflow='';start();}
+    function manualPrev(e){if(e){e.preventDefault();e.stopPropagation();}back();start();}function manualNext(e){if(e){e.preventDefault();e.stopPropagation();}advance();start();}
+    renderCurrent();start();img.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();openModal();});img.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal();}});closeBtn.addEventListener('click',function(e){e.stopPropagation();closeModal();});prevBtn.addEventListener('click',manualPrev);nextBtn.addEventListener('click',manualNext);modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});document.addEventListener('keydown',function(e){if(!modal.classList.contains('is-open'))return;if(e.key==='Escape')closeModal();else if(e.key==='ArrowLeft')manualPrev(e);else if(e.key==='ArrowRight')manualNext(e);});document.addEventListener('visibilitychange',function(){if(document.hidden)stop();else start();});return true;
   }
   if(!init()){var tries=0;var wait=setInterval(function(){tries++;if(init()||tries>20)clearInterval(wait);},250);}
 })();
 
-(function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=3';s.defer=true;document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=4';s.defer=true;document.head.appendChild(s);})();
 (function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=1';s.defer=true;document.head.appendChild(s);})();
