@@ -14,7 +14,15 @@
       es:'Soluciones completas, desde el diseño web y la implementación técnica hasta campañas de marketing integrales en Facebook, Google Ads, TikTok, Instagram, WhatsApp y muchas otras plataformas, enfocadas en captar nuevos clientes.',
       sv:'Kompletta lösningar från webbdesign och teknisk implementation till omfattande marknadsföringskampanjer på Facebook, Google Ads, TikTok, Instagram, WhatsApp och många andra plattformar, med fokus på att skaffa nya kunder.'
     };
+    var ranking={sk:'Lepšie pozície vo vyhľadávačoch',de:'Bessere Positionen in Suchmaschinen',en:'Better search engine rankings',fr:'Meilleur classement dans les moteurs de recherche',hr:'Bolje pozicije u tražilicama',pl:'Lepsze pozycje w wyszukiwarkach',it:'Migliori posizioni nei motori di ricerca',es:'Mejores posiciones en los buscadores',sv:'Bättre placeringar i sökmotorer'};
     el.textContent=copy[lang]||copy.de;
+    var row=document.querySelector('.hero-section .benefit-row');
+    if(row&&!row.querySelector('.search-ranking-benefit')){
+      var item=document.createElement('span');
+      item.className='benefit search-ranking-benefit';
+      item.innerHTML='<span aria-hidden="true">✓</span> '+(ranking[lang]||ranking.de);
+      row.appendChild(item);
+    }
     return true;
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
