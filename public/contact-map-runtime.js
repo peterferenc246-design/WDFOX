@@ -12,6 +12,12 @@
     const role=name.querySelector('small');
     if(role)role.textContent='Iniciátor, koordinátor a realizátor';
 
+    const lang=((location.pathname.split('/')[1]||document.documentElement.lang||'').toLowerCase().slice(0,2));
+    const intro=grid.previousElementSibling;
+    if(lang==='sk'&&intro&&intro.tagName==='P'){
+      intro.textContent='Stačí pár viet o vašom projekte. Ešte lepšie bude, ak nám pošlete podrobný, voľne písaný obsah vašej budúcej stránky – čo všetko na nej chcete mať. Obratom vám pripravíme prvotný návrh na odsúhlasenie dizajnu. Ozveme sa do jedného pracovného dňa.';
+    }
+
     let map=grid.querySelector('.register-google-map');
     if(!map){
       map=document.createElement('div');
