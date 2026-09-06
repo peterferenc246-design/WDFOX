@@ -20,4 +20,4 @@
   if(!init()){var tries=0,wait=setInterval(function(){tries++;if(init()||tries>20)clearInterval(wait);},250);}
 })();
 (function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=6';s.defer=true;document.head.appendChild(s);})();
-(function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=2';s.defer=true;document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=3';s.defer=true;document.head.appendChild(s);})();
