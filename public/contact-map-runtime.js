@@ -9,13 +9,25 @@
     const details=right?.querySelector('.register-right-details');
     if(!grid||!left||!right||!name||!address||!portrait||!details)return;
 
+    const lang=((location.pathname.split('/')[1]||document.documentElement.lang||'de').toLowerCase().slice(0,2));
+    const copy={
+      sk:{role:'Iniciátor, koordinátor a realizátor',intro:'Stačí pár viet o vašom projekte. Ešte lepšie bude, ak nám pošlete podrobný, voľne písaný obsah vašej budúcej stránky – čo všetko na nej chcete mať a v akých farbách. Obratom vám pripravíme prvotný návrh na odsúhlasenie dizajnu. Ozveme sa do jedného pracovného dňa.'},
+      de:{role:'Initiator, Koordinator und Umsetzer',intro:'Ein paar Sätze über Ihr Projekt genügen. Noch besser ist es, wenn Sie uns den gewünschten Inhalt Ihrer zukünftigen Website ausführlich und frei formuliert senden – was alles darauf enthalten sein soll und welche Farben Sie bevorzugen. Daraufhin erstellen wir umgehend einen ersten Entwurf zur Abstimmung des Designs. Wir melden uns innerhalb eines Werktages.'},
+      en:{role:'Initiator, coordinator and implementer',intro:'A few sentences about your project are enough. Even better, send us a detailed, freely written description of the content you want for your future website – what you would like to include and which colors you prefer. We will promptly prepare an initial design proposal for your approval. We will get back to you within one business day.'},
+      fr:{role:'Initiateur, coordinateur et réalisateur',intro:'Quelques phrases sur votre projet suffisent. Encore mieux, envoyez-nous une description détaillée et libre du contenu de votre futur site – tout ce que vous souhaitez y inclure ainsi que les couleurs que vous préférez. Nous vous préparerons rapidement une première proposition à valider pour le design. Nous vous répondrons sous un jour ouvré.'},
+      hr:{role:'Inicijator, koordinator i realizator',intro:'Dovoljno je nekoliko rečenica o vašem projektu. Još je bolje ako nam pošaljete detaljan, slobodno napisan sadržaj vaše buduće web-stranice – što sve želite da sadrži i koje boje preferirate. Odmah ćemo vam pripremiti prvi prijedlog za odobrenje dizajna. Javit ćemo vam se u roku od jednog radnog dana.'},
+      pl:{role:'Inicjator, koordynator i realizator',intro:'Wystarczy kilka zdań o Państwa projekcie. Jeszcze lepiej, jeśli prześlą nam Państwo szczegółowy, swobodnie napisany opis treści przyszłej strony – co ma się na niej znaleźć i jakie kolory Państwo preferują. Niezwłocznie przygotujemy pierwszy projekt do akceptacji wyglądu. Odezwiemy się w ciągu jednego dnia roboczego.'},
+      it:{role:'Ideatore, coordinatore e realizzatore',intro:'Bastano poche frasi sul vostro progetto. Ancora meglio, inviateci una descrizione dettagliata e libera dei contenuti del vostro futuro sito – tutto ciò che desiderate inserire e i colori che preferite. Vi prepareremo rapidamente una prima proposta da approvare per il design. Vi risponderemo entro un giorno lavorativo.'},
+      es:{role:'Iniciador, coordinador y realizador',intro:'Bastan unas pocas frases sobre su proyecto. Aún mejor, envíenos una descripción detallada y libre del contenido de su futura página web: todo lo que desea incluir y los colores que prefiere. Prepararemos de inmediato una primera propuesta para su aprobación del diseño. Nos pondremos en contacto con usted en el plazo de un día laborable.'},
+      sv:{role:'Initiativtagare, samordnare och genomförare',intro:'Några meningar om ert projekt räcker. Ännu bättre är det om ni skickar en detaljerad, fritt formulerad beskrivning av innehållet på er framtida webbplats – vad ni vill ha med och vilka färger ni föredrar. Vi tar därefter snabbt fram ett första förslag för godkännande av designen. Vi återkommer inom en arbetsdag.'}
+    };
+    const t=copy[lang]||copy.de;
     const role=name.querySelector('small');
-    if(role)role.textContent='Iniciátor, koordinátor a realizátor';
+    if(role)role.textContent=t.role;
 
-    const lang=((location.pathname.split('/')[1]||document.documentElement.lang||'').toLowerCase().slice(0,2));
     const intro=grid.previousElementSibling;
-    if(lang==='sk'&&intro&&intro.tagName==='P'){
-      intro.textContent='Stačí pár viet o vašom projekte. Ešte lepšie bude, ak nám pošlete podrobný, voľne písaný obsah vašej budúcej stránky – čo všetko na nej chcete mať a v akých farbách. Obratom vám pripravíme prvotný návrh na odsúhlasenie dizajnu. Ozveme sa do jedného pracovného dňa.';
+    if(intro&&intro.tagName==='P'){
+      intro.textContent=t.intro;
       intro.classList.add('contact-project-intro');
     }
 
