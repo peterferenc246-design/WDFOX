@@ -13,16 +13,17 @@
     document.head.appendChild(galleryStyle);
   }
 
+  var PROPERTY_ID = "6a951d52c3c46c344587662a";
   var widgets = {
-    sk: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1b9121q" },
-    de: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb2aln" },
-    en: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bb9ast" },
-    hr: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bjvbjq" },
-    fr: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1blk6o4" },
-    it: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bovo5t" },
-    pl: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bp5qda" },
-    es: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bp6lk5" },
-    sv: { propertyId: "6a951d52c3c46c344587662a", widgetId: "1k1bpdngj" }
+    sk: "1k1b9121q",
+    de: "1k1bb2aln",
+    en: "1k1bb9ast",
+    hr: "1k1bjvbjq",
+    fr: "1k1blk6o4",
+    it: "1k1bovo5t",
+    pl: "1k1bp5qda",
+    es: "1k1bp6lk5",
+    sv: "1k1bpdngj"
   };
 
   var supported = Object.keys(widgets);
@@ -51,7 +52,7 @@
     }
   }
 
-  var widget = widgets[language] || widgets.sk;
+  var widgetId = widgets[language] || widgets.sk;
 
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = new Date();
@@ -59,7 +60,7 @@
 
   var script = document.createElement("script");
   script.async = true;
-  script.src = "https://embed.tawk.to/" + widget.propertyId + "/" + widget.widgetId;
+  script.src = "https://embed.tawk.to/" + PROPERTY_ID + "/" + widgetId;
   script.charset = "UTF-8";
   script.setAttribute("crossorigin", "*");
   document.head.appendChild(script);
