@@ -1,3 +1,35 @@
 ---
-return Astro.redirect("/de/", 308);
+const supportedLocales = ["sk", "de", "en", "hr", "fr", "it", "pl", "es", "sv"];
 ---
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>WebDesignFOX</title>
+    <script is:inline define:vars={{ supportedLocales }}>
+      (function () {
+        var supported = supportedLocales;
+        var stored = "";
+
+        try {
+          stored = (localStorage.getItem("wdfox-language") || "").toLowerCase();
+        } catch (_) {}
+
+        var browserLanguages = navigator.languages && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language || ""];
+        var detected = browserLanguages
+          .map(function (value) { return String(value).toLowerCase().split(/[-_]/)[0]; })
+          .find(function (value) { return supported.indexOf(value) !== -1; });
+        var language = supported.indexOf(stored) !== -1 ? stored : (detected || "sk");
+
+        window.location.replace("/" + language + "/" + window.location.search + window.location.hash);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript><a href="/sk/">Pokračovať na WebDesignFOX</a></noscript>
+  </body>
+</html>
