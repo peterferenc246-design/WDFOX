@@ -73,12 +73,22 @@
       return;
     }
 
-    window.Tawk_API.switchWidget({
-      propertyId: PROPERTY_ID,
-      widgetId: nextWidget
-    }, function () {
-      callback();
-    });
+    // Tawk's seamless widget switch deliberately keeps the current conversation.
+    // End it first so headers, welcome text and history cannot leak across languages.
+    if (typeof window.Tawk_API.endChat === "function") {
+      try {
+        window.Tawk_API.endChat();
+      } catch (_) {}
+    }
+
+    window.setTimeout(function () {
+      window.Tawk_API.switchWidget({
+        propertyId: PROPERTY_ID,
+        widgetId: nextWidget
+      }, function () {
+        callback();
+      });
+    }, 250);
   };
 
   var script = document.createElement("script");
