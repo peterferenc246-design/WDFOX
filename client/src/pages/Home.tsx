@@ -24,6 +24,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import FoxWebAnalyzer from "../components/FoxWebAnalyzer";
 
 const heroFox = "/manus-storage/webdizainfox-fox-hero_96b4821d.png";
 const supportFox = heroFox;
@@ -117,6 +118,8 @@ export default function Home() {
             <div className="hero-orbit orbit-one" aria-hidden="true" /><div className="hero-orbit orbit-two" aria-hidden="true" /><span className="scribble scribble-one" aria-hidden="true">⌁</span><span className="scribble scribble-two" aria-hidden="true">⌁</span><span className="spark spark-one" aria-hidden="true">✧</span><span className="spark spark-two" aria-hidden="true">○</span><img className="hero-mascot" src={heroFox} alt="Líščí maskot WebDizainFOX s palcom hore" /><div className="hero-note"><span className="note-arrow">↗</span><span>Váš partner<br />pre <strong>úspešný web!</strong></span></div>
           </div>
         </section>
+
+        <FoxWebAnalyzer />
 
         <section className="services-section section-wrap" id="sluzby"><div className="section-heading centered"><p className="eyebrow eyebrow-center">ČO PRE VÁS <strong>VYBAVÍM?</strong></p><h2>Všetko, čo váš web potrebuje<br /><span>na jednom mieste.</span></h2></div><div className="services-grid">{services.map(({ icon: Icon, title, text }) => <a className="service-card" href="#kontakt" key={title}><span className="service-icon"><Icon size={24} strokeWidth={1.8} /></span><h3>{title}</h3><p>{text}</p><span className="card-arrow"><ArrowUpRight size={15} /></span></a>)}</div></section>
 
