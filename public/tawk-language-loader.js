@@ -1,7 +1,7 @@
 /*
  * WebDesignFOX – Tawk.to language-aware widget loader
  *
- * Loads exactly one Tawk.to widget based on the language in the URL.
+ * Loads exactly one Tawk.to widget based on the current localized page URL.
  */
 (function () {
   "use strict";
@@ -27,10 +27,19 @@
   };
 
   var supported = Object.keys(widgets);
-  var htmlLang = (document.documentElement.lang || "").toLowerCase().slice(0, 2);
-  var urlLang = (window.location.pathname.split("/")[1] || "").toLowerCase();
+  var normalizeLanguage = function (value) {
+    return String(value || "").toLowerCase().split(/[-_]/)[0];
+  };
+  var urlLang = normalizeLanguage(window.location.pathname.split("/")[1]);
+  var htmlLang = normalizeLanguage(document.documentElement.lang);
   var language = supported.indexOf(urlLang) !== -1 ? urlLang : htmlLang;
   if (supported.indexOf(language) === -1) language = "sk";
+
+  // The localized URL is authoritative. Keeping the same value in storage makes
+  // a later visit to the site root open the language explicitly chosen with a flag.
+  try {
+    localStorage.setItem("wdfox-language", language);
+  } catch (_) {}
 
   var mxCard = document.querySelector(".project-honda");
   if (mxCard) {
@@ -59,6 +68,7 @@
   window.WebDesignFOXChatLanguage = language;
 
   var script = document.createElement("script");
+  script.id = "tawk-language-script";
   script.async = true;
   script.src = "https://embed.tawk.to/" + PROPERTY_ID + "/" + widgetId;
   script.charset = "UTF-8";
