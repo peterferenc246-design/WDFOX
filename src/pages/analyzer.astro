@@ -1,5 +1,4 @@
 ---
-import FoxWebAnalyzer from "../../client/src/components/FoxWebAnalyzer";
 ---
 
 <!doctype html>
@@ -8,14 +7,46 @@ import FoxWebAnalyzer from "../../client/src/components/FoxWebAnalyzer";
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FOX Web Analyzer | WebDizainFOX</title>
-    <meta name="description" content="FOX Web Analyzer – rýchly audit webstránky, SEO, obsahu, CTA a dôveryhodnosti." />
+    <meta name="description" content="FOX Web Analyzer – rýchly audit webstránky, SEO, obsahu, CTA, dôveryhodnosti a UX." />
+    <style>
+      :root{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f7f7f5}
+      *{box-sizing:border-box}body{margin:0}main{min-height:100vh;padding:40px 20px}.wrap{max-width:1180px;margin:0 auto}.back{display:inline-block;margin:0 0 22px;color:#171717;text-decoration:none;font-weight:800}.panel{display:grid;grid-template-columns:1fr 1.08fr;gap:44px;align-items:center;background:#171717;color:#fff;border-radius:34px;padding:54px;overflow:hidden;position:relative}.panel:before{content:"";position:absolute;width:420px;height:420px;right:-180px;top:-220px;border-radius:50%;background:rgba(243,106,10,.16)}.copy,.card{position:relative;z-index:1}.eyebrow{color:#ff7a22;font-weight:900;font-size:13px;letter-spacing:.08em}.copy h1{font-size:clamp(34px,4vw,56px);line-height:1.03;margin:14px 0}.copy h1 span{color:#f36a0a}.copy p{color:#cfcfcf;max-width:560px;font-size:17px;line-height:1.65}.points{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}.points span{font-size:14px;color:#eee}.card{background:#fff;color:#171717;border-radius:24px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.25)}label{display:block;font-weight:800;margin-bottom:9px}.row{display:flex;gap:10px}.input{flex:1;border:1px solid #ddd;border-radius:14px;padding:15px;font-size:15px;min-width:0}.button{border:0;border-radius:14px;padding:0 20px;background:#f36a0a;color:#fff;font-weight:900;cursor:pointer;white-space:nowrap}.button:disabled{opacity:.65;cursor:wait}.hint{display:block;color:#777;margin-top:10px;font-size:12px}.error{margin-top:18px;background:#fff1eb;color:#b33b08;border-radius:12px;padding:12px 14px;font-size:14px}.result{margin-top:24px;border-top:1px solid #eee;padding-top:22px}.score{display:flex;align-items:center;justify-content:space-between;background:#fff7f2;border-radius:16px;padding:14px 18px;margin-bottom:14px}.score small{display:block;color:#777;font-weight:900;letter-spacing:.12em}.score strong{display:block;font-size:38px;color:#f36a0a;line-height:1.1}.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:14px}.cat{border:1px solid #eee;border-radius:12px;padding:10px;text-align:center}.cat b{display:block;font-size:19px;color:#f36a0a}.cat span{display:block;font-size:10px;font-weight:800;margin-top:3px}.cat i{display:block;font-size:9px;color:#888;margin-top:3px;font-style:normal}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.item{border:1px solid #eee;border-radius:12px;padding:11px}.item b{font-size:13px}.item div{font-size:11px;color:#777;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.recs{margin-top:14px;border-radius:14px;background:#f7f7f7;padding:14px;font-size:13px}.recs ul{margin:8px 0 0;padding-left:18px;color:#555;line-height:1.6}.foot{margin-top:12px;color:#777;font-size:11px}@media(max-width:850px){.panel{grid-template-columns:1fr;padding:34px 24px;gap:28px}.row{flex-direction:column}.button{height:50px}.points{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}}@media(max-width:520px){.card{padding:20px}.panel{border-radius:24px}.grid{grid-template-columns:1fr}.cats{grid-template-columns:repeat(2,1fr)}}
+    </style>
   </head>
-  <body style="margin:0;background:#f7f7f5;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-    <main style="min-height:100vh;padding:40px 20px;box-sizing:border-box;">
-      <div style="max-width:1180px;margin:0 auto;">
-        <a href="/" style="display:inline-block;margin:0 0 22px;color:#171717;text-decoration:none;font-weight:800;">← WebDizainFOX</a>
-        <FoxWebAnalyzer client:load />
-      </div>
-    </main>
+  <body>
+    <main><div class="wrap">
+      <a class="back" href="/">← WebDizainFOX</a>
+      <section class="panel">
+        <div class="copy">
+          <div class="eyebrow">✦ FOX LANDING PAGE AUDIT</div>
+          <h1>Je tvoja stránka pripravená<br><span>meniť návštevy na klientov?</span></h1>
+          <p>Zadaj URL a získaj rýchly audit SEO, konverzie, obsahu, dôvery a UX. Vlastné FOX hodnotenie bez registrácie.</p>
+          <div class="points"><span>✓ SEO a štruktúra</span><span>✓ Konverzia a CTA</span><span>✓ Obsah a benefity</span><span>✓ Dôvera a UX</span></div>
+        </div>
+        <div class="card">
+          <form id="form">
+            <label for="url">URL webstránky</label>
+            <div class="row"><input class="input" id="url" type="url" required placeholder="https://tvoja-stranka.sk"><button class="button" id="submit" type="submit">Spustiť audit →</button></div>
+            <small class="hint">Analyzujeme verejne dostupný obsah zadanej stránky.</small>
+          </form>
+          <div id="error" class="error" hidden></div>
+          <div id="result" class="result" hidden></div>
+        </div>
+      </section>
+    </div></main>
+    <script is:inline>
+      const form=document.getElementById("form"),input=document.getElementById("url"),button=document.getElementById("submit"),error=document.getElementById("error"),result=document.getElementById("result");
+      const esc=s=>String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+      form.addEventListener("submit",async e=>{e.preventDefault();error.hidden=true;result.hidden=true;button.disabled=true;button.textContent="Analyzujem…";try{
+        const target=/^https?:\/\//i.test(input.value.trim())?input.value.trim():`https://${input.value.trim()}`;const parsed=new URL(target);if(!/^https?:$/.test(parsed.protocol))throw Error("Zadaj platnú HTTP alebo HTTPS adresu.");
+        const response=await fetch(`https://r.jina.ai/${target}`,{headers:{Accept:"application/json"}});if(!response.ok)throw Error("Stránku sa nepodarilo načítať na analýzu.");const raw=await response.text();let content=raw,title="";try{const json=JSON.parse(raw),data=json?.data||json;content=data?.content||raw;title=data?.title||""}catch{}
+        const headings=(content.match(/^#{1,3}\s+.+$/gm)||[]).length,links=(content.match(/\[[^\]]+\]\([^\)]+\)/g)||[]).length,images=(content.match(/!\[[^\]]*\]\([^\)]+\)/g)||[]).length,clean=content.replace(/[#*_`>\[\]()]/g," ").replace(/\s+/g," ").trim(),len=clean.length,lower=clean.toLowerCase();
+        const has=(words)=>words.some(w=>lower.includes(w));const cta=has(["kontakt","contact","objedna","chcem","kúpi","kup","rezerv","book","call","get started","začať","nezáväz","ponuka","cena"]),trust=has(["referenc","recenzi","testimonial","klient","case study","certifik","garanci","skúsen","skusen"]),benefit=has(["výhod","benefit","riešen","result","výsled","šetri","získ","rast","pomôž","pomoz","prečo","preco"]);
+        const seo=Math.round((title.length>=10&&title.length<=70?40:title?20:0)+(headings>=2?30:headings===1?15:0)+(len>=500?30:len>=250?18:8)),conv=Math.round((cta?40:5)+(links>=3?25:links?12:0)+(benefit?20:0)+(trust?15:0)),cont=Math.min(100,Math.round((len>=1200?45:len>=700?35:len>=400?25:12)+(headings>=3?25:headings>=2?18:8)+(benefit?20:5)+(images?10:0))),trustScore=Math.min(100,Math.round((parsed.protocol==="https:"?35:0)+(trust?35:5)+(cta?15:0)+(links>=2?15:5))),ux=Math.min(100,Math.round((headings>=2?30:headings===1?18:8)+(images?20:5)+(links>=3?25:links?12:0)+(cta?25:5))),score=Math.round((seo+conv+cont+trustScore+ux)/5);
+        const cats=[["SEO",seo,seo>=75?"Silný základ":"Je priestor na zlepšenie"],["Konverzia",conv,conv>=75?"CTA funguje":"Posilni ďalší krok"],["Obsah",cont,cont>=75?"Dostatočná hĺbka":"Pridaj hodnotný obsah"],["Dôvera",trustScore,trustScore>=75?"Dobrá dôveryhodnosť":"Pridaj dôkazy"],["UX",ux,ux>=75?"Jasná štruktúra":"Zjednoduš cestu"]];
+        const rec=[];if(!title)rec.push("Doplň jasný SEO titulok stránky s hlavnou hodnotou ponuky.");else if(title.length<10||title.length>70)rec.push("Uprav titulok približne na 10–70 znakov a zameraj ho na zákazníka.");if(headings<2)rec.push("Vytvor jasnú hierarchiu nadpisov H1/H2 a rozdeľ obsah do sekcií.");if(!cta||links<2)rec.push("Pridaj výrazné CTA, ktoré návštevníka vedie k jednému konkrétnemu ďalšiemu kroku.");if(!benefit)rec.push("Komunikuj konkrétne benefity a výsledok, ktorý zákazník získa.");if(!trust)rec.push("Pridaj referencie, recenzie, ukážky práce alebo iný dôkaz dôveryhodnosti.");if(len<500)rec.push("Rozšír obsah o služby, benefity, dôkazy a odpovede na najčastejšie otázky.");if(!images)rec.push("Zváž relevantné obrázky alebo ukážky práce, ktoré podporia ponuku.");
+        result.innerHTML=`<div class="score"><div><small>FOX SCORE</small><strong>${score}/100</strong></div><b>✓</b></div><div class="cats">${cats.map(c=>`<div class="cat"><b>${c[1]}</b><span>${c[0]}</span><i>${c[2]}</i></div>`).join("")}</div><div class="grid"><div class="item"><b>HTTPS</b><div>${parsed.protocol==="https:"?"✓ Aktívne":"✕ Chýba"}</div></div><div class="item"><b>SEO titulok</b><div>${esc(title||"Chýba")}</div></div><div class="item"><b>Nadpisy</b><div>${headings} nájdené</div></div><div class="item"><b>CTA / odkazy</b><div>${links} nájdené</div></div><div class="item"><b>Obrázky</b><div>${images} nájdených</div></div><div class="item"><b>Obsah</b><div>${len.toLocaleString("sk-SK")} znakov</div></div></div>${rec.length?`<div class="recs"><b>FOX odporúčania</b><ul>${rec.map(r=>`<li>${r}</li>`).join("")}</ul></div>`:"<div class="recs"><b>FOX odporúčania</b><div>Silný základ — pokračuj v optimalizácii.</div></div>`}<div class="foot">Audit je orientačný a vychádza z verejne dostupného obsahu.</div>`;result.hidden=false;
+      }catch(err){error.textContent=err instanceof Error?err.message:"Analýzu sa nepodarilo dokončiť.";error.hidden=false}finally{button.disabled=false;button.textContent="Spustiť audit →"}});
+    </script>
   </body>
 </html>
