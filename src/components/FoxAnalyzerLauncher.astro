@@ -1,15 +1,15 @@
 ---
 const locale = Astro.props.locale ?? "de";
 const labels = {
-  de: { open: "Website kostenlos testen", close: "Analyzer schließen", kicker: "FOX TECHNOLOGY LAB", title: "Teste deine Website – direkt hier.", text: "SEO · Google · Performance · Conversion · Vertrauen · UX" },
-  en: { open: "Test your website for free", close: "Close analyzer", kicker: "FOX TECHNOLOGY LAB", title: "Test your website – right here.", text: "SEO · Google · Performance · Conversion · Trust · UX" },
-  sk: { open: "Otestovať web zdarma", close: "Zavrieť analyzátor", kicker: "FOX TECHNOLOGY LAB", title: "Otestuj svoj web – priamo tu.", text: "SEO · Google · Výkon · Konverzia · Dôvera · UX" },
-  fr: { open: "Tester votre site gratuitement", close: "Fermer l’analyseur", kicker: "FOX TECHNOLOGY LAB", title: "Testez votre site – directement ici.", text: "SEO · Google · Performance · Conversion · Confiance · UX" },
-  hr: { open: "Besplatno testiraj web", close: "Zatvori analizator", kicker: "FOX TECHNOLOGY LAB", title: "Testiraj svoju web-stranicu – ovdje.", text: "SEO · Google · Performanse · Konverzija · Povjerenje · UX" },
-  pl: { open: "Przetestuj stronę za darmo", close: "Zamknij analizator", kicker: "FOX TECHNOLOGY LAB", title: "Przetestuj swoją stronę – tutaj.", text: "SEO · Google · Wydajność · Konwersja · Zaufanie · UX" },
-  it: { open: "Testa il sito gratis", close: "Chiudi analizzatore", kicker: "FOX TECHNOLOGY LAB", title: "Testa il tuo sito – direttamente qui.", text: "SEO · Google · Prestazioni · Conversione · Fiducia · UX" },
-  es: { open: "Prueba tu web gratis", close: "Cerrar analizador", kicker: "FOX TECHNOLOGY LAB", title: "Prueba tu web – directamente aquí.", text: "SEO · Google · Rendimiento · Conversión · Confianza · UX" },
-  sv: { open: "Testa din webbplats gratis", close: "Stäng analysverktyget", kicker: "FOX TECHNOLOGY LAB", title: "Testa din webbplats – direkt här.", text: "SEO · Google · Prestanda · Konvertering · Förtroende · UX" }
+  de: { open: "Website kostenlos testen", close: "Analyzer schließen", kicker: "FOX TECHNOLOGY LAB", title: "Teste deine Website – direkt hier.", text: "SEO · Google · Meta · Performance · Conversion · UX" },
+  en: { open: "Test your website for free", close: "Close analyzer", kicker: "FOX TECHNOLOGY LAB", title: "Test your website – right here.", text: "SEO · Google · Meta · Performance · Conversion · UX" },
+  sk: { open: "Otestovať web zdarma", close: "Zavrieť analyzátor", kicker: "FOX TECHNOLOGY LAB", title: "Otestuj svoj web – priamo tu.", text: "SEO · Google · Meta · Výkon · Konverzia · UX" },
+  fr: { open: "Tester votre site gratuitement", close: "Fermer l’analyseur", kicker: "FOX TECHNOLOGY LAB", title: "Testez votre site – directement ici.", text: "SEO · Google · Meta · Performance · Conversion · UX" },
+  hr: { open: "Besplatno testiraj web", close: "Zatvori analizator", kicker: "FOX TECHNOLOGY LAB", title: "Testiraj svoju web-stranicu – ovdje.", text: "SEO · Google · Meta · Performanse · Konverzija · UX" },
+  pl: { open: "Przetestuj stronę za darmo", close: "Zamknij analizator", kicker: "FOX TECHNOLOGY LAB", title: "Przetestuj swoją stronę – tutaj.", text: "SEO · Google · Meta · Wydajność · Konwersja · UX" },
+  it: { open: "Testa il sito gratis", close: "Chiudi analizzatore", kicker: "FOX TECHNOLOGY LAB", title: "Testa il tuo sito – direttamente qui.", text: "SEO · Google · Meta · Prestazioni · Conversione · UX" },
+  es: { open: "Prueba tu web gratis", close: "Cerrar analizador", kicker: "FOX TECHNOLOGY LAB", title: "Prueba tu web – directamente aquí.", text: "SEO · Google · Meta · Rendimiento · Conversión · UX" },
+  sv: { open: "Testa din webbplats gratis", close: "Stäng analysverktyget", kicker: "FOX TECHNOLOGY LAB", title: "Testa din webbplats – direkt här.", text: "SEO · Google · Meta · Prestanda · Konvertering · UX" }
 } as const;
 const t = labels[locale as keyof typeof labels] ?? labels.de;
 ---
@@ -29,12 +29,12 @@ const t = labels[locale as keyof typeof labels] ?? labels.de;
   </div>
 </div>
 <style>
-.fox-launcher{width:100%;margin:0 auto;scroll-margin-top:20px;border-top:10px solid #f36a0a;border-bottom:10px solid #f36a0a;background:#171717;color:#fff;position:relative;z-index:5}
+.fox-launcher{width:100%;margin:0 auto;scroll-margin-top:20px;border-top:10px solid #f36a0a;border-bottom:10px solid #f36a0a;background:#0f1012;color:#fff;position:relative;z-index:5}
 .fox-launcher-bar{min-height:112px;padding:18px clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;gap:24px}
-.fox-launcher-copy{display:flex;flex-direction:column;gap:5px}.fox-launcher-kicker{font-size:12px;font-weight:900;letter-spacing:.12em;color:#ff7a22}.fox-launcher-copy strong{font-size:clamp(20px,2.2vw,32px);line-height:1.1}.fox-launcher-copy small{color:#bfc0c3;font-size:13px}
+.fox-launcher-copy{display:flex;flex-direction:column;gap:5px}.fox-launcher-kicker{font-size:12px;font-weight:900;letter-spacing:.12em;color:#ff7a22}.fox-launcher-copy strong{font-size:clamp(20px,2.2vw,32px);line-height:1.1}.fox-launcher-copy small{color:#aeb1b7;font-size:13px}
 .fox-launcher-button{border:0;background:#f36a0a;color:#fff;border-radius:14px;padding:17px 24px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(243,106,10,.22);display:inline-flex;align-items:center;gap:10px;white-space:nowrap;transition:transform .2s,background .2s}.fox-launcher-button:hover{transform:translateY(-2px);background:#ff7415}.fox-launcher-icon{font-size:20px}.fox-launcher-chevron{font-size:18px;transition:transform .25s}.fox-launcher.is-open .fox-launcher-chevron{transform:rotate(180deg)}
-.fox-analyzer-panel{background:#f7f7f5;padding:0}.fox-analyzer-panel iframe{display:block;width:100%;height:min(2500px,calc(100vh + 1700px));min-height:1650px;border:0;border-radius:0;background:#f7f7f5;box-shadow:none}
-@media(max-width:700px){.fox-launcher-bar{align-items:stretch;flex-direction:column}.fox-launcher-button{justify-content:center}.fox-analyzer-panel iframe{min-height:2200px}}
+.fox-analyzer-panel{background:#0b0c0f;padding:0}.fox-analyzer-panel iframe{display:block;width:100%;height:min(2700px,calc(100vh + 1900px));min-height:1800px;border:0;border-radius:0;background:#0b0c0f;box-shadow:none}
+@media(max-width:700px){.fox-launcher-bar{align-items:stretch;flex-direction:column}.fox-launcher-button{justify-content:center}.fox-analyzer-panel iframe{min-height:2450px}}
 </style>
 <script>
 const launcher=document.getElementById("fox-analyzer-launcher");
@@ -44,14 +44,87 @@ if(launcher){
   const button=launcher.querySelector(".fox-launcher-button");
   const panel=launcher.querySelector(".fox-analyzer-panel");
   const label=launcher.querySelector("[data-label]");
+  const iframe=launcher.querySelector("iframe");
   const openLabel=label?.textContent||"Website kostenlos testen";
   const closeLabel=launcher.dataset.locale==="sk"?"Zavrieť analyzátor":launcher.dataset.locale==="en"?"Close analyzer":launcher.dataset.locale==="fr"?"Fermer l’analyseur":launcher.dataset.locale==="it"?"Chiudi analizzatore":launcher.dataset.locale==="es"?"Cerrar analizador":launcher.dataset.locale==="pl"?"Zamknij analizator":launcher.dataset.locale==="hr"?"Zatvori analizator":launcher.dataset.locale==="sv"?"Stäng analysverktyget":"Analyzer schließen";
+
+  const installFoxDesign=()=>{
+    try{
+      const doc=iframe?.contentDocument;
+      if(!doc||doc.getElementById("fox-ui-overrides")) return;
+      const style=doc.createElement("style");
+      style.id="fox-ui-overrides";
+      style.textContent=`
+        html,body{background:#0b0c0f!important;color:#f5f5f5!important}
+        body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+        .page{background:#0b0c0f!important;padding:34px 22px 70px!important}
+        .wrap{max-width:1380px!important}
+        .back{color:#aeb1b7!important;margin-bottom:18px!important}
+        .analyzer{background:#111318!important;border:1px solid #292d35!important;border-radius:28px!important;padding:42px!important;box-shadow:0 30px 90px rgba(0,0,0,.45)!important}
+        .eyebrow{color:#ff7a22!important}
+        .hero h1{color:#fff!important;letter-spacing:-.035em!important}
+        .hero h1 em{color:#ff7a22!important}
+        .hero p{color:#bfc3ca!important}
+        .chips span{background:#181b21!important;border-color:#30343c!important;color:#dfe2e7!important}
+        .tool{background:#15181e!important;color:#f5f5f5!important;border:1px solid #30343c!important;border-radius:22px!important;box-shadow:none!important;padding:26px!important}
+        label{color:#fff!important}
+        .input{background:#0e1014!important;border-color:#383d47!important;color:#fff!important}
+        .input input{color:#fff!important}.input input::placeholder{color:#6f747d!important}
+        .help,.foot{color:#7f858f!important}
+        .result{border-top-color:#30343c!important}
+        .score{background:linear-gradient(135deg,#24170e,#181b21)!important;border:1px solid #4a3425!important}
+        .score small{color:#aeb1b7!important}.score strong{color:#ff7a22!important}
+        .card,.metric{background:#0f1115!important;border-color:#30343c!important;color:#f5f5f5!important}
+        .card p,.metric small{color:#8f959e!important}.metric span{color:#d9dce1!important}
+        .section h2{color:#fff!important;font-size:18px!important;margin-top:30px!important}
+        .action{background:#181b21!important;color:#e9ebef!important;border-color:#383d47!important}
+        .action:hover{background:#22262e!important;border-color:#f36a0a!important;color:#fff!important}
+        #fox-category-dashboard{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin:0 0 24px}
+        .fox-cat{appearance:none;border:1px solid #30343c;background:#101217;color:#fff;border-radius:15px;padding:14px 10px;text-align:left;cursor:pointer;min-height:84px;transition:.18s ease;display:flex;flex-direction:column;justify-content:space-between}
+        .fox-cat:hover{border-color:#f36a0a;transform:translateY(-2px);background:#171a20}
+        .fox-cat b{font-size:13px;line-height:1.15}.fox-cat span{font-size:10px;color:#7f858f;line-height:1.25}
+        .fox-cat .fox-cat-icon{font-size:18px;color:#ff7a22;margin-bottom:7px}
+        @media(max-width:1050px){#fox-category-dashboard{grid-template-columns:repeat(4,1fr)}}
+        @media(max-width:650px){.analyzer{padding:22px 15px!important}.page{padding:18px 10px 50px!important}#fox-category-dashboard{grid-template-columns:repeat(2,1fr)}.fox-cat{min-height:78px}}
+      `;
+      doc.head.appendChild(style);
+      const tool=doc.querySelector(".tool");
+      if(tool&&!doc.getElementById("fox-category-dashboard")){
+        const dash=doc.createElement("div");dash.id="fox-category-dashboard";
+        const cats=[
+          ["⌕","SEO","Technické SEO & Indexierung","tests"],
+          ["G","Google","Lighthouse & Suche","google"],
+          ["◎","Meta / Facebook","Social & Open Graph","social"],
+          ["↯","Performance","Core Web Vitals","cwv"],
+          ["◈","UX","Accessibility & Mobile","ux"],
+          ["◇","Security","HTTPS & Trust","security"],
+          ["↗","Conversion","CTA & Google Ads","conversion"]
+        ];
+        dash.innerHTML=cats.map(([icon,name,sub,target])=>`<button class="fox-cat" type="button" data-target="${target}"><span class="fox-cat-icon">${icon}</span><b>${name}</b><span>${sub}</span></button>`).join("");
+        tool.prepend(dash);
+        dash.querySelectorAll(".fox-cat").forEach(btn=>btn.addEventListener("click",()=>{
+          const key=btn.dataset.target;let el=null;
+          if(key==="tests") el=[...doc.querySelectorAll(".section h2")].find(x=>/Technische|Technical|Tests techniques|Tehnič|Testy|Test tecnici|Pruebas|Tekniska/i.test(x.textContent||""));
+          if(key==="google") el=[...doc.querySelectorAll(".section h2")].find(x=>/Google \/ Lighthouse|Google.*Lighthouse/i.test(x.textContent||""));
+          if(key==="social") el=[...doc.querySelectorAll(".card strong")].find(x=>/Open Graph/i.test(x.textContent||""));
+          if(key==="cwv") el=[...doc.querySelectorAll(".section h2")].find(x=>/Core Web Vitals/i.test(x.textContent||""));
+          if(key==="ux") el=[...doc.querySelectorAll(".card strong")].find(x=>/Mobile|Accessibility|prístupnosť|accessibilité|accesibilidad/i.test(x.textContent||""));
+          if(key==="security") el=[...doc.querySelectorAll(".card strong")].find(x=>/HTTPS/i.test(x.textContent||""));
+          if(key==="conversion") el=[...doc.querySelectorAll(".section h2")].find(x=>/Ads|Conversion|konverzia|conversión|conversion/i.test(x.textContent||""));
+          if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+        }));
+      }
+    }catch(e){console.debug("FOX UI",e)}
+  };
+  iframe?.addEventListener("load",installFoxDesign);
+  if(iframe?.contentDocument?.readyState==="complete") installFoxDesign();
+
   button?.addEventListener("click",()=>{
     const open=launcher.classList.toggle("is-open");
     button.setAttribute("aria-expanded",String(open));
     if(panel) panel.hidden=!open;
     if(label) label.textContent=open?closeLabel:openLabel;
-    if(open) setTimeout(()=>launcher.scrollIntoView({behavior:"smooth",block:"start"}),40);
+    if(open){setTimeout(()=>{installFoxDesign();launcher.scrollIntoView({behavior:"smooth",block:"start"})},80)}
     else setTimeout(()=>launcher.querySelector(".fox-launcher-bar")?.scrollIntoView({behavior:"smooth",block:"center"}),40);
   });
 }
