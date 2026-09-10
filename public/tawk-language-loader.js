@@ -66,6 +66,20 @@
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = new Date();
   window.WebDesignFOXChatLanguage = language;
+  window.WebDesignFOXSwitchChatLanguage = function (nextLanguage, callback) {
+    var nextWidget = widgets[nextLanguage];
+    if (!nextWidget || typeof window.Tawk_API.switchWidget !== "function") {
+      callback();
+      return;
+    }
+
+    window.Tawk_API.switchWidget({
+      propertyId: PROPERTY_ID,
+      widgetId: nextWidget
+    }, function () {
+      callback();
+    });
+  };
 
   var script = document.createElement("script");
   script.id = "tawk-language-script";
