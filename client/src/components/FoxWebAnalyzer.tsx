@@ -1,16 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, Globe2, LoaderCircle, ShieldCheck, Sparkles } from "lucide-react";
 
-type Result = {
-  score: number;
-  title: { value: string; ok: boolean };
-  description: { value: string; ok: boolean };
-  headings: { count: number; ok: boolean };
-  images: { total: number; missingAlt: number; ok: boolean };
-  https: { ok: boolean };
-  viewport: { ok: boolean };
-  recommendations: string[];
-};
+type Result = { score: number; title: string; headings: number; links: number; images: number; https: boolean; contentLength: number; recommendations: string[] };
 
 export default function FoxWebAnalyzer() {
   const [url, setUrl] = useState("");
@@ -21,10 +12,28 @@ export default function FoxWebAnalyzer() {
   const analyze = async (event: FormEvent) => {
     event.preventDefault(); setError(""); setResult(null); setLoading(true);
     try {
-      const response = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Analýzu sa nepodarilo dokončiť.");
-      setResult(data);
+      const target = /^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`;
+      const parsed = new URL(target);
+      if (!/^https?:$/.test(parsed.protocol)) throw new Error("Zadaj platnú HTTP alebo HTTPS adresu.");
+      const response = await fetch(`https://r.jina.ai/${target}`, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error("Stránku sa nepodarilo načítať na analýzu.");
+      const raw = await response.text();
+      let content = raw; let title = "";
+      try { const json = JSON.parse(raw); const data = json?.data || json; content = data?.content || ""; title = data?.title || ""; } catch { /* Reader may return plain text. */ }
+      if (!content) content = raw;
+      const headingMatches = content.match(/^#{1,3}\s+.+$/gm) || [];
+      const links = content.match(/\[[^\]]+\]\([^\)]+\)/g) || [];
+      const images = content.match(/!\[[^\]]*\]\([^\)]+\)/g) || [];
+      const https = parsed.protocol === "https:";
+      const contentLength = content.replace(/[#*_`>\[\]()]/g, " ").replace(/\s+/g, " ").trim().length;
+      let score = (https ? 20 : 0) + (title.length >= 10 && title.length <= 70 ? 20 : 0) + (headingMatches.length >= 2 ? 20 : headingMatches.length === 1 ? 12 : 0) + (contentLength >= 500 ? 20 : contentLength >= 250 ? 12 : 5) + (links.length > 2 ? 10 : links.length > 0 ? 5 : 0) + (images.length > 0 ? 10 : 0);
+      const recommendations: string[] = [];
+      if (!https) recommendations.push("Použi HTTPS pre dôveryhodnosť a bezpečný prenos.");
+      if (!title) recommendations.push("Doplň jasný titulok stránky, ktorý vysvetlí jej hlavnú hodnotu."); else if (title.length < 10 || title.length > 70) recommendations.push("Uprav dĺžku titulku približne na 10–70 znakov.");
+      if (headingMatches.length < 2) recommendations.push("Rozdeľ stránku do jasnejšej hierarchie nadpisov a sekcií.");
+      if (contentLength < 500) recommendations.push("Rozšír obsah o konkrétne benefity, dôkazy a odpovede na námietky klienta.");
+      if (links.length < 2) recommendations.push("Pridaj výraznejšie CTA alebo ďalšie relevantné odkazy na ďalší krok.");
+      setResult({ score: Math.min(100, score), title, headings: headingMatches.length, links: links.length, images: images.length, https, contentLength, recommendations });
     } catch (err) { setError(err instanceof Error ? err.message : "Analýzu sa nepodarilo dokončiť."); }
     finally { setLoading(false); }
   };
@@ -36,17 +45,17 @@ export default function FoxWebAnalyzer() {
         <div className="fox-analyzer-copy">
           <p className="eyebrow"><Sparkles size={15} /> FOX WEB ANALYZER</p>
           <h2>Performuje tvoja webstránka<br /><em>tak, ako má?</em></h2>
-          <p>Zadaj URL a získaj rýchly technický a konverzný prehľad. Bez registrácie a bez Leadscape.</p>
-          <div className="fox-analyzer-points"><span><CheckCircle2 size={16} /> SEO základ</span><span><CheckCircle2 size={16} /> Mobilná pripravenosť</span><span><CheckCircle2 size={16} /> Technické chyby</span><span><CheckCircle2 size={16} /> Konverzné odporúčania</span></div>
+          <p>Zadaj URL a získaj rýchly obsahový a konverzný prehľad. Vlastná FOX analýza bez registrácie.</p>
+          <div className="fox-analyzer-points"><span><CheckCircle2 size={16} /> Štruktúra obsahu</span><span><CheckCircle2 size={16} /> Nadpisy a CTA</span><span><CheckCircle2 size={16} /> Odkazy a obrázky</span><span><CheckCircle2 size={16} /> FOX Score</span></div>
         </div>
         <div className="fox-analyzer-card">
           <form onSubmit={analyze} className="fox-analyzer-form">
             <label htmlFor="fox-url">URL webstránky</label>
             <div className="fox-url-row"><div className="fox-url-input"><Globe2 size={19} /><input id="fox-url" type="url" required value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://tvoja-stranka.sk" /></div><button className="button button-primary" type="submit" disabled={loading}>{loading ? <><LoaderCircle size={18} className="fox-spin" /> Analyzujem…</> : <>Analyzovať <ArrowRight size={17} /></>}</button></div>
-            <small>Analýza pracuje s verejne dostupným obsahom zadanej stránky.</small>
+            <small>Analyzujeme verejne dostupný obsah zadanej stránky.</small>
           </form>
           {error && <div className="fox-analyzer-error" role="alert">{error}</div>}
-          {result && <div className="fox-result"><div className="fox-score"><div><span>FOX SCORE</span><strong>{result.score}<small>/100</small></strong></div><ShieldCheck size={34} /></div><div className="fox-result-grid"><ResultItem label="HTTPS" ok={result.https.ok} /><ResultItem label="Title" ok={result.title.ok} detail={result.title.value || "Chýba"} /><ResultItem label="Meta description" ok={result.description.ok} /><ResultItem label="Viewport" ok={result.viewport.ok} /><ResultItem label="Obrázky / alt" ok={result.images.ok} detail={`${result.images.total} / ${result.images.missingAlt} bez alt`} /><ResultItem label="Nadpisy H1–H3" ok={result.headings.ok} detail={`${result.headings.count} nájdených`} /></div>{result.recommendations.length > 0 && <div className="fox-recommendations"><strong>Najdôležitejšie odporúčania</strong><ul>{result.recommendations.slice(0, 4).map((item) => <li key={item}>{item}</li>)}</ul></div>}</div>}
+          {result && <div className="fox-result"><div className="fox-score"><div><span>FOX SCORE</span><strong>{result.score}<small>/100</small></strong></div><ShieldCheck size={34} /></div><div className="fox-result-grid"><ResultItem label="HTTPS" ok={result.https} /><ResultItem label="Titulok" ok={!!result.title} detail={result.title || "Chýba"} /><ResultItem label="Nadpisy" ok={result.headings >= 2} detail={`${result.headings} nájdené`} /><ResultItem label="CTA / odkazy" ok={result.links >= 2} detail={`${result.links} nájdené`} /><ResultItem label="Obrázky" ok={result.images > 0} detail={`${result.images} nájdených`} /><ResultItem label="Obsah" ok={result.contentLength >= 500} detail={`${result.contentLength} znakov`} /></div>{result.recommendations.length > 0 && <div className="fox-recommendations"><strong>Najdôležitejšie odporúčania</strong><ul>{result.recommendations.slice(0, 4).map((item) => <li key={item}>{item}</li>)}</ul></div>}</div>}
         </div>
       </div>
     </section>
