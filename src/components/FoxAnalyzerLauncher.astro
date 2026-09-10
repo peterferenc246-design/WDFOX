@@ -1,0 +1,58 @@
+---
+const locale = Astro.props.locale ?? "de";
+const labels = {
+  de: { open: "Website kostenlos testen", close: "Analyzer schließen", kicker: "FOX TECHNOLOGY LAB", title: "Teste deine Website – direkt hier.", text: "SEO · Google · Performance · Conversion · Vertrauen · UX" },
+  en: { open: "Test your website for free", close: "Close analyzer", kicker: "FOX TECHNOLOGY LAB", title: "Test your website – right here.", text: "SEO · Google · Performance · Conversion · Trust · UX" },
+  sk: { open: "Otestovať web zdarma", close: "Zavrieť analyzátor", kicker: "FOX TECHNOLOGY LAB", title: "Otestuj svoj web – priamo tu.", text: "SEO · Google · Výkon · Konverzia · Dôvera · UX" },
+  fr: { open: "Tester votre site gratuitement", close: "Fermer l’analyseur", kicker: "FOX TECHNOLOGY LAB", title: "Testez votre site – directement ici.", text: "SEO · Google · Performance · Conversion · Confiance · UX" },
+  hr: { open: "Besplatno testiraj web", close: "Zatvori analizator", kicker: "FOX TECHNOLOGY LAB", title: "Testiraj svoju web-stranicu – ovdje.", text: "SEO · Google · Performanse · Konverzija · Povjerenje · UX" },
+  pl: { open: "Przetestuj stronę za darmo", close: "Zamknij analizator", kicker: "FOX TECHNOLOGY LAB", title: "Przetestuj swoją stronę – tutaj.", text: "SEO · Google · Wydajność · Konwersja · Zaufanie · UX" },
+  it: { open: "Testa il sito gratis", close: "Chiudi analizzatore", kicker: "FOX TECHNOLOGY LAB", title: "Testa il tuo sito – direttamente qui.", text: "SEO · Google · Prestazioni · Conversione · Fiducia · UX" },
+  es: { open: "Prueba tu web gratis", close: "Cerrar analizador", kicker: "FOX TECHNOLOGY LAB", title: "Prueba tu web – directamente aquí.", text: "SEO · Google · Rendimiento · Conversión · Confianza · UX" },
+  sv: { open: "Testa din webbplats gratis", close: "Stäng analysverktyget", kicker: "FOX TECHNOLOGY LAB", title: "Testa din webbplats – direkt här.", text: "SEO · Google · Prestanda · Konvertering · Förtroende · UX" }
+} as const;
+const t = labels[locale as keyof typeof labels] ?? labels.de;
+---
+<div class="fox-launcher" id="fox-analyzer-launcher" data-locale={locale}>
+  <div class="fox-launcher-bar">
+    <div class="fox-launcher-copy">
+      <span class="fox-launcher-kicker">✦ {t.kicker}</span>
+      <strong>{t.title}</strong>
+      <small>{t.text}</small>
+    </div>
+    <button class="fox-launcher-button" type="button" aria-expanded="false" aria-controls="fox-analyzer-panel">
+      <span class="fox-launcher-icon">⌁</span><span data-label>{t.open}</span><span class="fox-launcher-chevron">↓</span>
+    </button>
+  </div>
+  <div class="fox-analyzer-panel" id="fox-analyzer-panel" hidden>
+    <iframe src="/analyzer/" title="FOX Web Analyzer" loading="lazy"></iframe>
+  </div>
+</div>
+<style>
+.fox-launcher{width:100%;margin:0 auto;scroll-margin-top:20px;border-top:10px solid #f36a0a;border-bottom:10px solid #f36a0a;background:#171717;color:#fff;position:relative;z-index:5}
+.fox-launcher-bar{min-height:112px;padding:18px clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;gap:24px}
+.fox-launcher-copy{display:flex;flex-direction:column;gap:5px}.fox-launcher-kicker{font-size:12px;font-weight:900;letter-spacing:.12em;color:#ff7a22}.fox-launcher-copy strong{font-size:clamp(20px,2.2vw,32px);line-height:1.1}.fox-launcher-copy small{color:#bfc0c3;font-size:13px}
+.fox-launcher-button{border:0;background:#f36a0a;color:#fff;border-radius:14px;padding:17px 24px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(243,106,10,.22);display:inline-flex;align-items:center;gap:10px;white-space:nowrap;transition:transform .2s,background .2s}.fox-launcher-button:hover{transform:translateY(-2px);background:#ff7415}.fox-launcher-icon{font-size:20px}.fox-launcher-chevron{font-size:18px;transition:transform .25s}.fox-launcher.is-open .fox-launcher-chevron{transform:rotate(180deg)}
+.fox-analyzer-panel{background:#f7f7f5;padding:28px clamp(12px,3vw,40px)}.fox-analyzer-panel iframe{display:block;width:100%;height:min(1900px,calc(100vh + 1100px));min-height:1150px;border:0;border-radius:24px;background:#f7f7f5;box-shadow:0 18px 55px rgba(0,0,0,.12)}
+@media(max-width:700px){.fox-launcher-bar{align-items:stretch;flex-direction:column}.fox-launcher-button{justify-content:center}.fox-analyzer-panel{padding:14px 6px}.fox-analyzer-panel iframe{min-height:1500px;border-radius:16px}}
+</style>
+<script>
+const launcher=document.getElementById("fox-analyzer-launcher");
+if(launcher){
+  const hero=document.querySelector(".hero-section");
+  if(hero) hero.insertAdjacentElement("afterend",launcher);
+  const button=launcher.querySelector(".fox-launcher-button");
+  const panel=launcher.querySelector(".fox-analyzer-panel");
+  const label=launcher.querySelector("[data-label]");
+  const openLabel=label?.textContent||"Website kostenlos testen";
+  const closeLabel=launcher.dataset.locale==="sk"?"Zavrieť analyzátor":launcher.dataset.locale==="en"?"Close analyzer":launcher.dataset.locale==="fr"?"Fermer l’analyseur":launcher.dataset.locale==="it"?"Chiudi analizzatore":launcher.dataset.locale==="es"?"Cerrar analizador":launcher.dataset.locale==="pl"?"Zamknij analizator":launcher.dataset.locale==="hr"?"Zatvori analizator":launcher.dataset.locale==="sv"?"Stäng analysverktyget":"Analyzer schließen";
+  button?.addEventListener("click",()=>{
+    const open=launcher.classList.toggle("is-open");
+    button.setAttribute("aria-expanded",String(open));
+    if(panel) panel.hidden=!open;
+    if(label) label.textContent=open?closeLabel:openLabel;
+    if(open) setTimeout(()=>launcher.scrollIntoView({behavior:"smooth",block:"start"}),40);
+    else setTimeout(()=>launcher.querySelector(".fox-launcher-bar")?.scrollIntoView({behavior:"smooth",block:"center"}),40);
+  });
+}
+</script>
