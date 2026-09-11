@@ -2,6 +2,14 @@
 const supportedLocales = ["sk", "de", "en", "hr", "fr", "it", "pl", "es", "sv"];
 const siteUrl = "https://www.foxprof.club";
 const ogImage = `${siteUrl}/images/peter-ferenc.jpg`;
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", "@id": `${siteUrl}/#website`, "url": `${siteUrl}/`, "name": "FOX Technology Lab", "inLanguage": "sk" },
+    { "@type": "ProfessionalService", "@id": `${siteUrl}/#business`, "name": "FOX Technology Lab", "url": `${siteUrl}/`, "description": "FOX Technology Lab – modern websites, webdesign, technology and digital solutions.", "image": ogImage, "email": "info@foxprof.club", "telephone": "+49 157 31733332", "areaServed": "DE", "sameAs": [] },
+    { "@type": "WebPage", "@id": `${siteUrl}/#webpage`, "url": `${siteUrl}/`, "name": "FOX Technology Lab – modern websites that convert", "description": "FOX Technology Lab – modern websites, webdesign, technology and digital solutions.", "isPartOf": { "@id": `${siteUrl}/#website` }, "about": { "@id": `${siteUrl}/#business` }, "inLanguage": "sk" }
+  ]
+};
 ---
 <!doctype html>
 <html lang="sk">
@@ -12,6 +20,8 @@ const ogImage = `${siteUrl}/images/peter-ferenc.jpg`;
     <meta name="googlebot" content="index, follow" />
     <title>FOX Technology Lab – modern websites that convert</title>
     <meta name="description" content="FOX Technology Lab – modern websites, webdesign, technology and digital solutions." />
+    <meta name="author" content="FOX Technology Lab" />
+    <meta name="theme-color" content="#f36a0a" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="FOX Technology Lab" />
     <meta property="og:title" content="FOX Technology Lab" />
@@ -20,28 +30,29 @@ const ogImage = `${siteUrl}/images/peter-ferenc.jpg`;
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:alt" content="FOX Technology Lab" />
     <meta property="og:locale" content="sk_SK" />
+    {supportedLocales.filter((code) => code !== "sk").map((code) => (
+      <meta property="og:locale:alternate" content={code === "en" ? "en_US" : code === "de" ? "de_DE" : `${code}_${code.toUpperCase()}`} />
+    ))}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FOX Technology Lab" />
+    <meta name="twitter:description" content="Moderné weby, technológia a digitálne riešenia pre firmy." />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="FOX Technology Lab" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={`${siteUrl}/`} />
     {supportedLocales.map((code) => (
       <link rel="alternate" hreflang={code} href={`${siteUrl}/${code}/`} />
     ))}
     <link rel="alternate" hreflang="x-default" href={`${siteUrl}/sk/`} />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     <script is:inline define:vars={{ supportedLocales }}>
       (function () {
         var supported = supportedLocales;
         var stored = "";
-
-        try {
-          stored = (localStorage.getItem("wdfox-language") || "").toLowerCase();
-        } catch (_) {}
-
-        var browserLanguages = navigator.languages && navigator.languages.length
-          ? navigator.languages
-          : [navigator.language || ""];
-        var detected = browserLanguages
-          .map(function (value) { return String(value).toLowerCase().split(/[-_]/)[0]; })
-          .find(function (value) { return supported.indexOf(value) !== -1; });
+        try { stored = (localStorage.getItem("wdfox-language") || "").toLowerCase(); } catch (_) {}
+        var browserLanguages = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
+        var detected = browserLanguages.map(function (value) { return String(value).toLowerCase().split(/[-_]/)[0]; }).find(function (value) { return supported.indexOf(value) !== -1; });
         var language = supported.indexOf(stored) !== -1 ? stored : (detected || "sk");
-
         window.location.replace("/" + language + "/" + window.location.search + window.location.hash);
       })();
     </script>
