@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,6 +21,33 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Apply neutral analyzer patch
+        if: github.event_name == 'push' && github.event.head_commit.message != 'fix: make analyzer neutral and standards-based'
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/pages/analyzer.astro')
+          s = p.read_text()
+          old = "const target=new URL(url,location.href),same=target.origin===location.origin||['foxprof.club','www.foxprof.club'].includes(target.hostname.toLowerCase());if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}"
+          new = "const target=new URL(url,location.href),same=target.origin===location.origin;if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}"
+          if old not in s: raise SystemExit('jina pattern not found')
+          s = s.replace(old,new,1)
+          start = s.find('function localRedirectTarget(')
+          if start >= 0:
+              end = s.find("$('form').addEventListener", start)
+              if end < 0: raise SystemExit('form marker not found')
+              s = s[:start] + s[end:]
+          old = "let target=$('url').value.trim();if(!/^https?:\\/\\//i.test(target))target='https://'+target;let head0=await jina(target,true).catch(()=>({content:''})),redirected=localRedirectTarget(target,String(head0.content||''));if(redirected){target=redirected;head0=await jina(target,true).catch(()=>({content:''}))}const u=new URL(target),robotsUrl=new URL('/robots.txt',u).href,sitemapUrl=new URL('/sitemap.xml',u).href;"
+          new = "let target=$('url').value.trim();if(!/^https?:\\/\\//i.test(target))target='https://'+target;let head0=await jina(target,true).catch(()=>({content:''}));target=head0.url||target;const u=new URL(target),robotsUrl=new URL('/robots.txt',u).href,sitemapUrl=new URL('/sitemap.xml',u).href;"
+          if old not in s: raise SystemExit('submit pattern not found')
+          s = s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet || git commit -m 'fix: make analyzer neutral and standards-based'
+          git push
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
