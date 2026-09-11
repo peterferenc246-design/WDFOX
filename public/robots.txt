@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /analyzer/
+
+Sitemap: https://www.foxprof.club/sitemap.xml
