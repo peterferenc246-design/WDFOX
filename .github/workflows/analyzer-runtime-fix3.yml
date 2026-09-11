@@ -6,26 +6,23 @@ on:
 
 jobs:
   fix:
-    if: ${{ github.event.head_commit.message != 'fix: restore missing analyzer runtime functions [analyzer-fix]' }}
+    if: "${{ github.event.head_commit.message != 'fix: restore missing analyzer runtime functions [analyzer-fix]' }}"
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.4.1
           run_install: false
-
       - name: Patch analyzer
         shell: python
         run: |
@@ -65,12 +62,10 @@ jobs:
               s=s.replace(marker, ''.join(inserts)+marker, 1)
           s=s.replace("h['X-Engine']='browser'", "")
           p.write_text(s,encoding='utf-8')
-
       - name: Verify build
         run: |
           pnpm install --frozen-lockfile
           pnpm build
-
       - name: Commit source fix and remove temporary workflow
         shell: bash
         run: |
