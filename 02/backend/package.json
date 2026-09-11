@@ -1,0 +1,17 @@
+{
+  "name": "fox-live-translator-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/gateway": "latest",
+    "ai": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "vercel": "latest"
+  }
+}
