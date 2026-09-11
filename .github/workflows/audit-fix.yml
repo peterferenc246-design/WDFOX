@@ -1,0 +1,41 @@
+name: Neutral analyzer audit fix
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.event.head_commit.message != 'fix: make analyzer neutral and standards-based'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove FOX-specific analyzer logic
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          old="const target=new URL(url,location.href),same=target.origin===location.origin||['foxprof.club','www.foxprof.club'].includes(target.hostname.toLowerCase());if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}"
+          new="const target=new URL(url,location.href),same=target.origin===location.origin;if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}"
+          assert old in s
+          s=s.replace(old,new,1)
+          old2="function localRedirectTarget(url,html){try{const u=new URL(url);if(!['foxprof.club','www.foxprof.club'].includes(u.hostname.toLowerCase())||u.pathname!=='/')return null;const supported=['sk','de','en','hr','fr','it','pl','es','sv'];const lang=(html.match(/<html[^>]+lang=[\"']([a-z]{2})/i)?.[1]||L).toLowerCase();const code=supported.includes(lang)?lang:(L||'sk');return new URL('/'+code+'/',u.origin).href}catch{return null}}\n"
+          assert old2 in s
+          s=s.replace(old2,'',1)
+          old3="let target=$('url').value.trim();if(!/^https?:\\/\\//i.test(target))target='https://'+target;let head0=await jina(target,true).catch(()=>({content:''})),redirected=localRedirectTarget(target,String(head0.content||''));if(redirected){target=redirected;head0=await jina(target,true).catch(()=>({content:''}))}const u=new URL(target),robotsUrl=new URL('/robots.txt',u).href,sitemapUrl=new URL('/sitemap.xml',u).href;"
+          new3="let target=$('url').value.trim();if(!/^https?:\\/\\//i.test(target))target='https://'+target;let head0=await jina(target,true).catch(()=>({content:''}));target=head0.url||target;const u=new URL(target),robotsUrl=new URL('/robots.txt',u).href,sitemapUrl=new URL('/sitemap.xml',u).href;"
+          assert old3 in s
+          s=s.replace(old3,new3,1)
+          old4="const relevant=groups.filter(g=>g.agents.includes('googlebot')||g.agents.includes('*'));\n    const blocked=relevant.some(g=>g.dis.includes('/'));\n    const robotsOk=rb.trim().length===0||!blocked;"
+          new4="const relevant=groups.filter(g=>g.agents.includes('googlebot')||g.agents.includes('*'));\n    const path=u.pathname||'/';\n    const matches=(rule)=>{if(rule==='')return false;const escaped=rule.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&').replace(/\\\\\\*/g,'.*');return new RegExp('^'+escaped).test(path)};\n    const blocked=relevant.some(g=>g.dis.some(matches)&&!g.dis.some(()=>false));\n    const robotsOk=rb.trim().length===0||!blocked;"
+          assert old4 in s
+          s=s.replace(old4,new4,1)
+          p.write_text(s)
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet || git commit -m 'fix: make analyzer neutral and standards-based'
+          git push
