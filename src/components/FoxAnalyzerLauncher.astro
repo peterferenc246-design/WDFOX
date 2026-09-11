@@ -1,4 +1,5 @@
 ---
+import MetaPixelInstaller from "./MetaPixelInstaller.astro";
 const locale = Astro.props.locale ?? "de";
 const labels = {
  de:{open:"Website kostenlos testen",close:"Analyzer schließen",title:"Teste deine Website – direkt hier.",text:"SEO · Google · Meta/Facebook · Meta Pixel · X/Twitter · Performance · UX · Security · Conversion",choose:"Wähle bis zu 2 Tests",run:"Ausgewählte Tests starten →",selected:"ausgewählt",limit:"Maximal 2 Kategorien auswählen"},
@@ -15,10 +16,12 @@ const t=labels[locale as keyof typeof labels]??labels.de;
 ---
 <div class="fox-launcher" id="fox-analyzer-launcher" data-locale={locale}>
  <div class="fox-launcher-bar"><div class="fox-launcher-copy"><span class="fox-launcher-kicker">✦ FOX TECHNOLOGY LAB</span><strong>{t.title}</strong><small>{t.text}</small></div><button class="fox-launcher-button" type="button" aria-expanded="false"><span>⌁</span><span data-label data-open={t.open} data-close={t.close}>{t.open}</span><span>↓</span></button></div>
+ <div class="fox-pixel-slot"><MetaPixelInstaller locale={locale} /></div>
  <div class="fox-analyzer-panel" hidden><iframe src={`/analyzer/?embed=1&lang=${locale}`} title="FOX Web Analyzer" loading="lazy"></iframe></div>
 </div>
 <style>
 .fox-launcher{width:100%;margin:0 auto;scroll-margin-top:20px;border-top:10px solid #f36a0a;border-bottom:10px solid #f36a0a;background:#0f1012;color:#fff;position:relative;z-index:5}.fox-launcher-bar{min-height:112px;padding:18px clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;gap:24px}.fox-launcher-copy{display:flex;flex-direction:column;gap:5px}.fox-launcher-kicker{font-size:12px;font-weight:900;letter-spacing:.12em;color:#ff7a22}.fox-launcher-copy strong{font-size:clamp(20px,2.2vw,32px);line-height:1.1}.fox-launcher-copy small{color:#aeb1b7;font-size:13px}.fox-launcher-button{border:0;background:#f36a0a;color:#fff;border-radius:14px;padding:17px 24px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 12px 30px rgba(243,106,10,.22);display:inline-flex;align-items:center;gap:10px;white-space:nowrap}.fox-analyzer-panel{background:#0b0c0f;padding:0;overflow:hidden}.fox-analyzer-panel iframe{display:block;width:100%;height:1px;min-height:1px;border:0;background:#0b0c0f;transition:height .12s ease}@media(max-width:700px){.fox-launcher-bar{align-items:stretch;flex-direction:column}.fox-launcher-button{justify-content:center}}
+.fox-pixel-slot{padding:0 clamp(20px,5vw,72px) 18px;background:#0f1012}.fox-pixel-slot :global(.pixel-installer){width:100%;margin:0;box-sizing:border-box}.fox-pixel-slot :global(.pixel-installer-copy){min-width:0}.fox-pixel-slot :global(.pixel-installer h2){font-size:clamp(18px,2vw,27px)}
 </style>
 <script>
 const launcher=document.getElementById("fox-analyzer-launcher");

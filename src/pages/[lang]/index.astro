@@ -2,7 +2,6 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
-import MetaPixelInstaller from "../../components/MetaPixelInstaller.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -23,7 +22,6 @@ const content = await getLandingContent(lang);
   </Fragment>
   <Landing content={content} />
   <FoxAnalyzerLauncher locale={lang} />
-  <MetaPixelInstaller locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
