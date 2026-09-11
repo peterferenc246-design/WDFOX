@@ -1,0 +1,42 @@
+name: Fix Google crawlability test 3
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-google-crawlability-3.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make crawlability a real FOX test
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          marker='async function googleIndexStatus(url){'
+          fn='''function foxCrawlability(url,html,head,robots){\n  try{\n    const u=new URL(url), h=String(html||''), hd=String(head||''), rb=String(robots||'');\n    const publicUrl=/^https?:\\/\\//i.test(u.href);\n    const htmlOk=/<html\\b/i.test(h)&&/<body\\b/i.test(h);\n    const noindex=!/(<meta\\b[^>]*(?:name|property)=["'](?:robots|googlebot)["'][^>]*content=["'][^"']*noindex|<meta\\b[^>]*content=["'][^"']*noindex[^"']*["'][^>]*(?:name|property)=["'](?:robots|googlebot)["'])/i.test(hd+h);\n    const groups=[]; let agents=[], dis=[];\n    for(const line of rb.split(/\\r?\\n/)){\n      const x=line.replace(/#.*/, '').trim(); if(!x) continue;\n      const a=x.match(/^User-agent:\\s*(.+)$/i);\n      if(a){if(agents.length) groups.push({agents,dis}); agents=[a[1].trim().toLowerCase()]; dis=[]; continue}\n      const d=x.match(/^Disallow:\\s*(.*)$/i); if(d) dis.push(d[1].trim());\n      const al=x.match(/^Allow:\\s*(.*)$/i); if(al){}\n    }\n    if(agents.length) groups.push({agents,dis});\n    const relevant=groups.filter(g=>g.agents.includes('googlebot')||g.agents.includes('*'));\n    const blocked=relevant.some(g=>g.dis.includes('/'));\n    const robotsOk=rb.trim().length===0||!blocked;\n    return publicUrl&&htmlOk&&noindex&&robotsOk;\n  }catch{return false}\n}\n\n'''
+          if marker not in s: raise SystemExit('googleIndexStatus marker not found')
+          if 'function foxCrawlability(' not in s: s=s.replace(marker,fn+marker,1)
+          old="crawl=pass('is-crawlable')"
+          if old not in s: raise SystemExit('crawl Lighthouse assignment not found')
+          s=s.replace(old,"crawl=foxCrawlability(target,html,head0,robots.content)",1)
+          oldcard="card(t.cards.crawl,crawl,t.lh)"
+          if oldcard not in s: raise SystemExit('crawl card renderer not found')
+          s=s.replace(oldcard,"card(t.cards.crawl,crawl,'FOX')",1)
+          # Keep Lighthouse explicitly separate from crawlability.
+          s=s.replace("crawl:'Lighthouse'","crawl:'FOX'")
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git commit -m 'fix: use independent FOX Google crawlability test'
+          git push
+          rm -f .github/workflows/fix-google-crawlability.yml .github/workflows/fix-google-crawlability-2.yml .github/workflows/fix-google-crawlability-3.yml .github/workflows/diagnose-crawl.yml crawl-diagnostic.txt
+          git add .github/workflows/fix-google-crawlability.yml .github/workflows/fix-google-crawlability-2.yml .github/workflows/fix-google-crawlability-3.yml .github/workflows/diagnose-crawl.yml crawl-diagnostic.txt
+          git commit -m 'chore: remove temporary crawlability tooling' || true
+          git push || true
