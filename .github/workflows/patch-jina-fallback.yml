@@ -1,0 +1,34 @@
+name: Patch Jina HTML fallback
+on:
+  push:
+    branches: [main]
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch analyzer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          old="const h={Accept:'application/json','X-No-Cache':'true'};"
+          new="const h={Accept:'application/json','X-No-Cache':'true'};"
+          old_fn="async function jina(url,head=false,engine='browser'){"
+          marker="const r=await fetch('https://r.jina.ai/'+url,{headers:h});if(!r.ok)throw Error('jina');const raw=await r.text();try{const j=JSON.parse(raw),d=j?.data||j;return{...d,content:String(d?.content||'')}}catch{return{content:raw}}}"
+          replacement="try{const r=await fetch('https://r.jina.ai/'+url,{headers:h});if(!r.ok)throw Error('jina');const raw=await r.text();try{const j=JSON.parse(raw),d=j?.data||j;return{...d,content:String(d?.content||'')}}catch{return{content:raw}}}catch(e){const proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(url),r=await fetch(proxy,{cache:'no-store'});if(!r.ok)throw e;return{content:await r.text(),url:url}}}"
+          if marker not in s: raise SystemExit('Jina marker not found')
+          s=s.replace(marker,replacement,1)
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: add public HTML fallback for analyzer'
+          git push
