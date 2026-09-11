@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FOX Live Translator — Voice Test</title>
 <style>
-body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px;background:#f5f7fa;color:#10233f}main{background:white;border-radius:18px;padding:24px;box-shadow:0 8px 30px #0001}h1{margin-top:0}select,button{font:inherit;padding:11px 14px;border-radius:10px;border:1px solid #ccd4df}button{cursor:pointer;margin:6px 6px 6px 0}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.box{background:#f7f9fc;border-radius:12px;padding:14px;margin-top:14px;min-height:44px}.status{font-weight:700;margin-top:12px}label{font-weight:600}small{color:#52657d}</style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px;background:#f5f7fa;color:#10233f}main{background:white;border-radius:18px;padding:24px;box-shadow:0 8px 30px #0001}h1{margin-top:0}select,button{font:inherit;padding:11px 14px;border-radius:10px;border:1px solid #ccd4df}button{cursor:pointer;margin:6px 6px 6px 0}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.box{background:#f7f9fc;border-radius:12px;padding:14px;margin-top:14px;min-height:44px}.status{font-weight:700;margin-top:12px}label{font-weight:600}small{color:#52657d}.hint{color:#52657d;font-size:.92rem}
+</style>
 </head>
 <body><main>
 <h1>FOX Live Translator</h1>
@@ -17,32 +18,42 @@ body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px
 <select id="target"><option value="de">🇩🇪 Nemčina</option><option value="sk">🇸🇰 Slovenčina</option></select></label>
 </div>
 <div class="row"><button id="start">🎤 Začať hovoriť</button><button id="stop" disabled>⏹ Zastaviť a preložiť</button></div>
+<p class="hint">Po zastavení môže spracovanie chvíľu trvať: zvuk → prepis → preklad → hlas.</p>
 <div class="status" id="status">Pripravené.</div>
 <div class="box"><small>Rozpoznaný text</small><div id="transcript">—</div></div>
 <div class="box"><small>Preklad</small><div id="translation">—</div></div>
 <audio id="audio" controls style="width:100%;margin-top:14px;display:none"></audio>
 <script>
-let recorder, chunks=[];
+let recorder,chunks=[],startedAt=0,timer;
 const $=id=>document.getElementById(id);
+function setStatus(text){$('status').textContent=text}
+function startTimer(){startedAt=Date.now();clearInterval(timer);timer=setInterval(()=>{const s=Math.floor((Date.now()-startedAt)/1000);setStatus('⏳ Spracúvam hlas… '+s+' s');},1000)}
+function stopTimer(){clearInterval(timer)}
 $('start').onclick=async()=>{
  try{
   const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-  chunks=[]; recorder=new MediaRecorder(stream); recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  chunks=[]; recorder=new MediaRecorder(stream);
+  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
   recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop()); await translate();};
-  recorder.start(); $('start').disabled=true; $('stop').disabled=false; $('status').textContent='🎤 Nahrávam… hovorte teraz.';
- }catch(e){$('status').textContent='❌ Mikrofon nebol povolený: '+e.message}
+  recorder.start(); $('start').disabled=true; $('stop').disabled=false; setStatus('🎤 Nahrávam… hovorte teraz.');
+ }catch(e){setStatus('❌ Mikrofon nebol povolený: '+(e.message||e));$('start').disabled=false}
 };
-$('stop').onclick=()=>{if(recorder&&recorder.state!=='inactive'){recorder.stop();$('stop').disabled=true;$('status').textContent='⏳ Odosielam zvuk na preklad…'}};
+$('stop').onclick=()=>{if(recorder&&recorder.state!=='inactive'){recorder.stop();$('stop').disabled=true;setStatus('⏳ Pripravujem zvuk…');}}
 async function translate(){
- const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'}), fd=new FormData();
- fd.append('audio',blob,'voice.webm'); fd.append('sourceLanguage',$('source').value); fd.append('targetLanguage',$('target').value); fd.append('speakResult','true');
+ const mime=recorder.mimeType||'audio/webm';
+ const extension=mime.includes('mp4')?'mp4':mime.includes('ogg')?'ogg':'webm';
+ const blob=new Blob(chunks,{type:mime}),fd=new FormData();
+ fd.append('audio',blob,'voice.'+extension);fd.append('sourceLanguage',$('source').value);fd.append('targetLanguage',$('target').value);fd.append('speakResult','true');
+ startTimer();
  try{
-  const r=await fetch('/api/translate-voice',{method:'POST',body:fd}); const data=await r.json();
-  if(!r.ok) throw new Error(data.error||('HTTP '+r.status));
-  $('transcript').textContent=data.transcript||'—'; $('translation').textContent=data.translatedText||'—';
+  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),55000);
+  const r=await fetch('/api/translate-voice',{method:'POST',body:fd,signal:controller.signal});clearTimeout(timeout);
+  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data={error:raw||('HTTP '+r.status)}}
+  if(!r.ok)throw new Error(data.error||('HTTP '+r.status));
+  $('transcript').textContent=data.transcript||'—';$('translation').textContent=data.translatedText||'—';
   if(data.audioBase64){$('audio').src='data:'+(data.audioMimeType||'audio/mpeg')+';base64,'+data.audioBase64;$('audio').style.display='block';$('audio').play().catch(()=>{});}
-  $('status').textContent='✅ Preklad dokončený.';
- }catch(e){$('status').textContent='❌ '+e.message}
+  stopTimer();setStatus('✅ Preklad dokončený.');
+ }catch(e){stopTimer();setStatus(e.name==='AbortError'?'❌ Timeout: server neodpovedal do 55 s.':'❌ '+(e.message||e));}
  finally{$('start').disabled=false}
 }
 </script></main></body></html>
