@@ -50,7 +50,7 @@ jobs:
               const text=String(r?.content||'').toLowerCase();
               if(!text)return null;
               if(/did not match any documents|no results|no results found/.test(text))return false;
-              return /search results|results for|organic results|https?:\\/\\//i.test(text);
+              return /search results|results for|organic results|http/.test(text);
             }catch{return null}
           }
           ''')
