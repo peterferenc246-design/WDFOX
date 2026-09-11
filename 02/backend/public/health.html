@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FOX Live Translator — API Health</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px;background:#f5f7fa;color:#10233f}main{background:white;border-radius:18px;padding:24px;box-shadow:0 8px 30px #0001}h1{margin-top:0}.card{background:#f7f9fc;border-radius:12px;padding:16px;margin-top:14px}.ok{color:#087f3f}.bad{color:#b42318}.muted{color:#52657d}pre{white-space:pre-wrap;word-break:break-word}button{font:inherit;padding:10px 14px;border-radius:10px;border:1px solid #ccd4df;cursor:pointer}
+</style>
+</head>
+<body><main>
+<h1>FOX Live Translator — API Health</h1>
+<p class="muted">Kontrola produkčného API bez potreby manuálne otvárať JSON endpoint.</p>
+<div class="card"><strong id="status">⏳ Kontrolujem API…</strong><div id="detail" class="muted"></div></div>
+<div class="card"><strong>Odpoveď API</strong><pre id="response">—</pre></div>
+<button onclick="check()">🔄 Skontrolovať znova</button>
+<p><a href="/test.html">← Späť na hlasový test</a></p>
+<script>
+async function check(){
+ const status=document.getElementById('status'),detail=document.getElementById('detail'),response=document.getElementById('response');
+ status.className='';status.textContent='⏳ Kontrolujem API…';detail.textContent='';response.textContent='—';
+ const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),10000);
+ try{
+  const r=await fetch('/api/health?ts='+Date.now(),{cache:'no-store',signal:controller.signal});
+  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data=raw};
+  response.textContent=typeof data==='string'?data:JSON.stringify(data,null,2);
+  if(r.ok){status.className='ok';status.textContent='✅ API odpovedá — HTTP '+r.status;detail.textContent='Endpoint je dostupný.';}
+  else{status.className='bad';status.textContent='❌ API odpovedá s chybou — HTTP '+r.status;detail.textContent='Samotný server je dostupný, ale health check hlási problém.';}
+ }catch(e){status.className='bad';status.textContent=e.name==='AbortError'?'❌ API neodpovedalo do 10 s.':'❌ API sa nepodarilo načítať';detail.textContent=e.message||String(e);}
+ finally{clearTimeout(timer)}
+}
+check();
+</script></main></body></html>
