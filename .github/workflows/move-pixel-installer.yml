@@ -1,0 +1,43 @@
+name: Move Pixel tester into analyzer
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch launcher
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/components/FoxAnalyzerLauncher.astro')
+          s=p.read_text()
+          old='<div class="fox-analyzer-panel" hidden><iframe src={`/analyzer/?embed=1&lang=${locale}`} title="FOX Web Analyzer" loading="lazy"></iframe></div>\n <div class="fox-pixel-slot"><MetaPixelInstaller locale={locale} /></div>'
+          new='<div class="fox-analyzer-panel" hidden><iframe src={`/analyzer/?embed=1&lang=${locale}`} title="FOX Web Analyzer" loading="lazy"></iframe><div class="fox-pixel-slot" hidden><MetaPixelInstaller locale={locale} /></div></div>'
+          if old not in s: raise SystemExit('panel markup not found')
+          s=s.replace(old,new,1)
+          s=s.replace('.fox-pixel-slot{padding:0 clamp(20px,5vw,72px) 18px;background:#0f1012}.fox-pixel-slot :global(.pixel-installer){width:100%;margin:0;box-sizing:border-box}.fox-pixel-slot :global(.pixel-installer-copy){min-width:0}.fox-pixel-slot :global(.pixel-installer h2){font-size:clamp(18px,2vw,27px)}', '.fox-pixel-slot{padding:0 clamp(20px,5vw,72px) 18px;background:#0f1012}.fox-pixel-slot :global(.pixel-installer){width:100%;margin:0;box-sizing:border-box}.fox-pixel-slot :global(.pixel-installer-copy){min-width:0}.fox-pixel-slot :global(.pixel-installer h2){font-size:clamp(18px,2vw,27px)}')
+          needle='const waitForResult=(keys)=>{if(iframe._foxWaitTimer)clearInterval(iframe._foxWaitTimer);'
+          repl='const syncPixelInstaller=(keys)=>{const slot=launcher.querySelector(".fox-pixel-slot");if(slot)slot.hidden=!keys.includes("pixel")};\n const waitForResult=(keys)=>{syncPixelInstaller(keys);if(iframe._foxWaitTimer)clearInterval(iframe._foxWaitTimer);'
+          if needle not in s: raise SystemExit('waitForResult not found')
+          s=s.replace(needle,repl,1)
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/components/FoxAnalyzerLauncher.astro
+          git diff --cached --quiet || git commit -m "fix: show pixel tester inside analyzer"
+          git push
+      - name: Remove temporary workflow
+        if: always()
+        run: |
+          rm -f .github/workflows/move-pixel-installer.yml
+          git add .github/workflows/move-pixel-installer.yml
+          git diff --cached --quiet || git commit -m "chore: remove temporary pixel workflow"
+          git push
