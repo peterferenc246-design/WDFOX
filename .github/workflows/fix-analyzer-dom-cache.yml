@@ -1,0 +1,38 @@
+name: Fix analyzer DOM cache
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-analyzer-dom-cache.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch DOM parser cache
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          old="function doc(html){try{return new DOMParser().parseFromString(String(html||''),'text/html')}catch{return null}}"
+          new="let __foxDocCacheHtml='';let __foxDocCache=null;function doc(html){try{const h=String(html||'');if(__foxDocCache&&h===__foxDocCacheHtml)return __foxDocCache;const parsed=new DOMParser().parseFromString(h,'text/html');__foxDocCacheHtml=h;__foxDocCache=parsed;return parsed}catch{return null}}"
+          if old not in s:
+              raise SystemExit('DOM parser function not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet || git commit -m 'fix: cache analyzer DOM parsing'
+          git push
+      - name: Remove temporary workflow
+        if: always()
+        run: |
+          rm -f .github/workflows/fix-analyzer-dom-cache.yml
+          git add -A
+          git diff --cached --quiet || git commit -m 'chore: remove temporary analyzer DOM cache workflow'
+          git push
