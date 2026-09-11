@@ -1,5 +1,7 @@
 ---
 const supportedLocales = ["sk", "de", "en", "hr", "fr", "it", "pl", "es", "sv"];
+const siteUrl = "https://www.foxprof.club";
+const ogImage = `${siteUrl}/images/peter-ferenc.jpg`;
 ---
 <!doctype html>
 <html lang="sk">
@@ -7,7 +9,16 @@ const supportedLocales = ["sk", "de", "en", "hr", "fr", "it", "pl", "es", "sv"];
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <title>WebDesignFOX</title>
+    <title>FOX Technology Lab – modern websites that convert</title>
+    <meta name="description" content="FOX Technology Lab – modern websites, webdesign, technology and digital solutions." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FOX Technology Lab" />
+    <meta property="og:title" content="FOX Technology Lab" />
+    <meta property="og:description" content="Moderné weby, technológia a digitálne riešenia pre firmy." />
+    <meta property="og:url" content={`${siteUrl}/`} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="FOX Technology Lab" />
+    <meta property="og:locale" content="sk_SK" />
     <script is:inline define:vars={{ supportedLocales }}>
       (function () {
         var supported = supportedLocales;
@@ -30,6 +41,6 @@ const supportedLocales = ["sk", "de", "en", "hr", "fr", "it", "pl", "es", "sv"];
     </script>
   </head>
   <body>
-    <noscript><a href="/sk/">Pokračovať na WebDesignFOX</a></noscript>
+    <noscript><a href="/sk/">Pokračovať na FOX Technology Lab</a></noscript>
   </body>
 </html>
