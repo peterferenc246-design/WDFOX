@@ -8,7 +8,8 @@ const ogImage = `${siteUrl}/images/peter-ferenc.jpg`;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="googlebot" content="index, follow" />
     <title>FOX Technology Lab – modern websites that convert</title>
     <meta name="description" content="FOX Technology Lab – modern websites, webdesign, technology and digital solutions." />
     <meta property="og:type" content="website" />
@@ -19,6 +20,11 @@ const ogImage = `${siteUrl}/images/peter-ferenc.jpg`;
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:alt" content="FOX Technology Lab" />
     <meta property="og:locale" content="sk_SK" />
+    <link rel="canonical" href={`${siteUrl}/`} />
+    {supportedLocales.map((code) => (
+      <link rel="alternate" hreflang={code} href={`${siteUrl}/${code}/`} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}/sk/`} />
     <script is:inline define:vars={{ supportedLocales }}>
       (function () {
         var supported = supportedLocales;
