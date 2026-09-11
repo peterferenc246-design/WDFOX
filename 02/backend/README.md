@@ -1,34 +1,35 @@
-# FOX Live Translator API
+# 02 — FOX Live Translator — Backend
 
-Backend for **02 — FOX Live Translator**.
+Backend contract and implementation for the mobile FOX Live Translator.
 
-## Live flow
+## Production endpoint
 
-`Android microphone → POST /api/translate-voice → STT → AI translation → TTS → Android playback`
+Vercel project: `wdfox-live-translat-api`
 
-The MVP supports:
+Vercel Root Directory: `02/backend`
 
-- Slovak (`sk`) ↔ German (`de`)
-- multipart audio upload
-- speech-to-text with AI Gateway
-- faithful text translation
-- optional text-to-speech audio returned as base64 MP3
-- API keys kept server-side
-
-The current implementation uses Vercel AI Gateway through the AI SDK. AI Gateway supports transcription and speech generation in addition to text generation. citeturn0search9turn0search0
-
-## API
+The production API endpoint is:
 
 `POST /api/translate-voice`
 
-`multipart/form-data`:
+The final public hostname is assigned by Vercel after the first successful production deployment.
 
-- `audio` — recorded audio file
-- `sourceLanguage` — `sk` or `de`
-- `targetLanguage` — `sk` or `de`
-- `speakResult` — `true` or `false`
+## Flow
 
-Response:
+`Android → multipart audio → STT → AI translation → optional TTS → JSON response`
+
+## Request
+
+`POST /api/translate-voice`
+
+Content-Type: `multipart/form-data`
+
+- `audio`: recorded audio file
+- `sourceLanguage`: `sk` or `de`
+- `targetLanguage`: `sk` or `de`
+- `speakResult`: `true` or `false`
+
+## Response
 
 ```json
 {
@@ -41,20 +42,21 @@ Response:
 }
 ```
 
-## Environment
+## Environment variables
 
-Required:
+Configure these in Vercel → Project → Environment Variables:
 
-- `AI_GATEWAY_API_KEY`
+- `AI_GATEWAY_API_KEY` — server-side AI Gateway credential
+- `TRANSLATION_MODEL` — optional
+- `TRANSCRIPTION_MODEL` — optional
+- `SPEECH_MODEL` — optional
 
-Optional:
+Never put the AI Gateway key in the Android application.
 
-- `TRANSLATION_MODEL` — default `openai/gpt-4o-mini`
-- `TRANSCRIPTION_MODEL` — default `openai/gpt-4o-mini-transcribe`
-- `SPEECH_MODEL` — default `openai/tts-1`
+## Deployment
 
-## Deploy
+Pushes to the connected `main` branch trigger Vercel deployment for this project. The Vercel project must use `Other` as Framework Preset and `02/backend` as Root Directory.
 
-Deploy `02/backend` as the Vercel project root. Add `AI_GATEWAY_API_KEY` as a server-side environment variable. Never put the key into the Android application.
+## Security
 
-After deployment, put the deployed `/api/translate-voice` URL into `TRANSLATOR_API_URL` in `02/app/build.gradle.kts`, then build the Android app.
+API credentials stay server-side. The mobile app only calls the public API endpoint.
