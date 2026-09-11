@@ -1,0 +1,45 @@
+name: Patch analyzer neutral parser
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[analyzer-patch]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch analyzer
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("const target=new URL(url,location.href),same=target.origin===location.origin||['foxprof.club','www.foxprof.club'].includes(target.hostname.toLowerCase());", "const target=new URL(url,location.href),same=target.origin===location.origin;")
+          s=s.replace("if(head){h['X-Respond-With']='html';h['X-Engine']='curl';h['X-Respond-Timing']='html'}", "if(head){h['X-Respond-With']='html';h['X-Engine']='browser'}")
+          meta_start=s.index('function meta(html,name){')
+          meta_end=s.index('\nfunction pixelAudit', meta_start)
+          s=s[:meta_start]+'''function doc(html){try{return new DOMParser().parseFromString(String(html||''),'text/html')}catch{return null}}\nfunction meta(html,name){const d=doc(html);if(!d)return '';const n=String(name).toLowerCase();const el=[...d.querySelectorAll('meta')].find(x=>String(x.getAttribute('name')||x.getAttribute('property')||'').toLowerCase()===n);return el?.getAttribute('content')||''}'''+s[meta_end:]
+          start=s.index('function foxCanonical(')
+          end=s.index("$('form').addEventListener", start)
+          funcs='''function foxCanonical(html,target){try{const d=doc(html),el=d?.querySelector('link[rel~="canonical"]');if(!el)return false;const href=el.getAttribute('href');if(!href)return false;return new URL(href,target).href.replace(/\\/$/,'')===new URL(target).href.replace(/\\/$/,'')}catch{return false}}\nfunction foxViewport(html){const v=meta(html,'viewport').toLowerCase();return /(?:^|,)\\s*width\\s*=\\s*device-width\\s*(?:,|$)/.test(v)&&/(?:^|,)\\s*initial-scale\\s*=\\s*1(?:\\.0+)?\\s*(?:,|$)/.test(v)}\nfunction foxSchema(html){try{const d=doc(html);return !![...(d?.querySelectorAll('script[type="application/ld+json"]')||[])].find(s=>{try{const x=JSON.parse(s.textContent.trim().replace(/^<!--[\\s\\S]*?-->$/,''));const a=Array.isArray(x)?x:(Array.isArray(x?.['@graph'])?x['@graph']:[x]);return a.some(v=>v&&((String(v['@context']||'').toLowerCase().includes('schema.org'))||v['@type']))}catch{return false}})}catch{return false}}\nfunction foxHreflang(html){try{const d=doc(html);return !!d?.querySelector('link[rel~="alternate"][hreflang]')}catch{return false}}\nfunction foxFavicon(html){try{const d=doc(html);return !!d?.querySelector('link[rel~="icon"],link[rel~="shortcut"]')}catch{return false}}\nfunction foxNoindex(html){const v=[meta(html,'robots'),meta(html,'googlebot')].join(',').toLowerCase();return !/\\bnoindex\\b/.test(v)}\nfunction foxCrawlability(url,html,head,robots){try{const u=new URL(url),h=String(html||''),hd=String(head||''),rb=String(robots||'');const publicUrl=/^https?:\\/\\//i.test(u.href);const sourceOk=/<html\\b/i.test(hd)&&/<body\\b/i.test(hd);const noindex=foxNoindex(hd);let blocked=false;for(const line of rb.split(/\\r?\\n/)){const x=line.replace(/#.*/,'').trim();if(/^Disallow:\\s*\\/$/i.test(x))blocked=true}return publicUrl&&sourceOk&&noindex&&!blocked}catch{return false}}\n'''
+          s=s[:start]+funcs+s[end:]
+          s=re.sub(r'\\nfunction localRedirectTarget\\(url,html\\)\\{[\\s\\S]*?\\n\\}\\n','\\n',s,count=1)
+          s=s.replace("let head0=await jina(target,true).catch(()=>({content:''})),redirected=localRedirectTarget(target,String(head0.content||''));if(redirected){target=redirected;head0=await jina(target,true).catch(()=>({content:''}))}", "let head0=await jina(target,true).catch(()=>({content:''}));if(head0.url){try{target=new URL(head0.url).href}catch{}}")
+          s=s.replace("crawl=foxCrawlability(target,html,head0,robots.content)", "crawl=foxCrawlability(target,html,head0.content,robots.content)")
+          s=s.replace("${card(t.cards.hreflang,/hreflang/i.test(html))}${card(t.cards.favicon,/rel=[\\\"'][^\\\"']*icon/i.test(html))}${card(t.cards.viewport,viewport)}${card(t.cards.noindex,!/noindex/i.test(html),/noindex/i.test(html)?t.noindex:t.notnoindex)}", "${card(t.cards.hreflang,foxHreflang(html),foxHreflang(html)?t.yes:'optional / not configured')}${card(t.cards.favicon,foxFavicon(html))}${card(t.cards.viewport,viewport)}${card(t.cards.noindex,foxNoindex(html),foxNoindex(html)?t.notnoindex:t.noindex)}")
+          p.write_text(s,encoding='utf-8')
+      - name: Validate build
+        run: |
+          npm install --global pnpm@10.4.1
+          pnpm install --frozen-lockfile
+          pnpm run build
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet || git commit -m 'fix: neutralize analyzer HTML parsing [analyzer-patch]'
+          git push
