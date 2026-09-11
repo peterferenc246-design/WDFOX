@@ -3,10 +3,10 @@ const locale = Astro.props.locale ?? "de";
 const labels = {
   de:{kicker:"META PIXEL",title:"Meta Pixel Tester installieren",text:"Prüfe Meta Pixel direkt im Browser. Die offizielle Meta-Erweiterung heißt heute Meta Ads Data Advisor und war früher Meta Pixel Helper.",button:"Zu Chrome – installieren →",note:"Offiziell von Meta · kostenlos · Chrome"},
   en:{kicker:"META PIXEL",title:"Install the Meta Pixel tester",text:"Check Meta Pixel directly in your browser. Meta’s official extension is now called Meta Ads Data Advisor, formerly Meta Pixel Helper.",button:"Open Chrome – install →",note:"Official Meta extension · free · Chrome"},
-  sk:{kicker:"META PIXEL",title:"Nainštalovať Meta Pixel tester",text:"Skontroluj Meta Pixel priamo v prehliadači. Oficiálne rozšírenie Meta sa dnes volá Meta Ads Data Advisor, predtým Meta Pixel Helper.",button:"Otvoriť Chrome – nainštalovať →",note:"Oficiálne rozšírenie Meta · zdarma · Chrome"},
+  sk:{kicker:"META PIXEL",title:"Nainštalovať Meta Pixel tester",text:"Skontroluj Meta Pixel priamo v prehliadači. Oficiálne rozšírenie Meta sa dnes volá Meta Ads Data Advisor, predtým Meta Pixel Helper.",button:"Otvoriť Chrome – nainštalovať →",note:"Oficiálne Meta rozšírenie · zdarma · Chrome"},
   fr:{kicker:"META PIXEL",title:"Installer le testeur Meta Pixel",text:"Vérifiez Meta Pixel directement dans votre navigateur. L’extension officielle de Meta s’appelle désormais Meta Ads Data Advisor, anciennement Meta Pixel Helper.",button:"Ouvrir Chrome – installer →",note:"Extension officielle Meta · gratuite · Chrome"},
   hr:{kicker:"META PIXEL",title:"Instaliraj Meta Pixel tester",text:"Provjeri Meta Pixel izravno u pregledniku. Službeno Meta proširenje sada se zove Meta Ads Data Advisor, prije Meta Pixel Helper.",button:"Otvori Chrome – instaliraj →",note:"Službeno Meta proširenje · besplatno · Chrome"},
-  pl:{kicker:"META PIXEL",title:"Zainstaluj tester Meta Pixel",text:"Sprawdź Meta Pixel bezpośrednio w przeglądarce. Oficjalne rozszerzenie Meta nazywa się teraz Meta Ads Data Advisor, wcześniej Meta Pixel Helper.",button:"Otwórz Chrome – zainstaluj →",note:"Oficjalne rozszerzenie Meta · bezpłatne · Chrome"},
+  pl:{kicker:"META PIXEL",title:"Zainstaluj tester Meta Pixel",text:"Sprawdź Meta Pixel bezpośrednio w przeglądarce. Oficjalne rozszerzenie Meta nazywa się teraz Meta Ads Data Advisor, wcześniej Meta Pixel Helper.",button:"Otwórz Chrome – zainstaluj →",note:"Oficjalne Meta rozszerzenie · bezpłatne · Chrome"},
   it:{kicker:"META PIXEL",title:"Installa il tester Meta Pixel",text:"Controlla Meta Pixel direttamente nel browser. L’estensione ufficiale di Meta ora si chiama Meta Ads Data Advisor, in precedenza Meta Pixel Helper.",button:"Apri Chrome – installa →",note:"Estensione ufficiale Meta · gratuita · Chrome"},
   es:{kicker:"META PIXEL",title:"Instala el tester de Meta Pixel",text:"Comprueba Meta Pixel directamente en el navegador. La extensión oficial de Meta ahora se llama Meta Ads Data Advisor, antes Meta Pixel Helper.",button:"Abrir Chrome – instalar →",note:"Extensión oficial de Meta · gratuita · Chrome"},
   sv:{kicker:"META PIXEL",title:"Installera Meta Pixel-testaren",text:"Kontrollera Meta Pixel direkt i webbläsaren. Metas officiella tillägg heter nu Meta Ads Data Advisor, tidigare Meta Pixel Helper.",button:"Öppna Chrome – installera →",note:"Officiellt Meta-tillägg · gratis · Chrome"}
@@ -14,7 +14,7 @@ const labels = {
 const t = labels[locale as keyof typeof labels] ?? labels.de;
 const chromeUrl = "https://chromewebstore.google.com/detail/meta-ads-data-advisor/fdgfkebogiimcoedlicjlajpkdmockpc";
 ---
-<section class="pixel-installer" aria-labelledby="pixel-installer-title">
+<section class="pixel-installer" id="meta-pixel-installer" aria-labelledby="pixel-installer-title">
   <div class="pixel-installer-copy">
     <span class="pixel-installer-kicker">✦ {t.kicker}</span>
     <h2 id="pixel-installer-title">{t.title}</h2>
@@ -26,3 +26,8 @@ const chromeUrl = "https://chromewebstore.google.com/detail/meta-ads-data-adviso
 <style>
 .pixel-installer{width:min(1180px,calc(100% - 40px));margin:26px auto 0;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#0f1012;color:#fff;border:1px solid #2d3138;border-left:5px solid #f36a0a;border-radius:16px;box-sizing:border-box}.pixel-installer-copy{display:flex;flex-direction:column;gap:6px}.pixel-installer-kicker{font-size:11px;font-weight:900;letter-spacing:.13em;color:#ff7a22}.pixel-installer h2{margin:0;font-size:clamp(19px,2vw,27px);line-height:1.15}.pixel-installer p{margin:0;color:#aeb1b7;font-size:13px;line-height:1.55;max-width:760px}.pixel-installer small{color:#737983;font-size:11px}.pixel-installer-button{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;background:#f36a0a;color:#fff;text-decoration:none;font-weight:900;font-size:13px;padding:14px 18px;border-radius:11px;box-shadow:0 10px 26px rgba(243,106,10,.18)}.pixel-installer-button:hover{filter:brightness(1.08)}@media(max-width:700px){.pixel-installer{width:calc(100% - 24px);flex-direction:column;align-items:stretch}.pixel-installer-button{width:100%;box-sizing:border-box}}
 </style>
+<script>
+const pixelInstaller = document.getElementById("meta-pixel-installer");
+const foxLauncher = document.getElementById("fox-analyzer-launcher");
+if (pixelInstaller && foxLauncher) foxLauncher.insertAdjacentElement("afterend", pixelInstaller);
+</script>
