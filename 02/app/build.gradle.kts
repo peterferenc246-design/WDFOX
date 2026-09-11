@@ -14,7 +14,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
-        buildConfigField("String", "TRANSLATOR_API_URL", "\"https://YOUR-VERCEL-DOMAIN.vercel.app/api/translate-voice\"")
+        buildConfigField("String", "TRANSLATOR_API_URL", "\"https://wdfox-live-translat-jz8mjkdcf-peters-projects-db101134.vercel.app/api/translate-voice\"")
     }
 }
 
