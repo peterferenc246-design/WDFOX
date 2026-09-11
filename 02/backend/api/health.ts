@@ -3,13 +3,20 @@ export default function handler(request: Request): Response {
     return Response.json({ error: 'Method not allowed' }, { status: 405 });
   }
 
+  const aiGatewayConfigured = Boolean(process.env.AI_GATEWAY_API_KEY);
+  const healthy = aiGatewayConfigured;
+
   return Response.json(
     {
-      status: 'ok',
+      status: healthy ? 'ok' : 'error',
       service: 'FOX Live Translator API',
-      version: '0.1.0',
+      version: '0.1.1',
+      aiGatewayConfigured,
       timestamp: new Date().toISOString(),
     },
-    { headers: { 'Cache-Control': 'no-store' } },
+    {
+      status: healthy ? 200 : 503,
+      headers: { 'Cache-Control': 'no-store' },
+    },
   );
 }
