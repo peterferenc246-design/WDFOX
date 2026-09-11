@@ -1,0 +1,82 @@
+name: Analyzer runtime fix 3
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[analyzer-fix]') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+          run_install: false
+
+      - name: Patch analyzer
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('src/pages/analyzer.astro')
+          s = p.read_text(encoding='utf-8')
+          marker = "$('form').addEventListener('submit',async e=>"
+          inserts = []
+          if 'function pagespeed(' not in s:
+              inserts.append(r'''async function pagespeed(url){
+            try{
+              const q=new URLSearchParams();
+              q.set('url',url);q.set('strategy','mobile');
+              ['performance','accessibility','best-practices','seo'].forEach(c=>q.append('category',c));
+              const r=await fetch('https://www.googleapis.com/pagespeedonline/v5/runPagespeed?'+q.toString(),{cache:'no-store'});
+              if(!r.ok)return null;
+              return await r.json();
+            }catch{return null}
+          }
+          ''')
+          if 'function googleIndexStatus(' not in s:
+              inserts.append(r'''async function googleIndexStatus(url){
+            try{
+              const u=new URL(url);
+              const q='https://www.google.com/search?q='+encodeURIComponent('site:'+u.hostname+(u.pathname&&u.pathname!=='/'?' '+u.pathname:''));
+              const r=await jina(q);
+              const text=String(r?.content||'').toLowerCase();
+              if(!text)return null;
+              if(/did not match any documents|no results|no results found/.test(text))return false;
+              return /search results|results for|organic results|https?:\\/\\//i.test(text);
+            }catch{return null}
+          }
+          ''')
+          if inserts:
+              if marker not in s:
+                  raise SystemExit('Analyzer form marker not found')
+              s=s.replace(marker, ''.join(inserts)+marker, 1)
+          s=s.replace("h['X-Engine']='browser'", "")
+          p.write_text(s,encoding='utf-8')
+
+      - name: Verify build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Commit source fix and remove temporary workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/analyzer-runtime-fix3.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/analyzer.astro .github/workflows/analyzer-runtime-fix3.yml
+          git commit -m "fix: restore missing analyzer runtime functions [analyzer-fix]"
+          git push
