@@ -4,7 +4,7 @@ on:
     branches: [main]
 jobs:
   fix:
-    if: "${{ github.event.head_commit.message != 'fix: harden analyzer HTML source parsing' }}"
+    if: "${{ github.event.head_commit.message != 'fix: simplify analyzer patch script' }}"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,12 +20,13 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
           p=Path('src/pages/analyzer.astro')
           s=p.read_text(encoding='utf-8')
           s=s.replace("const target=new URL(url,location.href),same=target.origin===location.origin;", "const target=new URL(url,location.href),same=target.hostname.toLowerCase().replace(/^www\\./,'')===location.hostname.toLowerCase().replace(/^www\\./,'');", 1)
           s=s.replace("if(head){h['X-Respond-With']='html';}", "if(head){h['X-Respond-With']='html';h['X-Engine']='browser';h['X-Respond-Timing']='html';}", 1)
-          s=re.sub(r"function foxViewport\(html\)\{.*?\}\nfunction foxSchema", "function foxViewport(html){const v=meta(html,'viewport').toLowerCase();const parts=v.split(',').map(x=>x.trim().replace(/\\s+/g,' '));return parts.some(x=>/^width\\s*=\\s*device-width$/.test(x))&&parts.some(x=>/^initial-scale\\s*=\\s*1(?:\\.0+)?$/.test(x))}\nfunction foxSchema", s, count=1, flags=re.S)
+          a=s.index("function foxViewport")
+          b=s.index("function foxSchema",a)
+          s=s[:a]+"function foxViewport(html){const v=meta(html,'viewport').toLowerCase();const parts=v.split(',').map(x=>x.trim().replace(/\\s+/g,' '));return parts.some(x=>/^width\\s*=\\s*device-width$/.test(x))&&parts.some(x=>/^initial-scale\\s*=\\s*1(?:\\.0+)?$/.test(x))}\n"+s[b:]
           s=s.replace("${card(t.cards.hreflang,/hreflang/i.test(html))}", "${card(t.cards.hreflang,foxHreflang(html))}", 1)
           s=s.replace("${card(t.cards.favicon,/rel=[\"'][^\"']*icon/i.test(html))}", "${card(t.cards.favicon,foxFavicon(html))}", 1)
           s=s.replace("${card(t.cards.noindex,!/noindex/i.test(html),/noindex/i.test(html)?t.noindex:t.notnoindex)}", "${card(t.cards.noindex,foxNoindex(html),foxNoindex(html)?t.notnoindex:t.noindex)}", 1)
@@ -37,9 +38,9 @@ jobs:
       - name: Commit and remove workflow
         shell: bash
         run: |
-          rm -f .github/workflows/analyzer-audit-fix.yml .analyzer-audit-trigger
+          rm -f .github/workflows/analyzer-audit-fix.yml .analyzer-audit-trigger .analyzer-audit-trigger-2
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/pages/analyzer.astro .github/workflows/analyzer-audit-fix.yml .analyzer-audit-trigger
-          git commit -m "fix: harden analyzer HTML source parsing"
+          git add src/pages/analyzer.astro .github/workflows/analyzer-audit-fix.yml .analyzer-audit-trigger .analyzer-audit-trigger-2
+          git commit -m "fix: simplify analyzer patch script"
           git push
