@@ -7,6 +7,15 @@ function json(body: unknown, status = 200): Response {
   return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
+function uint8ArrayToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 export default async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') {
     return json({ error: 'Method not allowed' }, 405);
@@ -57,7 +66,7 @@ export default async function handler(request: Request): Promise<Response> {
         voice: targetLanguage === 'de' ? 'nova' : 'alloy',
         outputFormat: 'mp3',
       });
-      audioBase64 = Buffer.from(speech.audio.uint8Array).toString('base64');
+      audioBase64 = uint8ArrayToBase64(speech.audio.uint8Array);
       audioMimeType = 'audio/mpeg';
     }
 
