@@ -10,16 +10,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Restore DOM parser helpers
+      - name: Restore analyzer helpers
         shell: python
         run: |
           from pathlib import Path
           p=Path('src/pages/analyzer.astro')
           s=p.read_text(encoding='utf-8')
           marker='function foxCanonical(html,target){'
-          helpers="""function doc(html){try{return new DOMParser().parseFromString(String(html||''),'text/html')}catch{return null}}\nfunction meta(html,name){const d=doc(html);if(!d)return '';const n=String(name).toLowerCase();const el=[...d.querySelectorAll('meta')].find(x=>String(x.getAttribute('name')||x.getAttribute('property')||'').toLowerCase()===n);return el?.getAttribute('content')||''}\n"""
+          helpers="""function doc(html){try{return new DOMParser().parseFromString(String(html||''),'text/html')}catch{return null}}
+          function meta(html,name){const d=doc(html);if(!d)return '';const n=String(name).toLowerCase();const el=[...d.querySelectorAll('meta')].find(x=>String(x.getAttribute('name')||x.getAttribute('property')||'').toLowerCase()===n);return el?.getAttribute('content')||''}
+          """
           if 'function doc(html)' not in s:
             s=s.replace(marker,helpers+marker,1)
+          pixel_marker='async function jina(url,head=false){'
+          pixel="""function pixelAudit(html){
+          const h=String(html||'');
+          const src=/https?:\\/\\/[^\\"']*connect\\.facebook\\.net[^\\"']*\\/en_US\\/fbevents\\.js/i.test(h)||/fbevents\\.js/i.test(h);
+          const fbq=/\\bfbq\\s*\\(/i.test(h);
+          const init=/\\bfbq\\s*\\(\\s*['\\\"]init['\\\"]\\s*,/i.test(h);
+          const pageview=/\\bfbq\\s*\\(\\s*['\\\"]track['\\\"]\\s*,\\s*['\\\"]PageView['\\\"]\\s*\\)/i.test(h)||/PageView/i.test(h)&&/fbq\\s*\\(/i.test(h);
+          const consent=/consent|cookie|cmp|gdpr|privacy/i.test(h);
+          const ids=[...h.matchAll(/fbq\\s*\\(\\s*['\\\"]init['\\\"]\\s*,\\s*['\\\"](\\d{5,})['\\\"]/gi)].map(m=>m[1]);
+          return{ok:src&&fbq&&init&&pageview,src,fbq,init,pageview,consent,ids:[...new Set(ids)]}
+          }
+          """
+          if 'function pixelAudit(html)' not in s:
+            s=s.replace(pixel_marker,pixel+pixel_marker,1)
           p.write_text(s,encoding='utf-8')
       - name: Validate build
         run: |
@@ -31,5 +47,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/pages/analyzer.astro
-          git diff --cached --quiet || git commit -m 'fix: restore analyzer DOM helpers [runtime-fix]'
+          git diff --cached --quiet || git commit -m 'fix: restore analyzer Meta Pixel audit [runtime-fix]'
           git push
