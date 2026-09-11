@@ -1,0 +1,40 @@
+name: Add Google index test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-google-index-test.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch analyzer
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/pages/analyzer.astro')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace("const t=T[L]||T.de,$=id=>document.getElementById(id)", "const t=T[L]||T.de,$=id=>document.getElementById(id),indexLabel={de:'Google-Indexierung',en:'Google indexing',sk:'Google indexácia',fr:'Indexation Google',hr:'Google indeksacija',pl:'Indeksowanie Google',it:'Indicizzazione Google',es:'Indexación de Google',sv:'Google-indexering'}[L]||'Google indexing'")
+          s = s.replace("async function pagespeed(url)", "async function googleIndexStatus(url){try{const u=new URL(url),q='https://www.google.com/search?q='+encodeURIComponent('site:'+u.hostname);const r=await jina(q);const c=String(r.content||'').toLowerCase();if(/unusual traffic|captcha|detected unusual|robot check/.test(c))return null;return c.includes(u.hostname.toLowerCase())}catch{return null}}\nasync function pagespeed(url)")
+          s = s.replace("const [page,head,robots,sitemap,ps]=await Promise.all([jina(target),Promise.resolve(head0),jina(robotsUrl).catch(()=>({content:''})),jina(sitemapUrl).catch(()=>({content:''})),pagespeed(target).catch(()=>null)]);", "const [page,head,robots,sitemap,ps,indexed]=await Promise.all([jina(target),Promise.resolve(head0),jina(robotsUrl).catch(()=>({content:''})),jina(sitemapUrl).catch(()=>({content:''})),pagespeed(target).catch(()=>null),googleIndexStatus(target)]);")
+          s = s.replace("out+=`<div class=\"section\"><h2>${t.technical}</h2><div class=\"grid\">${card(t.cards.canonical,canon)}", "out+=`<div class=\"section\"><h2>${t.technical}</h2><div class=\"grid\">${card(indexLabel,indexed,indexed===null?'Google Search overenie nedostupné':indexed?'site: výsledok nájdený':'site: výsledok nenájdený')} ${card(t.cards.canonical,canon)}")
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet || git commit -m 'feat: add Google indexation test to SEO'
+          git push
+      - name: Remove temporary workflow
+        run: |
+          rm -f .github/workflows/patch-google-index-test.yml
+          git add .github/workflows/patch-google-index-test.yml
+          git commit -m 'chore: remove temporary index test patch workflow'
+          git push
