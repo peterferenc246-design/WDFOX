@@ -16,6 +16,16 @@ const T={de:{headline:'Ist deine Website bereit<br><em>für Google und Kunden?</
 const t=T[L]||T.de,$=id=>document.getElementById(id),indexLabel={de:'Google-Indexierung',en:'Google indexing',sk:'Google indexácia',fr:'Indexation Google',hr:'Google indeksacija',pl:'Indeksowanie Google',it:'Indicizzazione Google',es:'Indexación de Google',sv:'Google-indexering'}[L]||'Google indexing',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 $('headline').innerHTML=t.headline;$('intro').textContent=t.intro;$('urlLabel').textContent=t.url;$('url').placeholder=t.placeholder;$('submit').textContent=t.start;$('help').textContent=t.help;$('foot').textContent=t.foot;$('chips').innerHTML=['SEO','Google','Meta / Facebook','Meta Pixel','X / Twitter','Performance','UX','Security','Conversion'].map(x=>`<span>✓ ${x}</span>`).join('');
 const card=(n,v,d)=>`<div class="card"><strong class="${v===true?'ok':v===false?'bad':'warn'}">${v===true?'✓':v===false?'✕':'▲'} ${esc(n)}</strong><p>${v===true?t.done:v===false?t.problem:t.unavailable}${d?' · '+esc(d):''}</p></div>`,metric=(n,v,d)=>`<div class="metric"><b>${esc(v==null?'—':v)}</b><span>${esc(n)}</span><small>${esc(d||'')}</small></div>`;
+function pixelAudit(html){
+const h=String(html||'');
+const src=/https?:\/\/[^\"']*connect\.facebook\.net[^\"']*\/en_US\/fbevents\.js/i.test(h)||/fbevents\.js/i.test(h);
+const fbq=/\bfbq\s*\(/i.test(h);
+const init=/\bfbq\s*\(\s*['\"]init['\"]\s*,/i.test(h);
+const pageview=/\bfbq\s*\(\s*['\"]track['\"]\s*,\s*['\"]PageView['\"]\s*\)/i.test(h)||/PageView/i.test(h)&&/fbq\s*\(/i.test(h);
+const consent=/consent|cookie|cmp|gdpr|privacy/i.test(h);
+const ids=[...h.matchAll(/fbq\s*\(\s*['\"]init['\"]\s*,\s*['\"](\d{5,})['\"]/gi)].map(m=>m[1]);
+return{ok:src&&fbq&&init&&pageview,src,fbq,init,pageview,consent,ids:[...new Set(ids)]}
+}
 async function jina(url,head=false){const target=new URL(url,location.href),same=target.origin===location.origin;if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}const h={Accept:'application/json','X-No-Cache':'true'};if(head){h['X-Respond-With']='html';h['X-Engine']='browser'}const r=await fetch('https://r.jina.ai/'+url,{headers:h});if(!r.ok)throw Error('jina');const raw=await r.text();try{const j=JSON.parse(raw),d=j?.data||j;return{...d,content:String(d?.content||'')}}catch{return{content:raw}}}
 function doc(html){try{return new DOMParser().parseFromString(String(html||''),'text/html')}catch{return null}}
 function meta(html,name){const d=doc(html);if(!d)return '';const n=String(name).toLowerCase();const el=[...d.querySelectorAll('meta')].find(x=>String(x.getAttribute('name')||x.getAttribute('property')||'').toLowerCase()===n);return el?.getAttribute('content')||''}
