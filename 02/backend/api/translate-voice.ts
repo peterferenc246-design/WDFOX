@@ -1,5 +1,7 @@
+import { experimental_generateSpeech as generateSpeech, experimental_transcribe as transcribe, generateText } from 'ai';
+import { gateway } from '@ai-sdk/gateway';
+
 const LANGUAGES = new Set(['sk', 'de']);
-const AI_GATEWAY_URL = 'https://ai-gateway.vercel.sh';
 
 function json(body: unknown, status = 200): Response {
   return Response.json(body, {
@@ -17,31 +19,12 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-async function gatewayFetch(path: string, model: string, body: unknown, timeoutMs: number): Promise<any> {
-  const apiKey = process.env.AI_GATEWAY_API_KEY;
-  if (!apiKey) throw new Error('AI_GATEWAY_API_KEY is not configured in Vercel');
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(`${AI_GATEWAY_URL}${path}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'ai-model-id': model, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-    const text = await response.text();
-    let result: any;
-    try { result = text ? JSON.parse(text) : {}; } catch { result = { raw: text }; }
-    if (!response.ok) {
-      const detail = result?.error?.message || result?.error || result?.message || `HTTP ${response.status}`;
-      throw new Error(`AI Gateway ${response.status}: ${String(detail)}`);
-    }
-    return result;
-  } finally { clearTimeout(timeout); }
-}
-
 export async function POST(request: Request): Promise<Response> {
   try {
+    if (!process.env.AI_GATEWAY_API_KEY) {
+      return json({ error: 'AI_GATEWAY_API_KEY is not configured in Vercel' }, 503);
+    }
+
     const form = await request.formData();
     const audio = form.get('audio');
     const sourceLanguage = String(form.get('sourceLanguage') ?? '');
@@ -52,54 +35,80 @@ export async function POST(request: Request): Promise<Response> {
     if (!LANGUAGES.has(sourceLanguage) || !LANGUAGES.has(targetLanguage)) {
       return json({ error: 'sourceLanguage and targetLanguage must be sk or de' }, 400);
     }
-    if (sourceLanguage === targetLanguage) return json({ error: 'Source and target languages must be different' }, 400);
+    if (sourceLanguage === targetLanguage) {
+      return json({ error: 'Source and target languages must be different' }, 400);
+    }
 
     const audioBytes = new Uint8Array(await audio.arrayBuffer());
     if (!audioBytes.length) return json({ error: 'Audio file is empty' }, 400);
 
-    const transcription = await gatewayFetch('/v4/ai/transcription-model', process.env.TRANSCRIPTION_MODEL || 'openai/whisper-1', {
-      audio: uint8ArrayToBase64(audioBytes),
+    const transcription = await transcribe({
+      model: gateway.transcriptionModel(
+        process.env.TRANSCRIPTION_MODEL || 'openai/whisper-1',
+      ),
+      audio: audioBytes,
       mediaType: audio.type || 'audio/webm',
-    }, 18000);
-    const transcript = String(transcription?.text || '').trim();
+      maxRetries: 0,
+      abortSignal: AbortSignal.timeout(18000),
+    });
+
+    const transcript = String(transcription.text || '').trim();
     if (!transcript) return json({ error: 'No speech detected' }, 422);
 
     const sourceName = sourceLanguage === 'sk' ? 'Slovak' : 'German';
     const targetName = targetLanguage === 'sk' ? 'Slovak' : 'German';
-    const translation = await gatewayFetch('/v1/chat/completions', process.env.TRANSLATION_MODEL || 'openai/gpt-4o-mini', {
-      messages: [
-        { role: 'system', content: `You are a professional live interpreter. Translate faithfully from ${sourceName} to ${targetName}. Preserve meaning, tone and intent. Return only the translated text. Do not explain anything.` },
-        { role: 'user', content: transcript },
-      ],
+
+    const translation = await generateText({
+      model: gateway.languageModel(
+        process.env.TRANSLATION_MODEL || 'openai/gpt-4o-mini',
+      ),
+      system: `You are a professional live interpreter. Translate faithfully from ${sourceName} to ${targetName}. Preserve meaning, tone and intent. Return only the translated text. Do not explain anything.`,
+      prompt: transcript,
       temperature: 0.1,
-      max_tokens: 1000,
-      stream: false,
-    }, 12000);
-    const translatedText = String(translation?.choices?.[0]?.message?.content || '').trim();
+      maxOutputTokens: 1000,
+      maxRetries: 0,
+      abortSignal: AbortSignal.timeout(12000),
+    });
+
+    const translatedText = translation.text.trim();
     if (!translatedText) throw new Error('AI Gateway returned an empty translation');
 
     let audioBase64: string | undefined;
-    let audioMimeType: 'audio/mpeg' | undefined;
+    let audioMimeType: string | undefined;
     let speechWarning: string | undefined;
+
     if (speakResult) {
       try {
-        const speech = await gatewayFetch('/v4/ai/speech-model', process.env.SPEECH_MODEL || 'openai/tts-1', {
+        const speech = await generateSpeech({
+          model: gateway.speechModel(
+            process.env.SPEECH_MODEL || 'openai/tts-1',
+          ),
           text: translatedText,
           voice: targetLanguage === 'de' ? 'nova' : 'alloy',
           outputFormat: 'mp3',
-        }, 8000);
-        if (typeof speech?.audio !== 'string' || !speech.audio) throw new Error('AI Gateway returned no speech audio');
-        audioBase64 = speech.audio;
-        audioMimeType = 'audio/mpeg';
+          maxRetries: 0,
+          abortSignal: AbortSignal.timeout(8000),
+        });
+
+        audioBase64 = uint8ArrayToBase64(speech.audio.uint8Array);
+        audioMimeType = speech.audio.mimeType || 'audio/mpeg';
       } catch (error) {
         speechWarning = error instanceof Error ? error.message : 'TTS failed';
         console.error('translate-voice TTS failed', error);
       }
     }
-    return json({ transcript, translatedText, sourceLanguage, targetLanguage, ...(audioBase64 ? { audioBase64, audioMimeType } : {}), ...(speechWarning ? { speechWarning } : {}) });
+
+    return json({
+      transcript,
+      translatedText,
+      sourceLanguage,
+      targetLanguage,
+      ...(audioBase64 ? { audioBase64, audioMimeType } : {}),
+      ...(speechWarning ? { speechWarning } : {}),
+    });
   } catch (error) {
     console.error('translate-voice failed', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return json({ error: `Translation service failed: ${message}` }, message.includes('AI_GATEWAY_API_KEY') ? 503 : 500);
+    return json({ error: `Translation service failed: ${message}` }, 500);
   }
 }
