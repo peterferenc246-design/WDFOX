@@ -1,0 +1,58 @@
+name: Fix Google crawlability test 2
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-google-crawlability-2.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch crawlability logic
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          # Add a genuine FOX crawlability check independent of Lighthouse.
+          marker='async function googleIndexStatus(url){'
+          fn='''function foxCrawlability(url,html,head,robots){\n  try{\n    const u=new URL(url), h=String(html||''), hd=String(head||''), rb=String(robots||'');\n    const publicUrl=/^https?:\\/\\//i.test(u.href);\n    const htmlOk=/<html\\b/i.test(h)&&/<body\\b/i.test(h);\n    const noindex=!/(<meta\\b[^>]*(?:name|property)=["'](?:robots|googlebot)["'][^>]*content=["'][^"']*noindex|<meta\\b[^>]*content=["'][^"']*noindex[^"']*["'][^>]*(?:name|property)=["'](?:robots|googlebot)["'])/i.test(hd+h);\n    const lines=rb.split(/\\r?\\n/), groups=[]; let agent='*', dis=[];\n    for(const line of lines){\n      const x=line.replace(/#.*/, '').trim(); if(!x) continue;\n      const m=x.match(/^User-agent:\\s*(.+)$/i);\n      if(m){groups.push({agent,dis}); agent=m[1].trim().toLowerCase(); dis=[]; continue}\n      const d=x.match(/^Disallow:\\s*(.*)$/i); if(d) dis.push(d[1].trim());\n    }\n    groups.push({agent,dis});\n    const relevant=groups.filter(g=>g.agent==='*'||g.agent==='googlebot');\n    const blocked=relevant.some(g=>g.dis.some(x=>x==='/'));\n    const robotsOk=rb.trim().length===0||!blocked;\n    return publicUrl&&htmlOk&&noindex&&robotsOk;\n  }catch{return false}\n}\n\n'''
+          if marker not in s: raise SystemExit('googleIndexStatus marker not found')
+          if 'function foxCrawlability(' not in s:
+              s=s.replace(marker,fn+marker,1)
+          needle='const [page,head,robots,sitemap,ps,indexed]=await Promise.all(['
+          i=s.find(needle)
+          if i<0: raise SystemExit('Promise.all marker not found')
+          end=s.find(']);',i)
+          if end<0: raise SystemExit('Promise.all end not found')
+          end += 3
+          if 'const crawlOk=foxCrawlability(target,page?.content,head0,robots?.content);' not in s:
+              s=s[:end]+'\nconst crawlOk=foxCrawlability(target,page?.content,head0,robots?.content);'+s[end:]
+          # Replace the Lighthouse is-crawlable expression with the real FOX result.
+          idx=s.find('is-crawlable')
+          if idx<0: raise SystemExit('is-crawlable audit not found')
+          start=s.rfind('ps',0,idx)
+          if start<0 or idx-start>400: raise SystemExit('crawl audit expression start not found')
+          score=s.find('score',idx)
+          if score<0 or score-idx>300: raise SystemExit('crawl audit score not found')
+          endexpr=s.find('===1',score)
+          if endexpr<0: endexpr=s.find('=== 1',score)
+          if endexpr<0: raise SystemExit('crawl audit comparison not found')
+          endexpr += 4 if s[endexpr:endexpr+4]=='===1' else 5
+          s=s[:start]+'crawlOk'+s[endexpr:]
+          # Make the crawlability metric explicitly FOX, not Lighthouse.
+          s=s.replace("crawl:'Lighthouse'","crawl:'FOX'")
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git commit -m 'fix: make Google crawlability independent of Lighthouse'
+          git push
+          rm -f .github/workflows/fix-google-crawlability.yml .github/workflows/fix-google-crawlability-2.yml
+          git add .github/workflows/fix-google-crawlability.yml .github/workflows/fix-google-crawlability-2.yml
+          git commit -m 'chore: remove temporary crawlability workflows' || true
+          git push || true
