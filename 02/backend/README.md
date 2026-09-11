@@ -6,23 +6,17 @@ Backend contract and implementation for the mobile FOX Live Translator.
 
 Vercel project: `wdfox-live-translat-api`
 
-Vercel Root Directory: `02/backend`
+Production API:
 
-The production API endpoint is:
-
-`POST /api/translate-voice`
-
-The final public hostname is assigned by Vercel after the first successful production deployment.
+`https://wdfox-live-translat-jz8mjkdcf-peters-projects-db101134.vercel.app/api/translate-voice`
 
 ## Flow
 
-`Android → multipart audio → STT → AI translation → optional TTS → JSON response`
+`Android → multipart audio → Gemini audio understanding → translation → optional Gemini TTS → JSON response`
 
 ## Request
 
-`POST /api/translate-voice`
-
-Content-Type: `multipart/form-data`
+`POST /api/translate-voice` with `multipart/form-data`:
 
 - `audio`: recorded audio file
 - `sourceLanguage`: `sk` or `de`
@@ -38,7 +32,7 @@ Content-Type: `multipart/form-data`
   "sourceLanguage": "sk",
   "targetLanguage": "de",
   "audioBase64": "...",
-  "audioMimeType": "audio/mpeg"
+  "audioMimeType": "audio/wav"
 }
 ```
 
@@ -46,16 +40,17 @@ Content-Type: `multipart/form-data`
 
 Configure these in Vercel → Project → Environment Variables:
 
-- `AI_GATEWAY_API_KEY` — server-side AI Gateway credential
-- `TRANSLATION_MODEL` — optional
+- `GEMINI_API_KEY` — server-side Google Gemini API key
+- `GEMINI_MODEL` — optional, default `gemini-2.5-flash`
 - `TRANSCRIPTION_MODEL` — optional
-- `SPEECH_MODEL` — optional
+- `TRANSLATION_MODEL` — optional
+- `SPEECH_MODEL` — optional, default `gemini-2.5-flash-preview-tts`
 
-Never put the AI Gateway key in the Android application.
+**Never put the Gemini API key in the Android application.**
 
 ## Deployment
 
-Pushes to the connected `main` branch trigger Vercel deployment for this project. The Vercel project must use `Other` as Framework Preset and `02/backend` as Root Directory.
+Pushes to the connected `main` branch trigger Vercel deployment. Root Directory is `02/backend`.
 
 ## Security
 
