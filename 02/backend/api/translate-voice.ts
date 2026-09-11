@@ -47,7 +47,7 @@ export async function POST(request: Request): Promise<Response> {
         process.env.TRANSCRIPTION_MODEL || 'openai/whisper-1',
       ),
       audio: audioBytes,
-      mediaType: audio.type || 'audio/webm',
+      language: sourceLanguage,
       maxRetries: 0,
       abortSignal: AbortSignal.timeout(18000),
     });
@@ -91,7 +91,7 @@ export async function POST(request: Request): Promise<Response> {
         });
 
         audioBase64 = uint8ArrayToBase64(speech.audio.uint8Array);
-        audioMimeType = speech.audio.mimeType || 'audio/mpeg';
+        audioMimeType = speech.audio.mediaType || 'audio/mpeg';
       } catch (error) {
         speechWarning = error instanceof Error ? error.message : 'TTS failed';
         console.error('translate-voice TTS failed', error);
