@@ -26,8 +26,3 @@ const chromeUrl = "https://chromewebstore.google.com/detail/meta-ads-data-adviso
 <style>
 .pixel-installer{width:min(1180px,calc(100% - 40px));margin:26px auto 0;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#0f1012;color:#fff;border:1px solid #2d3138;border-left:5px solid #f36a0a;border-radius:16px;box-sizing:border-box}.pixel-installer-copy{display:flex;flex-direction:column;gap:6px}.pixel-installer-kicker{font-size:11px;font-weight:900;letter-spacing:.13em;color:#ff7a22}.pixel-installer h2{margin:0;font-size:clamp(19px,2vw,27px);line-height:1.15}.pixel-installer p{margin:0;color:#aeb1b7;font-size:13px;line-height:1.55;max-width:760px}.pixel-installer small{color:#737983;font-size:11px}.pixel-installer-button{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;background:#f36a0a;color:#fff;text-decoration:none;font-weight:900;font-size:13px;padding:14px 18px;border-radius:11px;box-shadow:0 10px 26px rgba(243,106,10,.18)}.pixel-installer-button:hover{filter:brightness(1.08)}@media(max-width:700px){.pixel-installer{width:calc(100% - 24px);flex-direction:column;align-items:stretch}.pixel-installer-button{width:100%;box-sizing:border-box}}
 </style>
-<script>
-const pixelInstaller = document.getElementById("meta-pixel-installer");
-const foxLauncher = document.getElementById("fox-analyzer-launcher");
-if (pixelInstaller && foxLauncher) foxLauncher.insertAdjacentElement("afterend", pixelInstaller);
-</script>
