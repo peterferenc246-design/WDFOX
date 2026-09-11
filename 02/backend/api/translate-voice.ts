@@ -96,7 +96,7 @@ export default async function handler(request: Request): Promise<Response> {
         audio: uint8ArrayToBase64(audioBytes),
         mediaType: audio.type || 'audio/webm',
       },
-      25000,
+      18000,
     );
 
     const transcript = String(transcription?.text || '').trim();
@@ -122,7 +122,7 @@ export default async function handler(request: Request): Promise<Response> {
         max_tokens: 1000,
         stream: false,
       },
-      20000,
+      12000,
     );
 
     const translatedText = String(translation?.choices?.[0]?.message?.content || '').trim();
@@ -132,24 +132,30 @@ export default async function handler(request: Request): Promise<Response> {
 
     let audioBase64: string | undefined;
     let audioMimeType: 'audio/mpeg' | undefined;
+    let speechWarning: string | undefined;
 
     if (speakResult) {
-      const speech = await gatewayFetch(
-        '/v4/ai/speech-model',
-        process.env.SPEECH_MODEL || 'openai/tts-1',
-        {
-          text: translatedText,
-          voice: targetLanguage === 'de' ? 'nova' : 'alloy',
-          outputFormat: 'mp3',
-        },
-        20000,
-      );
+      try {
+        const speech = await gatewayFetch(
+          '/v4/ai/speech-model',
+          process.env.SPEECH_MODEL || 'openai/tts-1',
+          {
+            text: translatedText,
+            voice: targetLanguage === 'de' ? 'nova' : 'alloy',
+            outputFormat: 'mp3',
+          },
+          8000,
+        );
 
-      if (typeof speech?.audio !== 'string' || !speech.audio) {
-        throw new Error('AI Gateway returned no speech audio');
+        if (typeof speech?.audio !== 'string' || !speech.audio) {
+          throw new Error('AI Gateway returned no speech audio');
+        }
+        audioBase64 = speech.audio;
+        audioMimeType = 'audio/mpeg';
+      } catch (error) {
+        speechWarning = error instanceof Error ? error.message : 'TTS failed';
+        console.error('translate-voice TTS failed', error);
       }
-      audioBase64 = speech.audio;
-      audioMimeType = 'audio/mpeg';
     }
 
     return json({
@@ -158,6 +164,7 @@ export default async function handler(request: Request): Promise<Response> {
       sourceLanguage,
       targetLanguage,
       ...(audioBase64 ? { audioBase64, audioMimeType } : {}),
+      ...(speechWarning ? { speechWarning } : {}),
     });
   } catch (error) {
     console.error('translate-voice failed', error);
