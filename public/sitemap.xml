@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://www.foxprof.club/sk/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.foxprof.club/de/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.foxprof.club/en/"/>
+    <xhtml:link rel="alternate" hreflang="sk" href="https://www.foxprof.club/sk/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.foxprof.club/fr/"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://www.foxprof.club/hr/"/>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://www.foxprof.club/pl/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://www.foxprof.club/it/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.foxprof.club/es/"/>
+    <xhtml:link rel="alternate" hreflang="sv" href="https://www.foxprof.club/sv/"/>
+  </url>
+  <url><loc>https://www.foxprof.club/de/</loc></url>
+  <url><loc>https://www.foxprof.club/en/</loc></url>
+  <url><loc>https://www.foxprof.club/fr/</loc></url>
+  <url><loc>https://www.foxprof.club/hr/</loc></url>
+  <url><loc>https://www.foxprof.club/pl/</loc></url>
+  <url><loc>https://www.foxprof.club/it/</loc></url>
+  <url><loc>https://www.foxprof.club/es/</loc></url>
+  <url><loc>https://www.foxprof.club/sv/</loc></url>
+</urlset>
