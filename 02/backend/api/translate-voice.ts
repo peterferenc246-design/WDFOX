@@ -1,50 +1,51 @@
 const LANGUAGES = new Set(['sk', 'de']);
-const OPENAI_API = 'https://api.openai.com/v1';
+const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function json(body: unknown, status = 200): Response {
-  return Response.json(body, {
-    status,
-    headers: { 'Cache-Control': 'no-store' },
-  });
+  return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
-function uint8ArrayToBase64(bytes: Uint8Array): string {
+function base64(bytes: Uint8Array): string {
   let binary = '';
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   }
   return btoa(binary);
 }
 
-async function openaiFetch(path: string, init: RequestInit, timeoutMs: number): Promise<Response> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is not configured in Vercel');
-  }
+function wavFromPcm(pcm: Uint8Array, sampleRate = 24000, channels = 1, bits = 16): Uint8Array {
+  const out = new Uint8Array(44 + pcm.length);
+  const view = new DataView(out.buffer);
+  const text = (offset: number, value: string) => [...value].forEach((c, i) => view.setUint8(offset + i, c.charCodeAt(0)));
+  text(0, 'RIFF'); view.setUint32(4, 36 + pcm.length, true); text(8, 'WAVE'); text(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, channels, true);
+  view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * channels * bits / 8, true);
+  view.setUint16(32, channels * bits / 8, true); view.setUint16(34, bits, true); text(36, 'data');
+  view.setUint32(40, pcm.length, true); out.set(pcm, 44); return out;
+}
 
+async function gemini(model: string, body: unknown, timeoutMs = 30000): Promise<any> {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error('GEMINI_API_KEY is not configured in Vercel');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-
   try {
-    return await fetch(`${OPENAI_API}${path}`, {
-      ...init,
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        ...(init.headers || {}),
-      },
+    const response = await fetch(`${GEMINI_API}/${model}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify(body), signal: controller.signal,
     });
-  } finally {
-    clearTimeout(timer);
-  }
+    if (!response.ok) throw new Error(`Gemini ${response.status}: ${await response.text()}`);
+    return response.json();
+  } finally { clearTimeout(timer); }
+}
+
+function firstText(data: any): string {
+  return String(data?.candidates?.[0]?.content?.parts?.find((p: any) => p.text)?.text || '').trim();
 }
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return json({ error: 'OPENAI_API_KEY is not configured in Vercel' }, 503);
-    }
-
     const form = await request.formData();
     const audio = form.get('audio');
     const sourceLanguage = String(form.get('sourceLanguage') ?? '');
@@ -52,123 +53,58 @@ export async function POST(request: Request): Promise<Response> {
     const speakResult = String(form.get('speakResult') ?? 'true') === 'true';
 
     if (!(audio instanceof File)) return json({ error: 'Missing audio file' }, 400);
-    if (!LANGUAGES.has(sourceLanguage) || !LANGUAGES.has(targetLanguage)) {
-      return json({ error: 'sourceLanguage and targetLanguage must be sk or de' }, 400);
-    }
-    if (sourceLanguage === targetLanguage) {
-      return json({ error: 'Source and target languages must be different' }, 400);
+    if (!LANGUAGES.has(sourceLanguage) || !LANGUAGES.has(targetLanguage) || sourceLanguage === targetLanguage) {
+      return json({ error: 'sourceLanguage and targetLanguage must be different sk/de values' }, 400);
     }
 
-    const audioBytes = new Uint8Array(await audio.arrayBuffer());
-    if (!audioBytes.length) return json({ error: 'Audio file is empty' }, 400);
-
-    // OpenAI Audio Transcriptions API. Use the browser-provided filename/type
-    // so common WebM/MP4 recordings are handled correctly.
-    const transcriptionForm = new FormData();
-    const filename = audio.name || 'recording.webm';
-    transcriptionForm.append('file', new Blob([audioBytes], { type: audio.type || 'audio/webm' }), filename);
-    transcriptionForm.append(
-      'model',
-      process.env.TRANSCRIPTION_MODEL || 'gpt-4o-mini-transcribe',
-    );
-    transcriptionForm.append('response_format', 'json');
-
-    const transcriptionResponse = await openaiFetch(
-      '/audio/transcriptions',
-      { method: 'POST', body: transcriptionForm },
-      18000,
-    );
-
-    if (!transcriptionResponse.ok) {
-      const detail = await transcriptionResponse.text();
-      throw new Error(`OpenAI transcription ${transcriptionResponse.status}: ${detail}`);
-    }
-
-    const transcription = (await transcriptionResponse.json()) as { text?: string };
-    const transcript = String(transcription.text || '').trim();
-    if (!transcript) return json({ error: 'No speech detected' }, 422);
+    const bytes = new Uint8Array(await audio.arrayBuffer());
+    if (!bytes.length) return json({ error: 'Audio file is empty' }, 400);
+    if (bytes.length > 15 * 1024 * 1024) return json({ error: 'Audio file is too large for inline Gemini processing' }, 413);
 
     const sourceName = sourceLanguage === 'sk' ? 'Slovak' : 'German';
     const targetName = targetLanguage === 'sk' ? 'Slovak' : 'German';
+    const mimeType = audio.type || 'audio/mp4';
+    const model = process.env.TRANSCRIPTION_MODEL || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-    const translationResponse = await openaiFetch(
-      '/chat/completions',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: process.env.TRANSLATION_MODEL || 'gpt-4o-mini',
-          temperature: 0.1,
-          max_tokens: 1000,
-          messages: [
-            {
-              role: 'system',
-              content: `You are a professional live interpreter. Translate faithfully from ${sourceName} to ${targetName}. Preserve meaning, tone and intent. Return only the translated text. Do not explain anything.`,
-            },
-            { role: 'user', content: transcript },
-          ],
-        }),
-      },
-      12000,
-    );
+    const transcription = await gemini(model, {
+      contents: [{ parts: [
+        { text: `Transcribe this spoken ${sourceName} audio exactly. Return only the spoken words, with no commentary. Do not translate.` },
+        { inlineData: { mimeType, data: base64(bytes) } },
+      ] }],
+    });
+    const transcript = firstText(transcription);
+    if (!transcript) return json({ error: 'No speech detected' }, 422);
 
-    if (!translationResponse.ok) {
-      const detail = await translationResponse.text();
-      throw new Error(`OpenAI translation ${translationResponse.status}: ${detail}`);
-    }
-
-    const translation = (await translationResponse.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const translatedText = String(translation.choices?.[0]?.message?.content || '').trim();
-    if (!translatedText) throw new Error('OpenAI returned an empty translation');
+    const translation = await gemini(process.env.TRANSLATION_MODEL || model, {
+      contents: [{ parts: [{ text: `You are a professional live interpreter. Translate the following ${sourceName} text into ${targetName}. Preserve meaning, tone and intent. Return only the translation.\n\n${transcript}` }] }],
+    }, 15000);
+    const translatedText = firstText(translation);
+    if (!translatedText) throw new Error('Gemini returned an empty translation');
 
     let audioBase64: string | undefined;
     let audioMimeType: string | undefined;
-    let speechWarning: string | undefined;
-
     if (speakResult) {
       try {
-        const speechResponse = await openaiFetch(
-          '/audio/speech',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: process.env.SPEECH_MODEL || 'tts-1',
-              input: translatedText,
-              voice: targetLanguage === 'de' ? 'nova' : 'alloy',
-              response_format: 'mp3',
-            }),
+        const tts = await gemini(process.env.SPEECH_MODEL || 'gemini-2.5-flash-preview-tts', {
+          contents: [{ parts: [{ text: translatedText }] }],
+          generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: targetLanguage === 'de' ? 'Kore' : 'Aoede' } } },
           },
-          8000,
-        );
-
-        if (!speechResponse.ok) {
-          const detail = await speechResponse.text();
-          throw new Error(`OpenAI speech ${speechResponse.status}: ${detail}`);
+        }, 20000);
+        const part = tts?.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
+        if (part?.inlineData?.data) {
+          const pcm = Uint8Array.from(atob(part.inlineData.data), c => c.charCodeAt(0));
+          audioBase64 = base64(wavFromPcm(pcm));
+          audioMimeType = 'audio/wav';
         }
-
-        const speechBytes = new Uint8Array(await speechResponse.arrayBuffer());
-        audioBase64 = uint8ArrayToBase64(speechBytes);
-        audioMimeType = 'audio/mpeg';
-      } catch (error) {
-        speechWarning = error instanceof Error ? error.message : 'TTS failed';
-        console.error('translate-voice TTS failed', error);
-      }
+      } catch (error) { console.error('Gemini TTS failed', error); }
     }
 
-    return json({
-      transcript,
-      translatedText,
-      sourceLanguage,
-      targetLanguage,
-      ...(audioBase64 ? { audioBase64, audioMimeType } : {}),
-      ...(speechWarning ? { speechWarning } : {}),
-    });
+    return json({ transcript, translatedText, sourceLanguage, targetLanguage,
+      ...(audioBase64 ? { audioBase64, audioMimeType } : {}) });
   } catch (error) {
     console.error('translate-voice failed', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return json({ error: `Translation service failed: ${message}` }, 500);
+    return json({ error: `Translation service failed: ${error instanceof Error ? error.message : 'Unknown error'}` }, 500);
   }
 }
