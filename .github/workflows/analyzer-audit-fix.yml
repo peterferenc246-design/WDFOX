@@ -1,0 +1,47 @@
+name: Analyzer audit fix
+on:
+  push:
+    branches: [main]
+jobs:
+  fix:
+    if: "${{ github.event.head_commit.message != 'fix: make analyzer source checks parse real HTML' }}"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Patch analyzer
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text(encoding='utf-8')
+          old='''async function jina(url,head=false){const target=new URL(url,location.href),same=target.origin===location.origin;if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}const h={Accept:'application/json','X-No-Cache':'true'};if(head){h['X-Respond-With']='html';}const r=await fetch('https://r.jina.ai/'+url,{headers:h});if(!r.ok)throw Error('jina');const raw=await r.text();try{const j=JSON.parse(raw),d=j?.data||j;return{...d,content:String(d?.content||'')}}catch{return{content:raw}}}'''
+          new='''async function jina(url,head=false){const target=new URL(url,location.href),same=target.hostname.toLowerCase().replace(/^www\\./,'')===location.hostname.toLowerCase().replace(/^www\\./,'');if(same){const local=new URL(target.pathname+target.search,location.origin),r=await fetch(local.href,{cache:'no-store',redirect:'follow'});if(!r.ok)throw Error('local');return{content:await r.text(),url:r.url||local.href}}const h={Accept:'application/json','X-No-Cache':'true'};if(head){h['X-Respond-With']='html';h['X-Engine']='browser';h['X-Respond-Timing']='html';}const r=await fetch('https://r.jina.ai/'+url,{headers:h});if(!r.ok)throw Error('jina');const raw=await r.text();try{const j=JSON.parse(raw),d=j?.data||j;return{...d,content:String(d?.content||'')}}catch{return{content:raw}}}'''
+          if old not in s: raise SystemExit('jina block not found')
+          s=s.replace(old,new,1)
+          old2='''function foxViewport(html){const v=meta(html,'viewport').toLowerCase();return /(?:^|,)\\\\s*width\\\\s*=\\\\s*device-width\\\\s*(?:,|$)/.test(v)&&/(?:^|,)\\\\s*initial-scale\\\\s*=\\\\s*1(?:\\\\.0+)?\\\\s*(?:,|$)/.test(v)}'''
+          new2='''function foxViewport(html){const v=meta(html,'viewport').toLowerCase();const parts=v.split(',').map(x=>x.trim().replace(/\\s+/g,' '));return parts.some(x=>/^width\\s*=\\s*device-width$/.test(x))&&parts.some(x=>/^initial-scale\\s*=\\s*1(?:\\.0+)?$/.test(x))}'''
+          if old2 not in s: raise SystemExit('viewport block not found')
+          s=s.replace(old2,new2,1)
+          s=s.replace("${card(t.cards.hreflang,/hreflang/i.test(html))}${card(t.cards.favicon,/rel=[\\\"'][^\\\"']*icon/i.test(html))}${card(t.cards.viewport,viewport)}${card(t.cards.noindex,!/noindex/i.test(html),/noindex/i.test(html)?t.noindex:t.notnoindex)}", "${card(t.cards.hreflang,foxHreflang(html))}${card(t.cards.favicon,foxFavicon(html))}${card(t.cards.viewport,viewport)}${card(t.cards.noindex,foxNoindex(html),foxNoindex(html)?t.notnoindex:t.noindex)}")
+          p.write_text(s,encoding='utf-8')
+      - name: Build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+      - name: Commit and remove workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/analyzer-audit-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/analyzer.astro .github/workflows/analyzer-audit-fix.yml
+          git commit -m "fix: make analyzer source checks parse real HTML"
+          git push
