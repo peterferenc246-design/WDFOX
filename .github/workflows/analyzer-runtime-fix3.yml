@@ -6,7 +6,7 @@ on:
 
 jobs:
   fix:
-    if: ${{ !contains(github.event.head_commit.message, '[analyzer-fix]') }}
+    if: ${{ github.event.head_commit.message != 'fix: restore missing analyzer runtime functions [analyzer-fix]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
