@@ -38,9 +38,17 @@ export default async function handler(request: Request): Promise<Response> {
       return json({ error: 'Source and target languages must be different' }, 400);
     }
 
+    const audioBytes = new Uint8Array(await audio.arrayBuffer());
+    if (!audioBytes.length) {
+      return json({ error: 'Audio file is empty' }, 400);
+    }
+
     const transcription = await transcribe({
-      model: gateway.transcriptionModel(process.env.TRANSCRIPTION_MODEL || 'openai/gpt-4o-mini-transcribe'),
-      audio: new Uint8Array(await audio.arrayBuffer()),
+      model: gateway.transcriptionModel(process.env.TRANSCRIPTION_MODEL || 'openai/whisper-1'),
+      audio: audioBytes,
+      mediaType: audio.type || 'audio/webm',
+      maxRetries: 0,
+      abortSignal: AbortSignal.timeout(25000),
     });
 
     const transcript = transcription.text.trim();
@@ -53,6 +61,8 @@ export default async function handler(request: Request): Promise<Response> {
       system: `You are a professional live interpreter. Translate faithfully from ${sourceLanguage === 'sk' ? 'Slovak' : 'German'} to ${targetLanguage === 'sk' ? 'Slovak' : 'German'}. Preserve meaning, tone and intent. Return only the translated text. Do not explain anything.`,
       prompt: transcript,
       temperature: 0.1,
+      maxRetries: 0,
+      abortSignal: AbortSignal.timeout(20000),
     });
 
     const translatedText = translation.text.trim();
@@ -65,6 +75,8 @@ export default async function handler(request: Request): Promise<Response> {
         text: translatedText,
         voice: targetLanguage === 'de' ? 'nova' : 'alloy',
         outputFormat: 'mp3',
+        maxRetries: 0,
+        abortSignal: AbortSignal.timeout(20000),
       });
       audioBase64 = uint8ArrayToBase64(speech.audio.uint8Array);
       audioMimeType = 'audio/mpeg';
@@ -79,6 +91,7 @@ export default async function handler(request: Request): Promise<Response> {
     });
   } catch (error) {
     console.error('translate-voice failed', error);
-    return json({ error: 'Translation service failed' }, 500);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return json({ error: `Translation service failed: ${message}` }, 500);
   }
 }
