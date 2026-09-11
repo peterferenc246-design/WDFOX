@@ -1,4 +1,4 @@
-export default function handler(): Response {
+export function GET(): Response {
   return new Response('FOX API PING OK', {
     status: 200,
     headers: {
