@@ -47,7 +47,6 @@ export async function POST(request: Request): Promise<Response> {
         process.env.TRANSCRIPTION_MODEL || 'openai/whisper-1',
       ),
       audio: audioBytes,
-      language: sourceLanguage,
       maxRetries: 0,
       abortSignal: AbortSignal.timeout(18000),
     });
