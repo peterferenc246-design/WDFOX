@@ -1,0 +1,51 @@
+name: Fix analyzer external timeouts
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-analyzer-timeouts.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch analyzer fetch timeouts
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          old="""async function jina(url,head=false,engine='browser'){"""
+          if old not in s:
+              raise SystemExit('jina function signature not found')
+          marker="""async function jina(url,head=false,engine='browser'){"""
+          helper="""async function fetchWithTimeout(resource,options={},ms=10000){\n  const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);\n  try{return await fetch(resource,{...options,signal:c.signal})}finally{clearTimeout(t)}\n}\n"""
+          if 'async function fetchWithTimeout(' not in s:
+              s=s.replace(marker,helper+marker,1)
+          target="const r=await fetch('https://r.jina.ai/'+url,{headers:h});"
+          repl="const r=await fetchWithTimeout('https://r.jina.ai/'+url,{headers:h},10000);"
+          if target in s:
+              s=s.replace(target,repl,1)
+          else:
+              raise SystemExit('Jina fetch line not found')
+          # Make the AllOrigins fallback bounded as well.
+          s=s.replace("const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url));","const r=await fetchWithTimeout('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{},10000);")
+          # Bound PageSpeed and Google search requests so one provider cannot hold the whole audit indefinitely.
+          s=s.replace("const r=await fetch('https://www.googleapis.com/pagespeedonline/v5/runPagespeed?'+q);","const r=await fetchWithTimeout('https://www.googleapis.com/pagespeedonline/v5/runPagespeed?'+q,{},12000);")
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git diff --cached --quiet || git commit -m 'fix: prevent analyzer from hanging on external requests'
+          git push
+      - name: Remove temporary workflow
+        if: always()
+        run: |
+          rm -f .github/workflows/fix-analyzer-timeouts.yml
+          git add -A
+          git diff --cached --quiet || git commit -m 'chore: remove temporary analyzer timeout workflow'
+          git push
