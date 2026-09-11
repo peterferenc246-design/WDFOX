@@ -1,0 +1,41 @@
+name: Fix canonical and schema tests
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-canonical-schema.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace Lighthouse-only canonical and schema tests
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('src/pages/analyzer.astro')
+          s=p.read_text()
+          marker='function foxCrawlability(url,html,head,robots){'
+          fn='''function foxCanonical(html,target){\n  try{\n    const m=String(html||'').match(/<link\\b[^>]*(?:rel=["']canonical["'][^>]*href=["']([^"']+)["']|href=["']([^"']+)["'][^>]*rel=["']canonical["'])[^>]*>/i);\n    if(!m)return false;\n    const c=new URL(m[1]||m[2],target).href.replace(/\\/$/,'');\n    const u=new URL(target).href.replace(/\\/$/,'');\n    return c===u;\n  }catch{return false}\n}\nfunction foxSchema(html){\n  try{\n    const blocks=[...String(html||'').matchAll(/<script\\b[^>]*type=["']application\\/ld\\+json["'][^>]*>([\\s\\S]*?)<\\/script>/gi)];\n    if(!blocks.length)return false;\n    return blocks.some(m=>{\n      try{\n        const raw=m[1].trim().replace(/<!--[\\s\\S]*?-->/g,'');\n        const data=JSON.parse(raw);\n        const list=Array.isArray(data)?data:(Array.isArray(data?.['@graph'])?data['@graph']:[data]);\n        return list.some(x=>x&&((String(x['@context']||'').toLowerCase().includes('schema.org'))||x['@type']));\n      }catch{return false}\n    });\n  }catch{return false}\n}\n\n'''
+          if marker not in s: raise SystemExit('crawl function marker missing')
+          if 'function foxCanonical(' not in s: s=s.replace(marker,fn+marker,1)
+          # The analyzer already has local html/head variables before these assignments.
+          s=s.replace("canon=pass('canonical')","canon=foxCanonical(html,target)",1)
+          s=s.replace("schema=pass('structured-data')","schema=foxSchema(html)",1)
+          # Do not label these independent tests as Lighthouse.
+          s=s.replace("card(t.cards.canonical,canon,t.lh)","card(t.cards.canonical,canon,'FOX')",1)
+          s=s.replace("card(t.cards.schema,schema,t.lh)","card(t.cards.schema,schema,'FOX')",1)
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/analyzer.astro
+          git commit -m 'fix: make canonical and schema tests independent of Lighthouse' || true
+          git push || true
+          rm -f .github/workflows/fix-canonical-schema.yml
+          git add .github/workflows/fix-canonical-schema.yml
+          git commit -m 'chore: remove temporary canonical schema workflow' || true
+          git push || true
