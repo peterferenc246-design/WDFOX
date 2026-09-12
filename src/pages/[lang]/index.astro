@@ -28,10 +28,17 @@ const content = await getLandingContent(lang);
   <FoxAnalyzerLauncher locale={lang} />
   <script is:inline>
     (function () {
-      if (!new URLSearchParams(window.location.search).has('foxPeer')) return;
+      var params = new URLSearchParams(window.location.search);
+      if (!params.has('foxPeer')) return;
       var openLiveCommunicator = function () {
         var target = document.querySelector('[data-call-app]');
-        if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'instant', block: 'start' });
+        var call = target.querySelector('[data-call]');
+        if (call) {
+          call.removeAttribute('disabled');
+          call.setAttribute('aria-disabled', 'false');
+        }
       };
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', openLiveCommunicator, { once: true });
@@ -39,6 +46,8 @@ const content = await getLandingContent(lang);
         window.setTimeout(openLiveCommunicator, 80);
       }
       window.addEventListener('load', openLiveCommunicator, { once: true });
+      window.setTimeout(openLiveCommunicator, 500);
+      window.setTimeout(openLiveCommunicator, 1500);
     })();
   </script>
   <Fragment slot="footer-links">
