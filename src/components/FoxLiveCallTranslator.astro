@@ -16,6 +16,7 @@ const t = locale === 'de' ? { title:'FOX LIVE KOMMUNIKATOR', create:'VERBINDUNG 
 <script>
 const root=document.querySelector('[data-app]');
 if(root){
+ const t=JSON.parse(root.dataset.copy||'{}');
  const q=(s)=>root.querySelector(s),create=q('[data-create]'),callBtn=q('[data-call]'),copyBtn=q('[data-copy]'),status=q('[data-status]'),invite=q('[data-invite]'),link=q('[data-link]'),qr=q('[data-qr]'),sent=q('[data-sent]'),received=q('[data-received]'),mic=q('[data-mic]'),live=q('[data-live]'),translation=q('[data-translation]'),audio=q('[data-audio-el]'),audioBtn=q('[data-audio]');
  const params=new URLSearchParams(location.search),remoteId=params.get('foxPeer'),role=remoteId?'client':'host';
  const sourceLanguage=role==='host'?'Slovak':'German',targetLanguage=role==='host'?'German':'Slovak',sourceLocale=role==='host'?'sk-SK':'de-DE',targetLocale=role==='host'?'de-DE':'sk-SK';
