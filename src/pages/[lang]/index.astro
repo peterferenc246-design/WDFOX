@@ -26,6 +26,21 @@ const content = await getLandingContent(lang);
   <FoxLiveTranslator locale={lang} />
   <FoxLiveCallTranslator locale={lang} />
   <FoxAnalyzerLauncher locale={lang} />
+  <script is:inline>
+    (function () {
+      if (!new URLSearchParams(window.location.search).has('foxPeer')) return;
+      var openLiveCommunicator = function () {
+        var target = document.querySelector('[data-call-app]');
+        if (target) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', openLiveCommunicator, { once: true });
+      } else {
+        window.setTimeout(openLiveCommunicator, 80);
+      }
+      window.addEventListener('load', openLiveCommunicator, { once: true });
+    })();
+  </script>
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
