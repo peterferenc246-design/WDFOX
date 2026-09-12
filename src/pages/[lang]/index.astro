@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
+import FoxP2PCommunicator from "../../components/FoxP2PCommunicator.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -23,6 +24,7 @@ const content = await getLandingContent(lang);
   </Fragment>
   <Landing content={content} />
   <FoxLiveTranslator locale={lang} />
+  <FoxP2PCommunicator locale={lang} />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
