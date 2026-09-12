@@ -80,6 +80,40 @@ const content = await getLandingContent(lang);
       }
     })();
   </script>
+  <script is:inline>
+    (function () {
+      var bootClientCall = function () {
+        var params = new URLSearchParams(window.location.search);
+        if (!params.has('foxPeer')) return;
+        var app = document.querySelector('[data-call-app]');
+        if (!app) return;
+        var call = app.querySelector('[data-call]');
+        var create = app.querySelector('[data-create]');
+        if (!call || !create) return;
+        call.removeAttribute('disabled');
+        call.style.pointerEvents = 'auto';
+        var text = (call.textContent || '').trim();
+        if (!text || text === 'USKUTOČNIŤ HOVOR' || text === 'ANRUF STARTEN' || text === 'MAKE A CALL') {
+          create.click();
+          var tries = 0;
+          var retry = function () {
+            tries += 1;
+            if (tries > 12) return;
+            if (!call.disabled && /USKUTOČNIŤ HOVOR|ANRUF STARTEN|MAKE A CALL/.test((call.textContent || '').trim())) {
+              call.click();
+              window.setTimeout(retry, 500);
+            }
+          };
+          window.setTimeout(retry, 700);
+        }
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { window.setTimeout(bootClientCall, 250); }, { once: true });
+      } else {
+        window.setTimeout(bootClientCall, 250);
+      }
+    })();
+  </script>
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
