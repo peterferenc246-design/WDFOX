@@ -2,9 +2,9 @@
 interface Props { locale: string; }
 const { locale } = Astro.props;
 const copy = {
-  sk: { title:'FOX P2P KOMUNIKÁTOR', intro:'Priame hlasové spojenie medzi počítačom alebo mobilom bez WhatsAppu.', create:'VYTVORIŤ SPOJENIE', call:'USKUTOČNIŤ HOVOR', calling:'VOLÁM…', accept:'PRIJATIE HOVORU', accepting:'PRIJÍMAM HOVOR…', incoming:'PRICHÁDZAJÚCI HOVOR – stlač PRIJATIE HOVORU', share:'Zdieľať pozvánku', copy:'Kopírovať odkaz', code:'Kód spojenia', waiting:'Čakám na druhé zariadenie…', connected:'Spojenie je aktívne.', start:'ZAPNÚŤ MIKROFÓN', stop:'VYPNÚŤ MIKROFÓN', invite:'Pošli odkaz alebo nech klient naskenuje QR kód na obrazovke počítača.', qr:'NASKENUJTE QR KÓD MOBILOM', error:'Spojenie sa nepodarilo vytvoriť.', needConnection:'Najprv vytvor spojenie.' },
-  de: { title:'FOX P2P KOMMUNIKATOR', intro:'Direkte Sprachverbindung zwischen Computer oder Smartphone – ohne WhatsApp.', create:'VERBINDUNG ERSTELLEN', call:'ANRUF STARTEN', calling:'ANRUF…', accept:'ANRUF ANNEHMEN', accepting:'ANRUF WIRD ANGENOMMEN…', incoming:'EINGEHENDER ANRUF – Anruf annehmen', share:'Einladung teilen', copy:'Link kopieren', code:'Verbindungscode', waiting:'Warte auf das zweite Gerät…', connected:'Verbindung ist aktiv.', start:'MIKROFON EINSCHALTEN', stop:'MIKROFON AUSSCHALTEN', invite:'Link senden oder den QR-Code auf dem Computerbildschirm mit dem Smartphone scannen.', qr:'QR-CODE MIT DEM SMARTPHONE SCANNEN', error:'Verbindung konnte nicht hergestellt werden.', needConnection:'Bitte zuerst eine Verbindung erstellen.' },
-  en: { title:'FOX P2P COMMUNICATOR', intro:'Direct voice connection between computer or smartphone – without WhatsApp.', create:'CREATE CONNECTION', call:'MAKE A CALL', calling:'CALLING…', accept:'ACCEPT CALL', accepting:'ACCEPTING CALL…', incoming:'INCOMING CALL – press ACCEPT CALL', share:'Share invitation', copy:'Copy link', code:'Connection code', waiting:'Waiting for the second device…', connected:'Connection is active.', start:'TURN MICROPHONE ON', stop:'TURN MICROPHONE OFF', invite:'Send the link or let the client scan the QR code on the computer screen.', qr:'SCAN QR CODE WITH SMARTPHONE', error:'Connection could not be established.', needConnection:'Create a connection first.' }
+  sk: { title:'FOX P2P KOMUNIKÁTOR', intro:'Priame hlasové spojenie medzi počítačom alebo mobilom bez WhatsAppu.', create:'VYTVORIŤ SPOJENIE', call:'USKUTOČNIŤ HOVOR', calling:'VOLÁM…', accept:'PRIJATIE HOVORU', accepting:'PRIJÍMAM HOVOR…', incoming:'PRICHÁDZAJÚCI HOVOR – stlač PRIJATIE HOVORU', share:'Zdieľať pozvánku', copy:'Kopírovať odkaz', code:'Kód spojenia', waiting:'Čakám na druhé zariadenie…', connected:'Spojenie je aktívne.', start:'ZAPNÚŤ MIKROFÓN', stop:'VYPNÚŤ MIKROFÓN', invite:'Pošli odkaz alebo nech klient naskenuje QR kód na obrazovke počítača.', qr:'NASKENUJTE QR KÓD MOBILOM', error:'Spojenie sa nepodarilo vytvoriť.', needConnection:'Najprv vytvor spojenie.', ringing:'Klient žiada o hovor…', rejected:'Hovor bol odmietnutý.' },
+  de: { title:'FOX P2P KOMMUNIKATOR', intro:'Direkte Sprachverbindung zwischen Computer oder Smartphone – ohne WhatsApp.', create:'VERBINDUNG ERSTELLEN', call:'ANRUF STARTEN', calling:'ANRUF…', accept:'ANRUF ANNEHMEN', accepting:'ANRUF WIRD ANGENOMMEN…', incoming:'EINGEHENDER ANRUF – Anruf annehmen', share:'Einladung teilen', copy:'Link kopieren', code:'Verbindungscode', waiting:'Warte auf das zweite Gerät…', connected:'Verbindung ist aktiv.', start:'MIKROFON EINSCHALTEN', stop:'MIKROFON AUSSCHALTEN', invite:'Link senden oder den QR-Code auf dem Computerbildschirm mit dem Smartphone scannen.', qr:'QR-CODE MIT DEM SMARTPHONE SCANNEN', error:'Verbindung konnte nicht hergestellt werden.', needConnection:'Bitte zuerst eine Verbindung erstellen.', ringing:'Der Kunde fordert einen Anruf an…', rejected:'Der Anruf wurde abgelehnt.' },
+  en: { title:'FOX P2P COMMUNICATOR', intro:'Direct voice connection between computer or smartphone – without WhatsApp.', create:'CREATE CONNECTION', call:'MAKE A CALL', calling:'CALLING…', accept:'ACCEPT CALL', accepting:'ACCEPTING CALL…', incoming:'INCOMING CALL – press ACCEPT CALL', share:'Share invitation', copy:'Copy link', code:'Connection code', waiting:'Waiting for the second device…', connected:'Connection is active.', start:'TURN MICROPHONE ON', stop:'TURN MICROPHONE OFF', invite:'Send the link or let the client scan the QR code on the computer screen.', qr:'SCAN QR CODE WITH SMARTPHONE', error:'Connection could not be established.', needConnection:'Create a connection first.', ringing:'The client is requesting a call…', rejected:'The call was rejected.' }
 };
 const t = copy[locale as keyof typeof copy] || copy.en;
 ---
@@ -45,36 +45,90 @@ const root=document.querySelector('[data-p2p]');
 if(root){
   const text=JSON.parse(root.dataset.copy||'{}');
   const create=root.querySelector('[data-create]'); const callBtn=root.querySelector('[data-call]'); const share=root.querySelector('[data-share]'); const copyBtn=root.querySelector('[data-copy]'); const invite=root.querySelector('[data-invite]'); const link=root.querySelector('[data-link]'); const mic=root.querySelector('[data-mic]'); const status=root.querySelector('[data-status]'); const audio=root.querySelector('[data-audio]'); const qrPanel=root.querySelector('[data-qr-panel]'); const qr=root.querySelector('[data-qr]');
-  let peer=null,call=null,stream=null,roomUrl='',pendingIncoming=null;
+  let peer=null,mediaCall=null,dataConn=null,stream=null,roomUrl='',pendingConn=null,hostPeerId=null,role='host',ready=false;
   const remoteId=new URLSearchParams(location.search).get('foxPeer');
   const loadScript=(src,test)=>new Promise((resolve,reject)=>{if(test())return resolve();const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});
   const loadPeer=()=>loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',()=>!!window.Peer);
   const loadQr=()=>loadScript('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',()=>!!window.QRCode);
+  const peerOptions={host:'0.peerjs.com',port:443,path:'/',secure:true,debug:1};
+  const setStatus=msg=>{status.textContent=msg;};
   const setConnected=()=>{status.textContent=text.connected;mic.disabled=false;callBtn.disabled=true;callBtn.textContent=text.call;};
-  const startLocalStream=async()=>{if(!stream)stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getAudioTracks().forEach(track=>track.enabled=true);mic.disabled=false;mic.textContent=text.stop;return stream;};
+  const startLocalStream=async()=>{if(!stream)stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});stream.getAudioTracks().forEach(track=>track.enabled=true);mic.disabled=false;mic.textContent=text.stop;return stream;};
   const makeLink=id=>`${location.origin}${location.pathname}?foxPeer=${encodeURIComponent(id)}`;
   const renderQr=async()=>{await loadQr();qr.innerHTML='';new window.QRCode(qr,{text:roomUrl,width:210,height:210,colorDark:'#000000',colorLight:'#ffffff',correctLevel:window.QRCode.CorrectLevel.M});qrPanel.hidden=false;};
-  const placeCall=async()=>{
-    if(pendingIncoming){
-      try{
-        callBtn.disabled=true;callBtn.textContent=text.accepting;
-        const s=await startLocalStream();
-        pendingIncoming.answer(s);call=pendingIncoming;pendingIncoming=null;
-        call.on('stream',remote=>{audio.srcObject=remote;setConnected();});
-        call.on('close',()=>{callBtn.disabled=false;callBtn.textContent=text.call;status.textContent=text.waiting;});
-        call.on('error',()=>{callBtn.disabled=false;callBtn.textContent=text.call;status.textContent=text.error;});
-      }catch(e){callBtn.disabled=false;callBtn.textContent=text.accept;status.textContent=text.error;}
-      return;
-    }
-    if(!peer){status.textContent=text.needConnection;return;}
-    if(!remoteId){status.textContent=text.waiting;return;}
-    try{const s=await startLocalStream();callBtn.disabled=true;callBtn.textContent=text.calling;call=peer.call(remoteId,s);call.on('stream',remote=>{audio.srcObject=remote;setConnected();});call.on('close',()=>{callBtn.disabled=false;callBtn.textContent=text.call;});call.on('error',()=>{callBtn.disabled=false;callBtn.textContent=text.call;status.textContent=text.error;});}catch(e){callBtn.disabled=false;callBtn.textContent=text.call;status.textContent=text.error;}
+  const wireMediaCall=(mc,autoAnswer=false)=>{
+    mediaCall=mc;
+    mc.on('stream',remote=>{audio.srcObject=remote;audio.play().catch(()=>{});setConnected();});
+    mc.on('close',()=>{mediaCall=null;callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.waiting);});
+    mc.on('error',()=>{mediaCall=null;callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.error);});
+    if(autoAnswer) mc.answer(stream||undefined);
   };
-  create.addEventListener('click',async()=>{try{await loadPeer();peer=new window.Peer();peer.on('open',id=>{roomUrl=makeLink(id);link.value=roomUrl;invite.hidden=false;share.disabled=false;copyBtn.disabled=false;callBtn.disabled=true;status.textContent=text.waiting;renderQr().catch(()=>{});});peer.on('call',incoming=>{pendingIncoming=incoming;callBtn.textContent=text.accept;callBtn.disabled=false;status.textContent=text.incoming;incoming.on('close',()=>{if(pendingIncoming===incoming){pendingIncoming=null;callBtn.disabled=true;callBtn.textContent=text.call;status.textContent=text.waiting;}});incoming.on('error',()=>{if(pendingIncoming===incoming){pendingIncoming=null;callBtn.disabled=true;callBtn.textContent=text.call;status.textContent=text.error;}});});peer.on('error',()=>status.textContent=text.error);create.disabled=true;}catch(e){status.textContent=text.error;}});
-  const copyLink=async()=>{try{await navigator.clipboard.writeText(roomUrl);status.textContent=text.invite;}catch(e){link.select();document.execCommand('copy');}};
-  copyBtn.addEventListener('click',copyLink);share.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:text.title,url:roomUrl});}catch(e){}}else await copyLink();});
-  callBtn.addEventListener('click',placeCall);
+  const setupPeerEvents=()=>{
+    peer.on('disconnected',()=>{setStatus('Signalizácia bola prerušená – obnovujem spojenie…');try{peer.reconnect();}catch{}});
+    peer.on('error',e=>{setStatus(text.error+(e?.type?` (${e.type})`:''));});
+  };
+  const acceptIncoming=async()=>{
+    if(!pendingConn)return;
+    try{
+      callBtn.disabled=true;callBtn.textContent=text.accepting;
+      const s=await startLocalStream();
+      const target=pendingConn.peer;
+      try{pendingConn.send({type:'call-accepted'});}catch{}
+      mediaCall=peer.call(target,s,{metadata:{app:'FOX P2P',version:'0.3.0'}});
+      wireMediaCall(mediaCall,false);
+      pendingConn=null;
+    }catch(e){callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.error);}
+  };
+  const rejectIncoming=()=>{if(pendingConn){try{pendingConn.send({type:'call-rejected'});pendingConn.close()}catch{}pendingConn=null;}callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.rejected);};
+  const setupIncomingConnection=conn=>{
+    pendingConn=conn;
+    const activate=()=>{callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.incoming);};
+    conn.on('open',activate);
+    conn.on('data',data=>{
+      if(data?.type==='call-request')activate();
+      if(data?.type==='call-cancel'){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.waiting);}
+    });
+    conn.on('close',()=>{if(pendingConn===conn){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.waiting);}});
+    conn.on('error',()=>{if(pendingConn===conn){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.error);}});
+  };
+  const requestCall=async()=>{
+    if(!peer||!ready||!remoteId){setStatus(text.needConnection);return;}
+    try{
+      const s=await startLocalStream();
+      callBtn.disabled=true;callBtn.textContent=text.calling;setStatus(text.calling);
+      if(!dataConn||!dataConn.open){dataConn=peer.connect(remoteId,{label:'fox-call-control',reliable:true,metadata:{app:'FOX P2P',version:'0.3.0'}});}
+      const sendRequest=()=>{try{dataConn.send({type:'call-request'});}catch{setStatus(text.error);callBtn.disabled=false;callBtn.textContent=text.call;}};
+      if(dataConn.open)sendRequest();else dataConn.on('open',sendRequest);
+      dataConn.on('data',data=>{
+        if(data?.type==='call-accepted'){setStatus(text.calling);}
+        if(data?.type==='call-rejected'){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.rejected);}
+      });
+      dataConn.on('close',()=>{if(!mediaCall){callBtn.disabled=false;callBtn.textContent=text.call;}});
+    }catch(e){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.error);}
+  };
+  create.addEventListener('click',async()=>{
+    try{
+      await loadPeer(); role='host'; peer=new window.Peer(peerOptions); setupPeerEvents();
+      peer.on('open',id=>{hostPeerId=id;ready=true;roomUrl=makeLink(id);link.value=roomUrl;invite.hidden=false;share.disabled=false;copyBtn.disabled=false;callBtn.disabled=true;setStatus(text.waiting);renderQr().catch(()=>{});});
+      peer.on('connection',setupIncomingConnection);
+      peer.on('call',incoming=>{if(stream)wireMediaCall(incoming,true);else{pendingConn={peer:incoming.peer,media:incoming};callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.incoming);}});
+      create.disabled=true;
+    }catch(e){setStatus(text.error);}
+  });
+  callBtn.addEventListener('click',()=>{if(pendingConn && pendingConn.peer && !pendingConn.send)acceptIncoming();else requestCall();});
+  copyBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(roomUrl);setStatus(text.invite);}catch{link.select();document.execCommand('copy');}});
+  share.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:text.title,url:roomUrl});}catch{}}else{try{await navigator.clipboard.writeText(roomUrl);setStatus(text.invite);}catch{link.select();document.execCommand('copy');}}});
   mic.addEventListener('click',()=>{if(stream){stream.getAudioTracks().forEach(x=>x.enabled=!x.enabled);mic.textContent=stream.getAudioTracks()[0].enabled?text.stop:text.start;}});
-  if(remoteId){(async()=>{try{await loadPeer();peer=new window.Peer();peer.on('open',()=>{callBtn.disabled=false;status.textContent=text.waiting;});peer.on('error',()=>status.textContent=text.error);}catch(e){status.textContent=text.error;}})();}
+  if(remoteId){
+    role='client';
+    (async()=>{
+      try{
+        await loadPeer(); peer=new window.Peer(peerOptions); setupPeerEvents();
+        peer.on('open',()=>{ready=true;callBtn.disabled=false;setStatus(text.waiting);});
+        peer.on('call',incoming=>{try{wireMediaCall(incoming,true);}catch{setStatus(text.error);}});
+        peer.on('connection',conn=>{dataConn=conn;conn.on('data',data=>{if(data?.type==='call-accepted')setStatus(text.calling);if(data?.type==='call-rejected'){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.rejected);}});});
+      }catch(e){setStatus(text.error);}
+    })();
+  }
 }
 </script>
