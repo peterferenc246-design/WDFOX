@@ -4,77 +4,141 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0b1220">
-  <meta name="build" content="2026-09-11-01">
-  <title>FOX Live Translator</title>
+  <meta name="description" content="FOX Live Voice — bezpečné spojenie hlasového hovoru cez link alebo QR kód.">
+  <title>FOX Live Voice</title>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
     :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101828;background:#eef2f7}
-    *{box-sizing:border-box} body{margin:0;min-height:100vh;display:flex;justify-content:center;padding:20px}
-    main{width:min(680px,100%);margin:auto;background:#fff;border-radius:28px;padding:24px;box-shadow:0 12px 40px #10182818}
-    h1{font-size:clamp(30px,8vw,48px);margin:0 0 8px;letter-spacing:-1px}.sub{color:#667085;margin:0 0 22px}
-    .row{display:flex;gap:10px;align-items:center;margin-bottom:18px}.select{flex:1;padding:14px;border:1px solid #d0d5dd;border-radius:14px;font-size:16px;background:#fff}
-    .swap{width:50px;height:50px;border:0;border-radius:14px;background:#eef2f6;font-size:22px}
-    .record{width:100%;min-height:64px;border:0;border-radius:18px;background:#111827;color:#fff;font-size:18px;font-weight:750;letter-spacing:.2px}.record.on{background:#b42318}
-    .status{margin:16px 0;padding:13px 15px;border-radius:14px;background:#f2f4f7;color:#475467}.status.ok{background:#ecfdf3;color:#067647}.status.err{background:#fef3f2;color:#b42318}
-    .card{padding:16px;border:1px solid #eaecf0;border-radius:18px;margin-top:12px}.label{font-size:12px;font-weight:750;text-transform:uppercase;color:#667085;letter-spacing:.7px}.text{font-size:20px;line-height:1.45;margin-top:7px;white-space:pre-wrap}
-    audio{width:100%;margin-top:14px}.hint{font-size:13px;color:#667085;line-height:1.45;margin-top:18px}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;justify-content:center;padding:18px}
+    main{width:min(720px,100%);margin:auto;background:#fff;border-radius:28px;padding:24px;box-shadow:0 12px 40px #10182818}
+    h1{font-size:clamp(30px,8vw,48px);margin:0 0 6px;letter-spacing:-1px}.sub{color:#667085;margin:0 0 22px;font-size:17px}
+    .panel{padding:18px;border:1px solid #eaecf0;border-radius:20px;margin-top:14px}.panel h2{margin:0 0 8px;font-size:20px}.muted{color:#667085;line-height:1.45}
+    button{cursor:pointer}.primary{width:100%;min-height:64px;border:0;border-radius:18px;background:#111827;color:#fff;font-size:18px;font-weight:750}.primary.on{background:#b42318}.secondary{border:1px solid #d0d5dd;background:#fff;border-radius:14px;padding:12px 15px;font-weight:650}
+    .status{margin:16px 0;padding:13px 15px;border-radius:14px;background:#f2f4f7;color:#475467}.status.ok{background:#ecfdf3;color:#067647}.status.warn{background:#fffaeb;color:#b54708}.status.err{background:#fef3f2;color:#b42318}
+    .linkbox{display:flex;gap:8px;align-items:stretch}.linkbox input{min-width:0;flex:1;padding:13px;border:1px solid #d0d5dd;border-radius:14px;font-size:14px;background:#f9fafb}
+    .qrwrap{display:flex;justify-content:center;padding:16px 0 4px}.qr{background:#fff;padding:12px;border-radius:16px;display:inline-flex}.qr img,.qr canvas{display:block}
+    .callstate{text-align:center;padding:18px;border-radius:18px;background:#f2f4f7}.callstate .big{font-size:42px;line-height:1;margin-bottom:8px}.callstate strong{font-size:20px}
+    .actions{display:flex;gap:10px;margin-top:12px}.actions button{flex:1}.accept{background:#067647;color:#fff;border:0}.hang{background:#b42318;color:#fff;border:0}
+    audio{width:100%;margin-top:14px}.hidden{display:none!important}.role{display:inline-block;padding:7px 10px;border-radius:999px;background:#eef2ff;color:#3538cd;font-size:13px;font-weight:750}
+    .hint{font-size:13px;color:#667085;line-height:1.5;margin-top:18px}.divider{height:1px;background:#eaecf0;margin:18px 0}
   </style>
 </head>
 <body>
 <main>
-  <h1>FOX Live Translator</h1>
-  <p class="sub">🎤 Slovenčina ↔ Deutsch · hlasový preklad</p>
+  <h1>FOX Live Voice</h1>
+  <p class="sub">📞 Hlasové spojenie cez link alebo QR kód</p>
+  <div id="role" class="role">Pripravené</div>
 
-  <div class="row">
-    <select id="source" class="select"><option value="sk">🇸🇰 Slovenčina</option><option value="de">🇩🇪 Deutsch</option></select>
-    <button id="swap" class="swap" aria-label="Vymeniť jazyky">↔️</button>
-    <select id="target" class="select"><option value="de">🇩🇪 Deutsch</option><option value="sk">🇸🇰 Slovenčina</option></select>
+  <div id="hostPanel" class="panel">
+    <h2>1. Vytvoriť spojenie</h2>
+    <p class="muted">Vytvoríš jednorazové spojenie. Link môžeš poslať klientovi alebo mu ukážeš QR kód.</p>
+    <button id="create" class="primary">🔗 VYTVORIŤ SPOJENIE</button>
+    <div id="sharePanel" class="hidden">
+      <div class="divider"></div>
+      <p class="muted"><strong>Pošli tento link klientovi:</strong></p>
+      <div class="linkbox"><input id="shareLink" readonly><button id="copy" class="secondary">Kopírovať</button></div>
+      <div class="qrwrap"><div id="qr" class="qr"></div></div>
+      <p class="muted" style="text-align:center">Klient otvorí link alebo naskenuje QR. Keď sa pripojí, tvoj počítač zazvoní.</p>
+    </div>
   </div>
 
-  <button id="record" class="record">🎤 ZAČAŤ HOVORIŤ</button>
-  <div id="status" class="status">Pripravené. Stlač tlačidlo a hovoriť môžeš až 20 sekúnd.</div>
+  <div id="clientPanel" class="panel hidden">
+    <h2>Pripojenie FOX Live Voice</h2>
+    <p class="muted">Spojenie bolo vytvorené. Pripájam ťa k operátorovi…</p>
+    <div id="clientStatus" class="status">Pripravujem hovor…</div>
+  </div>
 
-  <section id="results" hidden>
-    <div class="card"><div class="label">Rozpoznaný text</div><div id="transcript" class="text"></div></div>
-    <div class="card"><div class="label">Preklad</div><div id="translation" class="text"></div><audio id="audio" controls hidden></audio></div>
-  </section>
+  <div id="callPanel" class="panel hidden">
+    <div class="callstate">
+      <div id="callIcon" class="big">📞</div>
+      <strong id="callTitle">Čakám na hovor</strong>
+      <div id="callText" class="muted">Klient sa môže pripojiť cez vytvorený link.</div>
+    </div>
+    <div id="incomingActions" class="actions hidden">
+      <button id="accept" class="primary accept">📞 PRIJAŤ HOVOR</button>
+      <button id="reject" class="secondary">Odmietnuť</button>
+    </div>
+    <button id="hangup" class="primary hang hidden" style="margin-top:12px">📴 UKONČIŤ HOVOR</button>
+    <audio id="remoteAudio" autoplay playsinline></audio>
+  </div>
 
-  <p class="hint">Webová verzia používa mikrofón telefónu. Prehliadač musí mať povolený prístup k mikrofónu. Nahrávka sa odošle na server iba po zastavení nahrávania.</p>
+  <div id="translatorPanel" class="panel hidden">
+    <h2>FOX Translator</h2>
+    <p class="muted">Hlasové spojenie je aktívne. Ďalšia fáza pridá živý preklad replík SK ↔ DE priamo do hovoru.</p>
+  </div>
+
+  <p class="hint">Mikrofón a reproduktor povoľ v prehliadači. Hovor používa WebRTC; po nadviazaní spojenia ide hlas priamo medzi zariadeniami.</p>
 </main>
 <script>
 const $=id=>document.getElementById(id);
-let recorder=null,chunks=[],timer=null,stream=null;
-const API='/api/translate-voice';
-function status(msg,type=''){ $('status').textContent=msg; $('status').className='status '+type; }
-function mime(){const list=['audio/webm;codecs=opus','audio/webm','audio/mp4'];return list.find(x=>MediaRecorder.isTypeSupported(x))||''}
-function stopTracks(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
-async function start(){
-  try{
-    if(!navigator.mediaDevices?.getUserMedia) throw new Error('Tento prehliadač nepodporuje prístup k mikrofónu.');
-    stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks=[]; const mt=mime(); recorder=new MediaRecorder(stream,mt?{mimeType:mt}:undefined);
-    recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
-    recorder.onstop=send;
-    recorder.start(); $('record').classList.add('on'); $('record').textContent='⏹️ ZASTAVIŤ'; status('Nahrávam… hovor teraz. Maximálne 20 sekúnd.');
-    timer=setTimeout(()=>stop(),20000);
-  }catch(e){stopTracks();status('Mikrofón sa nepodarilo spustiť: '+e.message,'err')}
+let peer=null,currentCall=null,localStream=null,audioCtx=null,ringTimer=null,role='host';
+const params=new URLSearchParams(location.search); const remotePeerId=params.get('call');
+
+function status(msg,type=''){const el=$('clientStatus');if(el){el.textContent=msg;el.className='status '+type}}
+function setRole(text){$('role').textContent=text}
+function showCall(){ $('callPanel').classList.remove('hidden'); }
+function ensureAudioContext(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
 }
-function stop(){if(!recorder||recorder.state==='inactive')return;clearTimeout(timer);recorder.stop();$('record').classList.remove('on');$('record').textContent='🎤 SPRACOVÁVAM…';$('record').disabled=true;stopTracks()}
-async function send(){
-  try{
-    const type=recorder.mimeType||'audio/webm'; const ext=type.includes('mp4')?'m4a':'webm'; const blob=new Blob(chunks,{type});
-    if(blob.size>4*1024*1024) throw new Error('Nahrávka je príliš veľká. Skús kratšiu vetu.');
-    const fd=new FormData();fd.append('audio',blob,'speech.'+ext);fd.append('sourceLanguage',$('source').value);fd.append('targetLanguage',$('target').value);fd.append('speakResult','true');
-    status('⏳ Rozpoznávam a prekladám…');
-    const r=await fetch(API,{method:'POST',body:fd}); const data=await r.json();
-    if(!r.ok) throw new Error(data.error||('HTTP '+r.status));
-    $('transcript').textContent=data.transcript||'';$('translation').textContent=data.translatedText||'';$('results').hidden=false;
-    const audio=$('audio'); if(data.audioBase64){audio.src='data:'+(data.audioMimeType||'audio/wav')+';base64,'+data.audioBase64;audio.hidden=false;audio.play().catch(()=>{});}else audio.hidden=true;
-    status('✅ Preklad hotový.','ok');
-  }catch(e){status('❌ '+e.message,'err')}
-  finally{$('record').disabled=false;$('record').textContent='🎤 ZAČAŤ HOVORIŤ';recorder=null}
+function ringStart(){
+  ensureAudioContext(); ringStop();
+  const beep=()=>{ if(!audioCtx)return; const now=audioCtx.currentTime; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.18,now+.03);g.gain.exponentialRampToValueAtTime(.0001,now+.32);o.connect(g).connect(audioCtx.destination);o.start(now);o.stop(now+.34); };
+  beep(); ringTimer=setInterval(beep,1000);
 }
-$('record').onclick=()=>recorder&&recorder.state==='recording'?stop():start();
-$('swap').onclick=()=>{const a=$('source').value;$('source').value=$('target').value;$('target').value=a};
+function ringStop(){if(ringTimer){clearInterval(ringTimer);ringTimer=null}}
+async function getMic(){
+  if(localStream?.active)return localStream;
+  localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
+  return localStream;
+}
+function attachRemote(stream){$('remoteAudio').srcObject=stream;$('remoteAudio').play().catch(()=>{});}
+function endCall(){
+  ringStop(); if(currentCall){try{currentCall.close()}catch{}currentCall=null}
+  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}
+  $('hangup').classList.add('hidden');$('incomingActions').classList.add('hidden');
+  $('callIcon').textContent='📞';$('callTitle').textContent='Čakám na hovor';$('callText').textContent=role==='host'?'Klient sa môže pripojiť cez vytvorený link.':'Hovor bol ukončený.';
+  $('translatorPanel').classList.add('hidden');
+}
+function wireCall(call){
+  currentCall=call;
+  call.on('stream',attachRemote);
+  call.on('close',endCall);
+  call.on('error',e=>{ringStop();$('callText').textContent='Chyba hovoru: '+(e?.message||'spojenie zlyhalo');$('callTitle').textContent='Hovor sa nepodarilo spojiť';});
+}
+
+async function initHost(){
+  role='host';setRole('Počítač · operátor');$('hostPanel').classList.remove('hidden');showCall();
+  peer=new Peer(undefined,{debug:1});
+  peer.on('open',id=>{
+    const url=new URL(location.href);url.searchParams.set('call',id);const link=url.toString();
+    $('shareLink').value=link;$('sharePanel').classList.remove('hidden');$('qr').innerHTML='';new QRCode($('qr'),{text:link,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+    $('callTitle').textContent='Čakám na klienta';$('callText').textContent='Pošli link alebo ukáž QR kód.';
+  });
+  peer.on('call',call=>{
+    wireCall(call);ringStart();$('callIcon').textContent='🔔';$('callTitle').textContent='PRICHÁDZA HOVOR';$('callText').textContent='Klient sa pripája. Prijmi hovor.';$('incomingActions').classList.remove('hidden');
+  });
+  peer.on('error',e=>{$('callTitle').textContent='Spojenie má chybu';$('callText').textContent=e?.message||'Nepodarilo sa pripojiť k signalizačnej službe.';});
+}
+async function acceptCall(){
+  try{ensureAudioContext();ringStop();const stream=await getMic();currentCall.answer(stream);$('incomingActions').classList.add('hidden');$('hangup').classList.remove('hidden');$('callIcon').textContent='🟢';$('callTitle').textContent='HOVOR AKTÍVNY';$('callText').textContent='Spojenie je aktívne.';$('translatorPanel').classList.remove('hidden');}
+  catch(e){ringStop();$('callText').textContent='Mikrofón sa nepodarilo povoliť: '+e.message;}
+}
+function rejectCall(){ringStop();if(currentCall){try{currentCall.close()}catch{}currentCall=null}$('incomingActions').classList.add('hidden');$('callTitle').textContent='Hovor odmietnutý';$('callText').textContent='Čakám na ďalší hovor.'}
+async function initClient(target){
+  role='client';setRole('Klient · hlasové spojenie');$('hostPanel').classList.add('hidden');$('clientPanel').classList.remove('hidden');showCall();$('callTitle').textContent='Pripájam…';$('callText').textContent='Čakám na prijatie hovoru.';
+  peer=new Peer(undefined,{debug:1});
+  peer.on('open',async()=>{
+    try{status('Povoľ mikrofón, ak sa prehliadač opýta.','warn');const stream=await getMic();const call=peer.call(target,stream,{metadata:{app:'FOX Live Voice',version:'0.2.0'}});wireCall(call);$('callIcon').textContent='📲';$('callTitle').textContent='VOLÁM…';$('callText').textContent='Čakám, kým operátor prijme hovor.';status('Hovor sa vytvára…','warn');$('hangup').classList.remove('hidden');call.on('stream',()=>{status('✅ Hovor je aktívny.','ok');$('callIcon').textContent='🟢';$('callTitle').textContent='HOVOR AKTÍVNY';$('callText').textContent='Môžete hovoriť.';$('translatorPanel').classList.remove('hidden');});}
+    catch(e){status('Mikrofón sa nepodarilo povoliť: '+e.message,'err');$('callTitle').textContent='Mikrofón je potrebný';$('callText').textContent='Povoľ mikrofón a obnov stránku.';}
+  });
+  peer.on('error',e=>{status('Chyba spojenia: '+(e?.message||'neznáma chyba'),'err');$('callTitle').textContent='Spojenie sa nepodarilo';$('callText').textContent=e?.message||'Klient nie je dostupný.';});
+}
+$('create').onclick=()=>{ensureAudioContext();$('create').disabled=true;$('create').textContent='⏳ VYTVÁRAM SPOJENIE…';initHost()};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('shareLink').value);$('copy').textContent='Skopírované ✓';setTimeout(()=>$('copy').textContent='Kopírovať',1800)}catch{prompt('Skopíruj link:', $('shareLink').value)}};
+$('accept').onclick=acceptCall;$('reject').onclick=rejectCall;$('hangup').onclick=endCall;
+if(remotePeerId){initClient(remotePeerId)}
 </script>
 </body>
 </html>
