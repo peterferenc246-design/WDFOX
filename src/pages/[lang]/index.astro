@@ -114,6 +114,42 @@ const content = await getLandingContent(lang);
       }
     })();
   </script>
+  <script is:inline>
+    (function () {
+      var installQrFallback = function () {
+        var app = document.querySelector('[data-call-app]');
+        if (!app) return;
+        var panel = app.querySelector('[data-qr-panel]');
+        var box = app.querySelector('[data-qr]');
+        var input = app.querySelector('[data-link]');
+        if (!panel || !box || !input) return;
+        var url = (input.value || '').trim();
+        if (!url || box.getAttribute('data-qr-url') === url) return;
+        box.setAttribute('data-qr-url', url);
+        box.innerHTML = '';
+        var img = document.createElement('img');
+        img.width = 180;
+        img.height = 180;
+        img.alt = 'QR kód spojenia';
+        img.style.display = 'block';
+        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=' + encodeURIComponent(url);
+        box.appendChild(img);
+        panel.hidden = false;
+      };
+      var scan = function () {
+        installQrFallback();
+        window.setTimeout(installQrFallback, 300);
+        window.setTimeout(installQrFallback, 1000);
+        window.setTimeout(installQrFallback, 2000);
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scan, { once: true });
+      } else {
+        scan();
+      }
+      new MutationObserver(scan).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['value'] });
+    })();
+  </script>
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
