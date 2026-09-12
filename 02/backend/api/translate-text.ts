@@ -11,6 +11,7 @@ type VercelLikeRequest = {
 
 type VercelLikeResponse = {
   status: (code: number) => VercelLikeResponse;
+  setHeader?: (name: string, value: string) => VercelLikeResponse;
   json: (body: unknown) => void;
 };
 
@@ -18,7 +19,21 @@ const sendJson = (res: VercelLikeResponse, status: number, body: unknown) => {
   res.status(status).json(body);
 };
 
+const cors = (res: VercelLikeResponse) => {
+  res.setHeader?.('Access-Control-Allow-Origin', '*');
+  res.setHeader?.('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader?.('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader?.('Access-Control-Max-Age', '86400');
+};
+
 export default async function handler(req: VercelLikeRequest, res: VercelLikeResponse) {
+  cors(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).json({});
+    return;
+  }
+
   if (req.method !== 'POST') {
     sendJson(res, 405, { error: 'Method not allowed' });
     return;
