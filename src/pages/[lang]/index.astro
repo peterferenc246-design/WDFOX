@@ -53,7 +53,9 @@ const content = await getLandingContent(lang);
   <script is:inline>
     (function () {
       var enableCall = function () {
-        var button = document.querySelector('[data-call]');
+        var app = document.querySelector('[data-call-app]');
+        if (!app) return;
+        var button = app.querySelector('[data-call]');
         if (!button) return;
         button.removeAttribute('disabled');
         button.setAttribute('aria-disabled', 'false');
@@ -61,57 +63,9 @@ const content = await getLandingContent(lang);
         button.style.opacity = '1';
         button.style.cursor = 'pointer';
       };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', enableCall, { once: true });
-      } else {
-        enableCall();
-      }
-      [100, 500, 1500, 3000].forEach(function (ms) { window.setTimeout(enableCall, ms); });
-      var attach = function () {
-        var button = document.querySelector('[data-call]');
-        if (!button) return;
-        new MutationObserver(enableCall).observe(button, { attributes: true, attributeFilter: ['disabled'] });
-        enableCall();
-      };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', attach, { once: true });
-      } else {
-        attach();
-      }
-    })();
-  </script>
-  <script is:inline>
-    (function () {
-      var bootClientCall = function () {
-        var params = new URLSearchParams(window.location.search);
-        if (!params.has('foxPeer')) return;
-        var app = document.querySelector('[data-call-app]');
-        if (!app) return;
-        var call = app.querySelector('[data-call]');
-        var create = app.querySelector('[data-create]');
-        if (!call || !create) return;
-        call.removeAttribute('disabled');
-        call.style.pointerEvents = 'auto';
-        var text = (call.textContent || '').trim();
-        if (!text || text === 'USKUTOČNIŤ HOVOR' || text === 'ANRUF STARTEN' || text === 'MAKE A CALL') {
-          create.click();
-          var tries = 0;
-          var retry = function () {
-            tries += 1;
-            if (tries > 12) return;
-            if (!call.disabled && /USKUTOČNIŤ HOVOR|ANRUF STARTEN|MAKE A CALL/.test((call.textContent || '').trim())) {
-              call.click();
-              window.setTimeout(retry, 500);
-            }
-          };
-          window.setTimeout(retry, 700);
-        }
-      };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () { window.setTimeout(bootClientCall, 250); }, { once: true });
-      } else {
-        window.setTimeout(bootClientCall, 250);
-      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enableCall, { once: true });
+      else enableCall();
+      [100, 500, 1500].forEach(function (ms) { window.setTimeout(enableCall, ms); });
     })();
   </script>
   <script is:inline>
@@ -142,112 +96,9 @@ const content = await getLandingContent(lang);
         window.setTimeout(installQrFallback, 1000);
         window.setTimeout(installQrFallback, 2000);
       };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', scan, { once: true });
-      } else {
-        scan();
-      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan, { once: true });
+      else scan();
       new MutationObserver(scan).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['value'] });
-    })();
-  </script>
-  <script is:inline>
-    (function () {
-      // Host-side safety bridge: accept the actual PeerJS media call on the user click.
-      // This complements the UI handler inside FoxLiveCallTranslator and guarantees that
-      // the incoming MediaConnection is answered with the PC microphone.
-      var incomingMedia = null;
-      var hostPeer = null;
-      var originalOn = null;
-      var installed = false;
-
-      var install = function () {
-        if (installed || !window.Peer || !window.Peer.prototype) return;
-        installed = true;
-        originalOn = window.Peer.prototype.on;
-        window.Peer.prototype.on = function (event, callback) {
-          if (event === 'call') {
-            var wrapped = function (call) {
-              incomingMedia = call;
-              hostPeer = this;
-              return callback.apply(this, arguments);
-            };
-            return originalOn.call(this, event, wrapped);
-          }
-          return originalOn.call(this, event, callback);
-        };
-      };
-
-      var answer = async function (ev) {
-        var button = ev.target.closest('[data-call]');
-        if (!button || !incomingMedia || !hostPeer) return;
-        if (incomingMedia.open) return;
-        ev.preventDefault();
-        ev.stopImmediatePropagation();
-
-        var app = button.closest('[data-call-app]');
-        var status = app && app.querySelector('[data-status]');
-        var audio = app && app.querySelector('[data-original-audio]');
-        var mic = app && app.querySelector('[data-mic]');
-        var livebar = app && app.querySelector('[data-livebar]');
-        var callText = app && app.dataset.copy ? JSON.parse(app.dataset.copy) : {};
-
-        try {
-          if (status) status.textContent = callText.micPermission || 'Povoľ mikrofón…';
-          var local = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-            video: false
-          });
-          local.getAudioTracks().forEach(function (track) { track.enabled = true; });
-
-          incomingMedia.on('stream', function (remote) {
-            if (audio) {
-              audio.srcObject = remote;
-              audio.play().catch(function () {});
-            }
-            if (status) status.textContent = callText.connected || 'HOVOR AKTÍVNY';
-            if (mic) { mic.disabled = false; mic.textContent = callText.stopMic || 'VYPNÚŤ MIKROFÓN'; }
-            if (livebar) livebar.classList.remove('hidden');
-          });
-          incomingMedia.on('close', function () {
-            if (status) status.textContent = callText.waiting || 'Čakám na druhé zariadenie…';
-          });
-          incomingMedia.on('error', function (err) { console.error('FOX host media', err); });
-
-          incomingMedia.answer(local);
-
-          // Confirm acceptance over the existing data channel, then reconnect it so the
-          // component's translation channel remains available after the ringtone is stopped.
-          var remotePeerId = incomingMedia.peer;
-          var oldConnections = hostPeer.connections && hostPeer.connections[remotePeerId];
-          if (oldConnections && oldConnections.length) {
-            oldConnections.forEach(function (conn) {
-              try { if (conn.open) conn.send({ type: 'call-accepted' }); } catch (e) {}
-              window.setTimeout(function () { try { conn.close(); } catch (e) {} }, 80);
-            });
-          }
-          window.setTimeout(function () {
-            if (!remotePeerId || hostPeer.destroyed) return;
-            try { hostPeer.connect(remotePeerId); } catch (e) { console.error('FOX host data reconnect', e); }
-          }, 180);
-
-          button.disabled = true;
-          button.textContent = callText.connected || 'HOVOR AKTÍVNY';
-          incomingMedia = null;
-        } catch (err) {
-          console.error('FOX host accept', err);
-          if (status) status.textContent = (callText.error || 'Preklad sa nepodaril') + ' (' + ((err && err.name) || 'MIC') + ')';
-        }
-      };
-
-      var boot = function () {
-        install();
-        var button = document.querySelector('[data-call]');
-        if (button && !button.dataset.hostAcceptBridge) {
-          button.dataset.hostAcceptBridge = '1';
-          button.addEventListener('click', answer, true);
-        }
-      };
-      [0, 100, 500, 1000, 2000].forEach(function (ms) { window.setTimeout(boot, ms); });
     })();
   </script>
   <Fragment slot="footer-links">
