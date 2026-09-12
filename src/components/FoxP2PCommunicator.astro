@@ -1,0 +1,50 @@
+---
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const copy = {
+  sk: { title:'FOX P2P KOMUNIKÁTOR', intro:'Priame hlasové spojenie medzi počítačom alebo mobilom bez WhatsAppu.', create:'VYTVORIŤ SPOJENIE', share:'Zdieľať pozvánku', copy:'Kopírovať odkaz', join:'PRIPOJIŤ SA', code:'Kód spojenia', waiting:'Čakám na druhé zariadenie…', connected:'Spojenie je aktívne.', start:'ZAPNÚŤ MIKROFÓN', stop:'VYPNÚŤ MIKROFÓN', invite:'Pošli tento odkaz druhej osobe. Na mobile ho iba otvorí – žiadne skenovanie QR.', error:'Spojenie sa nepodarilo vytvoriť.' },
+  de: { title:'FOX P2P KOMMUNIKATOR', intro:'Direkte Sprachverbindung zwischen Computer oder Smartphone – ohne WhatsApp.', create:'VERBINDUNG ERSTELLEN', share:'Einladung teilen', copy:'Link kopieren', join:'VERBINDEN', code:'Verbindungscode', waiting:'Warte auf das zweite Gerät…', connected:'Verbindung ist aktiv.', start:'MIKROFON EINSCHALTEN', stop:'MIKROFON AUSSCHALTEN', invite:'Senden Sie diesen Link. Auf dem Smartphone einfach öffnen – kein QR-Scan.', error:'Verbindung konnte nicht hergestellt werden.' },
+  en: { title:'FOX P2P COMMUNICATOR', intro:'Direct voice connection between computer or smartphone – without WhatsApp.', create:'CREATE CONNECTION', share:'Share invitation', copy:'Copy link', join:'CONNECT', code:'Connection code', waiting:'Waiting for the second device…', connected:'Connection is active.', start:'TURN MICROPHONE ON', stop:'TURN MICROPHONE OFF', invite:'Send this link to the other person. On mobile they simply open it – no QR scan.', error:'Connection could not be established.' }
+};
+const t = copy[locale as keyof typeof copy] || copy.en;
+---
+<section class="fox-p2p" data-p2p data-copy={JSON.stringify(t)}>
+  <div class="p2p-shell">
+    <p class="eyebrow">FOX TECHNOLOGY LAB</p>
+    <h2>{t.title}</h2>
+    <p class="intro">{t.intro}</p>
+    <div class="p2p-status" data-status>{t.waiting}</div>
+    <div class="p2p-actions">
+      <button class="primary" data-create>{t.create}</button>
+      <button class="secondary" data-share disabled>{t.share}</button>
+      <button class="secondary" data-copy disabled>{t.copy}</button>
+    </div>
+    <div class="invite" data-invite hidden>
+      <label>{t.code}</label>
+      <input data-link readonly />
+      <p>{t.invite}</p>
+    </div>
+    <button class="mic" data-mic disabled>{t.start}</button>
+    <audio data-audio autoplay playsinline></audio>
+  </div>
+</section>
+<style>
+.fox-p2p{padding:0 0 42px}.p2p-shell{border:1px solid #ececec;border-radius:28px;background:#121a2a;color:#fff;padding:30px;box-shadow:0 22px 60px rgba(20,24,35,.12)}.p2p-shell h2{margin:5px 0 8px;font-size:clamp(24px,4vw,38px);letter-spacing:-.03em}.eyebrow{margin:0;color:#f36a0a;font-size:10px;font-weight:900;letter-spacing:.12em}.intro{margin:0;color:#b9c1ce;font-size:14px;line-height:1.6}.p2p-status{margin:20px 0;padding:13px 15px;border-radius:13px;background:#1d2635;color:#dce2ea;font-size:13px}.p2p-actions{display:flex;gap:9px;flex-wrap:wrap}.p2p-actions button,.mic{border:0;border-radius:12px;padding:12px 15px;font-size:11px;font-weight:900;cursor:pointer}.primary,.mic{background:#f36a0a;color:#fff}.secondary{background:#fff;color:#172033}.p2p-actions button:disabled,.mic:disabled{opacity:.4;cursor:default}.invite{margin-top:16px}.invite label{display:block;margin-bottom:7px;color:#b9c1ce;font-size:10px;font-weight:800;text-transform:uppercase}.invite input{width:100%;box-sizing:border-box;border:1px solid #344054;border-radius:11px;background:#0d1420;color:#fff;padding:12px;font-size:13px}.invite p{margin:8px 0 0;color:#98a2b3;font-size:11px}.mic{margin-top:16px}.fox-p2p audio{display:none}@media(max-width:650px){.p2p-shell{padding:22px;border-radius:22px}.p2p-actions{display:grid;grid-template-columns:1fr}.p2p-actions button{width:100%}.mic{width:100%}}
+</style>
+<script define:vars={{ t }}>
+const root=document.querySelector('[data-p2p]');
+if(root){
+  const text=JSON.parse(root.dataset.copy||'{}');
+  const create=root.querySelector('[data-create]'); const share=root.querySelector('[data-share]'); const copyBtn=root.querySelector('[data-copy]'); const invite=root.querySelector('[data-invite]'); const link=root.querySelector('[data-link]'); const mic=root.querySelector('[data-mic]'); const status=root.querySelector('[data-status]'); const audio=root.querySelector('[data-audio]');
+  let peer=null,call=null,stream=null,roomUrl='';
+  const loadPeer=()=>new Promise((resolve,reject)=>{ if(window.Peer)return resolve(); const s=document.createElement('script'); s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'; s.onload=resolve; s.onerror=reject; document.head.appendChild(s); });
+  const setConnected=()=>{status.textContent=text.connected;mic.disabled=false;};
+  const makeLink=id=>`${location.origin}${location.pathname}?foxPeer=${encodeURIComponent(id)}`;
+  create.addEventListener('click',async()=>{try{await loadPeer();peer=new window.Peer();peer.on('open',id=>{roomUrl=makeLink(id);link.value=roomUrl;invite.hidden=false;share.disabled=false;copyBtn.disabled=false;status.textContent=text.waiting;});peer.on('call',incoming=>{navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{stream=s;incoming.answer(s);call=incoming;incoming.on('stream',remote=>{audio.srcObject=remote;setConnected();});}).catch(()=>status.textContent=text.error);});peer.on('error',()=>status.textContent=text.error);create.disabled=true;}catch(e){status.textContent=text.error;}});
+  const copyLink=async()=>{try{await navigator.clipboard.writeText(roomUrl);status.textContent=text.invite;}catch(e){link.select();document.execCommand('copy');}};
+  copyBtn.addEventListener('click',copyLink);share.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:text.title,url:roomUrl});}catch(e){}}else await copyLink();});
+  mic.addEventListener('click',()=>{if(stream){stream.getTracks().forEach(x=>x.enabled=!x.enabled);mic.textContent=stream.getTracks()[0].enabled?text.stop:text.start;}});
+  const params=new URLSearchParams(location.search); const remoteId=params.get('foxPeer');
+  if(remoteId){(async()=>{try{await loadPeer();peer=new window.Peer();peer.on('open',async()=>{stream=await navigator.mediaDevices.getUserMedia({audio:true});call=peer.call(remoteId,stream);call.on('stream',remote=>{audio.srcObject=remote;setConnected();});});peer.on('error',()=>status.textContent=text.error);}catch(e){status.textContent=text.error;}})();}
+}
+</script>
