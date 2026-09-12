@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
+import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -21,6 +22,7 @@ const content = await getLandingContent(lang);
     <a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
   <Landing content={content} />
+  <FoxLiveTranslator locale={lang} />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
