@@ -64,7 +64,7 @@ export async function POST(request: Request): Promise<Response> {
     const sourceName = sourceLanguage === 'sk' ? 'Slovak' : 'German';
     const targetName = targetLanguage === 'sk' ? 'Slovak' : 'German';
     const mimeType = audio.type || 'audio/mp4';
-    const model = process.env.TRANSCRIPTION_MODEL || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const model = process.env.TRANSCRIPTION_MODEL || process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
     const transcription = await gemini(model, {
       contents: [{ parts: [
@@ -85,7 +85,7 @@ export async function POST(request: Request): Promise<Response> {
     let audioMimeType: string | undefined;
     if (speakResult) {
       try {
-        const tts = await gemini(process.env.SPEECH_MODEL || 'gemini-2.5-flash-preview-tts', {
+        const tts = await gemini(process.env.SPEECH_MODEL || 'gemini-3.1-flash-tts-preview', {
           contents: [{ parts: [{ text: translatedText }] }],
           generationConfig: {
             responseModalities: ['AUDIO'],
