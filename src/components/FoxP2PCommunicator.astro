@@ -45,7 +45,7 @@ const root=document.querySelector('[data-p2p]');
 if(root){
   const text=JSON.parse(root.dataset.copy||'{}');
   const create=root.querySelector('[data-create]'); const callBtn=root.querySelector('[data-call]'); const share=root.querySelector('[data-share]'); const copyBtn=root.querySelector('[data-copy]'); const invite=root.querySelector('[data-invite]'); const link=root.querySelector('[data-link]'); const mic=root.querySelector('[data-mic]'); const status=root.querySelector('[data-status]'); const audio=root.querySelector('[data-audio]'); const qrPanel=root.querySelector('[data-qr-panel]'); const qr=root.querySelector('[data-qr]');
-  let peer=null,mediaCall=null,dataConn=null,stream=null,roomUrl='',pendingConn=null,hostPeerId=null,role='host',ready=false;
+  let peer=null,mediaCall=null,dataConn=null,stream=null,roomUrl='',pendingConn=null,role='host',ready=false;
   const remoteId=new URLSearchParams(location.search).get('foxPeer');
   const loadScript=(src,test)=>new Promise((resolve,reject)=>{if(test())return resolve();const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});
   const loadPeer=()=>loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',()=>!!window.Peer);
@@ -56,79 +56,16 @@ if(root){
   const startLocalStream=async()=>{if(!stream)stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});stream.getAudioTracks().forEach(track=>track.enabled=true);mic.disabled=false;mic.textContent=text.stop;return stream;};
   const makeLink=id=>`${location.origin}${location.pathname}?foxPeer=${encodeURIComponent(id)}`;
   const renderQr=async()=>{await loadQr();qr.innerHTML='';new window.QRCode(qr,{text:roomUrl,width:210,height:210,colorDark:'#000000',colorLight:'#ffffff',correctLevel:window.QRCode.CorrectLevel.M});qrPanel.hidden=false;};
-  const wireMediaCall=(mc,autoAnswer=false)=>{
-    mediaCall=mc;
-    mc.on('stream',remote=>{audio.srcObject=remote;audio.play().catch(()=>{});setConnected();});
-    mc.on('close',()=>{mediaCall=null;callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.waiting);});
-    mc.on('error',()=>{mediaCall=null;callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.error);});
-    if(autoAnswer) mc.answer(stream||undefined);
-  };
-  const setupPeerEvents=()=>{
-    peer.on('disconnected',()=>{setStatus('Signalizácia bola prerušená – obnovujem spojenie…');try{peer.reconnect();}catch{}});
-    peer.on('error',e=>{setStatus(text.error+(e?.type?` (${e.type})`:''));});
-  };
-  const acceptIncoming=async()=>{
-    if(!pendingConn)return;
-    try{
-      callBtn.disabled=true;callBtn.textContent=text.accepting;
-      const s=await startLocalStream();
-      const target=pendingConn.peer;
-      try{pendingConn.send({type:'call-accepted'});}catch{}
-      mediaCall=peer.call(target,s,{metadata:{app:'FOX P2P',version:'0.3.0'}});
-      wireMediaCall(mediaCall,false);
-      pendingConn=null;
-    }catch(e){callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.error);}
-  };
-  const rejectIncoming=()=>{if(pendingConn){try{pendingConn.send({type:'call-rejected'});pendingConn.close()}catch{}pendingConn=null;}callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.rejected);};
-  const setupIncomingConnection=conn=>{
-    pendingConn=conn;
-    const activate=()=>{callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.incoming);};
-    conn.on('open',activate);
-    conn.on('data',data=>{
-      if(data?.type==='call-request')activate();
-      if(data?.type==='call-cancel'){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.waiting);}
-    });
-    conn.on('close',()=>{if(pendingConn===conn){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.waiting);}});
-    conn.on('error',()=>{if(pendingConn===conn){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.error);}});
-  };
-  const requestCall=async()=>{
-    if(!peer||!ready||!remoteId){setStatus(text.needConnection);return;}
-    try{
-      const s=await startLocalStream();
-      callBtn.disabled=true;callBtn.textContent=text.calling;setStatus(text.calling);
-      if(!dataConn||!dataConn.open){dataConn=peer.connect(remoteId,{label:'fox-call-control',reliable:true,metadata:{app:'FOX P2P',version:'0.3.0'}});}
-      const sendRequest=()=>{try{dataConn.send({type:'call-request'});}catch{setStatus(text.error);callBtn.disabled=false;callBtn.textContent=text.call;}};
-      if(dataConn.open)sendRequest();else dataConn.on('open',sendRequest);
-      dataConn.on('data',data=>{
-        if(data?.type==='call-accepted'){setStatus(text.calling);}
-        if(data?.type==='call-rejected'){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.rejected);}
-      });
-      dataConn.on('close',()=>{if(!mediaCall){callBtn.disabled=false;callBtn.textContent=text.call;}});
-    }catch(e){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.error);}
-  };
-  create.addEventListener('click',async()=>{
-    try{
-      await loadPeer(); role='host'; peer=new window.Peer(peerOptions); setupPeerEvents();
-      peer.on('open',id=>{hostPeerId=id;ready=true;roomUrl=makeLink(id);link.value=roomUrl;invite.hidden=false;share.disabled=false;copyBtn.disabled=false;callBtn.disabled=true;setStatus(text.waiting);renderQr().catch(()=>{});});
-      peer.on('connection',setupIncomingConnection);
-      peer.on('call',incoming=>{if(stream)wireMediaCall(incoming,true);else{pendingConn={peer:incoming.peer,media:incoming};callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.incoming);}});
-      create.disabled=true;
-    }catch(e){setStatus(text.error);}
-  });
-  callBtn.addEventListener('click',()=>{if(pendingConn && pendingConn.peer && !pendingConn.send)acceptIncoming();else requestCall();});
+  const wireMediaCall=(mc,autoAnswer=false)=>{mediaCall=mc;mc.on('stream',remote=>{audio.srcObject=remote;audio.play().catch(()=>{});setConnected();});mc.on('close',()=>{mediaCall=null;callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.waiting);});mc.on('error',()=>{mediaCall=null;callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.error);});if(autoAnswer)mc.answer(stream||undefined);};
+  const setupPeerEvents=()=>{peer.on('disconnected',()=>{setStatus('Signalizácia bola prerušená – obnovujem spojenie…');try{peer.reconnect();}catch{}});peer.on('error',e=>{setStatus(text.error+(e?.type?` (${e.type})`:''));});};
+  const acceptIncoming=async()=>{if(!pendingConn)return;try{callBtn.disabled=true;callBtn.textContent=text.accepting;const s=await startLocalStream();const target=pendingConn.peer;try{pendingConn.send({type:'call-accepted'});}catch{}mediaCall=peer.call(target,s,{metadata:{app:'FOX P2P',version:'0.3.0'}});wireMediaCall(mediaCall,false);pendingConn=null;}catch(e){callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.error);}};
+  const setupIncomingConnection=conn=>{pendingConn=conn;const activate=()=>{callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.incoming);};conn.on('open',activate);conn.on('data',data=>{if(data?.type==='call-request')activate();if(data?.type==='call-cancel'){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.waiting);}});conn.on('close',()=>{if(pendingConn===conn){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.waiting);}});conn.on('error',()=>{if(pendingConn===conn){pendingConn=null;callBtn.disabled=true;callBtn.textContent=text.call;setStatus(text.error);}});};
+  const requestCall=async()=>{if(!peer||!ready||!remoteId){setStatus(text.needConnection);return;}try{const s=await startLocalStream();callBtn.disabled=true;callBtn.textContent=text.calling;setStatus(text.calling);if(!dataConn||!dataConn.open)dataConn=peer.connect(remoteId,{label:'fox-call-control',reliable:true,metadata:{app:'FOX P2P',version:'0.3.0'}});const sendRequest=()=>{try{dataConn.send({type:'call-request'});}catch{setStatus(text.error);callBtn.disabled=false;callBtn.textContent=text.call;}};if(dataConn.open)sendRequest();else dataConn.on('open',sendRequest);dataConn.on('data',data=>{if(data?.type==='call-accepted')setStatus(text.calling);if(data?.type==='call-rejected'){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.rejected);}});dataConn.on('close',()=>{if(!mediaCall){callBtn.disabled=false;callBtn.textContent=text.call;}});}catch(e){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.error);}};
+  create.addEventListener('click',async()=>{try{await loadPeer();peer=new window.Peer(peerOptions);setupPeerEvents();peer.on('open',id=>{ready=true;roomUrl=makeLink(id);link.value=roomUrl;invite.hidden=false;share.disabled=false;copyBtn.disabled=false;callBtn.disabled=true;setStatus(text.waiting);renderQr().catch(()=>{});});peer.on('connection',setupIncomingConnection);peer.on('call',incoming=>{if(stream)wireMediaCall(incoming,true);else{pendingConn=incoming;callBtn.disabled=false;callBtn.textContent=text.accept;setStatus(text.incoming);}});create.disabled=true;}catch(e){setStatus(text.error);}});
+  callBtn.addEventListener('click',()=>{if(pendingConn)acceptIncoming();else requestCall();});
   copyBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(roomUrl);setStatus(text.invite);}catch{link.select();document.execCommand('copy');}});
   share.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:text.title,url:roomUrl});}catch{}}else{try{await navigator.clipboard.writeText(roomUrl);setStatus(text.invite);}catch{link.select();document.execCommand('copy');}}});
   mic.addEventListener('click',()=>{if(stream){stream.getAudioTracks().forEach(x=>x.enabled=!x.enabled);mic.textContent=stream.getAudioTracks()[0].enabled?text.stop:text.start;}});
-  if(remoteId){
-    role='client';
-    (async()=>{
-      try{
-        await loadPeer(); peer=new window.Peer(peerOptions); setupPeerEvents();
-        peer.on('open',()=>{ready=true;callBtn.disabled=false;setStatus(text.waiting);});
-        peer.on('call',incoming=>{try{wireMediaCall(incoming,true);}catch{setStatus(text.error);}});
-        peer.on('connection',conn=>{dataConn=conn;conn.on('data',data=>{if(data?.type==='call-accepted')setStatus(text.calling);if(data?.type==='call-rejected'){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.rejected);}});});
-      }catch(e){setStatus(text.error);}
-    })();
-  }
+  if(remoteId){(async()=>{try{await loadPeer();peer=new window.Peer(peerOptions);setupPeerEvents();peer.on('open',()=>{ready=true;callBtn.disabled=false;setStatus(text.waiting);});peer.on('call',incoming=>{try{wireMediaCall(incoming,true);}catch{setStatus(text.error);}});peer.on('connection',conn=>{dataConn=conn;conn.on('data',data=>{if(data?.type==='call-accepted')setStatus(text.calling);if(data?.type==='call-rejected'){callBtn.disabled=false;callBtn.textContent=text.call;setStatus(text.rejected);}});});}catch(e){setStatus(text.error);}})();}
 }
 </script>
