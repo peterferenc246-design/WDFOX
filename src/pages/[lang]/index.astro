@@ -50,6 +50,36 @@ const content = await getLandingContent(lang);
       window.setTimeout(openLiveCommunicator, 1500);
     })();
   </script>
+  <script is:inline>
+    (function () {
+      var enableCall = function () {
+        var button = document.querySelector('[data-call]');
+        if (!button) return;
+        button.removeAttribute('disabled');
+        button.setAttribute('aria-disabled', 'false');
+        button.style.pointerEvents = 'auto';
+        button.style.opacity = '1';
+        button.style.cursor = 'pointer';
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', enableCall, { once: true });
+      } else {
+        enableCall();
+      }
+      [100, 500, 1500, 3000].forEach(function (ms) { window.setTimeout(enableCall, ms); });
+      var attach = function () {
+        var button = document.querySelector('[data-call]');
+        if (!button) return;
+        new MutationObserver(enableCall).observe(button, { attributes: true, attributeFilter: ['disabled'] });
+        enableCall();
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attach, { once: true });
+      } else {
+        attach();
+      }
+    })();
+  </script>
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
