@@ -2,33 +2,75 @@
 <html lang="sk">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FOX Live Translator API</title>
-  <meta name="description" content="FOX Live Translator API — Slovak ↔ German voice translation backend.">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="build" content="2026-09-12-02-public">
+  <title>FOX Live Translator</title>
   <style>
-    :root { color-scheme: light dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f5f7fa; color: #172033; }
-    main { width: min(680px, calc(100% - 40px)); box-sizing: border-box; padding: 36px; border-radius: 18px; background: white; box-shadow: 0 12px 40px rgba(0,0,0,.08); }
-    h1 { margin-top: 0; }
-    code { padding: 3px 7px; border-radius: 6px; background: #eef1f5; }
-    .ok { display: inline-block; margin: 12px 0 20px; padding: 7px 12px; border-radius: 999px; background: #e7f7ed; color: #16733a; font-weight: 700; }
-    a { color: inherit; }
-    @media (prefers-color-scheme: dark) {
-      body { background: #11151c; color: #eef2f7; }
-      main { background: #1b222d; box-shadow: none; }
-      code { background: #293241; }
-      .ok { background: #173b27; color: #8ee2ad; }
-    }
+    :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101828;background:#eef2f7}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;display:flex;justify-content:center;padding:20px}
+    main{width:min(680px,100%);margin:auto;background:#fff;border-radius:28px;padding:24px;box-shadow:0 12px 40px #10182818}
+    h1{font-size:clamp(30px,8vw,48px);margin:0 0 8px;letter-spacing:-1px}.sub{color:#667085;margin:0 0 22px}
+    .row{display:flex;gap:10px;align-items:center;margin-bottom:18px}.select{flex:1;padding:14px;border:1px solid #d0d5dd;border-radius:14px;font-size:16px;background:#fff}
+    .swap{width:50px;height:50px;border:0;border-radius:14px;background:#eef2f6;font-size:22px}
+    .record{width:100%;min-height:64px;border:0;border-radius:18px;background:#111827;color:#fff;font-size:18px;font-weight:750;letter-spacing:.2px}.record.on{background:#b42318}
+    .status{margin:16px 0;padding:13px 15px;border-radius:14px;background:#f2f4f7;color:#475467}.status.ok{background:#ecfdf3;color:#067647}.status.err{background:#fef3f2;color:#b42318}
+    .card{padding:16px;border:1px solid #eaecf0;border-radius:18px;margin-top:12px}.label{font-size:12px;font-weight:750;text-transform:uppercase;color:#667085;letter-spacing:.7px}.text{font-size:20px;line-height:1.45;margin-top:7px;white-space:pre-wrap}
+    audio{width:100%;margin-top:14px}.hint{font-size:13px;color:#667085;line-height:1.45;margin-top:18px}
   </style>
 </head>
 <body>
-  <main>
-    <h1>FOX Live Translator</h1>
-    <div class="ok">● API deployment is online</div>
-    <p>Backend pre mobilnú aplikáciu <strong>FOX Live Translator</strong>.</p>
-    <p>Jazykový pár MVP: <strong>Slovenčina ↔ Nemčina</strong>.</p>
-    <p>Health check: <a href="/api/health"><code>/api/health</code></a></p>
-    <p>Voice translation endpoint: <code>POST /api/translate-voice</code></p>
-  </main>
+<main>
+  <h1>FOX Live Translator</h1>
+  <p class="sub">🎤 Slovenčina ↔ Deutsch · hlasový preklad</p>
+  <div class="row">
+    <select id="source" class="select"><option value="sk">🇸🇰 Slovenčina</option><option value="de">🇩🇪 Deutsch</option></select>
+    <button id="swap" class="swap" aria-label="Vymeniť jazyky">↔️</button>
+    <select id="target" class="select"><option value="de">🇩🇪 Deutsch</option><option value="sk">🇸🇰 Slovenčina</option></select>
+  </div>
+  <button id="record" class="record">🎤 ZAČAŤ HOVORIŤ</button>
+  <div id="status" class="status">Pripravené. Stlač tlačidlo a hovoriť môžeš až 20 sekúnd.</div>
+  <section id="results" hidden>
+    <div class="card"><div class="label">Rozpoznaný text</div><div id="transcript" class="text"></div></div>
+    <div class="card"><div class="label">Preklad</div><div id="translation" class="text"></div><audio id="audio" controls hidden></audio></div>
+  </section>
+  <p class="hint">Webová verzia používa mikrofón telefónu. Prehliadač musí mať povolený prístup k mikrofónu. Nahrávka sa odošle na server iba po zastavení nahrávania.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let recorder=null,chunks=[],timer=null,stream=null;
+const API='/api/translate-voice';
+function status(msg,type=''){ $('status').textContent=msg; $('status').className='status '+type; }
+function mime(){const list=['audio/webm;codecs=opus','audio/webm','audio/mp4'];return list.find(x=>MediaRecorder.isTypeSupported(x))||''}
+function stopTracks(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+async function start(){
+  try{
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error('Tento prehliadač nepodporuje prístup k mikrofónu.');
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[]; const mt=mime(); recorder=new MediaRecorder(stream,mt?{mimeType:mt}:undefined);
+    recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    recorder.onstop=send;
+    recorder.start(); $('record').classList.add('on'); $('record').textContent='⏹️ ZASTAVIŤ'; status('Nahrávam… hovor teraz. Maximálne 20 sekúnd.');
+    timer=setTimeout(()=>stop(),20000);
+  }catch(e){stopTracks();status('Mikrofón sa nepodarilo spustiť: '+e.message,'err')}
+}
+function stop(){if(!recorder||recorder.state==='inactive')return;clearTimeout(timer);recorder.stop();$('record').classList.remove('on');$('record').textContent='🎤 SPRACOVÁVAM…';$('record').disabled=true;stopTracks()}
+async function send(){
+  try{
+    const type=recorder.mimeType||'audio/webm'; const ext=type.includes('mp4')?'m4a':'webm'; const blob=new Blob(chunks,{type});
+    if(blob.size>4*1024*1024) throw new Error('Nahrávka je príliš veľká. Skús kratšiu vetu.');
+    const fd=new FormData();fd.append('audio',blob,'speech.'+ext);fd.append('sourceLanguage',$('source').value);fd.append('targetLanguage',$('target').value);fd.append('speakResult','true');
+    status('⏳ Rozpoznávam a prekladám…');
+    const r=await fetch(API,{method:'POST',body:fd}); const data=await r.json();
+    if(!r.ok) throw new Error(data.error||('HTTP '+r.status));
+    $('transcript').textContent=data.transcript||'';$('translation').textContent=data.translatedText||'';$('results').hidden=false;
+    const audio=$('audio'); if(data.audioBase64){audio.src='data:'+(data.audioMimeType||'audio/wav')+';base64,'+data.audioBase64;audio.hidden=false;audio.play().catch(()=>{});}else audio.hidden=true;
+    status('✅ Preklad hotový.','ok');
+  }catch(e){status('❌ '+e.message,'err')}
+  finally{$('record').disabled=false;$('record').textContent='🎤 ZAČAŤ HOVORIŤ';recorder=null}
+}
+$('record').onclick=()=>recorder&&recorder.state==='recording'?stop():start();
+$('swap').onclick=()=>{const a=$('source').value;$('source').value=$('target').value;$('target').value=a};
+</script>
 </body>
 </html>
