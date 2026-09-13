@@ -49,9 +49,7 @@ const content = await getLandingContent(lang);
       return nativeFetch(input, init);
     };
 
-    // Do not monkey-patch getDisplayMedia here. Mobile browsers apply their own
-    // screen-capture rules and the native permission picker must remain untouched.
-    // FoxLiveTranslator owns the complete screen-sharing/WebRTC path.
+    // Keep microphone permission priming tied to a user gesture.
     let micPrimed = false;
     const primeMicPermission = async () => {
       if (micPrimed || !navigator.mediaDevices?.getUserMedia) return;
@@ -64,6 +62,21 @@ const content = await getLandingContent(lang);
       }
     };
 
+    // Mobile regression guard: the screen-share control must remain visible
+    // whenever the FOX communicator panel is visible. Do not alter its disabled
+    // state; FoxLiveTranslator controls that according to connection readiness.
+    const keepScreenButtonVisible = () => {
+      const root = document.querySelector("[data-translator]");
+      if (!root) return;
+      const panel = root.querySelector("[data-communicator]");
+      const screen = root.querySelector("[data-screen]");
+      if (!panel || !screen) return;
+      if (!panel.classList.contains("hidden")) {
+        screen.style.display = "inline-flex";
+        screen.style.visibility = "visible";
+      }
+    };
+
     const watchDuplexCall = () => {
       const root = document.querySelector("[data-translator]");
       if (!root) return;
@@ -71,12 +84,18 @@ const content = await getLandingContent(lang);
       const commStatus = root.querySelector("[data-comm-status]");
       const callButton = root.querySelector("[data-call]");
       const createButton = root.querySelector("[data-create]");
+      const modeButtons = root.querySelectorAll("[data-mode]");
       if (!mic || !commStatus) return;
 
       const primeFromGesture = () => { void primeMicPermission(); };
       callButton?.addEventListener("click", primeFromGesture, { passive: true });
       createButton?.addEventListener("click", primeFromGesture, { passive: true });
       mic.addEventListener("click", primeFromGesture, { passive: true });
+      modeButtons.forEach((button) => button.addEventListener("click", keepScreenButtonVisible, { passive: true }));
+
+      const observer = new MutationObserver(keepScreenButtonVisible);
+      observer.observe(root, { subtree: true, attributes: true, attributeFilter: ["class", "style"] });
+      keepScreenButtonVisible();
     };
 
     if (document.readyState === "loading") {
