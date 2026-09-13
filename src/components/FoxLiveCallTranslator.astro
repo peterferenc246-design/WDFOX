@@ -11,23 +11,11 @@ const t = locale === 'de'
     <h2>{t.title}</h2>
     <p class="intro">{t.intro}</p>
     <div class="status" data-status>{t.wait}</div>
-    <div class="actions">
-      <button class="primary" data-create>{t.create}</button>
-      <button class="call" data-call disabled>{t.call}</button>
-    </div>
-    <div class="invite hidden" data-invite>
-      <input data-link readonly aria-label="Connection link" />
-      <div class="qr-wrap"><div data-qr></div><small>{t.invite}</small></div>
-    </div>
-    <div class="grid">
-      <article><header>{t.sent}</header><div class="history" data-sent>—</div></article>
-      <article><header>{t.received}</header><div class="history" data-received>—</div></article>
-    </div>
+    <div class="actions"><button class="primary" data-create>{t.create}</button><button class="call" data-call disabled>{t.call}</button></div>
+    <div class="invite hidden" data-invite><input data-link readonly aria-label="Connection link" /><div class="qr-wrap"><div data-qr></div><small>{t.invite}</small></div></div>
+    <div class="grid"><article><header>{t.sent}</header><div class="history" data-sent>—</div></article><article><header>{t.received}</header><div class="history" data-received>—</div></article></div>
     <div class="live hidden" data-live><b>FOX LIVE PREKLAD</b><span data-translation>Čakám na hovorenú vetu…</span></div>
-    <div class="controls">
-      <button class="mic" data-mic disabled>{t.mic}</button>
-      <button class="secondary" data-audio>🔊 AUDIO</button>
-    </div>
+    <div class="controls"><button class="mic" data-mic disabled>{t.mic}</button><button class="secondary" data-audio>🔊 AUDIO</button></div>
     <audio data-audio-el autoplay playsinline></audio>
   </div>
 </section>
@@ -48,24 +36,24 @@ if(root){
  const clear=box=>{if(box.textContent.trim()==='—')box.innerHTML=''};
  const send=m=>{if(data?.open){try{data.send(m);return}catch(e){}}queue.push(m)};
  const flush=()=>{while(data?.open&&queue.length){try{data.send(queue.shift())}catch(e){break}}};
- const wire=c=>{if(!c||c.__fox)return;c.__fox=true;data=c;c.on('open',flush);c.on('data',m=>{if(m?.type==='translation'){clear(received);add(received,m.translatedText);translation.textContent='Preklad je aktívny.';speak(m.translatedText,targetLocale)}})};
+ const wire=c=>{if(!c||c.__fox)return;c.__fox=true;data=c;c.on('open',flush);c.on('data',m=>{if(m?.type==='call-request'&&role==='host'){prime();ringStart();callBtn.disabled=false;callBtn.textContent=t.accept;set(t.incoming)}if(m?.type==='call-cancel'&&role==='host'){ringStop();set(t.wait)}if(m?.type==='translation'){clear(received);add(received,m.translatedText);translation.textContent='Preklad je aktívny.';speak(m.translatedText,targetLocale)}})};
  const loadPeer=()=>new Promise((ok,bad)=>{if(window.Peer)return ok();const s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';s.onload=ok;s.onerror=bad;document.head.appendChild(s)});
  const openPeer=async()=>{await loadPeer();if(ready)return ready;peer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}});peer.on('call',incoming);peer.on('connection',wire);peer.on('error',e=>{console.error(e);set('PeerJS: '+(e?.type||e?.message||'chyba'))});ready=new Promise((ok,bad)=>{const tm=setTimeout(()=>bad(Error('PeerJS timeout')),20000);peer.once('open',id=>{clearTimeout(tm);ok(id)})});return ready};
  const local=async()=>{if(stream)return stream;stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});stream.getAudioTracks().forEach(x=>x.enabled=true);mic.disabled=false;mic.textContent=t.stop;return stream};
- const prime=()=>{try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume().catch(()=>{})}catch(e){}};
- const ringStart=()=>{ringStop();prime();const beep=()=>{if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.frequency.value=880;g.gain.value=.06;o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.2)};beep();ring=setInterval(beep,1200)};
+ const prime=()=>{try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{})}catch(e){}};
+ const ringStart=()=>{ringStop();prime();const beep=()=>{if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(880,audioCtx.currentTime);g.gain.setValueAtTime(.12,audioCtx.currentTime);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.28)};beep();ring=setInterval(beep,1200)};
  const ringStop=()=>{if(ring){clearInterval(ring);ring=null}};
  const speak=(text,lang)=>{if(!text||!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=.96;speechSynthesis.speak(u)};
- const play=s=>{audio.srcObject=s;audio.muted=false;audio.volume=1;audio.play().catch(()=>set('🔊 Klikni na AUDIO.'))};
+ const play=s=>{audio.srcObject=s;audio.muted=false;audio.volume=1;const p=audio.play();if(p?.catch)p.catch(()=>set('🔊 Klepni na AUDIO.'))};
  const incoming=c=>{pending=c;prime();set(t.incoming);callBtn.disabled=false;callBtn.textContent=t.accept;ringStart();c.on('stream',play)};
- const media=c=>{c.on('stream',s=>{play(s);live.classList.remove('hidden');set('HOVOR AKTÍVNY');startRecognition()});c.on('close',()=>{live.classList.add('hidden');set(t.wait);if(role==='client'){callBtn.disabled=false;callBtn.textContent=t.call}});c.on('error',e=>set('Hovor: '+(e?.message||'chyba')))};
+ const media=c=>{c.on('stream',s=>{play(s);live.classList.remove('hidden');set('HOVOR AKTÍVNY');startRecognition()});c.on('close',()=>{live.classList.add('hidden');ringStop();set(t.wait);if(role==='client'){callBtn.disabled=false;callBtn.textContent=t.call}});c.on('error',e=>{ringStop();set('Hovor: '+(e?.message||'chyba'))})};
  const startRecognition=()=>{if(recognizing)return;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){translation.textContent='SpeechRecognition nie je podporovaný.';return}recognition=new SR();recognition.lang=sourceLocale;recognition.continuous=true;recognition.interimResults=true;recognition.onstart=()=>recognizing=true;recognition.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const text=e.results[i][0].transcript.trim();if(e.results[i].isFinal)translate(text);else interim+=text}if(interim)translation.textContent=sourceLanguage+': '+interim};recognition.onend=()=>{recognizing=false;if(!live.classList.contains('hidden'))setTimeout(startRecognition,300)};try{recognition.start()}catch(e){}};
  const translate=async text=>{text=text.trim();if(!text)return;clear(sent);add(sent,text);translation.textContent='Preklad…';try{const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,sourceLanguage,targetLanguage})});const raw=await r.text();let d={};try{d=JSON.parse(raw)}catch{}if(!r.ok)throw Error(d.error||`HTTP ${r.status}`);const translated=String(d.translatedText||'').trim();if(!translated)throw Error('Prázdny preklad');clear(received);add(received,translated);translation.textContent='Preklad je aktívny.';send({type:'translation',sourceText:text,translatedText:translated});speak(translated,targetLocale)}catch(e){console.error('FOX translation',e);translation.textContent='Preklad sa nepodaril: '+(e?.message||'chyba API')}};
  const createRoom=async()=>{prime();invite.classList.remove('hidden');set('Vytváram spojenie…');try{const id=await openPeer();roomUrl=location.origin+location.pathname+'?foxPeer='+encodeURIComponent(id);link.value=roomUrl;await renderQr();set(t.wait)}catch(e){set('Spojenie sa nepodarilo: '+e.message)}};
  const renderQr=async()=>{try{qr.innerHTML='';if(!window.QRCode){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';await new Promise((ok,bad)=>{s.onload=ok;s.onerror=bad;document.head.appendChild(s)})}new QRCode(qr,{text:roomUrl,width:210,height:210})}catch(e){console.error('QR',e)}};
- const call=async()=>{callBtn.disabled=true;prime();try{await openPeer();const s=await local();const c=peer.call(remoteId,s);media(c);const d=peer.connect(remoteId,{reliable:true});wire(d);live.classList.remove('hidden');startRecognition();set('PRIPÁJAM HOVOR…')}catch(e){set(e.message||'Chyba');callBtn.disabled=false;callBtn.textContent=t.call}};
+ const call=async()=>{callBtn.disabled=true;prime();try{await openPeer();const d=peer.connect(remoteId,{reliable:true});wire(d);const signal=()=>send({type:'call-request',at:Date.now()});if(d.open)signal();else d.on('open',signal);const s=await local();const c=peer.call(remoteId,s);media(c);live.classList.remove('hidden');startRecognition();set('PRIPÁJAM HOVOR…')}catch(e){set(e.message||'Chyba');callBtn.disabled=false;callBtn.textContent=t.call}};
  const accept=async()=>{if(!pending)return;callBtn.disabled=true;prime();ringStop();try{const s=await local(),c=pending;pending=null;c.answer(s);media(c);live.classList.remove('hidden');startRecognition();set('HOVOR AKTÍVNY')}catch(e){set(e.message||'Chyba');callBtn.disabled=false;callBtn.textContent=t.accept}};
- create.onclick=createRoom;callBtn.onclick=()=>role==='host'?accept():call();audioBtn.onclick=()=>{prime();audio.muted=false;audio.play().catch(()=>{});if(stream)stream.getAudioTracks().forEach(x=>x.enabled=true)};mic.onclick=()=>{if(stream){const x=stream.getAudioTracks()[0];x.enabled=!x.enabled;mic.textContent=x.enabled?t.stop:t.mic}};
+ create.onclick=createRoom;callBtn.onclick=()=>role==='host'?accept():call();audioBtn.onclick=()=>{prime();audio.muted=false;audio.volume=1;audio.play().catch(()=>{});if(stream)stream.getAudioTracks().forEach(x=>x.enabled=true)};mic.onclick=()=>{if(stream){const x=stream.getAudioTracks()[0];x.enabled=!x.enabled;mic.textContent=x.enabled?t.stop:t.mic}};
  if(role==='client'){callBtn.disabled=false;callBtn.textContent=t.call}else openPeer().catch(()=>{});
 }
 </script>
