@@ -173,6 +173,8 @@ const chromeUrl = "https://chromewebstore.google.com/detail/meta-ads-data-adviso
     const button = document.querySelector('[data-screen]');
     if (!button || button.__foxConsentButton) return;
     button.__foxConsentButton = true;
+    const label = button.querySelector('[data-screen-label]');
+    if (label) label.textContent = lang()==='de' ? 'BILDSCHIRM DES PARTNERS ANFORDERN' : lang()==='en' ? 'REQUEST PARTNER SCREEN' : 'POŽIADAŤ O OBRAZOVKU PARTNERA';
     button.title = lang()==='de' ? 'Bildschirm des Partners anfordern' : lang()==='en' ? 'Request partner screen' : 'Požiadať o obrazovku partnera';
     document.addEventListener('click', e => {
       const target = e.target?.closest?.('[data-screen]');
