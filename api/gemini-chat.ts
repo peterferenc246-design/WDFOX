@@ -1,8 +1,8 @@
-type Message = { role?: string; content?: string };
 type Body = {
   message?: string;
   previousInteractionId?: string | null;
   systemInstruction?: string;
+  thinkingLevel?: 'minimal' | 'low' | 'medium' | 'high';
 };
 type Req = { method?: string; body?: Body };
 type Res = {
@@ -32,7 +32,6 @@ export default async function handler(req: Req, res: Res) {
   try {
     const body = req.body || {};
     const message = String(body.message || '').trim();
-    const previousInteractionId = body.previousInteractionId ? String(body.previousInteractionId) : undefined;
     if (!message) {
       res.status(400).json({ error: 'message is required' });
       return;
@@ -50,9 +49,12 @@ export default async function handler(req: Req, res: Res) {
       model,
       input: message,
       store: true,
+      generation_config: {
+        thinking_level: body.thinkingLevel || 'low',
+      },
     };
 
-    if (previousInteractionId) payload.previous_interaction_id = previousInteractionId;
+    if (body.previousInteractionId) payload.previous_interaction_id = String(body.previousInteractionId);
     if (body.systemInstruction) payload.system_instruction = String(body.systemInstruction);
 
     const upstream = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
@@ -78,11 +80,10 @@ export default async function handler(req: Req, res: Res) {
     ).trim();
 
     if (!outputText) {
-      res.status(502).json({ error: 'Gemini returned no text output', interactionId: data?.id || null });
+      res.status(502).json({ error: 'Gemini returned no text output', interactionId: data?.id || null, status: data?.status || null });
       return;
     }
 
-    // The client MUST persist this ID and send it as previousInteractionId on the next turn.
     res.status(200).json({
       text: outputText,
       interactionId: data?.id || null,
