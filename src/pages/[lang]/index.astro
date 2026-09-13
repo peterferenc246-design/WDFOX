@@ -30,3 +30,19 @@ const content = await getLandingContent(lang);
     <a href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
 </BaseLayout>
+
+<script is:inline>
+  (() => {
+    const FOX_API = "https://wdfox-live-translator.vercel.app";
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const url = typeof input === "string" ? input : input?.url || "";
+      if (url.startsWith("/api/")) {
+        const target = `${FOX_API}${url}`;
+        if (typeof input === "string") return nativeFetch(target, init);
+        return nativeFetch(new Request(target, input), init);
+      }
+      return nativeFetch(input, init);
+    };
+  })();
+</script>
