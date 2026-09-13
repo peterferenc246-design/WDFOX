@@ -3,7 +3,6 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
-import FoxLiveCallTranslator from "../../components/FoxLiveCallTranslator.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -24,83 +23,7 @@ const content = await getLandingContent(lang);
   </Fragment>
   <Landing content={content} />
   <FoxLiveTranslator locale={lang} />
-  <FoxLiveCallTranslator locale={lang} />
   <FoxAnalyzerLauncher locale={lang} />
-  <script is:inline>
-    (function () {
-      var params = new URLSearchParams(window.location.search);
-      if (!params.has('foxPeer')) return;
-      var openLiveCommunicator = function () {
-        var target = document.querySelector('[data-call-app]');
-        if (!target) return;
-        target.scrollIntoView({ behavior: 'instant', block: 'start' });
-        var call = target.querySelector('[data-call]');
-        if (call) {
-          call.removeAttribute('disabled');
-          call.setAttribute('aria-disabled', 'false');
-        }
-      };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', openLiveCommunicator, { once: true });
-      } else {
-        window.setTimeout(openLiveCommunicator, 80);
-      }
-      window.addEventListener('load', openLiveCommunicator, { once: true });
-      window.setTimeout(openLiveCommunicator, 500);
-      window.setTimeout(openLiveCommunicator, 1500);
-    })();
-  </script>
-  <script is:inline>
-    (function () {
-      var enableCall = function () {
-        var app = document.querySelector('[data-call-app]');
-        if (!app) return;
-        var button = app.querySelector('[data-call]');
-        if (!button) return;
-        button.removeAttribute('disabled');
-        button.setAttribute('aria-disabled', 'false');
-        button.style.pointerEvents = 'auto';
-        button.style.opacity = '1';
-        button.style.cursor = 'pointer';
-      };
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enableCall, { once: true });
-      else enableCall();
-      [100, 500, 1500].forEach(function (ms) { window.setTimeout(enableCall, ms); });
-    })();
-  </script>
-  <script is:inline>
-    (function () {
-      var installQrFallback = function () {
-        var app = document.querySelector('[data-call-app]');
-        if (!app) return;
-        var panel = app.querySelector('[data-qr-panel]');
-        var box = app.querySelector('[data-qr]');
-        var input = app.querySelector('[data-link]');
-        if (!panel || !box || !input) return;
-        var url = (input.value || '').trim();
-        if (!url || box.getAttribute('data-qr-url') === url) return;
-        box.setAttribute('data-qr-url', url);
-        box.innerHTML = '';
-        var img = document.createElement('img');
-        img.width = 180;
-        img.height = 180;
-        img.alt = 'QR kód spojenia';
-        img.style.display = 'block';
-        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=' + encodeURIComponent(url);
-        box.appendChild(img);
-        panel.hidden = false;
-      };
-      var scan = function () {
-        installQrFallback();
-        window.setTimeout(installQrFallback, 300);
-        window.setTimeout(installQrFallback, 1000);
-        window.setTimeout(installQrFallback, 2000);
-      };
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan, { once: true });
-      else scan();
-      new MutationObserver(scan).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['value'] });
-    })();
-  </script>
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
