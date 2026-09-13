@@ -33,7 +33,9 @@ const content = await getLandingContent(lang);
 
 <script is:inline>
   (() => {
-    const FOX_API = "https://wdfox-live-translator.vercel.app";
+    // Single canonical Gemini/API gateway for the static GitHub Pages frontend.
+    // The API key remains server-side in Vercel; it is never exposed to the browser.
+    const FOX_API = "https://wdfox-gemini-api.vercel.app";
     const nativeFetch = window.fetch.bind(window);
     window.fetch = (input, init) => {
       const url = typeof input === "string" ? input : input?.url || "";
