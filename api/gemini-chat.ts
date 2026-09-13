@@ -4,12 +4,15 @@ type Body = {
   systemInstruction?: string;
   thinkingLevel?: 'minimal' | 'low' | 'medium' | 'high';
 };
+
 type Req = { method?: string; body?: Body };
 type Res = {
   status: (n: number) => Res;
   setHeader?: (n: string, v: string) => Res;
   json: (b: unknown) => void;
 };
+
+const PROXY_URL = 'https://wdfox-gemini-api.vercel.app/api/gemini-chat';
 
 const cors = (res: Res) => {
   res.setHeader?.('Access-Control-Allow-Origin', '*');
@@ -39,8 +42,47 @@ export default async function handler(req: Req, res: Res) {
 
     const env = (globalThis as any).process?.env || {};
     const key = env.GEMINI_API_KEY;
+
+    // Prefer the local server key when it exists. If the current deployment
+    // has no key, use the dedicated FOX Gemini gateway instead of exposing
+    // the configuration error to the user.
     if (!key) {
-      res.status(500).json({ error: 'GEMINI_API_KEY is not configured' });
+      const proxy = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          previousInteractionId: body.previousInteractionId || null,
+          systemInstruction: body.systemInstruction || undefined,
+          thinkingLevel: body.thinkingLevel || 'low',
+        }),
+      });
+
+      const raw = await proxy.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = null;
+      }
+
+      if (!proxy.ok) {
+        console.error('FOX Gemini gateway failed', proxy.status, raw.slice(0, 1000));
+        res.status(502).json({ error: 'Prekladová služba je momentálne nedostupná.' });
+        return;
+      }
+
+      if (!data?.text) {
+        res.status(502).json({ error: 'Prekladová služba nevrátila výsledok.' });
+        return;
+      }
+
+      res.status(200).json({
+        text: String(data.text),
+        interactionId: data.interactionId || null,
+        previousInteractionId: data.previousInteractionId || data.interactionId || null,
+        model: data.model || 'FOX Gemini gateway',
+      });
       return;
     }
 
@@ -92,6 +134,6 @@ export default async function handler(req: Req, res: Res) {
     });
   } catch (e: any) {
     console.error('gemini-chat', e);
-    res.status(500).json({ error: e?.message || 'Gemini chat failed' });
+    res.status(500).json({ error: 'Prekladová služba je momentálne nedostupná.' });
   }
 }
