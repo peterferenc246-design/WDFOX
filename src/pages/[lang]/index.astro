@@ -51,10 +51,6 @@ const content = await getLandingContent(lang);
     };
 
     // FOX full-duplex communicator helper.
-    // Both devices must have microphone permission. We prime that permission
-    // from a real user click, then automatically start the communicator mic
-    // when the PeerJS call becomes ACTIVE. This makes PC and mobile listen /
-    // speak simultaneously instead of requiring a manual second start.
     let micPrimed = false;
     let duplexStarted = false;
 
@@ -69,9 +65,231 @@ const content = await getLandingContent(lang);
       }
     };
 
+    // FOX bidirectional WebRTC screen-sharing bridge.
+    // It attaches to the existing PeerJS instance created by FoxLiveTranslator,
+    // so screen sharing uses the same live peer-to-peer connection architecture
+    // and does not consume Gemini tokens.
+    let peerPatched = false;
+    const screenState = {
+      peer: null,
+      remoteId: null,
+      localStream: null,
+      outgoingCall: null,
+      incomingCall: null,
+      remoteVideo: null,
+      status: null,
+      startButton: null,
+      stopButton: null,
+    };
+
+    const screenText = () => {
+      const l = (document.documentElement.lang || "sk").toLowerCase().slice(0, 2);
+      if (l === "de") return {
+        title: "🖥️ BILDSCHIRM",
+        start: "MEINEN BILDSCHIRM TEILEN",
+        stop: "BILDSCHIRM FREIGEBEN BEENDEN",
+        waiting: "Warte auf aktive Verbindung…",
+        sharing: "Dein Bildschirm wird geteilt.",
+        receiving: "Bildschirm des anderen Teilnehmers wird empfangen.",
+        stopped: "Bildschirmfreigabe beendet.",
+        error: "Bildschirmfreigabe fehlgeschlagen",
+      };
+      if (l === "en") return {
+        title: "🖥️ SCREEN",
+        start: "SHARE MY SCREEN",
+        stop: "STOP SCREEN SHARING",
+        waiting: "Waiting for an active connection…",
+        sharing: "Your screen is being shared.",
+        receiving: "Receiving the other participant's screen.",
+        stopped: "Screen sharing stopped.",
+        error: "Screen sharing failed",
+      };
+      return {
+        title: "🖥️ OBRAZOVKA",
+        start: "ZDIEĽAŤ MOJU OBRAZOVKU",
+        stop: "ZASTAVIŤ ZDIEĽANIE",
+        waiting: "Čakám na aktívne spojenie…",
+        sharing: "Tvoja obrazovka sa zdieľa.",
+        receiving: "Prijímam obrazovku druhého účastníka.",
+        stopped: "Zdieľanie obrazovky zastavené.",
+        error: "Zdieľanie obrazovky sa nepodarilo",
+      };
+    };
+
+    const setScreenStatus = (text) => {
+      if (screenState.status) screenState.status.textContent = text;
+    };
+
+    const showRemoteScreen = (stream) => {
+      if (!screenState.remoteVideo) return;
+      screenState.remoteVideo.srcObject = stream;
+      screenState.remoteVideo.play().catch(() => {});
+      setScreenStatus(screenText().receiving);
+    };
+
+    const closeScreenCall = (call) => {
+      try { call?.close?.(); } catch {}
+    };
+
+    const stopScreenShare = () => {
+      screenState.localStream?.getTracks().forEach((track) => track.stop());
+      screenState.localStream = null;
+      closeScreenCall(screenState.outgoingCall);
+      screenState.outgoingCall = null;
+      if (screenState.stopButton) screenState.stopButton.disabled = true;
+      if (screenState.startButton) screenState.startButton.disabled = false;
+      setScreenStatus(screenText().stopped);
+    };
+
+    const handleIncomingScreenCall = (call) => {
+      screenState.incomingCall = call;
+      try {
+        // A screen share is intentionally one-way per call. Both participants
+        // can create their own screen call at the same time for true duplex.
+        call.answer();
+      } catch (error) {
+        setScreenStatus(`${screenText().error}: ${error?.message || error}`);
+        return;
+      }
+      call.on("stream", showRemoteScreen);
+      call.on("close", () => {
+        if (screenState.incomingCall === call) screenState.incomingCall = null;
+        if (screenState.remoteVideo) screenState.remoteVideo.srcObject = null;
+        setScreenStatus(screenText().stopped);
+      });
+      call.on("error", (error) => setScreenStatus(`${screenText().error}: ${error?.message || error}`));
+    };
+
+    const installPeerBridge = () => {
+      if (peerPatched || !window.Peer) return;
+      const OriginalPeer = window.Peer;
+      const FoxPeer = function (...args) {
+        const peer = new OriginalPeer(...args);
+        window.__FOX_PEER__ = peer;
+        screenState.peer = peer;
+        const originalOn = peer.on.bind(peer);
+        peer.on = (event, handler) => {
+          if (event === "connection") {
+            return originalOn(event, (connection) => {
+              if (connection?.peer) {
+                window.__FOX_REMOTE_ID__ = connection.peer;
+                screenState.remoteId = connection.peer;
+              }
+              return handler(connection);
+            });
+          }
+          if (event === "call") {
+            return originalOn(event, (call) => {
+              if (call?.metadata?.foxScreen) return handleIncomingScreenCall(call);
+              return handler(call);
+            });
+          }
+          return originalOn(event, handler);
+        };
+        const originalConnect = peer.connect.bind(peer);
+        peer.connect = (remoteId, ...rest) => {
+          screenState.remoteId = remoteId;
+          window.__FOX_REMOTE_ID__ = remoteId;
+          return originalConnect(remoteId, ...rest);
+        };
+        const originalCall = peer.call.bind(peer);
+        peer.call = (remoteId, stream, options) => {
+          screenState.remoteId = remoteId;
+          window.__FOX_REMOTE_ID__ = remoteId;
+          return originalCall(remoteId, stream, options);
+        };
+        return peer;
+      };
+      FoxPeer.prototype = OriginalPeer.prototype;
+      try { Object.setPrototypeOf(FoxPeer, OriginalPeer); } catch {}
+      window.Peer = FoxPeer;
+      peerPatched = true;
+    };
+
+    // FoxLiveTranslator loads PeerJS lazily. Patch the constructor before the
+    // user's first click so the bridge can observe the same Peer instance.
+    installPeerBridge();
+    const nativeAppendChild = Node.prototype.appendChild;
+    Node.prototype.appendChild = function (node) {
+      try {
+        if (node?.tagName === "SCRIPT" && String(node.src || "").includes("peerjs")) {
+          node.addEventListener("load", installPeerBridge, { once: true });
+        }
+      } catch {}
+      return nativeAppendChild.call(this, node);
+    };
+    const peerPoll = setInterval(() => {
+      installPeerBridge();
+      if (peerPatched) clearInterval(peerPoll);
+    }, 250);
+
+    const addScreenUi = (root) => {
+      if (root.querySelector("[data-fox-screen]") || !root.querySelector("[data-communicator]")) return;
+      const labels = screenText();
+      const panel = document.createElement("div");
+      panel.dataset.foxScreen = "true";
+      panel.style.cssText = "margin-top:14px;padding:14px;border:1px solid #dfe3ea;border-radius:16px;background:#fff";
+      panel.innerHTML = `
+        <div style="font-size:12px;font-weight:900;color:#172033;margin-bottom:9px">${labels.title}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" data-fox-screen-start class="secondary">${labels.start}</button>
+          <button type="button" data-fox-screen-stop class="secondary" disabled>⛔ ${labels.stop}</button>
+        </div>
+        <div data-fox-screen-status style="margin-top:8px;color:#667085;font-size:12px">${labels.waiting}</div>
+        <video data-fox-remote-screen autoplay playsinline controls style="display:none;width:100%;max-height:420px;margin-top:12px;border-radius:12px;background:#101318;object-fit:contain"></video>
+      `;
+      root.querySelector("[data-communicator]").appendChild(panel);
+      screenState.status = panel.querySelector("[data-fox-screen-status]");
+      screenState.startButton = panel.querySelector("[data-fox-screen-start]");
+      screenState.stopButton = panel.querySelector("[data-fox-screen-stop]");
+      screenState.remoteVideo = panel.querySelector("[data-fox-remote-screen]");
+
+      screenState.startButton.onclick = async () => {
+        try {
+          if (!screenState.peer || !screenState.peer.open) {
+            setScreenStatus(labels.waiting);
+            return;
+          }
+          const remoteId = screenState.remoteId || window.__FOX_REMOTE_ID__ || new URLSearchParams(location.search).get("foxPeer");
+          if (!remoteId) {
+            setScreenStatus(labels.waiting);
+            return;
+          }
+          if (!navigator.mediaDevices?.getDisplayMedia) {
+            setScreenStatus(`${labels.error}: getDisplayMedia is not supported by this browser.`);
+            return;
+          }
+          const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { frameRate: { ideal: 15, max: 20 } },
+            audio: false,
+          });
+          screenState.localStream = stream;
+          screenState.remoteId = remoteId;
+          const call = screenState.peer.call(remoteId, stream, {
+            metadata: { foxScreen: true, kind: "screen", version: 1 },
+          });
+          screenState.outgoingCall = call;
+          call.on("stream", showRemoteScreen);
+          call.on("close", () => {
+            if (screenState.outgoingCall === call) screenState.outgoingCall = null;
+          });
+          call.on("error", (error) => setScreenStatus(`${labels.error}: ${error?.message || error}`));
+          const track = stream.getVideoTracks()[0];
+          if (track) track.addEventListener("ended", stopScreenShare, { once: true });
+          screenState.startButton.disabled = true;
+          screenState.stopButton.disabled = false;
+          setScreenStatus(labels.sharing);
+        } catch (error) {
+          setScreenStatus(`${labels.error}: ${error?.message || error}`);
+        }
+      };
+      screenState.stopButton.onclick = stopScreenShare;
+    };
+
     const watchDuplexCall = () => {
       const root = document.querySelector("[data-translator]");
       if (!root) return;
+      addScreenUi(root);
       const mic = root.querySelector("[data-mic]");
       const commStatus = root.querySelector("[data-comm-status]");
       const callButton = root.querySelector("[data-call]");
