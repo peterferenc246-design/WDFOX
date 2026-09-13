@@ -50,6 +50,43 @@ const content = await getLandingContent(lang);
       return nativeFetch(input, init);
     };
 
+    // Screen-sharing policy: FOX may share exactly one monitor stream.
+    // Tabs/windows are excluded where the browser supports these hints.
+    // The browser's security picker remains authoritative for which physical
+    // monitor is selected; a web page cannot programmatically force monitor #1.
+    const installScreenSharePolicy = () => {
+      const mediaDevices = navigator.mediaDevices;
+      if (!mediaDevices?.getDisplayMedia || mediaDevices.__foxScreenPolicy) return;
+      const nativeGetDisplayMedia = mediaDevices.getDisplayMedia.bind(mediaDevices);
+      mediaDevices.getDisplayMedia = async (constraints = {}) => {
+        const next = { ...constraints };
+        const requestedVideo = next.video;
+        const video = requestedVideo && typeof requestedVideo === "object" ? { ...requestedVideo } : {};
+        video.displaySurface = "monitor";
+        video.monitorTypeSurfaces = "include";
+        video.selfBrowserSurface = "exclude";
+        video.surfaceSwitching = "exclude";
+        video.preferCurrentTab = false;
+        next.video = video;
+        // FOX screen sharing is video-only; never capture system audio here.
+        next.audio = false;
+        const stream = await nativeGetDisplayMedia(next);
+        const tracks = stream.getVideoTracks();
+        if (tracks.length !== 1) {
+          stream.getTracks().forEach((track) => track.stop());
+          throw new DOMException("FOX allows exactly one screen stream.", "NotAllowedError");
+        }
+        const settings = tracks[0].getSettings?.() || {};
+        if (settings.displaySurface && settings.displaySurface !== "monitor") {
+          stream.getTracks().forEach((track) => track.stop());
+          throw new DOMException("FOX requires a monitor screen, not a tab or window.", "NotAllowedError");
+        }
+        return stream;
+      };
+      mediaDevices.__foxScreenPolicy = true;
+    };
+    installScreenSharePolicy();
+
     // FOX full-duplex communicator helper.
     let micPrimed = false;
     let duplexStarted = false;
@@ -122,6 +159,7 @@ const content = await getLandingContent(lang);
 
     const showRemoteScreen = (stream) => {
       if (!screenState.remoteVideo) return;
+      screenState.remoteVideo.style.display = "block";
       screenState.remoteVideo.srcObject = stream;
       screenState.remoteVideo.play().catch(() => {});
       setScreenStatus(screenText().receiving);
@@ -144,8 +182,6 @@ const content = await getLandingContent(lang);
     const handleIncomingScreenCall = (call) => {
       screenState.incomingCall = call;
       try {
-        // A screen share is intentionally one-way per call. Both participants
-        // can create their own screen call at the same time for true duplex.
         call.answer();
       } catch (error) {
         setScreenStatus(`${screenText().error}: ${error?.message || error}`);
@@ -206,8 +242,6 @@ const content = await getLandingContent(lang);
       peerPatched = true;
     };
 
-    // FoxLiveTranslator loads PeerJS lazily. Patch the constructor before the
-    // user's first click so the bridge can observe the same Peer instance.
     installPeerBridge();
     const nativeAppendChild = Node.prototype.appendChild;
     Node.prototype.appendChild = function (node) {
