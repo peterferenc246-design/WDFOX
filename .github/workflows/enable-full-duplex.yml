@@ -14,8 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Patch communicator for simultaneous two-way speech
-        shell: python
+        shell: bash
         run: |
+          python3 <<'PY'
           from pathlib import Path
           p = Path('src/components/FoxLiveTranslator.astro')
           s = p.read_text(encoding='utf-8')
@@ -26,7 +27,8 @@ jobs:
           needle = '\n}</script>'
           if needle not in s:
               raise SystemExit('Could not locate end of FOX translator script')
-          inject = r'''\n/* FOX_FULL_DUPLEX_V1 */
+          inject = '''
+/* FOX_FULL_DUPLEX_V1 */
 let foxDuplexStarted=false;
 const startFoxFullDuplex=()=>{
   if(foxDuplexStarted) return;
@@ -45,6 +47,7 @@ window.addEventListener('beforeunload',()=>clearInterval(foxDuplexTimer));
 '''
           s = s.replace(needle, inject + needle, 1)
           p.write_text(s, encoding='utf-8')
+          PY
       - name: Commit patch
         shell: bash
         run: |
