@@ -49,5 +49,62 @@ const content = await getLandingContent(lang);
       }
       return nativeFetch(input, init);
     };
+
+    // FOX full-duplex communicator helper.
+    // Both devices must have microphone permission. We prime that permission
+    // from a real user click, then automatically start the communicator mic
+    // when the PeerJS call becomes ACTIVE. This makes PC and mobile listen /
+    // speak simultaneously instead of requiring a manual second start.
+    let micPrimed = false;
+    let duplexStarted = false;
+
+    const primeMicPermission = async () => {
+      if (micPrimed || !navigator.mediaDevices?.getUserMedia) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        micPrimed = true;
+      } catch (error) {
+        console.warn("FOX microphone permission was not granted", error);
+      }
+    };
+
+    const watchDuplexCall = () => {
+      const root = document.querySelector("[data-translator]");
+      if (!root) return;
+      const mic = root.querySelector("[data-mic]");
+      const commStatus = root.querySelector("[data-comm-status]");
+      const callButton = root.querySelector("[data-call]");
+      const createButton = root.querySelector("[data-create]");
+      if (!mic || !commStatus) return;
+
+      const primeFromGesture = () => { void primeMicPermission(); };
+      callButton?.addEventListener("click", primeFromGesture, { passive: true });
+      createButton?.addEventListener("click", primeFromGesture, { passive: true });
+      mic.addEventListener("click", primeFromGesture, { passive: true });
+
+      const tryStartDuplex = () => {
+        const text = String(commStatus.textContent || "").toLowerCase();
+        const active = text.includes("hovor je aktívny") || text.includes("call is active") || text.includes("anruf ist aktiv");
+        if (!active || duplexStarted || mic.disabled) return;
+        duplexStarted = true;
+        setTimeout(() => {
+          try { mic.click(); } catch (error) { console.warn("FOX duplex mic start failed", error); }
+        }, 250);
+      };
+
+      new MutationObserver(tryStartDuplex).observe(commStatus, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+      setInterval(tryStartDuplex, 1000);
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", watchDuplexCall, { once: true });
+    } else {
+      watchDuplexCall();
+    }
   })();
 </script>
