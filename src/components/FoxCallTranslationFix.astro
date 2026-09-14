@@ -16,7 +16,6 @@
     const status = root.querySelector('[data-status]');
     const commStatus = root.querySelector('[data-comm-status]');
     const micButton = root.querySelector('[data-mic]');
-    const callButton = root.querySelector('[data-call]');
     if (!source || !target || !transcript || !translation || !commStatus) return;
 
     const localeMap = {
@@ -40,6 +39,8 @@
     let speechRate = 1;
     let lastFinal = '';
     let ttsSpeaking = false;
+    let transcriptTimer = null;
+    let observedTranscript = '';
 
     const setStatus = text => {
       if (status) status.textContent = text;
@@ -122,6 +123,20 @@
         if (next && isCallActive()) void translate(next);
         else if (!ttsSpeaking && !stopping && isCallActive()) startRecognition();
       }
+    };
+
+    const scheduleTranscriptTranslation = () => {
+      if (!isCallActive()) return;
+      const text = String(transcript.textContent || '').trim();
+      if (!text || text === observedTranscript || text === lastFinal) return;
+      observedTranscript = text;
+      if (transcriptTimer) clearTimeout(transcriptTimer);
+      transcriptTimer = setTimeout(() => {
+        transcriptTimer = null;
+        const stable = String(transcript.textContent || '').trim();
+        if (!stable || stable !== observedTranscript || stable === lastFinal || !isCallActive()) return;
+        void translate(stable);
+      }, 900);
     };
 
     const stopRecognition = () => {
@@ -218,12 +233,17 @@
     }));
     source.addEventListener('change', () => {
       interactionId = null;
+      lastFinal = '';
+      observedTranscript = '';
       if (running) { stopRecognition(); stopping = false; startRecognition(); }
     });
     target.addEventListener('change', () => { interactionId = null; });
 
+    new MutationObserver(() => scheduleTranscriptTranslation()).observe(transcript, {childList:true, characterData:true, subtree:true});
+
     const watch = () => {
       if (isCallActive()) {
+        scheduleTranscriptTranslation();
         const dataStatus = String(status?.textContent || '').toLowerCase();
         const nativeRecognitionAppearsActive = /hovoríte|sie sprechen|speaking|recording|nahrávam/.test(dataStatus);
         if (!nativeRecognitionAppearsActive && !running && !ttsSpeaking && !stopping) startRecognition();
