@@ -1,0 +1,243 @@
+<script is:inline>
+(() => {
+  if (window.__FOX_CALL_TRANSLATION_FIX__) return;
+  window.__FOX_CALL_TRANSLATION_FIX__ = true;
+
+  const boot = () => {
+    const root = document.querySelector('[data-fox-live]');
+    if (!root || root.dataset.foxCallFixReady === '1') return;
+    root.dataset.foxCallFixReady = '1';
+
+    const source = root.querySelector('[data-source]');
+    const target = root.querySelector('[data-target]');
+    const transcript = root.querySelector('[data-transcript]');
+    const translation = root.querySelector('[data-translation]');
+    const play = root.querySelector('[data-play]');
+    const status = root.querySelector('[data-status]');
+    const commStatus = root.querySelector('[data-comm-status]');
+    const micButton = root.querySelector('[data-mic]');
+    const callButton = root.querySelector('[data-call]');
+    if (!source || !target || !transcript || !translation || !commStatus) return;
+
+    const localeMap = {
+      bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',
+      fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',
+      mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'
+    };
+    const names = Object.fromEntries([...source.options].map(o => [o.value, o.textContent || o.value]));
+    const locale = code => localeMap[code] || code || 'en-US';
+    const activeText = () => String(commStatus.textContent || '').toLowerCase();
+    const isCallActive = () => /hovor je aktívny|call is active|anruf ist aktiv|live|aktívny/.test(activeText());
+    const recognitionCtor = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    let recognition = null;
+    let running = false;
+    let stopping = false;
+    let restarting = null;
+    let translating = false;
+    let queue = [];
+    let interactionId = null;
+    let speechRate = 1;
+    let lastFinal = '';
+    let ttsSpeaking = false;
+
+    const setStatus = text => {
+      if (status) status.textContent = text;
+    };
+    const setCallStatus = text => {
+      commStatus.textContent = text;
+    };
+
+    const chooseVoice = lang => {
+      const voices = window.speechSynthesis?.getVoices?.() || [];
+      const exact = voices.find(v => v.lang?.toLowerCase() === lang.toLowerCase());
+      if (exact) return exact;
+      const base = lang.split('-')[0].toLowerCase();
+      return voices.find(v => v.lang?.toLowerCase().startsWith(base + '-')) || voices.find(v => v.lang?.toLowerCase() === base);
+    };
+
+    const speak = text => {
+      if (!text || !window.speechSynthesis) return;
+      ttsSpeaking = true;
+      try { window.speechSynthesis.cancel(); } catch {}
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = locale(target.value);
+      u.rate = speechRate;
+      const voice = chooseVoice(u.lang);
+      if (voice) u.voice = voice;
+      u.onend = () => {
+        ttsSpeaking = false;
+        if (!stopping && !running && isCallActive()) startRecognition();
+      };
+      u.onerror = () => {
+        ttsSpeaking = false;
+        if (!stopping && !running && isCallActive()) startRecognition();
+      };
+      window.speechSynthesis.speak(u);
+    };
+
+    const translate = async text => {
+      const clean = String(text || '').trim();
+      if (!clean || clean === lastFinal) return;
+      lastFinal = clean;
+      if (translating) {
+        queue.push(clean);
+        if (queue.length > 4) queue = queue.slice(-4);
+        return;
+      }
+      translating = true;
+      setStatus('🧠 PREKLADÁM CEZ GEMINI…');
+      setCallStatus('🧠 PREKLADÁM…');
+      try {
+        const src = source.value;
+        const dst = target.value;
+        const prompt = `Translate only this spoken sentence from ${names[src] || src} to ${names[dst] || dst}. Return only a natural, grammatically correct, standard/formal translation in the target language. Translate meaning, not word-for-word. Preserve names, numbers, dates, negation, tense, politeness and tone. Do not mix source-language words into the target language. Do not add or remove meaning. Sentence: ${clean}`;
+        const response = await fetch('/api/gemini-chat', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            message: prompt,
+            previousInteractionId: interactionId,
+            systemInstruction: 'You are a professional real-time interpreter. Output only the target-language translation. Use standard, grammatically correct language. Never explain the translation.',
+            thinkingLevel: 'low'
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw Error(data?.error || `Gemini HTTP ${response.status}`);
+        const out = String(data?.text || data?.translation || '').trim();
+        if (!out) throw Error('Gemini returned an empty translation');
+        interactionId = data?.interactionId || interactionId;
+        transcript.textContent = clean;
+        translation.textContent = out;
+        if (play) play.disabled = false;
+        setStatus('✅ PREKLAD HOTOVÝ');
+        setCallStatus('🟢 HOVOR JE AKTÍVNY · 🎙 PREKLAD AKTÍVNY');
+        speak(out);
+      } catch (error) {
+        setStatus(`❌ GEMINI: ${error?.message || 'Preklad sa nepodaril.'}`);
+        setCallStatus(`🟢 HOVOR JE AKTÍVNY · ❌ PREKLAD: ${error?.message || 'chyba'}`);
+      } finally {
+        translating = false;
+        const next = queue.shift();
+        if (next && isCallActive()) void translate(next);
+        else if (!ttsSpeaking && !stopping && isCallActive()) startRecognition();
+      }
+    };
+
+    const stopRecognition = () => {
+      stopping = true;
+      if (restarting) { clearTimeout(restarting); restarting = null; }
+      try { recognition?.stop(); } catch {}
+      running = false;
+      recognition = null;
+    };
+
+    const startRecognition = () => {
+      if (!isCallActive() || ttsSpeaking || running || stopping) return;
+      const Ctor = recognitionCtor();
+      if (!Ctor) {
+        setCallStatus('🟢 HOVOR JE AKTÍVNY · ❌ Chrome/Edge nepodporuje rozpoznávanie reči.');
+        return;
+      }
+      stopping = false;
+      try { recognition?.abort?.(); } catch {}
+      const r = new Ctor();
+      recognition = r;
+      r.lang = locale(source.value);
+      r.continuous = true;
+      r.interimResults = true;
+      r.maxAlternatives = 1;
+      r.onstart = () => {
+        running = true;
+        setStatus('🎙 HOVORÍTE…');
+        setCallStatus('🟢 HOVOR JE AKTÍVNY · 🎙 PREKLAD POČÚVA');
+      };
+      r.onresult = event => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          const text = String(result?.[0]?.transcript || '').trim();
+          if (!text) continue;
+          if (result.isFinal) {
+            transcript.textContent = text;
+            void translate(text);
+          } else {
+            interim += text + ' ';
+          }
+        }
+        if (interim.trim()) transcript.textContent = interim.trim();
+      };
+      r.onerror = event => {
+        running = false;
+        if (stopping) return;
+        const err = event?.error || 'unknown';
+        if (err === 'aborted') return;
+        if (err === 'not-allowed' || err === 'service-not-allowed') {
+          setCallStatus('🟢 HOVOR JE AKTÍVNY · ❌ POVOLENIE PRE ROZPOZNÁVANIE REČI NEBOLO UDELENÉ');
+          return;
+        }
+        setCallStatus('🟢 HOVOR JE AKTÍVNY · 🔄 OBNOVUJEM ROZPOZNÁVANIE…');
+      };
+      r.onend = () => {
+        running = false;
+        recognition = null;
+        if (!stopping && !ttsSpeaking && isCallActive()) {
+          restarting = setTimeout(() => {
+            restarting = null;
+            startRecognition();
+          }, 250);
+        }
+      };
+      try { r.start(); }
+      catch {
+        running = false;
+        recognition = null;
+        if (!stopping && isCallActive()) {
+          restarting = setTimeout(() => { restarting = null; startRecognition(); }, 500);
+        }
+      }
+    };
+
+    const toggleFromMicButton = event => {
+      if (!isCallActive()) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (running) {
+        stopRecognition();
+        setCallStatus('🟢 HOVOR JE AKTÍVNY · 🎙 PREKLAD POZASTAVENÝ');
+      } else {
+        stopping = false;
+        startRecognition();
+      }
+    };
+
+    micButton?.addEventListener('click', toggleFromMicButton, true);
+    play?.addEventListener('click', () => speak(translation.textContent || ''), true);
+    root.querySelectorAll('[data-speed]').forEach(button => button.addEventListener('click', () => {
+      speechRate = Number(button.dataset.speed || 1);
+    }));
+    source.addEventListener('change', () => {
+      interactionId = null;
+      if (running) { stopRecognition(); stopping = false; startRecognition(); }
+    });
+    target.addEventListener('change', () => { interactionId = null; });
+
+    const watch = () => {
+      if (isCallActive()) {
+        const dataStatus = String(status?.textContent || '').toLowerCase();
+        const nativeRecognitionAppearsActive = /hovoríte|sie sprechen|speaking|recording|nahrávam/.test(dataStatus);
+        if (!nativeRecognitionAppearsActive && !running && !ttsSpeaking && !stopping) startRecognition();
+      } else if (running || recognition) {
+        stopRecognition();
+      }
+    };
+
+    new MutationObserver(watch).observe(commStatus, {childList:true, characterData:true, subtree:true});
+    setInterval(watch, 700);
+    setTimeout(watch, 900);
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
+})();
+</script>
