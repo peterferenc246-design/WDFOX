@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
+import FoxPcBridge from "../../components/FoxPcBridge.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -20,6 +21,7 @@ const content = await getLandingContent(lang);
   </Fragment>
   <Landing content={content} />
   <FoxLiveTranslator locale={lang} />
+  <FoxPcBridge />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
@@ -43,117 +45,27 @@ const content = await getLandingContent(lang);
     return nativeFetch(input,init);
   };
 
-  // One direct communicator bridge: desktop registers FOX-WDFOX, mobile calls it.
+  // Legacy bridge retained for compatibility; FoxPcBridge owns the resilient multi-ID call path.
   const isMobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   const STATION_ID='FOX-WDFOX';
   const root=document.querySelector('[data-fox-live]');
   if(!root) return;
-
   let peer=null, data=null, incomingCall=null, localStream=null, remoteAudio=null;
-  let ringing=false, ringTimer=null, audioCtx=null;
-  let source='sk', target='de';
-  const $=s=>root.querySelector(s);
-  const status=$('[data-comm-status]');
-  const callBtn=$('[data-call]');
-  const callLabel=$('[data-call-label]');
-  const createBtn=$('[data-create]');
-  const micBtn=$('[data-mic]');
-  const sourceSel=$('[data-source]');
-  const targetSel=$('[data-target]');
+  let ringing=false, ringTimer=null, audioCtx=null, source='sk', target='de';
+  const $=s=>root.querySelector(s), status=$('[data-comm-status]'), callBtn=$('[data-call]'), callLabel=$('[data-call-label]'), createBtn=$('[data-create]'), micBtn=$('[data-mic]'), sourceSel=$('[data-source]'), targetSel=$('[data-target]');
   const setStatus=t=>{if(status)status.textContent=t};
-
   const unlock=()=>{try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch{}};
   ['pointerdown','touchstart','keydown'].forEach(e=>document.addEventListener(e,unlock,{capture:true,passive:true}));
   const tone=()=>{unlock();if(!audioCtx||audioCtx.state!=='running')return;const n=audioCtx.currentTime;[0,.24,.48].forEach((d,i)=>{try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=i===1?660:880;g.gain.setValueAtTime(.0001,n+d);g.gain.exponentialRampToValueAtTime(.14,n+d+.02);g.gain.exponentialRampToValueAtTime(.0001,n+d+.2);o.connect(g).connect(audioCtx.destination);o.start(n+d);o.stop(n+d+.21)}catch{}})};
-  const startRing=()=>{if(ringing)return;ringing=true;tone();document.title='📞 FOX – PRICHÁDZA HOVOR';ringTimer=setInterval(tone,1300)};
-  const stopRing=()=>{ringing=false;if(ringTimer)clearInterval(ringTimer);ringTimer=null;document.title='FOX LIVE TRANSLATOR'};
-
-  const ensurePeerScript=()=>new Promise((resolve,reject)=>{
-    if(window.Peer)return resolve();
-    const s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-    s.onload=()=>window.Peer?resolve():reject(Error('PeerJS sa nenačítal'));s.onerror=()=>reject(Error('PeerJS sa nenačítal'));document.head.appendChild(s);
-  });
-
-  const attachRemote=stream=>{
-    remoteAudio=remoteAudio||$('[data-remote-audio]');
-    if(remoteAudio){remoteAudio.srcObject=stream;remoteAudio.autoplay=true;remoteAudio.play().catch(()=>{});}
-    else{const a=new Audio();a.autoplay=true;a.srcObject=stream;a.play().catch(()=>{});window.__FOX_BRIDGE_AUDIO__=a;}
-  };
-
-  const showIncoming=()=>{
-    let b=document.querySelector('[data-fox-bridge-incoming]');if(b)return b;
-    b=document.createElement('div');b.dataset.foxBridgeIncoming='1';
-    b.style.cssText='position:fixed;inset:0;z-index:100000;display:grid;place-items:center;background:rgba(10,14,24,.64);padding:20px;backdrop-filter:blur(5px)';
-    b.innerHTML='<div style="width:min(430px,100%);background:#fff;border-radius:22px;padding:26px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.35)"><div style="font-size:13px;font-weight:900;color:#f36a0a;letter-spacing:.08em">FOX LIVE</div><h2 style="margin:10px 0;color:#172033">📞 PRICHÁDZAJÚCI HOVOR</h2><p style="color:#667085;font-weight:700">Mobil žiada o spojenie s FOX PC.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-fox-deny style="border:0;border-radius:12px;padding:14px;font-weight:900">ZAMIETNUŤ</button><button data-fox-accept style="border:0;border-radius:12px;padding:14px;font-weight:900;background:#18a957;color:#fff">PRIJATIAŤ HOVOR</button></div></div>';
-    document.body.appendChild(b);
-    b.querySelector('[data-fox-deny]').onclick=()=>{try{incomingCall?.close()}catch{};incomingCall=null;try{data?.close()}catch{};data=null;stopRing();b.remove();setStatus('🟢 FOX PC ONLINE – čakám na hovor')};
-    b.querySelector('[data-fox-accept]').onclick=acceptIncoming;
-    return b;
-  };
-
-  const wireData=c=>{
-    data=c;
-    c.on('open',()=>{
-      setStatus(isMobile?'🟢 SPOJENIE S FOX PC AKTÍVNE':'🟢 MOBIL JE PRIPOJENÝ');
-      if(isMobile)c.send({type:'call-request',source,target,at:Date.now()});
-    });
-    c.on('data',m=>{
-      if(!m||typeof m!=='object')return;
-      if(m.type==='call-request'){source=m.source||source;target=m.target||target;if(sourceSel)sourceSel.value=target;if(targetSel)targetSel.value=source;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');showIncoming();}
-    });
-    c.on('close',()=>{data=null;if(!incomingCall)setStatus(isMobile?'⚠️ Spojenie s FOX PC bolo ukončené':'🟢 FOX PC ONLINE – čakám na hovor')});
-    c.on('error',e=>setStatus('❌ DÁTOVÉ SPOJENIE: '+(e.message||e)));
-  };
-
-  const acceptIncoming=async()=>{
-    const b=document.querySelector('[data-fox-bridge-incoming]');
-    try{
-      stopRing();unlock();
-      if(!localStream)localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-      if(incomingCall){incomingCall.answer(localStream);incomingCall.on('stream',attachRemote);incomingCall.on('close',()=>setStatus('🟢 FOX PC ONLINE – čakám na hovor'));incomingCall.on('error',e=>setStatus('❌ WEBRTC: '+(e.message||e)));}
-      if(data?.open)data.send({type:'call-accepted',at:Date.now()});
-      if(callBtn){callBtn.disabled=true;if(callLabel)callLabel.textContent='HOVOR JE AKTÍVNY';}
-      if(micBtn)micBtn.disabled=false;
-      setStatus('🟢 HOVOR JE AKTÍVNY');b?.remove();
-    }catch(e){setStatus('❌ MIKROFÓN: '+(e.message||e));b?.remove();}
-  };
-
-  const initPeer=async()=>{
-    await ensurePeerScript();
-    if(peer&&!peer.destroyed)return;
-    peer=isMobile?new Peer(undefined,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}}):new Peer(STATION_ID,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});
-    peer.on('open',id=>setStatus(isMobile?'🟢 MOBIL PRIPRAVEN – FOX PC je cieľ':'🟢 FOX PC ONLINE – čakám na hovor'));
-    peer.on('connection',wireData);
-    peer.on('call',call=>{incomingCall=call;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');showIncoming();});
-    peer.on('error',e=>{
-      if(e.type==='unavailable-id'&&!isMobile){setStatus('⚠️ FOX-WDFOX je obsadený – obnovujem prijímač…');try{peer.destroy()}catch{}peer=null;setTimeout(initPeer,1800);return;}
-      setStatus('❌ PeerJS: '+(e.type||e.message||'chyba'));
-    });
-    peer.on('disconnected',()=>{setStatus('⚠️ PeerJS odpojený – obnovujem…');try{peer.reconnect()}catch{}});
-  };
-
-  const makeCall=async e=>{
-    e.preventDefault();e.stopImmediatePropagation();unlock();
-    try{
-      await initPeer();
-      if(!isMobile){setStatus('ℹ️ FOX PC je prijímač – čaká na mobil');return;}
-      if(!localStream)localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-      setStatus('📞 VOLÁM NA FOX PC…');
-      const c=peer.connect(STATION_ID,{reliable:true,metadata:{fox:true,source,target}});wireData(c);
-      const call=peer.call(STATION_ID,localStream,{metadata:{fox:true,source,target}});incomingCall=call;
-      call.on('stream',attachRemote);
-      call.on('close',()=>setStatus('⚠️ Hovor ukončený'));
-      call.on('error',e=>setStatus(e.type==='peer-unavailable'?'❌ FOX PC NIE JE ONLINE – otvor FOX na PC a nechaj stránku otvorenú.':'❌ WEBRTC: '+(e.message||e)));
-      if(callBtn){callBtn.disabled=true;if(callLabel)callLabel.textContent='VOLÁM…';}
-    }catch(e){setStatus('❌ '+(e.message||e));}
-  };
-
-  // Capture phase blocks the old communicator's second PeerJS path.
-  callBtn?.addEventListener('click',makeCall,true);
-  createBtn?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();initPeer().catch(err=>setStatus('❌ '+(err.message||err)));},true);
-  micBtn?.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();try{unlock();localStream=await navigator.mediaDevices.getUserMedia({audio:true});if(micBtn)micBtn.disabled=false;setStatus('🎙 MIKROFÓN JE ZAPNUTÝ');}catch(err){setStatus('❌ MIKROFÓN: '+(err.message||err));}},true);
-  sourceSel?.addEventListener('change',()=>{source=sourceSel.value||source});
-  targetSel?.addEventListener('change',()=>{target=targetSel.value||target});
-  setTimeout(()=>initPeer().catch(e=>setStatus('❌ PeerJS: '+(e.message||e))),700);
+  const startRing=()=>{if(ringing)return;ringing=true;tone();ringTimer=setInterval(tone,1300)};
+  const stopRing=()=>{ringing=false;if(ringTimer)clearInterval(ringTimer);ringTimer=null};
+  const ensurePeerScript=()=>new Promise((resolve,reject)=>{if(window.Peer)return resolve();const s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>window.Peer?resolve():reject(Error('PeerJS sa nenačítal'));s.onerror=()=>reject(Error('PeerJS sa nenačítal'));document.head.appendChild(s)});
+  const attachRemote=stream=>{remoteAudio=remoteAudio||$('[data-remote-audio]');if(remoteAudio){remoteAudio.srcObject=stream;remoteAudio.autoplay=true;remoteAudio.play().catch(()=>{});}else{const a=new Audio();a.autoplay=true;a.srcObject=stream;a.play().catch(()=>{});window.__FOX_BRIDGE_AUDIO__=a}};
+  const showIncoming=()=>{let b=document.querySelector('[data-fox-bridge-incoming]');if(b)return b;b=document.createElement('div');b.dataset.foxBridgeIncoming='1';b.style.cssText='position:fixed;inset:0;z-index:100000;display:grid;place-items:center;background:rgba(10,14,24,.64);padding:20px';b.innerHTML='<div style="width:min(430px,100%);background:#fff;border-radius:22px;padding:26px;text-align:center"><div style="font-size:13px;font-weight:900;color:#f36a0a">FOX LIVE</div><h2>📞 PRICHÁDZAJÚCI HOVOR</h2><p>Mobil žiada o spojenie s FOX PC.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-fox-deny style="padding:14px;border:0;border-radius:12px">ZAMIETNUŤ</button><button data-fox-accept style="padding:14px;border:0;border-radius:12px;background:#18a957;color:#fff;font-weight:900">PRIJATIAŤ HOVOR</button></div></div>';document.body.appendChild(b);b.querySelector('[data-fox-deny]').onclick=()=>{try{incomingCall?.close()}catch{};incomingCall=null;try{data?.close()}catch{};data=null;stopRing();b.remove();setStatus('🟢 FOX PC ONLINE – čakám na hovor')};b.querySelector('[data-fox-accept]').onclick=acceptIncoming;return b};
+  const wireData=c=>{data=c;c.on('open',()=>{setStatus(isMobile?'🟢 SPOJENIE S FOX PC AKTÍVNE':'🟢 MOBIL JE PRIPOJENÝ');if(isMobile)c.send({type:'call-request',source,target,at:Date.now()})});c.on('data',m=>{if(!m||typeof m!=='object')return;if(m.type==='call-request'){source=m.source||source;target=m.target||target;if(sourceSel)sourceSel.value=target;if(targetSel)targetSel.value=source;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');showIncoming()}});c.on('close',()=>{data=null;if(!incomingCall)setStatus(isMobile?'⚠️ Spojenie s FOX PC bolo ukončené':'🟢 FOX PC ONLINE – čakám na hovor')});c.on('error',e=>setStatus('❌ DÁTOVÉ SPOJENIE: '+(e.message||e)))};
+  const acceptIncoming=async()=>{const b=document.querySelector('[data-fox-bridge-incoming]');try{stopRing();unlock();if(!localStream)localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});if(incomingCall){incomingCall.answer(localStream);incomingCall.on('stream',attachRemote);incomingCall.on('close',()=>setStatus('🟢 FOX PC ONLINE – čakám na hovor'));incomingCall.on('error',e=>setStatus('❌ WEBRTC: '+(e.message||e)))}if(data?.open)data.send({type:'call-accepted',at:Date.now()});if(callBtn){callBtn.disabled=true;if(callLabel)callLabel.textContent='HOVOR JE AKTÍVNY'}if(micBtn)micBtn.disabled=false;setStatus('🟢 HOVOR JE AKTÍVNY');b?.remove()}catch(e){setStatus('❌ MIKROFÓN: '+(e.message||e));b?.remove()}};
+  const initPeer=async()=>{await ensurePeerScript();if(peer&&!peer.destroyed)return;peer=isMobile?new Peer(undefined,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}}):new Peer(STATION_ID,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});peer.on('open',id=>setStatus(isMobile?'🟢 MOBIL PRIPRAVEN – FOX PC je cieľ':'🟢 FOX PC ONLINE – čakám na hovor'));peer.on('connection',wireData);peer.on('call',call=>{incomingCall=call;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');showIncoming()});peer.on('error',e=>{if(e.type==='unavailable-id'&&!isMobile){try{peer.destroy()}catch{}peer=null;setTimeout(initPeer,1800);return}setStatus('❌ PeerJS: '+(e.type||e.message||'chyba'))});peer.on('disconnected',()=>{try{peer.reconnect()}catch{}})};
+  const makeCall=async e=>{e.preventDefault();e.stopImmediatePropagation();unlock();try{await initPeer();if(!isMobile)return;if(!localStream)localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});const c=peer.connect(STATION_ID,{reliable:true,metadata:{fox:true,source,target}});wireData(c);const call=peer.call(STATION_ID,localStream,{metadata:{fox:true,source,target}});incomingCall=call;call.on('stream',attachRemote);if(callBtn){callBtn.disabled=true;if(callLabel)callLabel.textContent='VOLÁM…'}}catch(e){setStatus('❌ '+(e.message||e))}};
+  callBtn?.addEventListener('click',makeCall,true);createBtn?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();initPeer().catch(err=>setStatus('❌ '+(err.message||err)))},true);micBtn?.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();try{unlock();localStream=await navigator.mediaDevices.getUserMedia({audio:true});if(micBtn)micBtn.disabled=false;setStatus('🎙 MIKROFÓN JE ZAPNUTÝ')}catch(err){setStatus('❌ MIKROFÓN: '+(err.message||err))}},true);sourceSel?.addEventListener('change',()=>{source=sourceSel.value||source});targetSel?.addEventListener('change',()=>{target=targetSel.value||target});setTimeout(()=>initPeer().catch(e=>setStatus('❌ PeerJS: '+(e.message||e))),700);
 })();
 </script>
