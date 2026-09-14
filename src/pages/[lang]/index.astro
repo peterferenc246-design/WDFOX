@@ -8,60 +8,27 @@ import FoxIncomingCall from "../../components/FoxIncomingCall.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
-export function getStaticPaths() {
-  return locales.map((lang) => ({ params: { lang }, props: { lang } }));
-}
-
+export function getStaticPaths() { return locales.map((lang) => ({ params: { lang }, props: { lang } })); }
 const lang = Astro.props.lang as Locale;
 const content = await getLandingContent(lang);
 ---
 <BaseLayout locale={lang} title={content.title} description={content.heroDescription}>
   <Fragment slot="navigation">
-    <a class="nav-link active" href={`/${lang}/#domov`}>{content.nav.home}</a>
-    <a class="nav-link" href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
-    <a class="nav-link" href={`/${lang}/#o-mne`}>{content.nav.about}</a>
-    <a class="nav-link" href={`/${lang}/#proces`}>{content.nav.process}</a>
-    <a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
+    <a class="nav-link active" href={`/${lang}/#domov`}>{content.nav.home}</a><a class="nav-link" href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a><a class="nav-link" href={`/${lang}/#o-mne`}>{content.nav.about}</a><a class="nav-link" href={`/${lang}/#proces`}>{content.nav.process}</a><a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
   <Landing content={content} />
-  <FoxDirectHotlineV2 locale={lang} />
   <FoxLiveTranslator locale={lang} />
+  <FoxDirectHotlineV2 locale={lang} />
   <FoxIncomingCall locale={lang} />
   <FoxAnalyzerLauncher locale={lang} />
-  <Fragment slot="footer-links">
-    <a href={`/${lang}/#domov`}>{content.nav.home}</a>
-    <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
-    <a href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
-  </Fragment>
+  <Fragment slot="footer-links"><a href={`/${lang}/#domov`}>{content.nav.home}</a><a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a><a href={`/${lang}/#kontakt`}>{content.nav.contact}</a></Fragment>
 </BaseLayout>
 
 <script is:inline>
 (() => {
-  const FOX_LIVE_API = "https://wdfox-live-translator.vercel.app";
-  const FOX_GEMINI_API = "https://wdfox-gemini-api.vercel.app";
-  const nativeFetch = window.fetch.bind(window);
-  window.fetch = (input, init) => {
-    const url = typeof input === "string" ? input : input?.url || "";
-    if (url.startsWith("/api/")) {
-      const base = url.startsWith("/api/gemini-chat") ? FOX_GEMINI_API : FOX_LIVE_API;
-      const target = `${base}${url}`;
-      if (typeof input === "string") return nativeFetch(target, init);
-      return nativeFetch(new Request(target, input), init);
-    }
-    return nativeFetch(input, init);
-  };
-
-  // The direct FOX PC/mobile hotline is the primary call path.
-  // The legacy QR communicator remains hidden so it cannot create a second
-  // PeerJS session or interfere with the direct receiver.
-  const hideLegacyQrCall = () => {
-    const live = document.querySelector('[data-fox-live]');
-    if (!live) return;
-    live.querySelector('[data-mode="communicator"]')?.setAttribute('hidden', 'true');
-    live.querySelector('[data-communicator]')?.setAttribute('hidden', 'true');
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideLegacyQrCall, { once: true });
-  else hideLegacyQrCall();
-  new MutationObserver(hideLegacyQrCall).observe(document.documentElement, { childList: true, subtree: true });
+  const LIVE='https://wdfox-live-translator.vercel.app', GEMINI='https://wdfox-gemini-api.vercel.app', nativeFetch=window.fetch.bind(window);
+  window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input,init)};
+  // Keep the single FOX LIVE TRANSLATOR mode switch visible. Do not hide KOMUNIKÁTOR.
+  // FOX DIRECT is an additional direct PC/mobile path; it must not suppress the QR communicator.
 })();
 </script>
