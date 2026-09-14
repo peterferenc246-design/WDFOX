@@ -11,11 +11,30 @@
     const names=Object.fromEntries([...source.options].map(o=>[o.value,o.textContent||o.value]));
     const localeMap={bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'};
     const locale=c=>localeMap[c]||c||'en-US';
-    const active=()=>/hovor je aktívny|call is active|anruf ist aktiv|live|aktívny/i.test(String(commStatus.textContent||''));
-    let recordHandler=null,wrapped=false,lastTranslated='',timer=null,translating=false,interactionId=null,speechRate=1;
+    const active=()=>/hovor je aktívny|call is active|anruf ist aktiv|live|aktívny|volám|calling|anruf/i.test(String(commStatus.textContent||''));
+    let recordHandler=null,wrapped=false,lastTranslated='',timer=null,translating=false,interactionId=null,speechRate=1,gestureStarted=false;
     const capture=()=>{if(!recordHandler&&typeof recordButton.onclick==='function')recordHandler=recordButton.onclick;return !!recordHandler};
-    const startFromTrustedGesture=e=>{if(!capture())return;if(!root.classList.contains('is-call-mode')||callButton.disabled||recordButton.classList.contains('recording'))return;try{recordHandler.call(recordButton,e)}catch(err){commStatus.textContent='❌ SpeechRecognition: '+(err?.message||'spustenie zlyhalo')}};
-    const wrap=()=>{if(wrapped||!capture())return;const original=callButton.onclick;if(typeof original!=='function')return;wrapped=true;callButton.addEventListener('pointerup',startFromTrustedGesture,{capture:true});callButton.onclick=function(e){startFromTrustedGesture(e);return original.call(this,e)}};
+    const startRecognitionFromGesture=e=>{
+      if(!capture()||callButton.disabled||recordButton.classList.contains('recording')||gestureStarted)return;
+      gestureStarted=true;
+      try{recordHandler.call(recordButton,e)}catch(err){commStatus.textContent='❌ SpeechRecognition: '+(err?.message||'spustenie zlyhalo')}
+      setTimeout(()=>{gestureStarted=false},1200);
+    };
+    const wrap=()=>{
+      if(wrapped||!capture())return;
+      const original=callButton.onclick;
+      if(typeof original!=='function')return;
+      wrapped=true;
+      // Start recognition directly from the real mobile touch/pointer gesture.
+      // Do this BEFORE requestCall() performs async WebRTC work, otherwise
+      // mobile browsers may reject SpeechRecognition with a network/activation error.
+      callButton.addEventListener('pointerdown',startRecognitionFromGesture,{capture:true,passive:true});
+      callButton.addEventListener('touchstart',startRecognitionFromGesture,{capture:true,passive:true});
+      callButton.onclick=function(e){
+        startRecognitionFromGesture(e);
+        return original.call(this,e);
+      };
+    };
     const speak=text=>{if(!text||!window.speechSynthesis)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=locale(target.value);u.rate=speechRate;window.speechSynthesis.speak(u)};
     const translate=async text=>{const clean=String(text||'').trim();if(!clean||clean===lastTranslated||!active()||translating)return;translating=true;lastTranslated=clean;if(status)status.textContent='🧠 PREKLADÁM CEZ GEMINI…';try{const src=source.value,dst=target.value;const r=await fetch('/api/gemini-chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`Translate only this spoken sentence from ${names[src]||src} to ${names[dst]||dst}. Return only the natural target-language translation. Preserve names, numbers, dates, negation, tense, politeness and tone. Sentence: ${clean}`,previousInteractionId:interactionId,systemInstruction:'You are a professional real-time interpreter. Output only the target-language translation.',thinkingLevel:'low'})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j?.error||`Gemini HTTP ${r.status}`);const out=String(j?.text||j?.translation||'').trim();if(!out)throw Error('Gemini returned an empty translation');interactionId=j?.interactionId||interactionId;translation.textContent=out;if(play)play.disabled=false;if(status)status.textContent='✅ PREKLAD HOTOVÝ';speak(out)}catch(e){if(status)status.textContent='❌ GEMINI: '+(e?.message||'Preklad sa nepodaril.')}finally{translating=false}};
     const observe=()=>{if(!active())return;const text=String(transcript.textContent||'').trim();if(!text||text===lastTranslated)return;clearTimeout(timer);timer=setTimeout(()=>{const stable=String(transcript.textContent||'').trim();if(stable&&stable!==lastTranslated)void translate(stable)},700)};
