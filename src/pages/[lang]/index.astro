@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
+import FoxCallTranslationFix from "../../components/FoxCallTranslationFix.astro";
 import FoxPcBridge from "../../components/FoxPcBridge.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
@@ -21,6 +22,7 @@ const content = await getLandingContent(lang);
   </Fragment>
   <Landing content={content} />
   <FoxLiveTranslator locale={lang} />
+  <FoxCallTranslationFix />
   <FoxPcBridge />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
@@ -29,3 +31,10 @@ const content = await getLandingContent(lang);
     <a href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
 </BaseLayout>
+
+<script is:inline>
+(() => {
+  const LIVE='https://wdfox-live-translator.vercel.app', GEMINI='https://wdfox-gemini-api.vercel.app', nativeFetch=window.fetch.bind(window);
+  window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input,init)};
+})();
+</script>
