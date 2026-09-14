@@ -49,7 +49,6 @@ const content = await getLandingContent(lang);
       return nativeFetch(input, init);
     };
 
-    // Keep microphone permission priming tied to a user gesture.
     let micPrimed = false;
     const primeMicPermission = async () => {
       if (micPrimed || !navigator.mediaDevices?.getUserMedia) return;
@@ -62,9 +61,6 @@ const content = await getLandingContent(lang);
       }
     };
 
-    // Mobile regression guard: the screen-share control must remain visible
-    // whenever the FOX communicator panel is visible. Do not alter its disabled
-    // state; FoxLiveTranslator controls that according to connection readiness.
     const keepScreenButtonVisible = () => {
       const root = document.querySelector("[data-translator]");
       if (!root) return;
@@ -86,22 +82,225 @@ const content = await getLandingContent(lang);
       const createButton = root.querySelector("[data-create]");
       const modeButtons = root.querySelectorAll("[data-mode]");
       if (!mic || !commStatus) return;
-
       const primeFromGesture = () => { void primeMicPermission(); };
       callButton?.addEventListener("click", primeFromGesture, { passive: true });
       createButton?.addEventListener("click", primeFromGesture, { passive: true });
       mic.addEventListener("click", primeFromGesture, { passive: true });
       modeButtons.forEach((button) => button.addEventListener("click", keepScreenButtonVisible, { passive: true }));
-
       const observer = new MutationObserver(keepScreenButtonVisible);
       observer.observe(root, { subtree: true, attributes: true, attributeFilter: ["class", "style"] });
       keepScreenButtonVisible();
     };
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", watchDuplexCall, { once: true });
-    } else {
+    // FOX Audio Translator: browser speech recognition -> Gemini translation -> speech synthesis.
+    // There is intentionally no one-minute application timer. If the browser ends a recognition
+    // session, it is restarted automatically while the user is still in recording mode.
+    const installAudioTranslator = () => {
+      const root = document.querySelector("[data-translator]");
+      if (!root || root.dataset.foxAudioReady === "1") return;
+      const record = root.querySelector("[data-record]");
+      const recordLabel = root.querySelector("[data-record-label]");
+      const status = root.querySelector("[data-status]");
+      const transcript = root.querySelector("[data-transcript]");
+      const translation = root.querySelector("[data-translation]");
+      const play = root.querySelector("[data-play]");
+      const source = root.querySelector("[data-source]");
+      const target = root.querySelector("[data-target]");
+      const sourceLabel = root.querySelector("[data-source-label]");
+      const targetLabel = root.querySelector("[data-target-label]");
+      const speedButtons = [...root.querySelectorAll("[data-speed]")];
+      if (!record || !status || !transcript || !translation || !source || !target) return;
+      root.dataset.foxAudioReady = "1";
+
+      const localeMap = {
+        bg:"bg-BG", hr:"hr-HR", cs:"cs-CZ", da:"da-DK", nl:"nl-NL", en:"en-US", et:"et-EE", fi:"fi-FI",
+        fr:"fr-FR", de:"de-DE", el:"el-GR", hu:"hu-HU", ga:"ga-IE", it:"it-IT", lv:"lv-LV", lt:"lt-LT",
+        lb:"lb-LU", mt:"mt-MT", pl:"pl-PL", pt:"pt-PT", ro:"ro-RO", sk:"sk-SK", sl:"sl-SI", es:"es-ES", sv:"sv-SE"
+      };
+      const langName = code => source.querySelector(`option[value="${CSS.escape(code)}"]`)?.textContent || code;
+      const recognitionCtor = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognition = null;
+      let running = false;
+      let stopping = false;
+      let translationBusy = false;
+      let translationQueue = [];
+      let interactionId = null;
+      let speechRate = Number(root.querySelector("[data-speed].is-active")?.dataset.speed || 1);
+      let lastText = "";
+
+      const setStatus = text => { status.textContent = text; };
+      const updateLabels = () => {
+        if (sourceLabel) sourceLabel.textContent = langName(source.value);
+        if (targetLabel) targetLabel.textContent = langName(target.value);
+      };
+      const targetLocale = () => localeMap[target.value] || target.value || "en-US";
+      const sourceLocale = () => localeMap[source.value] || source.value || "en-US";
+
+      const chooseVoice = locale => {
+        const voices = window.speechSynthesis?.getVoices?.() || [];
+        const exact = voices.find(v => v.lang?.toLowerCase() === locale.toLowerCase());
+        if (exact) return exact;
+        const base = locale.split("-")[0].toLowerCase();
+        return voices.find(v => v.lang?.toLowerCase().startsWith(`${base}-`)) || voices.find(v => v.lang?.toLowerCase() === base);
+      };
+
+      const speakTranslation = text => {
+        if (!text || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = targetLocale();
+        utterance.rate = speechRate;
+        const voice = chooseVoice(utterance.lang);
+        if (voice) utterance.voice = voice;
+        window.speechSynthesis.speak(utterance);
+      };
+
+      const translateText = async text => {
+        const clean = text.trim();
+        if (!clean || clean === lastText) return;
+        lastText = clean;
+        translationBusy = true;
+        setStatus("🧠 PREKLADÁM CEZ GEMINI…");
+        try {
+          const response = await fetch("/api/gemini-chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: clean,
+              source: source.value,
+              target: target.value,
+              previousInteractionId: interactionId
+            })
+          });
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(payload?.error || `HTTP ${response.status}`);
+          if (payload?.interactionId) interactionId = payload.interactionId;
+          const translated = String(payload?.text || payload?.translation || "").trim();
+          if (!translated) throw new Error("Gemini vrátil prázdny preklad.");
+          translation.textContent = translated;
+          if (play) play.disabled = false;
+          setStatus("✅ PREKLAD HOTOVÝ");
+          speakTranslation(translated);
+        } catch (error) {
+          setStatus(`❌ GEMINI: ${error?.message || "Preklad sa nepodaril."}`);
+        } finally {
+          translationBusy = false;
+          const next = translationQueue.shift();
+          if (next) void translateText(next);
+        }
+      };
+
+      const enqueueTranslation = text => {
+        if (translationBusy) {
+          translationQueue.push(text);
+          if (translationQueue.length > 3) translationQueue = translationQueue.slice(-3);
+          return;
+        }
+        void translateText(text);
+      };
+
+      const stopRecognition = () => {
+        stopping = true;
+        try { recognition?.stop(); } catch {}
+        running = false;
+        record.classList.remove("recording");
+        recordLabel.textContent = "ZAČAŤ HOVORIŤ";
+      };
+
+      const startRecognition = () => {
+        const Ctor = recognitionCtor();
+        if (!Ctor) {
+          setStatus("❌ Tento prehliadač nepodporuje hlasové rozpoznávanie. Použite Chrome alebo Edge.");
+          return;
+        }
+        stopping = false;
+        try { recognition?.abort?.(); } catch {}
+        recognition = new Ctor();
+        recognition.lang = sourceLocale();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        recognition.onstart = () => {
+          running = true;
+          record.classList.add("recording");
+          recordLabel.textContent = "ZASTAVIŤ";
+          setStatus("🎙️ HOVORÍTE…");
+        };
+        recognition.onerror = event => {
+          if (stopping || event.error === "aborted") return;
+          if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+            stopping = true;
+            running = false;
+            record.classList.remove("recording");
+            recordLabel.textContent = "ZAČAŤ HOVORIŤ";
+            setStatus("❌ Mikrofon alebo rozpoznávanie reči bolo zamietnuté.");
+            return;
+          }
+          setStatus(`⚠️ Hlasové rozpoznávanie: ${event.error}`);
+        };
+        recognition.onresult = event => {
+          let interim = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const text = event.results[i][0]?.transcript?.trim() || "";
+            if (event.results[i].isFinal && text) {
+              transcript.textContent = text;
+              enqueueTranslation(text);
+            } else if (text) {
+              interim += `${text} `;
+            }
+          }
+          if (interim.trim()) transcript.textContent = interim.trim();
+        };
+        recognition.onend = () => {
+          running = false;
+          if (!stopping) {
+            setStatus("🔄 OBNOVUJEM HLASOVÉ ROZPOZNÁVANIE…");
+            window.setTimeout(() => {
+              if (!stopping) {
+                try { recognition.start(); } catch { startRecognition(); }
+              }
+            }, 180);
+          }
+        };
+        try { recognition.start(); } catch (error) {
+          running = false;
+          setStatus(`❌ Hlasové rozpoznávanie: ${error?.message || "nedá sa spustiť"}`);
+        }
+      };
+
+      record.onclick = async () => {
+        await primeMicPermission();
+        if (running) {
+          stopRecognition();
+          setStatus("Preklad je pripravený.");
+        } else {
+          startRecognition();
+        }
+      };
+
+      play?.addEventListener("click", () => speakTranslation(translation.textContent || ""));
+      speedButtons.forEach(button => button.addEventListener("click", () => {
+        speechRate = Number(button.dataset.speed || 1);
+        speedButtons.forEach(item => item.classList.toggle("is-active", item === button));
+        if (translation.textContent) speakTranslation(translation.textContent);
+      }));
+      source.addEventListener("change", () => {
+        updateLabels();
+        if (running) {
+          stopRecognition();
+          startRecognition();
+        }
+      });
+      target.addEventListener("change", () => { updateLabels(); });
+      window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
+      updateLabels();
+    };
+
+    const boot = () => {
+      installAudioTranslator();
       watchDuplexCall();
-    }
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true });
+    else boot();
   })();
 </script>
