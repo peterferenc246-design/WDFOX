@@ -29,173 +29,27 @@ const chromeUrl = "https://chromewebstore.google.com/detail/meta-ads-data-adviso
 
 <script is:inline>
 (() => {
-  // FOX screen-share visibility fix.
-  const revealRemoteScreen = () => {
-    document.querySelectorAll('[data-fox-remote-screen]').forEach((video) => {
-      if (video.srcObject) {
-        video.style.display = 'block';
-        video.style.visibility = 'visible';
-        video.removeAttribute('hidden');
-      }
-    });
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', revealRemoteScreen, { once: true });
-  else revealRemoteScreen();
-  new MutationObserver(revealRemoteScreen).observe(document.documentElement, { childList: true, subtree: true });
-  setInterval(revealRemoteScreen, 500);
-
-  // FOX consent-based, bidirectional screen sharing.
-  // Important: a screen is NEVER captured just because the other participant
-  // requests it. The owner must explicitly approve the request first.
-  const state = { peer:null, remoteId:null, requestPending:false, requestId:null, stream:null };
-  const lang = () => (document.documentElement.lang || 'sk').slice(0,2).toLowerCase();
-  const text = (key) => {
-    const de = { request:'Der Partner möchte Ihren Bildschirm sehen.', allow:'ERLAUBEN', deny:'ABLEHNEN', sent:'Bildschirmfreigabe angefragt. Warte auf Zustimmung…', denied:'Bildschirmfreigabe abgelehnt.', sharing:'Ihr Bildschirm wird für den Partner freigegeben.', stopped:'Bildschirmfreigabe beendet.', requested:'Der Partner hat eine Bildschirmfreigabe angefragt.', error:'Bildschirmfreigabe fehlgeschlagen.' };
-    const en = { request:'The partner wants to see your screen.', allow:'ALLOW', deny:'DENY', sent:'Screen sharing requested. Waiting for approval…', denied:'Screen sharing denied.', sharing:'Your screen is being shared with the partner.', stopped:'Screen sharing stopped.', requested:'The partner requested screen sharing.', error:'Screen sharing failed.' };
-    const sk = { request:'Partner chce vidieť tvoju obrazovku.', allow:'POVOLIŤ', deny:'ZAMIETNUŤ', sent:'Požiadavka odoslaná. Čakám na povolenie partnera…', denied:'Zdieľanie obrazovky bolo zamietnuté.', sharing:'Tvoja obrazovka sa zdieľa s partnerom.', stopped:'Zdieľanie obrazovky zastavené.', requested:'Partner požiadal o zdieľanie tvojej obrazovky.', error:'Zdieľanie obrazovky sa nepodarilo.' };
-    return (lang()==='de'?de:lang()==='en'?en:sk)[key] || sk[key];
-  };
-  const getPeer = () => window.__FOX_PEER__ || state.peer;
-  const getRemoteId = () => state.remoteId || window.__FOX_REMOTE_ID__ || new URLSearchParams(location.search).get('foxPeer');
-  const getControl = () => {
-    const peer = getPeer();
-    const rid = getRemoteId();
-    if (!peer || !rid) return null;
-    const list = peer.connections?.[rid] || [];
-    return list.find(c => c?.type === 'data' && c?.open && (c.label === 'fox-control' || c.metadata?.foxControl)) || list.find(c => c?.type === 'data' && c?.open) || null;
-  };
-  const sendControl = (message) => {
-    const c = getControl();
-    if (!c) return false;
-    try { c.send(message); return true; } catch { return false; }
-  };
-  const stopLocalShare = () => {
-    state.stream?.getTracks().forEach(t => t.stop());
-    state.stream = null;
-    const local = document.querySelector('[data-local-screen]');
-    if (local) local.srcObject = null;
-    document.querySelector('[data-local-screen-status]')?.replaceChildren();
-    sendControl({ type:'screen-share-stopped', requestId:state.requestId });
-  };
-  const makeDialog = () => {
-    if (document.querySelector('[data-fox-screen-consent]')) return document.querySelector('[data-fox-screen-consent]');
-    const box = document.createElement('div');
-    box.dataset.foxScreenConsent = 'true';
-    box.innerHTML = `<div class="fox-consent-backdrop"><div class="fox-consent-card" role="dialog" aria-modal="true"><div class="fox-consent-title">🖥️ FOX SCREEN</div><p data-fox-consent-text></p><div class="fox-consent-actions"><button type="button" data-fox-consent-deny>${text('deny')}</button><button type="button" data-fox-consent-allow>${text('allow')}</button></div></div></div>`;
-    document.body.appendChild(box);
-    return box;
-  };
-  const showRequest = (requestId, remoteId) => {
-    state.requestId = requestId; state.remoteId = remoteId; state.requestPending = true;
-    const box = makeDialog();
-    box.querySelector('[data-fox-consent-text]').textContent = text('request');
-    box.style.display = 'block';
-    box.querySelector('[data-fox-consent-deny]').onclick = () => {
-      sendControl({ type:'screen-response', requestId, approved:false });
-      box.style.display='none'; state.requestPending=false;
-    };
-    box.querySelector('[data-fox-consent-allow]').onclick = async () => {
-      box.style.display='none'; state.requestPending=false;
-      try {
-        if (!navigator.mediaDevices?.getDisplayMedia) throw Error('getDisplayMedia');
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video:{ frameRate:{ ideal:15, max:30 } }, audio:false });
-        state.stream = stream;
-        const local = document.querySelector('[data-local-screen]');
-        if (local) { local.srcObject = stream; local.play().catch(()=>{}); }
-        document.querySelector('[data-local-screen-status]')?.replaceChildren(document.createTextNode('● LIVE'));
-        const peer = getPeer();
-        const call = peer?.call?.(remoteId, stream, { metadata:{ foxScreen:true, requestId, consent:true } });
-        if (!call) throw Error('PeerJS');
-        call.on?.('close', stopLocalShare);
-        call.on?.('error', () => {});
-        sendControl({ type:'screen-response', requestId, approved:true });
-        const track = stream.getVideoTracks()[0];
-        track?.addEventListener('ended', stopLocalShare, { once:true });
-      } catch (e) {
-        sendControl({ type:'screen-response', requestId, approved:false, error:e?.name || 'error' });
-      }
-    };
-  };
-  const requestPartnerScreen = () => {
-    const rid = getRemoteId();
-    if (!getPeer() || !rid) { document.querySelector('[data-comm-status]')?.replaceChildren(document.createTextNode('Najprv vytvorte aktívne spojenie.')); return; }
-    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    state.requestId = requestId; state.remoteId = rid; state.requestPending = true;
-    if (sendControl({ type:'screen-request', requestId, from: getPeer()?.id || '' })) {
-      document.querySelector('[data-comm-status]')?.replaceChildren(document.createTextNode(text('sent')));
-    } else {
-      state.requestPending=false;
-      document.querySelector('[data-comm-status]')?.replaceChildren(document.createTextNode('Spojenie pre požiadavku nie je pripravené.'));
-    }
-  };
-  const attachControlListener = () => {
-    const peer = getPeer();
-    if (!peer) return;
-    state.peer = peer;
-    const rid = getRemoteId();
-    if (rid) state.remoteId = rid;
-    const connections = peer.connections || {};
-    Object.keys(connections).forEach(id => {
-      (connections[id] || []).forEach(c => {
-        if (!c || c.__foxScreenControlAttached || c.type !== 'data') return;
-        c.__foxScreenControlAttached = true;
-        c.on?.('data', m => {
-          if (!m || typeof m !== 'object') return;
-          if (m.type === 'screen-request') showRequest(m.requestId, c.peer);
-          if (m.type === 'screen-response') {
-            state.requestPending=false;
-            document.querySelector('[data-comm-status]')?.replaceChildren(document.createTextNode(m.approved ? text('sharing') : text('denied')));
-          }
-          if (m.type === 'screen-share-stopped') {
-            const remote = document.querySelector('[data-remote-screen]');
-            if (remote) remote.srcObject=null;
-            document.querySelector('[data-remote-screen-status]')?.replaceChildren();
-          }
+  // Safety net for older cached FOX builds: PeerJS must receive valid ICE URLs.
+  const sanitizePeer = () => {
+    const Original = window.Peer;
+    if (!Original || Original.__foxSanitized) return;
+    function FoxPeer(id, options = {}) {
+      const cfg = options && options.config;
+      if (cfg && Array.isArray(cfg.iceServers)) {
+        cfg.iceServers = cfg.iceServers.map(server => {
+          if (!server || typeof server !== 'object') return server;
+          const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+          return { ...server, urls: urls.filter(Boolean).map(url => String(url).startsWith('stun:') || String(url).startsWith('turn:') || String(url).startsWith('turns:') ? url : String(url).startsWith('stun.') ? `stun:${url}` : url) };
         });
-      });
-    });
-  };
-  const installPeerHook = () => {
-    const peer = getPeer();
-    if (!peer || peer.__foxConsentHooked) return;
-    peer.__foxConsentHooked = true;
-    state.peer = peer;
-    const originalOn = peer.on.bind(peer);
-    peer.on = (event, handler) => {
-      if (event === 'connection') {
-        return originalOn(event, c => { state.remoteId = c?.peer || state.remoteId; setTimeout(attachControlListener, 0); return handler(c); });
       }
-      return originalOn(event, handler);
-    };
-    setTimeout(attachControlListener, 100);
+      return new Original(id, options);
+    }
+    FoxPeer.prototype = Original.prototype;
+    Object.setPrototypeOf(FoxPeer, Original);
+    FoxPeer.__foxSanitized = true;
+    window.Peer = FoxPeer;
   };
-  const installUi = () => {
-    const button = document.querySelector('[data-screen]');
-    if (!button || button.__foxConsentButton) return;
-    button.__foxConsentButton = true;
-    const label = button.querySelector('[data-screen-label]');
-    if (label) label.textContent = lang()==='de' ? 'BILDSCHIRM DES PARTNERS ANFORDERN' : lang()==='en' ? 'REQUEST PARTNER SCREEN' : 'POŽIADAŤ O OBRAZOVKU PARTNERA';
-    button.title = lang()==='de' ? 'Bildschirm des Partners anfordern' : lang()==='en' ? 'Request partner screen' : 'Požiadať o obrazovku partnera';
-    document.addEventListener('click', e => {
-      const target = e.target?.closest?.('[data-screen]');
-      if (!target) return;
-      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-      requestPartnerScreen();
-    }, true);
-  };
-  const boot = () => { installUi(); installPeerHook(); attachControlListener(); };
-  boot();
-  setInterval(boot, 500);
+  sanitizePeer();
+  setInterval(sanitizePeer, 100);
 })();
 </script>
-
-<style>
-.fox-consent-backdrop{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:20px;background:rgba(10,14,24,.58);backdrop-filter:blur(4px)}
-.fox-consent-card{width:min(440px,100%);box-sizing:border-box;background:#fff;border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.3);border:1px solid #eee}
-.fox-consent-title{font-size:13px;font-weight:900;color:#f36a0a;letter-spacing:.08em;margin-bottom:12px}
-.fox-consent-card p{margin:0;color:#172033;font-size:16px;line-height:1.5;font-weight:700}
-.fox-consent-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
-.fox-consent-actions button{border:0;border-radius:12px;padding:13px;font-weight:900;cursor:pointer}
-.fox-consent-actions button[data-fox-consent-deny]{background:#eef0f3;color:#172033}
-.fox-consent-actions button[data-fox-consent-allow]{background:#18a957;color:#fff}
-</style>
