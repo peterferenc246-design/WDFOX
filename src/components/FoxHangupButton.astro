@@ -1,37 +1,52 @@
 <div class="fox-hangup-wrap" data-fox-hangup-wrap hidden>
-  <button type="button" class="fox-hangup" data-fox-hangup>📵 <span data-hangup-label>ANRUF BEENDEN</span></button>
+  <button type="button" class="fox-hangup" data-fox-hangup disabled>📵 <span data-hangup-label>ANRUF BEENDEN</span></button>
 </div>
 
 <style>
   .fox-hangup-wrap{margin:12px 0 0}
   .fox-hangup-wrap[hidden]{display:none!important}
-  .fox-hangup{width:100%;min-height:48px;border:0;border-radius:999px;background:#d92d20;color:#fff;padding:13px 20px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(217,45,32,.22)}
-  .fox-hangup:active{transform:translateY(1px)}
+  .fox-hangup{width:100%;min-height:50px;border:0;border-radius:999px;background:#d92d20;color:#fff;padding:13px 20px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(217,45,32,.22);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .fox-hangup:disabled{opacity:.45;cursor:default;box-shadow:none}
+  .fox-hangup:not(:disabled):active{transform:translateY(1px)}
+  @media(max-width:650px){.fox-hangup-wrap{margin:14px 0 0}.fox-hangup{min-height:54px;font-size:14px}}
 </style>
 
 <script is:inline>
 (() => {
   const setup = () => {
     const panel = document.querySelector('[data-communicator]');
+    const root = document.querySelector('[data-fox-live]');
     const wrap = document.querySelector('[data-fox-hangup-wrap]');
     const button = document.querySelector('[data-fox-hangup]');
     const label = document.querySelector('[data-hangup-label]');
-    if (!panel || !wrap || !button || button.dataset.ready === '1') return;
+    if (!panel || !root || !wrap || !button || button.dataset.ready === '1') return;
     button.dataset.ready = '1';
 
     const lang = (location.pathname.match(/^\/([^/]+)/)?.[1] || 'en').toLowerCase();
-    label.textContent = lang === 'de' ? 'ANRUF BEENDEN' : lang === 'sk' ? 'UKONČIŤ HOVOR' : 'END CALL';
+    const text = {
+      label: lang === 'de' ? 'ANRUF BEENDEN' : lang === 'sk' ? 'UKONČIŤ HOVOR' : 'END CALL',
+      ending: lang === 'de' ? 'ANRUF WIRD BEENDET…' : lang === 'sk' ? 'HOVOR SA UKONČUJE…' : 'ENDING CALL…'
+    };
+    label.textContent = text.label;
 
     const sync = () => {
-      const active = panel.classList.contains('is-active') ||
-        /HOVOR JE AKTÍVNY|CALL IS ACTIVE|ANRUF IST AKTIV/i.test(panel.textContent || '');
-      const incoming = /PRICHÁDZAJÚCI HOVOR|INCOMING CALL|EINGEHENDER ANRUF/i.test(panel.textContent || '');
-      wrap.hidden = !(active || incoming);
+      const communicatorVisible = !panel.classList.contains('hidden');
+      const activeText = panel.textContent || '';
+      const active = /HOVOR JE AKTÍVNY|CALL IS ACTIVE|ANRUF IST AKTIV/i.test(activeText);
+      const incoming = /PRICHÁDZAJÚCI HOVOR|INCOMING CALL|EINGEHENDER ANRUF/i.test(activeText);
+      const callButton = panel.querySelector('[data-call]');
+      const callDisabled = !!callButton?.disabled;
+
+      // Show the control whenever the communicator is open on mobile/desktop.
+      // Enable it only when a live/incoming call is actually present.
+      wrap.hidden = !communicatorVisible;
+      button.disabled = !(active || incoming || callDisabled);
     };
 
     button.addEventListener('click', () => {
+      if (button.disabled) return;
       button.disabled = true;
-      label.textContent = lang === 'de' ? 'ANRUF WIRD BEENDET…' : lang === 'sk' ? 'HOVOR SA UKONČUJE…' : 'ENDING CALL…';
+      label.textContent = text.ending;
       try {
         document.querySelectorAll('audio,video').forEach(el => {
           try { el.pause?.(); } catch {}
@@ -39,22 +54,21 @@
           try { el.srcObject = null; } catch {}
         });
       } catch {}
-      // The active PeerJS/WebRTC objects live inside FoxLiveTranslator's closure.
-      // Reloading the same page tears down that peer, media tracks and data channel,
-      // which is the reliable final hangup even when those internals are not global.
+      // FoxLiveTranslator keeps its PeerJS objects private. Reloading the page
+      // reliably tears down the peer, media tracks and data channel.
       setTimeout(() => location.reload(), 80);
     });
 
     const observer = new MutationObserver(sync);
     observer.observe(panel, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','disabled']});
+    observer.observe(root, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','disabled']});
     sync();
-    window.addEventListener('beforeunload', () => {
-      try { document.querySelectorAll('audio,video').forEach(el => el.srcObject?.getTracks?.().forEach(track => track.stop())); } catch {}
-    });
   };
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup, {once:true});
   else setup();
-  setTimeout(setup, 500);
-  setTimeout(setup, 1500);
+  setTimeout(setup, 300);
+  setTimeout(setup, 1000);
+  setTimeout(setup, 2000);
 })();
 </script>
