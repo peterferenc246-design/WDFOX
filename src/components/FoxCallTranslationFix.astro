@@ -2,161 +2,39 @@
 (() => {
   if (window.__FOX_CALL_TRANSLATION_FIX__) return;
   window.__FOX_CALL_TRANSLATION_FIX__ = true;
-
-  const boot = () => {
-    const root = document.querySelector('[data-fox-live]');
-    if (!root || root.dataset.foxCallFixReady === '1') return;
-    root.dataset.foxCallFixReady = '1';
-
-    const source = root.querySelector('[data-source]');
-    const target = root.querySelector('[data-target]');
-    const transcript = root.querySelector('[data-transcript]');
-    const translation = root.querySelector('[data-translation]');
-    const play = root.querySelector('[data-play]');
-    const status = root.querySelector('[data-status]');
-    const commStatus = root.querySelector('[data-comm-status]');
-    const callButton = root.querySelector('[data-call]');
-    const recordButton = root.querySelector('[data-record]');
-    if (!source || !target || !transcript || !translation || !commStatus || !callButton || !recordButton) return;
-
-    const localeMap={bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'};
-    const locale=code=>localeMap[code]||code||'en-US';
+  const boot=()=>{
+    const root=document.querySelector('[data-fox-live]');
+    if(!root||root.dataset.foxCallFixReady==='1')return;
+    root.dataset.foxCallFixReady='1';
+    const source=root.querySelector('[data-source]'),target=root.querySelector('[data-target]'),transcript=root.querySelector('[data-transcript]'),translation=root.querySelector('[data-translation]'),play=root.querySelector('[data-play]'),status=root.querySelector('[data-status]'),commStatus=root.querySelector('[data-comm-status]'),callButton=root.querySelector('[data-call]'),recordButton=root.querySelector('[data-record]');
+    if(!source||!target||!transcript||!translation||!commStatus||!callButton||!recordButton)return;
     const names=Object.fromEntries([...source.options].map(o=>[o.value,o.textContent||o.value]));
+    const localeMap={bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'};
+    const locale=c=>localeMap[c]||c||'en-US';
     const active=()=>/hovor je aktívny|call is active|anruf ist aktiv|live|aktívny/i.test(String(commStatus.textContent||''));
-    let translating=false;
-    let lastTranslated='';
-    let timer=null;
-    let speechRate=1;
-    let interactionId=null;
-    let tts=false;
-    let callWrapped=false;
-
-    const setStatus=t=>{if(status)status.textContent=t;};
-    const setCallStatus=t=>{commStatus.textContent=t;};
-    const chooseVoice=lang=>{const voices=window.speechSynthesis?.getVoices?.()||[];const exact=voices.find(v=>v.lang?.toLowerCase()===lang.toLowerCase());if(exact)return exact;const base=lang.split('-')[0].toLowerCase();return voices.find(v=>v.lang?.toLowerCase().startsWith(base+'-'))||voices.find(v=>v.lang?.toLowerCase()===base)};
-    const speak=text=>{if(!text||!window.speechSynthesis)return;tts=true;try{window.speechSynthesis.cancel()}catch{};const u=new SpeechSynthesisUtterance(text);u.lang=locale(target.value);u.rate=speechRate;const voice=chooseVoice(u.lang);if(voice)u.voice=voice;u.onend=()=>{tts=false};u.onerror=()=>{tts=false};window.speechSynthesis.speak(u)};
-
-    /*
-     * MOBILE FIX:
-     * SpeechRecognition.start() must happen synchronously while the REAL
-     * call-button gesture is still active. Calling recordButton.click() is
-     * not sufficient because that creates a synthetic/untrusted click.
-     * We therefore invoke the existing main record handler directly from
-     * the trusted call-button handler. No second SpeechRecognition instance
-     * is created and the WebRTC call flow remains untouched.
-     *
-     * The main FOX LIVE TRANSLATOR script may install its onclick handler
-     * after this component boots, so we retry the wrapper until it exists.
-     */
-    const armSpeechOnCallGesture=()=>{
-      if(callWrapped)return true;
+    let recordHandler=null,wrapped=false,lastTranslated='',timer=null,translating=false,interactionId=null,speechRate=1;
+    const capture=()=>{if(!recordHandler&&typeof recordButton.onclick==='function')recordHandler=recordButton.onclick;return !!recordHandler};
+    const startFromTrustedGesture=e=>{
+      if(!capture()||wrapped)return;
+      if(!root.classList.contains('is-call-mode')||callButton.disabled||recordButton.classList.contains('recording'))return;
+      try{recordHandler.call(recordButton,e)}catch(err){commStatus.textContent='❌ SpeechRecognition: '+(err?.message||'spustenie zlyhalo')}
+    };
+    const wrap=()=>{
+      if(wrapped||!capture())return;
       const original=callButton.onclick;
-      if(typeof original!=='function')return false;
-      callWrapped=true;
-      callButton.onclick=function(event){
-        try{
-          const communicator=root.classList.contains('is-call-mode');
-          const callActive=/hovor je aktívny|call is active|anruf ist aktiv/i.test(String(commStatus.textContent||''));
-          const alreadyRecording=recordButton.classList.contains('recording');
-          if(communicator&&!alreadyRecording&&!callButton.disabled&&!callActive){
-            if(navigator.userActivation?.isActive===false){
-              setCallStatus('⚠️ ČAKÁM NA AKTÍVNU INTERAKCIU PRE MIKROFÓN…');
-            }
-            // Direct invocation keeps this inside the trusted call click.
-            // Do NOT use recordButton.click() here.
-            originalRecordHandler(event);
-          }
-        }catch(error){
-          setCallStatus(`❌ SpeechRecognition: ${error?.message||'nedá sa spustiť'}`);
-        }
-        return original.call(this,event);
-      };
-      return true;
+      if(typeof original!=='function')return;
+      wrapped=true;
+      callButton.addEventListener('pointerup',startFromTrustedGesture,{capture:true});
+      callButton.onclick=function(e){startFromTrustedGesture(e);return original.call(this,e)};
     };
-
-    const originalRecordHandler=event=>{
-      try{
-        const handler=recordButton.onclick;
-        // During wrapping, recordButton.onclick is still the original handler
-        // captured below. Calling it directly preserves the current gesture.
-        if(typeof handler==='function'&&handler!==callButton.onclick) handler.call(recordButton,event);
-      }catch{}
-    };
-
-    // Capture the original record handler before any call-button wrapping.
-    let recordHandler=null;
-    const captureRecordHandler=()=>{
-      if(typeof recordButton.onclick==='function'&&!recordHandler) recordHandler=recordButton.onclick;
-      return !!recordHandler;
-    };
-    const armSpeechOnCallGestureSafe=()=>{
-      if(callWrapped)return true;
-      if(!captureRecordHandler())return false;
-      const originalCall=callButton.onclick;
-      if(typeof originalCall!=='function')return false;
-      callWrapped=true;
-      callButton.onclick=function(event){
-        try{
-          const communicator=root.classList.contains('is-call-mode');
-          const callActive=/hovor je aktívny|call is active|anruf ist aktiv/i.test(String(commStatus.textContent||''));
-          const alreadyRecording=recordButton.classList.contains('recording');
-          if(communicator&&!alreadyRecording&&!callButton.disabled&&!callActive){
-            recordHandler.call(recordButton,event);
-          }
-        }catch(error){
-          setCallStatus(`❌ SpeechRecognition: ${error?.message||'nedá sa spustiť'}`);
-        }
-        return originalCall.call(this,event);
-      };
-      return true;
-    };
-
-    const translate=async text=>{
-      const clean=String(text||'').trim();
-      if(!clean||clean===lastTranslated||!active())return;
-      if(translating)return;
-      translating=true;lastTranslated=clean;
-      setStatus('🧠 PREKLADÁM CEZ GEMINI…');
-      try{
-        const src=source.value,dst=target.value;
-        const prompt=`Translate only this spoken sentence from ${names[src]||src} to ${names[dst]||dst}. Return only a natural, grammatically correct translation in the target language. Preserve names, numbers, dates, negation, tense, politeness and tone. Do not mix source-language words into the target language. Do not add or remove meaning. Sentence: ${clean}`;
-        const response=await fetch('/api/gemini-chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,previousInteractionId:interactionId,systemInstruction:'You are a professional real-time interpreter. Output only the target-language translation. Never explain the translation.',thinkingLevel:'low'})});
-        const data=await response.json().catch(()=>({}));
-        if(!response.ok)throw Error(data?.error||`Gemini HTTP ${response.status}`);
-        const out=String(data?.text||data?.translation||'').trim();
-        if(!out)throw Error('Gemini returned an empty translation');
-        interactionId=data?.interactionId||interactionId;
-        translation.textContent=out;if(play)play.disabled=false;
-        setStatus('✅ PREKLAD HOTOVÝ');
-        setCallStatus('🟢 HOVOR JE AKTÍVNY · 🎙 PREKLAD AKTÍVNY');
-        speak(out);
-      }catch(error){
-        setStatus(`❌ GEMINI: ${error?.message||'Preklad sa nepodaril.'}`);
-        setCallStatus(`🟢 HOVOR JE AKTÍVNY · ❌ PREKLAD: ${error?.message||'chyba'}`);
-      }finally{translating=false}
-    };
-
-    const observe=()=>{
-      if(!active())return;
-      const text=String(transcript.textContent||'').trim();
-      if(!text||text===lastTranslated)return;
-      if(timer)clearTimeout(timer);
-      timer=setTimeout(()=>{timer=null;const stable=String(transcript.textContent||'').trim();if(stable&&stable!==lastTranslated&&active())void translate(stable)},700);
-    };
-
+    const speak=text=>{if(!text||!window.speechSynthesis)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=locale(target.value);u.rate=speechRate;window.speechSynthesis.speak(u)};
+    const translate=async text=>{const clean=String(text||'').trim();if(!clean||clean===lastTranslated||!active()||translating)return;translating=true;lastTranslated=clean;if(status)status.textContent='🧠 PREKLADÁM CEZ GEMINI…';try{const src=source.value,dst=target.value;const r=await fetch('/api/gemini-chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`Translate only this spoken sentence from ${names[src]||src} to ${names[dst]||dst}. Return only the natural target-language translation. Preserve names, numbers, dates, negation, tense, politeness and tone. Sentence: ${clean}`,previousInteractionId:interactionId,systemInstruction:'You are a professional real-time interpreter. Output only the target-language translation.',thinkingLevel:'low'})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j?.error||`Gemini HTTP ${r.status}`);const out=String(j?.text||j?.translation||'').trim();if(!out)throw Error('Gemini returned an empty translation');interactionId=j?.interactionId||interactionId;translation.textContent=out;if(play)play.disabled=false;if(status)status.textContent='✅ PREKLAD HOTOVÝ';speak(out)}catch(e){if(status)status.textContent='❌ GEMINI: '+(e?.message||'Preklad sa nepodaril.')}finally{translating=false}};
+    const observe=()=>{if(!active())return;const text=String(transcript.textContent||'').trim();if(!text||text===lastTranslated)return;clearTimeout(timer);timer=setTimeout(()=>{const stable=String(transcript.textContent||'').trim();if(stable&&stable!==lastTranslated)void translate(stable)},700)};
     new MutationObserver(observe).observe(transcript,{childList:true,characterData:true,subtree:true});
-    root.querySelectorAll('[data-speed]').forEach(button=>button.addEventListener('click',()=>{speechRate=Number(button.dataset.speed||1)}));
+    root.querySelectorAll('[data-speed]').forEach(b=>b.addEventListener('click',()=>speechRate=Number(b.dataset.speed||1)));
     play?.addEventListener('click',()=>speak(translation.textContent||''),true);
-    source.addEventListener('change',()=>{lastTranslated='';interactionId=null});
-    target.addEventListener('change',()=>{interactionId=null});
-
-    // Install after the main component has had a chance to assign onclick.
-    const armTimer=setInterval(()=>{
-      if(armSpeechOnCallGestureSafe())clearInterval(armTimer);
-    },50);
-    armSpeechOnCallGestureSafe();
-    setTimeout(()=>clearInterval(armTimer),5000);
-    setInterval(observe,500);
+    source.addEventListener('change',()=>{lastTranslated='';interactionId=null});target.addEventListener('change',()=>{interactionId=null});
+    const arm=setInterval(()=>{wrap();if(wrapped)clearInterval(arm)},50);setTimeout(()=>clearInterval(arm),10000);wrap();setInterval(observe,500);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
