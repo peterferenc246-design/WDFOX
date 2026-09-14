@@ -2,44 +2,31 @@
 ---
 <script is:inline>
 (() => {
-  const params = new URLSearchParams(location.search);
-  const targetId = params.get('foxPeer');
-  if (!targetId) return;
+  // Preload PeerJS for QR/invitation sessions. The main FOX communicator
+  // owns the actual Peer connection; this component only loads the library.
+  if (window.Peer) return;
 
-  const boot = () => {
-    const Original = window.Peer;
-    if (!Original || Original.__foxQrBootstrap) return !!Original;
-    function FoxPeer(id, options) {
-      const peer = new Original(id, options);
-      const originalOpen = peer.on.bind(peer);
-      let connected = false;
-      originalOpen('open', () => {
-        if (connected || peer.id === targetId) return;
-        connected = true;
-        try {
-          const conn = peer.connect(targetId, { reliable: true, label: 'fox-control' });
-          conn.on('open', () => {
-            window.dispatchEvent(new CustomEvent('fox-qr-connected', { detail: { peerId: peer.id, targetId } }));
-          });
-          conn.on('error', () => {});
-        } catch {}
-      });
-      return peer;
+  const urls = [
+    'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+    'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'
+  ];
+
+  const load = (index = 0) => {
+    if (window.Peer) return;
+    if (index >= urls.length) {
+      window.dispatchEvent(new CustomEvent('fox-peer-load-error'));
+      return;
     }
-    FoxPeer.prototype = Original.prototype;
-    Object.setPrototypeOf(FoxPeer, Original);
-    FoxPeer.__foxQrBootstrap = true;
-    window.Peer = FoxPeer;
-    return true;
+    const script = document.createElement('script');
+    script.src = urls[index];
+    script.async = false;
+    script.onload = () => {
+      if (!window.Peer) load(index + 1);
+    };
+    script.onerror = () => load(index + 1);
+    document.head.appendChild(script);
   };
 
-  const load = () => {
-    if (boot()) return;
-    const s = document.createElement('script');
-    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-    s.onload = boot;
-    document.head.appendChild(s);
-  };
   load();
 })();
 </script>
