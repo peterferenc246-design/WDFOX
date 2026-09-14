@@ -5,6 +5,7 @@ import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
 import FoxQrFix from "../../components/FoxQrFix.astro";
 import FoxIncomingCall from "../../components/FoxIncomingCall.astro";
+import FoxCallWorkflow from "../../components/FoxCallWorkflow.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -26,6 +27,7 @@ const content = await getLandingContent(lang);
   <Landing content={content} />
   <FoxLiveTranslator locale={lang} />
   <FoxIncomingCall locale={lang} />
+  <FoxCallWorkflow />
   <FoxQrFix />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
