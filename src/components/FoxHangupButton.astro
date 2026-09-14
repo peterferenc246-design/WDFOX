@@ -1,0 +1,60 @@
+<div class="fox-hangup-wrap" data-fox-hangup-wrap hidden>
+  <button type="button" class="fox-hangup" data-fox-hangup>📵 <span data-hangup-label>ANRUF BEENDEN</span></button>
+</div>
+
+<style>
+  .fox-hangup-wrap{margin:12px 0 0}
+  .fox-hangup-wrap[hidden]{display:none!important}
+  .fox-hangup{width:100%;min-height:48px;border:0;border-radius:999px;background:#d92d20;color:#fff;padding:13px 20px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(217,45,32,.22)}
+  .fox-hangup:active{transform:translateY(1px)}
+</style>
+
+<script is:inline>
+(() => {
+  const setup = () => {
+    const panel = document.querySelector('[data-communicator]');
+    const wrap = document.querySelector('[data-fox-hangup-wrap]');
+    const button = document.querySelector('[data-fox-hangup]');
+    const label = document.querySelector('[data-hangup-label]');
+    if (!panel || !wrap || !button || button.dataset.ready === '1') return;
+    button.dataset.ready = '1';
+
+    const lang = (location.pathname.match(/^\/([^/]+)/)?.[1] || 'en').toLowerCase();
+    label.textContent = lang === 'de' ? 'ANRUF BEENDEN' : lang === 'sk' ? 'UKONČIŤ HOVOR' : 'END CALL';
+
+    const sync = () => {
+      const active = panel.classList.contains('is-active') ||
+        /HOVOR JE AKTÍVNY|CALL IS ACTIVE|ANRUF IST AKTIV/i.test(panel.textContent || '');
+      const incoming = /PRICHÁDZAJÚCI HOVOR|INCOMING CALL|EINGEHENDER ANRUF/i.test(panel.textContent || '');
+      wrap.hidden = !(active || incoming);
+    };
+
+    button.addEventListener('click', () => {
+      button.disabled = true;
+      label.textContent = lang === 'de' ? 'ANRUF WIRD BEENDET…' : lang === 'sk' ? 'HOVOR SA UKONČUJE…' : 'ENDING CALL…';
+      try {
+        document.querySelectorAll('audio,video').forEach(el => {
+          try { el.pause?.(); } catch {}
+          try { el.srcObject?.getTracks?.().forEach(track => track.stop()); } catch {}
+          try { el.srcObject = null; } catch {}
+        });
+      } catch {}
+      // The active PeerJS/WebRTC objects live inside FoxLiveTranslator's closure.
+      // Reloading the same page tears down that peer, media tracks and data channel,
+      // which is the reliable final hangup even when those internals are not global.
+      setTimeout(() => location.reload(), 80);
+    });
+
+    const observer = new MutationObserver(sync);
+    observer.observe(panel, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','disabled']});
+    sync();
+    window.addEventListener('beforeunload', () => {
+      try { document.querySelectorAll('audio,video').forEach(el => el.srcObject?.getTracks?.().forEach(track => track.stop())); } catch {}
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup, {once:true});
+  else setup();
+  setTimeout(setup, 500);
+  setTimeout(setup, 1500);
+})();
+</script>
