@@ -1,74 +1,102 @@
-<div class="fox-hangup-wrap" data-fox-hangup-wrap hidden>
-  <button type="button" class="fox-hangup" data-fox-hangup disabled>📵 <span data-hangup-label>ANRUF BEENDEN</span></button>
+<div class="fox-call-controls" data-fox-call-controls hidden>
+  <button type="button" class="fox-mic" data-fox-mic>🎙 <span data-fox-mic-label>VYPNÚŤ MIKROFÓN</span></button>
+  <button type="button" class="fox-hangup" data-fox-hangup>📵 <span data-hangup-label>UKONČIŤ HOVOR</span></button>
 </div>
 
 <style>
-  .fox-hangup-wrap{margin:12px 0 0}
-  .fox-hangup-wrap[hidden]{display:none!important}
-  .fox-hangup{width:100%;min-height:50px;border:0;border-radius:999px;background:#d92d20;color:#fff;padding:13px 20px;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(217,45,32,.22);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-  .fox-hangup:disabled{opacity:.45;cursor:default;box-shadow:none}
-  .fox-hangup:not(:disabled):active{transform:translateY(1px)}
-  @media(max-width:650px){.fox-hangup-wrap{margin:14px 0 0}.fox-hangup{min-height:54px;font-size:14px}}
+  .fox-call-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 0}
+  .fox-call-controls[hidden]{display:none!important}
+  .fox-call-controls button{width:100%;min-height:50px;border:0;border-radius:999px;padding:13px 16px;font-size:13px;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .fox-mic{background:#eef0f3;color:#172033;box-shadow:0 8px 20px rgba(0,0,0,.06)}
+  .fox-mic.is-muted{background:#171b25;color:#fff}
+  .fox-hangup{background:#d92d20;color:#fff;box-shadow:0 10px 24px rgba(217,45,32,.22)}
+  .fox-call-controls button:active{transform:translateY(1px)}
+  @media(max-width:650px){.fox-call-controls{grid-template-columns:1fr}.fox-call-controls button{min-height:54px;font-size:14px}}
 </style>
 
 <script is:inline>
 (() => {
+  try {
+    if (navigator.mediaDevices && !navigator.mediaDevices.__foxWrapped) {
+      const original = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+      navigator.mediaDevices.getUserMedia = async (...args) => {
+        const stream = await original(...args);
+        window.__foxLocalStream = stream;
+        return stream;
+      };
+      navigator.mediaDevices.__foxWrapped = true;
+    }
+  } catch {}
+
   const setup = () => {
-    const panel = document.querySelector('[data-communicator]');
     const root = document.querySelector('[data-fox-live]');
-    const wrap = document.querySelector('[data-fox-hangup-wrap]');
-    const button = document.querySelector('[data-fox-hangup]');
-    const label = document.querySelector('[data-hangup-label]');
-    if (!panel || !root || !wrap || !button || button.dataset.ready === '1') return;
-    button.dataset.ready = '1';
+    const wrap = document.querySelector('[data-fox-call-controls]');
+    const mic = document.querySelector('[data-fox-mic]');
+    const micLabel = document.querySelector('[data-fox-mic-label]');
+    const hangup = document.querySelector('[data-fox-hangup]');
+    const hangupLabel = document.querySelector('[data-hangup-label]');
+    if (!root || !wrap || !mic || !micLabel || !hangup || !hangupLabel || wrap.dataset.ready === '1') return;
+    wrap.dataset.ready = '1';
 
     const lang = (location.pathname.match(/^\/([^/]+)/)?.[1] || 'en').toLowerCase();
     const text = {
-      label: lang === 'de' ? 'ANRUF BEENDEN' : lang === 'sk' ? 'UKONČIŤ HOVOR' : 'END CALL',
+      micOn: lang === 'de' ? 'MIKROFON EINSCHALTEN' : lang === 'sk' ? 'ZAPNÚŤ MIKROFÓN' : 'TURN MICROPHONE ON',
+      micOff: lang === 'de' ? 'MIKROFON AUSSCHALTEN' : lang === 'sk' ? 'VYPNÚŤ MIKROFÓN' : 'TURN MICROPHONE OFF',
+      hangup: lang === 'de' ? 'ANRUF BEENDEN' : lang === 'sk' ? 'UKONČIŤ HOVOR' : 'END CALL',
       ending: lang === 'de' ? 'ANRUF WIRD BEENDET…' : lang === 'sk' ? 'HOVOR SA UKONČUJE…' : 'ENDING CALL…'
     };
-    label.textContent = text.label;
+    hangupLabel.textContent = text.hangup;
 
-    const sync = () => {
-      const communicatorVisible = !panel.classList.contains('hidden');
-      const activeText = panel.textContent || '';
-      const active = /HOVOR JE AKTÍVNY|CALL IS ACTIVE|ANRUF IST AKTIV/i.test(activeText);
-      const incoming = /PRICHÁDZAJÚCI HOVOR|INCOMING CALL|EINGEHENDER ANRUF/i.test(activeText);
-      const callButton = panel.querySelector('[data-call]');
-      const callDisabled = !!callButton?.disabled;
-
-      // Show the control whenever the communicator is open on mobile/desktop.
-      // Enable it only when a live/incoming call is actually present.
-      wrap.hidden = !communicatorVisible;
-      button.disabled = !(active || incoming || callDisabled);
+    const getStream = () => window.__foxLocalStream || null;
+    const isCallMode = () => root.classList.contains('is-call-mode');
+    const isLive = () => {
+      const panel = root.querySelector('[data-communicator]');
+      const status = panel?.querySelector('[data-comm-status]')?.textContent || '';
+      return /HOVOR JE AKTÍVNY|CALL IS ACTIVE|ANRUF IST AKTIV|PRICHÁDZAJÚCI HOVOR|INCOMING CALL|EINGEHENDER ANRUF/i.test(status);
     };
 
-    button.addEventListener('click', () => {
-      if (button.disabled) return;
-      button.disabled = true;
-      label.textContent = text.ending;
-      try {
-        document.querySelectorAll('audio,video').forEach(el => {
-          try { el.pause?.(); } catch {}
-          try { el.srcObject?.getTracks?.().forEach(track => track.stop()); } catch {}
-          try { el.srcObject = null; } catch {}
-        });
-      } catch {}
-      // FoxLiveTranslator keeps its PeerJS objects private. Reloading the page
-      // reliably tears down the peer, media tracks and data channel.
+    const sync = () => {
+      const show = isCallMode() && isLive();
+      wrap.hidden = !show;
+      const track = getStream()?.getAudioTracks?.()[0];
+      if (track) {
+        mic.classList.toggle('is-muted', !track.enabled);
+        micLabel.textContent = track.enabled ? text.micOff : text.micOn;
+      }
+    };
+
+    mic.addEventListener('click', () => {
+      const track = getStream()?.getAudioTracks?.()[0];
+      if (!track) return;
+      track.enabled = !track.enabled;
+      const muted = !track.enabled;
+      mic.classList.toggle('is-muted', muted);
+      micLabel.textContent = muted ? text.micOn : text.micOff;
+
+      const record = root.querySelector('[data-record]');
+      if (muted && record?.classList.contains('recording')) record.click();
+      else if (!muted && isLive() && !record?.classList.contains('recording')) record?.click();
+    });
+
+    hangup.addEventListener('click', () => {
+      if (!isLive()) return;
+      hangup.disabled = true;
+      hangupLabel.textContent = text.ending;
+      try { getStream()?.getTracks?.().forEach(track => track.stop()); } catch {}
+      window.__foxLocalStream = null;
       setTimeout(() => location.reload(), 80);
     });
 
     const observer = new MutationObserver(sync);
-    observer.observe(panel, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','disabled']});
     observer.observe(root, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','disabled']});
     sync();
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup, {once:true});
   else setup();
-  setTimeout(setup, 300);
-  setTimeout(setup, 1000);
-  setTimeout(setup, 2000);
+  setTimeout(setup, 200);
+  setTimeout(setup, 700);
+  setTimeout(setup, 1500);
+  setTimeout(setup, 2500);
 })();
 </script>
