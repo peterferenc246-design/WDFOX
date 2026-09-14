@@ -1,0 +1,45 @@
+---
+---
+<script is:inline>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const targetId = params.get('foxPeer');
+  if (!targetId) return;
+
+  const boot = () => {
+    const Original = window.Peer;
+    if (!Original || Original.__foxQrBootstrap) return !!Original;
+    function FoxPeer(id, options) {
+      const peer = new Original(id, options);
+      const originalOpen = peer.on.bind(peer);
+      let connected = false;
+      originalOpen('open', () => {
+        if (connected || peer.id === targetId) return;
+        connected = true;
+        try {
+          const conn = peer.connect(targetId, { reliable: true, label: 'fox-control' });
+          conn.on('open', () => {
+            window.dispatchEvent(new CustomEvent('fox-qr-connected', { detail: { peerId: peer.id, targetId } }));
+          });
+          conn.on('error', () => {});
+        } catch {}
+      });
+      return peer;
+    }
+    FoxPeer.prototype = Original.prototype;
+    Object.setPrototypeOf(FoxPeer, Original);
+    FoxPeer.__foxQrBootstrap = true;
+    window.Peer = FoxPeer;
+    return true;
+  };
+
+  const load = () => {
+    if (boot()) return;
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload = boot;
+    document.head.appendChild(s);
+  };
+  load();
+})();
+</script>
