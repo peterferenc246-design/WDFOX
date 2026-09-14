@@ -15,7 +15,7 @@
     let recordHandler=null,wrapped=false,lastTranslated='',timer=null,translating=false,interactionId=null,speechRate=1;
     const capture=()=>{if(!recordHandler&&typeof recordButton.onclick==='function')recordHandler=recordButton.onclick;return !!recordHandler};
     const startFromTrustedGesture=e=>{
-      if(!capture()||wrapped)return;
+      if(!capture())return;
       if(!root.classList.contains('is-call-mode')||callButton.disabled||recordButton.classList.contains('recording'))return;
       try{recordHandler.call(recordButton,e)}catch(err){commStatus.textContent='❌ SpeechRecognition: '+(err?.message||'spustenie zlyhalo')}
     };
