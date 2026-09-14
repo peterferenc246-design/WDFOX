@@ -4,6 +4,7 @@ import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxPeerQrBootstrap from "../../components/FoxPeerQrBootstrap.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
+import FoxDirectHotlineV2 from "../../components/FoxDirectHotlineV2.astro";
 import FoxQrFix from "../../components/FoxQrFix.astro";
 import FoxIncomingCall from "../../components/FoxIncomingCall.astro";
 import { getLandingContent } from "../../lib/sanity";
@@ -25,6 +26,7 @@ const content = await getLandingContent(lang);
     <a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
   <Landing content={content} />
+  <FoxDirectHotlineV2 locale={lang} />
   <FoxPeerQrBootstrap />
   <FoxLiveTranslator locale={lang} />
   <FoxIncomingCall locale={lang} />
@@ -50,7 +52,21 @@ const content = await getLandingContent(lang);
       if (typeof input === "string") return nativeFetch(target, init);
       return nativeFetch(new Request(target, input), init);
     }
-    return nativeFetch(input);
+    return nativeFetch(input, init);
   };
+
+  // FOX DIRECT is the primary PC/mobile call path. Keep the legacy QR
+  // communicator available only for the standalone translator interface.
+  const hideLegacyQrCall = () => {
+    const live = document.querySelector('[data-fox-live]');
+    if (!live) return;
+    const tab = live.querySelector('[data-mode="communicator"]');
+    const panel = live.querySelector('[data-communicator]');
+    if (tab) tab.style.display = 'none';
+    if (panel) panel.style.display = 'none';
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideLegacyQrCall, { once: true });
+  else hideLegacyQrCall();
+  new MutationObserver(hideLegacyQrCall).observe(document.documentElement, { childList: true, subtree: true });
 })();
 </script>
