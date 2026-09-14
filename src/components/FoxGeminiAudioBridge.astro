@@ -1,0 +1,183 @@
+<script>
+(() => {
+  const root = document.querySelector('[data-fox-live]');
+  if (!root || window.__foxGeminiAudioBridge) return;
+  window.__foxGeminiAudioBridge = true;
+
+  const source = root.querySelector('[data-source]');
+  const target = root.querySelector('[data-target]');
+  const transcript = root.querySelector('[data-transcript]');
+  const translation = root.querySelector('[data-translation]');
+  const status = root.querySelector('[data-status]');
+  const commStatus = root.querySelector('[data-comm-status]');
+  const recordButton = root.querySelector('[data-record]');
+  const remoteAudio = root.querySelector('[data-remote-audio]');
+  const isMobile = new URLSearchParams(location.search).has('foxPeer');
+  const localeNames = { bg:'Bulgarian',hr:'Croatian',cs:'Czech',da:'Danish',nl:'Dutch',en:'English',et:'Estonian',fi:'Finnish',fr:'French',de:'German',el:'Greek',hu:'Hungarian',ga:'Irish',it:'Italian',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pl:'Polish',pt:'Portuguese',ro:'Romanian',sk:'Slovak',sl:'Slovenian',es:'Spanish',sv:'Swedish' };
+
+  let recorder = null;
+  let running = false;
+  let stopping = false;
+  let busy = false;
+  let nativeSpeechRecognition = null;
+  let nativeWebkitSpeechRecognition = null;
+
+  const setStatus = (text) => {
+    if (commStatus) commStatus.textContent = text;
+    if (status) status.textContent = text;
+  };
+
+  const pickMime = () => {
+    const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4','audio/aac'];
+    return types.find((x) => window.MediaRecorder?.isTypeSupported?.(x)) || '';
+  };
+
+  const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result || '').split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+
+  const speak = (text) => {
+    if (!text || !window.speechSynthesis) return;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const lang = String(target?.value || 'sk');
+      u.lang = ({sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'})[lang] || lang;
+      window.speechSynthesis.speak(u);
+    } catch {}
+  };
+
+  const patchBrowserSpeech = () => {
+    if (nativeSpeechRecognition || nativeWebkitSpeechRecognition) return;
+    nativeSpeechRecognition = window.SpeechRecognition;
+    nativeWebkitSpeechRecognition = window.webkitSpeechRecognition;
+    const disabled = function DisabledSpeechRecognition() {
+      this.start = () => {};
+      this.stop = () => {};
+      this.abort = () => {};
+    };
+    try { if (nativeSpeechRecognition) window.SpeechRecognition = disabled; } catch {}
+    try { if (nativeWebkitSpeechRecognition) window.webkitSpeechRecognition = disabled; } catch {}
+    if (recordButton?.classList.contains('recording')) {
+      try { recordButton.click(); } catch {}
+    }
+  };
+
+  const restoreBrowserSpeech = () => {
+    if (nativeSpeechRecognition) { try { window.SpeechRecognition = nativeSpeechRecognition; } catch {} }
+    if (nativeWebkitSpeechRecognition) { try { window.webkitSpeechRecognition = nativeWebkitSpeechRecognition; } catch {} }
+    nativeSpeechRecognition = null;
+    nativeWebkitSpeechRecognition = null;
+  };
+
+  const getStream = () => isMobile ? (window.__foxLocalStream || null) : (remoteAudio?.srcObject || null);
+  const callIsConnected = () => {
+    const call = root.querySelector('[data-call]');
+    return !!call && call.disabled && root.classList.contains('is-call-mode');
+  };
+  const active = () => {
+    const text = String(commStatus?.textContent || '').toLowerCase();
+    return !!getStream() && (/aktív|active|aktiv|calling|volám|anruf/.test(text) || callIsConnected());
+  };
+
+  const upload = async (blob) => {
+    if (!blob || blob.size < 1200 || busy || stopping) return;
+    busy = true;
+    try {
+      const audioBase64 = await blobToBase64(blob);
+      if (!audioBase64) return;
+      const src = String(source?.value || 'de');
+      const dst = String(target?.value || 'sk');
+      setStatus(`GEMINI: ${localeNames[src] || src} → ${localeNames[dst] || dst}…`);
+      const response = await fetch('/api/gemini-audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioBase64, mimeType: blob.type || 'audio/webm', source: src, target: dst })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error || `Gemini HTTP ${response.status}`);
+      const srcText = String(data?.transcript || '').trim();
+      const dstText = String(data?.translation || '').trim();
+      if (srcText) transcript.textContent = srcText;
+      if (dstText) {
+        translation.textContent = dstText;
+        speak(dstText);
+      }
+      setStatus(srcText ? `GEMINI ✓ ${localeNames[src] || src} → ${localeNames[dst] || dst}` : 'GEMINI: čakám na reč…');
+    } catch (e) {
+      setStatus(`❌ GEMINI AUDIO: ${e?.message || 'preklad audia zlyhal'}`);
+    } finally {
+      busy = false;
+    }
+  };
+
+  const startRecorder = (sourceStream) => {
+    if (stopping || !sourceStream?.getAudioTracks?.().some((t) => t.readyState === 'live')) return false;
+    const mime = pickMime();
+    try {
+      recorder = mime ? new MediaRecorder(sourceStream, { mimeType: mime, audioBitsPerSecond: 64000 }) : new MediaRecorder(sourceStream);
+    } catch (e) {
+      setStatus(`❌ GEMINI AUDIO: MediaRecorder ${e?.message || 'nie je dostupný'}`);
+      return false;
+    }
+    const chunks = [];
+    recorder.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
+    recorder.onerror = () => { try { recorder?.stop(); } catch {} };
+    recorder.onstop = () => {
+      const usedType = recorder?.mimeType || mime || 'audio/webm';
+      const blob = new Blob(chunks, { type: usedType });
+      recorder = null;
+      if (!stopping && running) {
+        const next = getStream();
+        if (next) startRecorder(next);
+      }
+      void upload(blob);
+    };
+    try {
+      recorder.start();
+      setTimeout(() => { if (recorder?.state === 'recording') { try { recorder.stop(); } catch {} } }, 5500);
+      return true;
+    } catch (e) {
+      recorder = null;
+      setStatus(`❌ GEMINI AUDIO: ${e?.message || 'nahrávanie sa nespustilo'}`);
+      return false;
+    }
+  };
+
+  const start = () => {
+    if (running || !active()) return;
+    const s = getStream();
+    if (!s) return;
+    running = true;
+    stopping = false;
+    patchBrowserSpeech();
+    setStatus('GEMINI AUDIO: počúvam…');
+    startRecorder(s);
+  };
+
+  const stop = () => {
+    stopping = true;
+    running = false;
+    try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
+    recorder = null;
+    restoreBrowserSpeech();
+  };
+
+  const tick = () => {
+    if (active()) {
+      if (!running) start();
+    } else if (running) {
+      stop();
+    }
+  };
+
+  const observer = new MutationObserver(tick);
+  observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true });
+  setInterval(tick, 700);
+  ['ended','inactive'].forEach((evt) => remoteAudio?.addEventListener?.(evt, stop));
+  window.addEventListener('beforeunload', stop, { once: true });
+})();
+</script>
