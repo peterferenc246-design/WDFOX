@@ -2,14 +2,19 @@
 (() => {
   const root = document.querySelector('[data-fox-live]') || document.querySelector('[data-app]');
   if (!root || window.__foxGeminiAudioBridge) return;
-  window.__foxGeminiAudioBridge = true;
 
+  window.__foxGeminiAudioBridge = true;
   const isMobile = new URLSearchParams(location.search).has('foxPeer');
   const sourceCode = isMobile ? 'de' : 'sk';
   const targetCode = isMobile ? 'sk' : 'de';
   const localeNames = {de:'German',sk:'Slovak',en:'English',fr:'French',it:'Italian',pl:'Polish',es:'Spanish',sv:'Swedish',hr:'Croatian',cs:'Czech',nl:'Dutch',da:'Danish',fi:'Finnish',et:'Estonian',el:'Greek',hu:'Hungarian',ga:'Irish',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pt:'Portuguese',ro:'Romanian',sl:'Slovenian',bg:'Bulgarian'};
   const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
-  const API_URL = 'https://wdfox-live-translator-pfiwvb92n-podlahy24-1702.vercel.app/api/translate-voice';
+
+  // Emergency public-access bridge. The deployment itself is protected by Vercel SSO;
+  // this temporary share token lets the browser call the verified POST endpoint.
+  // Replace this with the permanent public production endpoint once Vercel protection is fixed.
+  const API_URL = 'https://wdfox-live-translator-pfiwvb92n-podlahy24-1702.vercel.app/api/translate-voice?_vercel_share=f3KcV7njQsY8aEPAC0NzZGm1Dqco4EDt';
+
   const q = (s) => root.querySelector(s);
   const status = q('[data-comm-status]') || q('[data-status]');
   const live = q('[data-live]');
@@ -20,8 +25,24 @@
   let recorder = null, running = false, stopping = false, uploading = false;
 
   const setStatus = (s) => { if (status) status.textContent = s; };
-  const append = (box, text) => { if (!box || !text) return; if (box.textContent.trim() === '—') box.textContent = ''; const p = document.createElement('div'); p.textContent = text; box.appendChild(p); box.scrollTop = box.scrollHeight; };
-  const speak = (text) => { if (!text || !window.speechSynthesis) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = voices[targetCode] || targetCode; u.rate = .96; speechSynthesis.speak(u); } catch {} };
+  const append = (box, text) => {
+    if (!box || !text) return;
+    if (box.textContent.trim() === '—') box.textContent = '';
+    const p = document.createElement('div');
+    p.textContent = text;
+    box.appendChild(p);
+    box.scrollTop = box.scrollHeight;
+  };
+  const speak = (text) => {
+    if (!text || !window.speechSynthesis) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = voices[targetCode] || targetCode;
+      u.rate = .96;
+      speechSynthesis.speak(u);
+    } catch {}
+  };
   const mime = () => ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(x => window.MediaRecorder?.isTypeSupported?.(x)) || '';
   const stream = () => audio?.srcObject || null;
   const connected = () => !!stream()?.getAudioTracks?.().some(t => t.readyState === 'live') && (!live || !live.classList.contains('hidden'));
@@ -45,25 +66,62 @@
       if (src) append(sent, src);
       if (dst) { append(received, dst); if (translation) translation.textContent = dst; speak(dst); }
       setStatus(src || dst ? `GEMINI ✓ ${localeNames[sourceCode]} → ${localeNames[targetCode]}` : 'GEMINI AUDIO: nič nerozpoznal');
-    } catch (e) { setStatus(`❌ GEMINI AUDIO: ${e?.message || 'chyba'}`); }
-    finally { uploading = false; }
+    } catch (e) {
+      setStatus(`❌ GEMINI AUDIO: ${e?.message || 'chyba'}`);
+    } finally {
+      uploading = false;
+    }
   }
 
   function startRecorder() {
     const s = stream();
     if (!s || stopping || running) return;
     const m = mime();
-    try { recorder = m ? new MediaRecorder(s,{mimeType:m,audioBitsPerSecond:64000}) : new MediaRecorder(s); } catch(e) { setStatus(`❌ MediaRecorder: ${e.message}`); return; }
+    try {
+      recorder = m ? new MediaRecorder(s,{mimeType:m,audioBitsPerSecond:64000}) : new MediaRecorder(s);
+    } catch(e) {
+      setStatus(`❌ MediaRecorder: ${e.message}`);
+      return;
+    }
     running = true;
     const chunks = [];
     recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
     recorder.onerror = () => { try { recorder.stop(); } catch {} };
-    recorder.onstop = () => { const b = new Blob(chunks,{type:recorder?.mimeType||m||'audio/webm'}); recorder=null; if (!stopping) startRecorder(); void upload(b); };
-    try { recorder.start(); setStatus(`GEMINI AUDIO: počúvam ${localeNames[sourceCode]}…`); } catch(e) { recorder=null; running=false; setStatus(`❌ Nahrávanie: ${e.message}`); }
+    recorder.onstop = () => {
+      const b = new Blob(chunks,{type:recorder?.mimeType||m||'audio/webm'});
+      recorder=null;
+      if (!stopping) startRecorder();
+      void upload(b);
+    };
+    try {
+      recorder.start();
+      setStatus(`GEMINI AUDIO: počúvam ${localeNames[sourceCode]}…`);
+    } catch(e) {
+      recorder=null;
+      running=false;
+      setStatus(`❌ Nahrávanie: ${e.message}`);
+    }
   }
-  function stopRecorder() { stopping=true; running=false; try { if (recorder?.state==='recording') recorder.stop(); } catch {} recorder=null; }
-  function tick() { if (connected()) { stopping=false; if (!running) startRecorder(); } else if (running) stopRecorder(); }
-  const observer = new MutationObserver(tick); observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true});
-  setInterval(tick,700); tick();
+
+  function stopRecorder() {
+    stopping=true;
+    running=false;
+    try { if (recorder?.state==='recording') recorder.stop(); } catch {}
+    recorder=null;
+  }
+
+  function tick() {
+    if (connected()) {
+      stopping=false;
+      if (!running) startRecorder();
+    } else if (running) {
+      stopRecorder();
+    }
+  }
+
+  const observer = new MutationObserver(tick);
+  observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true});
+  setInterval(tick,700);
+  tick();
 })();
 </script>
