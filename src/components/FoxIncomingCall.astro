@@ -1,0 +1,55 @@
+---
+const locale = Astro.props.locale ?? "de";
+const labels = {
+  sk: { incoming: "📞 PRIJÍMAM HOVOR", title: "PRICHÁDZAJÚCI HOVOR", hint: "Niekto vás volá cez FOX komunikátor." },
+  de: { incoming: "📞 ANRUF ANNEHMEN", title: "EINGEHENDER ANRUF", hint: "Jemand ruft Sie über den FOX-Kommunikator an." },
+  en: { incoming: "📞 ACCEPT CALL", title: "INCOMING CALL", hint: "Someone is calling you through FOX Communicator." }
+} as const;
+const t = labels[locale as keyof typeof labels] ?? labels.en;
+---
+<div class="fox-incoming-call" data-fox-incoming-call hidden>
+  <div class="fox-incoming-card" role="alertdialog" aria-modal="true" aria-labelledby="fox-incoming-title">
+    <div class="fox-incoming-icon">📞</div>
+    <strong id="fox-incoming-title">{t.title}</strong>
+    <span>{t.hint}</span>
+    <button type="button" data-fox-accept>{t.incoming}</button>
+  </div>
+</div>
+<style>
+.fox-incoming-call{position:fixed;inset:0;z-index:2147483640;display:grid;place-items:center;padding:20px;background:rgba(10,14,24,.56);backdrop-filter:blur(5px)}
+.fox-incoming-call[hidden]{display:none!important}
+.fox-incoming-card{width:min(420px,100%);box-sizing:border-box;padding:28px;border-radius:22px;background:#fff;box-shadow:0 24px 90px rgba(0,0,0,.35);text-align:center;border:2px solid #18a957}
+.fox-incoming-icon{font-size:44px;line-height:1;margin-bottom:12px;animation:fox-call-pulse 1s infinite}
+.fox-incoming-card strong{display:block;color:#172033;font-size:22px;font-weight:900;letter-spacing:.02em}
+.fox-incoming-card span{display:block;margin:10px 0 22px;color:#667085;font-size:14px;line-height:1.5}
+.fox-incoming-card button{width:100%;border:0;border-radius:999px;background:#18a957;color:#fff;padding:16px 20px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 12px 28px rgba(24,169,87,.28)}
+@keyframes fox-call-pulse{50%{transform:scale(1.12)}}
+</style>
+<script is:inline>
+(() => {
+  const root = document.querySelector('[data-fox-incoming-call]');
+  if (!root) return;
+  const accept = root.querySelector('[data-fox-accept]');
+  const findCall = () => document.querySelector('[data-call]');
+  const isIncoming = () => {
+    const btn = findCall();
+    const label = btn?.querySelector('[data-call-label]')?.textContent?.trim()?.toLowerCase() || '';
+    return !!btn && !btn.disabled && /prijatie hovoru|accept call|anruf annehmen|eingehender anruf/.test(label);
+  };
+  const sync = () => {
+    if (isIncoming()) root.hidden = false;
+    else if (!root.dataset.locked) root.hidden = true;
+  };
+  accept?.addEventListener('click', () => {
+    const btn = findCall();
+    if (!btn || btn.disabled) return;
+    root.dataset.locked = '1';
+    root.hidden = true;
+    btn.click();
+    setTimeout(() => delete root.dataset.locked, 1500);
+  });
+  new MutationObserver(sync).observe(document.documentElement, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['disabled'] });
+  sync();
+  setInterval(sync, 250);
+})();
+</script>
