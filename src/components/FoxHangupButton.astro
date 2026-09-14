@@ -82,9 +82,19 @@
       if (!isLive()) return;
       hangup.disabled = true;
       hangupLabel.textContent = text.ending;
+
+      // Let the FOX LIVE TRANSLATOR send the hangup packet through the
+      // existing PeerJS data connection before closing/reloading this device.
+      if (typeof window.__foxEndCall === 'function') {
+        try {
+          window.__foxEndCall();
+          return;
+        } catch {}
+      }
+
       try { getStream()?.getTracks?.().forEach(track => track.stop()); } catch {}
       window.__foxLocalStream = null;
-      setTimeout(() => location.reload(), 80);
+      setTimeout(() => location.reload(), 150);
     });
 
     const observer = new MutationObserver(sync);
