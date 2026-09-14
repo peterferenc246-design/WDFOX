@@ -57,11 +57,12 @@
 
     const sync = () => {
       const show = isCallMode() && isLive();
-      wrap.hidden = !show;
+      if (wrap.hidden !== !show) wrap.hidden = !show;
       const track = getStream()?.getAudioTracks?.()[0];
       if (track) {
         mic.classList.toggle('is-muted', !track.enabled);
-        micLabel.textContent = track.enabled ? text.micOff : text.micOn;
+        const next = track.enabled ? text.micOff : text.micOn;
+        if (micLabel.textContent !== next) micLabel.textContent = next;
       }
     };
 
@@ -72,29 +73,22 @@
       const muted = !track.enabled;
       mic.classList.toggle('is-muted', muted);
       micLabel.textContent = muted ? text.micOn : text.micOff;
-      // IMPORTANT: microphone mute is a local WebRTC media-track operation.
-      // It must never click the speech-recognition button or affect the peer.
     });
 
     hangup.addEventListener('click', () => {
       if (!isLive()) return;
       hangup.disabled = true;
       hangupLabel.textContent = text.ending;
-
       if (typeof window.__foxEndCall === 'function') {
-        try {
-          window.__foxEndCall();
-          return;
-        } catch {}
+        try { window.__foxEndCall(); return; } catch {}
       }
-
       try { getStream()?.getTracks?.().forEach(track => track.stop()); } catch {}
       window.__foxLocalStream = null;
       setTimeout(() => location.reload(), 150);
     });
 
     const observer = new MutationObserver(sync);
-    observer.observe(root, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['class','disabled']});
+    observer.observe(root, {subtree:true, attributes:true, attributeFilter:['class','disabled']});
     sync();
   };
 
