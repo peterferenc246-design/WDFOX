@@ -3,7 +3,6 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
-import FoxCallTranslationFix from "../../components/FoxCallTranslationFix.astro";
 import FoxGeminiAudioBridge from "../../components/FoxGeminiAudioBridge.astro";
 import FoxPcBridge from "../../components/FoxPcBridge.astro";
 import FoxHangupButton from "../../components/FoxHangupButton.astro";
@@ -25,7 +24,6 @@ const content = await getLandingContent(lang);
   <Landing content={content} />
   <FoxHangupButton />
   <FoxLiveTranslator locale={lang} />
-  <FoxCallTranslationFix />
   <FoxGeminiAudioBridge />
   <FoxPcBridge />
   <FoxAnalyzerLauncher locale={lang} />
