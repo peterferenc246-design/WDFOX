@@ -9,10 +9,6 @@
   const targetCode = isMobile ? 'sk' : 'de';
   const localeNames = {de:'German',sk:'Slovak',en:'English',fr:'French',it:'Italian',pl:'Polish',es:'Spanish',sv:'Swedish',hr:'Croatian',cs:'Czech',nl:'Dutch',da:'Danish',fi:'Finnish',et:'Estonian',el:'Greek',hu:'Hungarian',ga:'Irish',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pt:'Portuguese',ro:'Romanian',sl:'Slovenian',bg:'Bulgarian'};
   const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
-
-  // Emergency public-access bridge. The deployment itself is protected by Vercel SSO;
-  // this temporary share token lets the browser call the verified POST endpoint.
-  // Replace this with the permanent public production endpoint once Vercel protection is fixed.
   const API_URL = 'https://wdfox-live-translator-pfiwvb92n-podlahy24-1702.vercel.app/api/translate-voice?_vercel_share=f3KcV7njQsY8aEPAC0NzZGm1Dqco4EDt';
 
   const q = (s) => root.querySelector(s);
@@ -119,8 +115,6 @@
     }
   }
 
-  const observer = new MutationObserver(tick);
-  observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true});
   setInterval(tick,700);
   tick();
 })();
