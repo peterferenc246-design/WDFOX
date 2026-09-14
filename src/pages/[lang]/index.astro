@@ -5,6 +5,7 @@ import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
 import FoxCallTranslationFix from "../../components/FoxCallTranslationFix.astro";
 import FoxPcBridge from "../../components/FoxPcBridge.astro";
+import FoxHangupButton from "../../components/FoxHangupButton.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -24,6 +25,7 @@ const content = await getLandingContent(lang);
   <FoxLiveTranslator locale={lang} />
   <FoxCallTranslationFix />
   <FoxPcBridge />
+  <FoxHangupButton />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
