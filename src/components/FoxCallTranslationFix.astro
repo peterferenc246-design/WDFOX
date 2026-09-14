@@ -15,6 +15,8 @@
     const play = root.querySelector('[data-play]');
     const status = root.querySelector('[data-status]');
     const commStatus = root.querySelector('[data-comm-status]');
+    const callButton = root.querySelector('[data-call]');
+    const recordButton = root.querySelector('[data-record]');
     if (!source || !target || !transcript || !translation || !commStatus) return;
 
     const localeMap={bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'};
@@ -32,6 +34,30 @@
     const setCallStatus=t=>{commStatus.textContent=t;};
     const chooseVoice=lang=>{const voices=window.speechSynthesis?.getVoices?.()||[];const exact=voices.find(v=>v.lang?.toLowerCase()===lang.toLowerCase());if(exact)return exact;const base=lang.split('-')[0].toLowerCase();return voices.find(v=>v.lang?.toLowerCase().startsWith(base+'-'))||voices.find(v=>v.lang?.toLowerCase()===base)};
     const speak=text=>{if(!text||!window.speechSynthesis)return;tts=true;try{window.speechSynthesis.cancel()}catch{};const u=new SpeechSynthesisUtterance(text);u.lang=locale(target.value);u.rate=speechRate;const voice=chooseVoice(u.lang);if(voice)u.voice=voice;u.onend=()=>{tts=false};u.onerror=()=>{tts=false};window.speechSynthesis.speak(u)};
+
+    /*
+     * MOBILE FIX:
+     * SpeechRecognition must be armed while the real CALL button user gesture
+     * is still on the stack. The main communicator starts it again later after
+     * WebRTC/media setup; that later call is harmless because its own
+     * `recognizing` guard sees the already-running recognition instance.
+     */
+    const armSpeechOnCallGesture=()=>{
+      if(!callButton||!recordButton)return;
+      const original=callButton.onclick;
+      if(typeof original!=='function')return;
+      callButton.onclick=function(event){
+        try{
+          const communicator=root.classList.contains('is-call-mode');
+          const callActive=/hovor je aktívny|call is active|anruf ist aktiv/i.test(String(commStatus.textContent||''));
+          const alreadyRecording=recordButton.classList.contains('recording');
+          if(communicator&&!alreadyRecording&&!callButton.disabled&&!callActive){
+            recordButton.click();
+          }
+        }catch{}
+        return original.call(this,event);
+      };
+    };
 
     const translate=async text=>{
       const clean=String(text||'').trim();
@@ -71,6 +97,7 @@
     play?.addEventListener('click',()=>speak(translation.textContent||''),true);
     source.addEventListener('change',()=>{lastTranslated='';interactionId=null});
     target.addEventListener('change',()=>{interactionId=null});
+    armSpeechOnCallGesture();
     setInterval(observe,500);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
