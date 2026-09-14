@@ -12,10 +12,10 @@ android {
         applicationId = "club.foxprof.translator02"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.3.0"
-        // Android audio -> original Google Gemini speech recognition -> transcript + translation.
-        buildConfigField("String", "TRANSLATOR_API_URL", "\"https://wdfox.vercel.app/api/translate-voice\"")
+        versionCode = 4
+        versionName = "0.4.0"
+        // Stable FOX LIVE TRANSLATOR backend: multipart audio -> original Google Gemini -> transcript + translation.
+        buildConfigField("String", "TRANSLATOR_API_URL", "\"https://wdfox-live-translator.vercel.app/api/translate-voice\"")
     }
 }
 
