@@ -13,6 +13,8 @@
   const recordButton = root.querySelector('[data-record]');
   const remoteAudio = root.querySelector('[data-remote-audio]');
   const isMobile = new URLSearchParams(location.search).has('foxPeer');
+
+  const API_URL = 'https://wdfox-live-translat-jz8mjkdcf-peters-projects-db101134.vercel.app/api/translate-voice';
   const localeNames = { bg:'Bulgarian',hr:'Croatian',cs:'Czech',da:'Danish',nl:'Dutch',en:'English',et:'Estonian',fi:'Finnish',fr:'French',de:'German',el:'Greek',hu:'Hungarian',ga:'Irish',it:'Italian',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pl:'Polish',pt:'Portuguese',ro:'Romanian',sk:'Slovak',sl:'Slovenian',es:'Spanish',sv:'Swedish' };
 
   let recorder = null;
@@ -31,13 +33,6 @@
     const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4','audio/aac'];
     return types.find((x) => window.MediaRecorder?.isTypeSupported?.(x)) || '';
   };
-
-  const blobToBase64 = (blob) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(String(reader.result || '').split(',')[1] || '');
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 
   const speak = (text) => {
     if (!text || !window.speechSynthesis) return;
@@ -87,26 +82,40 @@
     if (!blob || blob.size < 1200 || busy || stopping) return;
     busy = true;
     try {
-      const audioBase64 = await blobToBase64(blob);
-      if (!audioBase64) return;
       const src = String(source?.value || 'de');
       const dst = String(target?.value || 'sk');
-      setStatus(`GEMINI: ${localeNames[src] || src} → ${localeNames[dst] || dst}…`);
-      const response = await fetch('/api/gemini-audio', {
+      setStatus(`GEMINI AUDIO: ${localeNames[src] || src} → ${localeNames[dst] || dst}…`);
+
+      const form = new FormData();
+      const extension = blob.type.includes('mp4') || blob.type.includes('aac') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
+      form.append('audio', blob, `fox-live-${Date.now()}.${extension}`);
+      form.append('sourceLanguage', src);
+      form.append('targetLanguage', dst);
+      form.append('speakResult', 'false');
+
+      const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioBase64, mimeType: blob.type || 'audio/webm', source: src, target: dst })
+        headers: { Accept: 'application/json' },
+        body: form,
+        cache: 'no-store'
       });
+
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.error || `Gemini HTTP ${response.status}`);
+
       const srcText = String(data?.transcript || '').trim();
-      const dstText = String(data?.translation || '').trim();
-      if (srcText) transcript.textContent = srcText;
-      if (dstText) {
+      const dstText = String(data?.translatedText || data?.translation || '').trim();
+      if (srcText && transcript) transcript.textContent = srcText;
+      if (dstText && translation) {
         translation.textContent = dstText;
         speak(dstText);
       }
-      setStatus(srcText ? `GEMINI ✓ ${localeNames[src] || src} → ${localeNames[dst] || dst}` : 'GEMINI: čakám na reč…');
+
+      if (srcText || dstText) {
+        setStatus(`GEMINI ✓ ${localeNames[src] || src} → ${localeNames[dst] || dst}`);
+      } else {
+        setStatus('GEMINI AUDIO: čakám na reč…');
+      }
     } catch (e) {
       setStatus(`❌ GEMINI AUDIO: ${e?.message || 'preklad audia zlyhal'}`);
     } finally {
@@ -123,6 +132,7 @@
       setStatus(`❌ GEMINI AUDIO: MediaRecorder ${e?.message || 'nie je dostupný'}`);
       return false;
     }
+
     const chunks = [];
     recorder.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
     recorder.onerror = () => { try { recorder?.stop(); } catch {} };
@@ -136,9 +146,14 @@
       }
       void upload(blob);
     };
+
     try {
       recorder.start();
-      setTimeout(() => { if (recorder?.state === 'recording') { try { recorder.stop(); } catch {} } }, 5500);
+      setTimeout(() => {
+        if (recorder?.state === 'recording') {
+          try { recorder.stop(); } catch {}
+        }
+      }, 5500);
       return true;
     } catch (e) {
       recorder = null;
@@ -149,13 +164,13 @@
 
   const start = () => {
     if (running || !active()) return;
-    const s = getStream();
-    if (!s) return;
+    const stream = getStream();
+    if (!stream) return;
     running = true;
     stopping = false;
     patchBrowserSpeech();
     setStatus('GEMINI AUDIO: počúvam…');
-    startRecorder(s);
+    startRecorder(stream);
   };
 
   const stop = () => {
