@@ -22,10 +22,10 @@ const content = await getLandingContent(lang);
     <a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
   <Landing content={content} />
+  <FoxHangupButton />
   <FoxLiveTranslator locale={lang} />
   <FoxCallTranslationFix />
   <FoxPcBridge />
-  <FoxHangupButton />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
