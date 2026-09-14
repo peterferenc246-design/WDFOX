@@ -1,0 +1,52 @@
+<script is:inline>
+(() => {
+  const root = () => document.querySelector('[data-fox-live]');
+  let shown = false;
+  let audio;
+  const lang = () => (document.documentElement.lang || 'sk').slice(0,2);
+  const strings = () => {
+    const l = lang();
+    if (l === 'de') return { title:'📞 EINGEHENDER ANRUF', text:'Jemand möchte Sie anrufen.', accept:'ANRUF ANNEHMEN', deny:'ABLEHNEN' };
+    if (l === 'en') return { title:'📞 INCOMING CALL', text:'Someone wants to call you.', accept:'ACCEPT CALL', deny:'DECLINE' };
+    return { title:'📞 PRICHÁDZAJÚCI HOVOR', text:'Niekto vám chce zavolať.', accept:'PRIJAŤ HOVOR', deny:'ODMIETNUŤ' };
+  };
+  const findCallButton = () => root()?.querySelector('[data-call]');
+  const isIncoming = () => {
+    const b = findCallButton();
+    const label = b?.querySelector('[data-call-label]')?.textContent?.trim() || '';
+    const status = root()?.querySelector('[data-comm-status]')?.textContent?.trim() || '';
+    return /PRIJ|ANRUF ANNEHMEN|ACCEPT CALL|INCOMING|EINGEH|PRICHÁDZAJÚC/i.test(label + ' ' + status);
+  };
+  const stopRing = () => { try { audio?.pause(); audio=null; } catch {} };
+  const show = () => {
+    if (shown || !isIncoming()) return;
+    shown = true;
+    const s = strings();
+    const box = document.createElement('div');
+    box.id = 'fox-incoming-gate';
+    box.innerHTML = `<div class="fox-incoming-backdrop"><div class="fox-incoming-card" role="dialog" aria-modal="true"><div class="fox-incoming-icon">📞</div><div class="fox-incoming-title">${s.title}</div><p>${s.text}</p><div class="fox-incoming-actions"><button type="button" data-deny>${s.deny}</button><button type="button" data-accept>${s.accept}</button></div></div></div>`;
+    document.body.appendChild(box);
+    const deny = box.querySelector('[data-deny]');
+    const accept = box.querySelector('[data-accept]');
+    deny.onclick = () => { stopRing(); box.remove(); shown=false; findCallButton()?.click(); };
+    accept.onclick = () => { stopRing(); box.remove(); shown=false; findCallButton()?.click(); };
+  };
+  const scan = () => { if (isIncoming()) show(); else if (!isIncoming()) { const old=document.getElementById('fox-incoming-gate'); if(old){old.remove();shown=false;} } };
+  new MutationObserver(scan).observe(document.body,{subtree:true,childList:true,characterData:true});
+  setInterval(scan,300);
+  scan();
+})();
+</script>
+<style>
+#fox-incoming-gate{position:fixed;inset:0;z-index:2147483647}
+.fox-incoming-backdrop{position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:rgba(8,12,20,.62);backdrop-filter:blur(5px)}
+.fox-incoming-card{width:min(440px,100%);box-sizing:border-box;background:#fff;border-radius:24px;padding:30px;box-shadow:0 28px 90px rgba(0,0,0,.38);text-align:center;border:2px solid #18a957}
+.fox-incoming-icon{font-size:44px;margin-bottom:8px;animation:foxRing .9s infinite alternate}
+.fox-incoming-title{font-size:14px;font-weight:1000;color:#f36a0a;letter-spacing:.08em}
+.fox-incoming-card p{margin:12px 0 22px;color:#172033;font-size:19px;font-weight:800}
+.fox-incoming-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fox-incoming-actions button{border:0;border-radius:14px;padding:15px;font-weight:900;cursor:pointer}
+.fox-incoming-actions button:first-child{background:#eef0f3;color:#172033}
+.fox-incoming-actions button:last-child{background:#18a957;color:#fff}
+@keyframes foxRing{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+</style>
