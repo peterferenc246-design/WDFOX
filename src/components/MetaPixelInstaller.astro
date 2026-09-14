@@ -29,6 +29,37 @@ const chromeUrl = "https://chromewebstore.google.com/detail/meta-ads-data-adviso
 
 <script is:inline>
 (() => {
+  // Unlock FOX audio from a real user gesture BEFORE a remote call arrives.
+  // Browser autoplay policies otherwise may block the ringtone because the
+  // incoming PeerJS event is not itself a user gesture.
+  let foxAudioContext = null;
+  let OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+  const unlockFoxAudio = () => {
+    try {
+      if (!OriginalAudioContext) return;
+      if (!foxAudioContext) foxAudioContext = new OriginalAudioContext();
+      foxAudioContext.resume?.();
+      if (foxAudioContext.state === 'running') window.__foxAudioContext = foxAudioContext;
+      if (window.AudioContext && !window.AudioContext.__foxShared) {
+        const Native = OriginalAudioContext;
+        const SharedAudioContext = function(){ return foxAudioContext || new Native(); };
+        SharedAudioContext.prototype = Native.prototype;
+        SharedAudioContext.__foxShared = true;
+        window.AudioContext = SharedAudioContext;
+      }
+      if (window.webkitAudioContext && !window.webkitAudioContext.__foxShared) {
+        const NativeWebkit = window.webkitAudioContext;
+        const SharedWebkitAudioContext = function(){ return foxAudioContext || new NativeWebkit(); };
+        SharedWebkitAudioContext.prototype = NativeWebkit.prototype;
+        SharedWebkitAudioContext.__foxShared = true;
+        window.webkitAudioContext = SharedWebkitAudioContext;
+      }
+    } catch {}
+  };
+  ['pointerdown','touchstart','mousedown','keydown'].forEach(event => {
+    window.addEventListener(event, unlockFoxAudio, {capture:true, passive:true});
+  });
+
   // Safety net for older cached FOX builds: PeerJS must receive valid ICE URLs.
   const sanitizePeer = () => {
     const Original = window.Peer;
