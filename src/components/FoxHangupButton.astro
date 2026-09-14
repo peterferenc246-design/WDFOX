@@ -72,10 +72,8 @@
       const muted = !track.enabled;
       mic.classList.toggle('is-muted', muted);
       micLabel.textContent = muted ? text.micOn : text.micOff;
-
-      const record = root.querySelector('[data-record]');
-      if (muted && record?.classList.contains('recording')) record.click();
-      else if (!muted && isLive() && !record?.classList.contains('recording')) record?.click();
+      // IMPORTANT: microphone mute is a local WebRTC media-track operation.
+      // It must never click the speech-recognition button or affect the peer.
     });
 
     hangup.addEventListener('click', () => {
@@ -83,8 +81,6 @@
       hangup.disabled = true;
       hangupLabel.textContent = text.ending;
 
-      // Let the FOX LIVE TRANSLATOR send the hangup packet through the
-      // existing PeerJS data connection before closing/reloading this device.
       if (typeof window.__foxEndCall === 'function') {
         try {
           window.__foxEndCall();
