@@ -17,7 +17,7 @@
     const commStatus = root.querySelector('[data-comm-status]');
     const callButton = root.querySelector('[data-call]');
     const recordButton = root.querySelector('[data-record]');
-    if (!source || !target || !transcript || !translation || !commStatus) return;
+    if (!source || !target || !transcript || !translation || !commStatus || !callButton || !recordButton) return;
 
     const localeMap={bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'};
     const locale=code=>localeMap[code]||code||'en-US';
@@ -29,6 +29,7 @@
     let speechRate=1;
     let interactionId=null;
     let tts=false;
+    let callWrapped=false;
 
     const setStatus=t=>{if(status)status.textContent=t;};
     const setCallStatus=t=>{commStatus.textContent=t;};
@@ -37,26 +38,77 @@
 
     /*
      * MOBILE FIX:
-     * SpeechRecognition must be armed while the real CALL button user gesture
-     * is still on the stack. The main communicator starts it again later after
-     * WebRTC/media setup; that later call is harmless because its own
-     * `recognizing` guard sees the already-running recognition instance.
+     * SpeechRecognition.start() must happen synchronously while the REAL
+     * call-button gesture is still active. Calling recordButton.click() is
+     * not sufficient because that creates a synthetic/untrusted click.
+     * We therefore invoke the existing main record handler directly from
+     * the trusted call-button handler. No second SpeechRecognition instance
+     * is created and the WebRTC call flow remains untouched.
+     *
+     * The main FOX LIVE TRANSLATOR script may install its onclick handler
+     * after this component boots, so we retry the wrapper until it exists.
      */
     const armSpeechOnCallGesture=()=>{
-      if(!callButton||!recordButton)return;
+      if(callWrapped)return true;
       const original=callButton.onclick;
-      if(typeof original!=='function')return;
+      if(typeof original!=='function')return false;
+      callWrapped=true;
       callButton.onclick=function(event){
         try{
           const communicator=root.classList.contains('is-call-mode');
           const callActive=/hovor je aktívny|call is active|anruf ist aktiv/i.test(String(commStatus.textContent||''));
           const alreadyRecording=recordButton.classList.contains('recording');
           if(communicator&&!alreadyRecording&&!callButton.disabled&&!callActive){
-            recordButton.click();
+            if(navigator.userActivation?.isActive===false){
+              setCallStatus('⚠️ ČAKÁM NA AKTÍVNU INTERAKCIU PRE MIKROFÓN…');
+            }
+            // Direct invocation keeps this inside the trusted call click.
+            // Do NOT use recordButton.click() here.
+            originalRecordHandler(event);
           }
-        }catch{}
+        }catch(error){
+          setCallStatus(`❌ SpeechRecognition: ${error?.message||'nedá sa spustiť'}`);
+        }
         return original.call(this,event);
       };
+      return true;
+    };
+
+    const originalRecordHandler=event=>{
+      try{
+        const handler=recordButton.onclick;
+        // During wrapping, recordButton.onclick is still the original handler
+        // captured below. Calling it directly preserves the current gesture.
+        if(typeof handler==='function'&&handler!==callButton.onclick) handler.call(recordButton,event);
+      }catch{}
+    };
+
+    // Capture the original record handler before any call-button wrapping.
+    let recordHandler=null;
+    const captureRecordHandler=()=>{
+      if(typeof recordButton.onclick==='function'&&!recordHandler) recordHandler=recordButton.onclick;
+      return !!recordHandler;
+    };
+    const armSpeechOnCallGestureSafe=()=>{
+      if(callWrapped)return true;
+      if(!captureRecordHandler())return false;
+      const originalCall=callButton.onclick;
+      if(typeof originalCall!=='function')return false;
+      callWrapped=true;
+      callButton.onclick=function(event){
+        try{
+          const communicator=root.classList.contains('is-call-mode');
+          const callActive=/hovor je aktívny|call is active|anruf ist aktiv/i.test(String(commStatus.textContent||''));
+          const alreadyRecording=recordButton.classList.contains('recording');
+          if(communicator&&!alreadyRecording&&!callButton.disabled&&!callActive){
+            recordHandler.call(recordButton,event);
+          }
+        }catch(error){
+          setCallStatus(`❌ SpeechRecognition: ${error?.message||'nedá sa spustiť'}`);
+        }
+        return originalCall.call(this,event);
+      };
+      return true;
     };
 
     const translate=async text=>{
@@ -97,7 +149,13 @@
     play?.addEventListener('click',()=>speak(translation.textContent||''),true);
     source.addEventListener('change',()=>{lastTranslated='';interactionId=null});
     target.addEventListener('change',()=>{interactionId=null});
-    armSpeechOnCallGesture();
+
+    // Install after the main component has had a chance to assign onclick.
+    const armTimer=setInterval(()=>{
+      if(armSpeechOnCallGestureSafe())clearInterval(armTimer);
+    },50);
+    armSpeechOnCallGestureSafe();
+    setTimeout(()=>clearInterval(armTimer),5000);
     setInterval(observe,500);
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
