@@ -2,10 +2,8 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
-import FoxPeerQrBootstrap from "../../components/FoxPeerQrBootstrap.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
 import FoxDirectHotlineV2 from "../../components/FoxDirectHotlineV2.astro";
-import FoxQrFix from "../../components/FoxQrFix.astro";
 import FoxIncomingCall from "../../components/FoxIncomingCall.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
@@ -27,10 +25,8 @@ const content = await getLandingContent(lang);
   </Fragment>
   <Landing content={content} />
   <FoxDirectHotlineV2 locale={lang} />
-  <FoxPeerQrBootstrap />
   <FoxLiveTranslator locale={lang} />
   <FoxIncomingCall locale={lang} />
-  <FoxQrFix />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
@@ -55,15 +51,14 @@ const content = await getLandingContent(lang);
     return nativeFetch(input, init);
   };
 
-  // FOX DIRECT is the primary PC/mobile call path. Keep the legacy QR
-  // communicator available only for the standalone translator interface.
+  // The direct FOX PC/mobile hotline is the primary call path.
+  // The legacy QR communicator remains hidden so it cannot create a second
+  // PeerJS session or interfere with the direct receiver.
   const hideLegacyQrCall = () => {
     const live = document.querySelector('[data-fox-live]');
     if (!live) return;
-    const tab = live.querySelector('[data-mode="communicator"]');
-    const panel = live.querySelector('[data-communicator]');
-    if (tab) tab.style.display = 'none';
-    if (panel) panel.style.display = 'none';
+    live.querySelector('[data-mode="communicator"]')?.setAttribute('hidden', 'true');
+    live.querySelector('[data-communicator]')?.setAttribute('hidden', 'true');
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideLegacyQrCall, { once: true });
   else hideLegacyQrCall();
