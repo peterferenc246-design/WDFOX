@@ -30,35 +30,130 @@ const content = await getLandingContent(lang);
 
 <script is:inline>
 (() => {
-  const LIVE='https://wdfox-live-translator.vercel.app', GEMINI='https://wdfox-gemini-api.vercel.app', nativeFetch=window.fetch.bind(window);
-  window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input,init)};
+  const LIVE='https://wdfox-live-translator.vercel.app';
+  const GEMINI='https://wdfox-gemini-api.vercel.app';
+  const nativeFetch=window.fetch.bind(window);
+  window.fetch=(input,init)=>{
+    const url=typeof input==='string'?input:input?.url||'';
+    if(url.startsWith('/api/')){
+      const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;
+      const target=base+url;
+      return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init);
+    }
+    return nativeFetch(input,init);
+  };
 
-  // FOX PC station: the desktop is always reachable as FOX-WDFOX.
-  // The mobile communicator already uses this ID when no QR peer is supplied.
-  const mobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  if(mobile) return;
+  // One direct communicator bridge: desktop registers FOX-WDFOX, mobile calls it.
+  const isMobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   const STATION_ID='FOX-WDFOX';
-  let station=null, incoming=null, data=null, micStream=null, ringing=false, ringTimer=null, audioCtx=null, interactionId=null, source='sk', target='de', recognition=null;
   const root=document.querySelector('[data-fox-live]');
   if(!root) return;
-  const q=s=>root.querySelector(s), status=q('[data-comm-status]'), callBtn=q('[data-call]'), callLabel=q('[data-call-label]'), sourceSel=q('[data-source]'), targetSel=q('[data-target]'), transcript=q('[data-transcript]'), translation=q('[data-translation]');
-  const labels={bg:'Български',hr:'Hrvatski',cs:'Čeština',da:'Dansk',nl:'Nederlands',en:'English',et:'Eesti',fi:'Suomi',fr:'Français',de:'Deutsch',el:'Ελληνικά',hu:'Magyar',ga:'Gaeilge',it:'Italiano',lv:'Latviešu',lt:'Lietuvių',mt:'Malti',pl:'Polski',pt:'Português',ro:'Română',sk:'Slovenčina',sl:'Slovenščina',es:'Español',sv:'Svenska'};
-  const speechLocale={bg:'bg-BG',hr:'hr-HR',cs:'cs-CZ',da:'da-DK',nl:'nl-NL',en:'en-US',et:'et-EE',fi:'fi-FI',fr:'fr-FR',de:'de-DE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',it:'it-IT',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pl:'pl-PL',pt:'pt-PT',ro:'ro-RO',sk:'sk-SK',sl:'sl-SI',es:'es-ES',sv:'sv-SE'};
-  const setStatus=x=>{if(status)status.textContent=x};
-  const unlock=()=>{try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}catch{}};
+
+  let peer=null, data=null, incomingCall=null, localStream=null, remoteAudio=null;
+  let ringing=false, ringTimer=null, audioCtx=null;
+  let source='sk', target='de';
+  const $=s=>root.querySelector(s);
+  const status=$('[data-comm-status]');
+  const callBtn=$('[data-call]');
+  const callLabel=$('[data-call-label]');
+  const createBtn=$('[data-create]');
+  const micBtn=$('[data-mic]');
+  const sourceSel=$('[data-source]');
+  const targetSel=$('[data-target]');
+  const setStatus=t=>{if(status)status.textContent=t};
+
+  const unlock=()=>{try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch{}};
   ['pointerdown','touchstart','keydown'].forEach(e=>document.addEventListener(e,unlock,{capture:true,passive:true}));
-  const tone=()=>{unlock();if(!audioCtx||audioCtx.state!=='running')return;const now=audioCtx.currentTime;[0,.22,.44].forEach((d,i)=>{try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=i===1?660:880;g.gain.setValueAtTime(.0001,now+d);g.gain.exponentialRampToValueAtTime(.12,now+d+.02);g.gain.exponentialRampToValueAtTime(.0001,now+d+.18);o.connect(g).connect(audioCtx.destination);o.start(now+d);o.stop(now+d+.2)}catch{}})};
-  const startRing=()=>{if(ringing)return;ringing=true;tone();document.title='📞 FOX – PRICHÁDZA HOVOR';ringTimer=setInterval(()=>{tone();document.title=document.title.includes('PRICHÁDZA')?'📞 FOX – HOVOR':'📞 FOX – PRICHÁDZA HOVOR'},1200)};
+  const tone=()=>{unlock();if(!audioCtx||audioCtx.state!=='running')return;const n=audioCtx.currentTime;[0,.24,.48].forEach((d,i)=>{try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=i===1?660:880;g.gain.setValueAtTime(.0001,n+d);g.gain.exponentialRampToValueAtTime(.14,n+d+.02);g.gain.exponentialRampToValueAtTime(.0001,n+d+.2);o.connect(g).connect(audioCtx.destination);o.start(n+d);o.stop(n+d+.21)}catch{}})};
+  const startRing=()=>{if(ringing)return;ringing=true;tone();document.title='📞 FOX – PRICHÁDZA HOVOR';ringTimer=setInterval(tone,1300)};
   const stopRing=()=>{ringing=false;if(ringTimer)clearInterval(ringTimer);ringTimer=null;document.title='FOX LIVE TRANSLATOR'};
-  const overlay=()=>{let b=document.querySelector('[data-fox-pc-incoming]');if(b)return b;b=document.createElement('div');b.dataset.foxPcIncoming='1';b.style.cssText='position:fixed;inset:0;z-index:100000;display:grid;place-items:center;background:rgba(10,14,24,.62);backdrop-filter:blur(5px);padding:20px';b.innerHTML='<div style="width:min(440px,100%);background:#fff;border-radius:22px;padding:26px;box-shadow:0 25px 80px rgba(0,0,0,.35);text-align:center"><div style="font-size:14px;font-weight:900;color:#f36a0a;letter-spacing:.08em">FOX PC</div><h2 style="margin:10px 0;color:#172033">📞 PRICHÁDZAJÚCI HOVOR</h2><p style="color:#667085;font-weight:700">Mobil žiada o spojenie s FOX PC.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-deny style="border:0;border-radius:12px;padding:14px;font-weight:900">ZAMIETNUŤ</button><button data-accept style="border:0;border-radius:12px;padding:14px;font-weight:900;background:#18a957;color:#fff">PRIJATIAŤ HOVOR</button></div></div>';document.body.appendChild(b);b.querySelector('[data-deny]').onclick=()=>{try{incoming?.close()}catch{};incoming=null;try{data?.close()}catch{};data=null;stopRing();b.remove();setStatus('Čakám na hovor…')};b.querySelector('[data-accept]').onclick=accept;return b};
-  const speak=text=>{if(!text||!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=speechLocale[target]||target;speechSynthesis.speak(u)};
-  const translate=async(text)=>{const prompt=`Translate only this spoken sentence from ${labels[source]||source} to ${labels[target]||target}. Return only a natural, grammatically correct standard/formal translation in the target language. Preserve meaning, names, numbers, dates, negation, tense, politeness and tone. Do not add or remove meaning. Sentence: ${text}`;const r=await fetch('/api/gemini-chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,previousInteractionId:interactionId,systemInstruction:'You are a professional real-time interpreter. Output only the target-language translation.',thinkingLevel:'low'})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||`Gemini HTTP ${r.status}`);interactionId=j.interactionId||interactionId;return String(j.text||j.translation||'').trim()};
-  const wire=c=>{data=c;c.on('data',async m=>{if(!m||typeof m!=='object')return;if(m.type==='call-request'){source=m.source||source;target=m.target||target;sourceSel.value=target;targetSel.value=source;incoming=incoming||null;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');overlay()}if(m.type==='speech'){try{source=m.source||source;target=m.target||target;transcript.textContent=m.text||'';const out=await translate(m.text||'');translation.textContent=out;speak(out);if(data?.open)data.send({type:'translation',id:m.id,text:out,source,target})}catch(e){setStatus('❌ PREKLAD: '+(e.message||e))}}if(m.type==='screen-request'){if(data?.open)data.send({type:'screen-response',requestId:m.requestId,approved:false,error:'PC screen consent not enabled in station mode'})}});c.on('close',()=>{data=null;setStatus('Čakám na hovor…')})};
-  const accept=async()=>{const b=document.querySelector('[data-fox-pc-incoming]');try{stopRing();unlock();micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});if(incoming){incoming.answer(micStream);incoming.on('stream',s=>{const a=new Audio();a.autoplay=true;a.srcObject=s;a.play().catch(()=>{});window.__FOX_PC_AUDIO__=a});incoming.on('close',()=>{stopRecognition();setStatus('Čakám na hovor…')});incoming.on('error',e=>setStatus('❌ WebRTC: '+(e.message||'chyba')))}callBtn.disabled=true;callLabel.textContent='HOVOR AKTÍVNY';setStatus('🟢 HOVOR JE AKTÍVNY');b?.remove();startRecognition()}catch(e){setStatus('❌ '+(e.message||e));b?.remove()}};
-  const startRecognition=()=>{const C=window.SpeechRecognition||window.webkitSpeechRecognition;if(!C)return;try{recognition=new C();recognition.lang=speechLocale[source]||source;recognition.continuous=true;recognition.interimResults=true;recognition.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i],txt=r[0]?.transcript?.trim();if(r.isFinal&&txt&&data?.open){transcript.textContent=txt;data.send({type:'speech',id:Date.now()+Math.random(),text:txt,source,target})}}};recognition.onend=()=>{if(incoming?.open)setTimeout(()=>{try{recognition.start()}catch{}},250)};recognition.start()}catch{}};
-  const stopRecognition=()=>{try{recognition?.stop()}catch{}recognition=null};
-  const load=()=>new Promise((res,rej)=>{if(window.Peer)return res();const s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>window.Peer?res():rej(Error('PeerJS unavailable'));s.onerror=rej;document.head.appendChild(s)});
-  const stationStart=async()=>{try{await load();station=new Peer(STATION_ID,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});station.on('open',id=>{setStatus('🟢 FOX PC ONLINE – pripravený prijímať hovory');});station.on('connection',wire);station.on('call',c=>{if(c.metadata?.foxScreen){c.answer();return}incoming=c;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');overlay()});station.on('disconnected',()=>{setStatus('⚠️ FOX PC odpojený – pripájam…');try{station.reconnect()}catch{}});station.on('error',e=>{setStatus('❌ FOX PC: '+(e.type||e.message||'chyba'))})}catch(e){setStatus('❌ FOX PC: '+(e.message||e))}};
-  setTimeout(stationStart,900);
+
+  const ensurePeerScript=()=>new Promise((resolve,reject)=>{
+    if(window.Peer)return resolve();
+    const s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload=()=>window.Peer?resolve():reject(Error('PeerJS sa nenačítal'));s.onerror=()=>reject(Error('PeerJS sa nenačítal'));document.head.appendChild(s);
+  });
+
+  const attachRemote=stream=>{
+    remoteAudio=remoteAudio||$('[data-remote-audio]');
+    if(remoteAudio){remoteAudio.srcObject=stream;remoteAudio.autoplay=true;remoteAudio.play().catch(()=>{});}
+    else{const a=new Audio();a.autoplay=true;a.srcObject=stream;a.play().catch(()=>{});window.__FOX_BRIDGE_AUDIO__=a;}
+  };
+
+  const showIncoming=()=>{
+    let b=document.querySelector('[data-fox-bridge-incoming]');if(b)return b;
+    b=document.createElement('div');b.dataset.foxBridgeIncoming='1';
+    b.style.cssText='position:fixed;inset:0;z-index:100000;display:grid;place-items:center;background:rgba(10,14,24,.64);padding:20px;backdrop-filter:blur(5px)';
+    b.innerHTML='<div style="width:min(430px,100%);background:#fff;border-radius:22px;padding:26px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.35)"><div style="font-size:13px;font-weight:900;color:#f36a0a;letter-spacing:.08em">FOX LIVE</div><h2 style="margin:10px 0;color:#172033">📞 PRICHÁDZAJÚCI HOVOR</h2><p style="color:#667085;font-weight:700">Mobil žiada o spojenie s FOX PC.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-fox-deny style="border:0;border-radius:12px;padding:14px;font-weight:900">ZAMIETNUŤ</button><button data-fox-accept style="border:0;border-radius:12px;padding:14px;font-weight:900;background:#18a957;color:#fff">PRIJATIAŤ HOVOR</button></div></div>';
+    document.body.appendChild(b);
+    b.querySelector('[data-fox-deny]').onclick=()=>{try{incomingCall?.close()}catch{};incomingCall=null;try{data?.close()}catch{};data=null;stopRing();b.remove();setStatus('🟢 FOX PC ONLINE – čakám na hovor')};
+    b.querySelector('[data-fox-accept]').onclick=acceptIncoming;
+    return b;
+  };
+
+  const wireData=c=>{
+    data=c;
+    c.on('open',()=>{
+      setStatus(isMobile?'🟢 SPOJENIE S FOX PC AKTÍVNE':'🟢 MOBIL JE PRIPOJENÝ');
+      if(isMobile)c.send({type:'call-request',source,target,at:Date.now()});
+    });
+    c.on('data',m=>{
+      if(!m||typeof m!=='object')return;
+      if(m.type==='call-request'){source=m.source||source;target=m.target||target;if(sourceSel)sourceSel.value=target;if(targetSel)targetSel.value=source;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');showIncoming();}
+    });
+    c.on('close',()=>{data=null;if(!incomingCall)setStatus(isMobile?'⚠️ Spojenie s FOX PC bolo ukončené':'🟢 FOX PC ONLINE – čakám na hovor')});
+    c.on('error',e=>setStatus('❌ DÁTOVÉ SPOJENIE: '+(e.message||e)));
+  };
+
+  const acceptIncoming=async()=>{
+    const b=document.querySelector('[data-fox-bridge-incoming]');
+    try{
+      stopRing();unlock();
+      if(!localStream)localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+      if(incomingCall){incomingCall.answer(localStream);incomingCall.on('stream',attachRemote);incomingCall.on('close',()=>setStatus('🟢 FOX PC ONLINE – čakám na hovor'));incomingCall.on('error',e=>setStatus('❌ WEBRTC: '+(e.message||e)));}
+      if(data?.open)data.send({type:'call-accepted',at:Date.now()});
+      if(callBtn){callBtn.disabled=true;if(callLabel)callLabel.textContent='HOVOR JE AKTÍVNY';}
+      if(micBtn)micBtn.disabled=false;
+      setStatus('🟢 HOVOR JE AKTÍVNY');b?.remove();
+    }catch(e){setStatus('❌ MIKROFÓN: '+(e.message||e));b?.remove();}
+  };
+
+  const initPeer=async()=>{
+    await ensurePeerScript();
+    if(peer&&!peer.destroyed)return;
+    peer=isMobile?new Peer(undefined,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}}):new Peer(STATION_ID,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}});
+    peer.on('open',id=>setStatus(isMobile?'🟢 MOBIL PRIPRAVEN – FOX PC je cieľ':'🟢 FOX PC ONLINE – čakám na hovor'));
+    peer.on('connection',wireData);
+    peer.on('call',call=>{incomingCall=call;startRing();setStatus('🔔 PRICHÁDZAJÚCI HOVOR');showIncoming();});
+    peer.on('error',e=>{
+      if(e.type==='unavailable-id'&&!isMobile){setStatus('⚠️ FOX-WDFOX je obsadený – obnovujem prijímač…');try{peer.destroy()}catch{}peer=null;setTimeout(initPeer,1800);return;}
+      setStatus('❌ PeerJS: '+(e.type||e.message||'chyba'));
+    });
+    peer.on('disconnected',()=>{setStatus('⚠️ PeerJS odpojený – obnovujem…');try{peer.reconnect()}catch{}});
+  };
+
+  const makeCall=async e=>{
+    e.preventDefault();e.stopImmediatePropagation();unlock();
+    try{
+      await initPeer();
+      if(!isMobile){setStatus('ℹ️ FOX PC je prijímač – čaká na mobil');return;}
+      if(!localStream)localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+      setStatus('📞 VOLÁM NA FOX PC…');
+      const c=peer.connect(STATION_ID,{reliable:true,metadata:{fox:true,source,target}});wireData(c);
+      const call=peer.call(STATION_ID,localStream,{metadata:{fox:true,source,target}});incomingCall=call;
+      call.on('stream',attachRemote);
+      call.on('close',()=>setStatus('⚠️ Hovor ukončený'));
+      call.on('error',e=>setStatus(e.type==='peer-unavailable'?'❌ FOX PC NIE JE ONLINE – otvor FOX na PC a nechaj stránku otvorenú.':'❌ WEBRTC: '+(e.message||e)));
+      if(callBtn){callBtn.disabled=true;if(callLabel)callLabel.textContent='VOLÁM…';}
+    }catch(e){setStatus('❌ '+(e.message||e));}
+  };
+
+  // Capture phase blocks the old communicator's second PeerJS path.
+  callBtn?.addEventListener('click',makeCall,true);
+  createBtn?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();initPeer().catch(err=>setStatus('❌ '+(err.message||err)));},true);
+  micBtn?.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();try{unlock();localStream=await navigator.mediaDevices.getUserMedia({audio:true});if(micBtn)micBtn.disabled=false;setStatus('🎙 MIKROFÓN JE ZAPNUTÝ');}catch(err){setStatus('❌ MIKROFÓN: '+(err.message||err));}},true);
+  sourceSel?.addEventListener('change',()=>{source=sourceSel.value||source});
+  targetSel?.addEventListener('change',()=>{target=targetSel.value||target});
+  setTimeout(()=>initPeer().catch(e=>setStatus('❌ PeerJS: '+(e.message||e))),700);
 })();
 </script>
