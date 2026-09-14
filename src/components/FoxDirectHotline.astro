@@ -1,0 +1,43 @@
+---
+interface Props { locale: string }
+const { locale } = Astro.props;
+---
+<section class="fox-hotline" data-fox-hotline>
+  <div class="hotline-card">
+    <div class="hotline-head">
+      <div><p class="eyebrow">FOX DIRECT</p><h2 data-title></h2><p data-subtitle></p></div>
+      <div class="device-badge" data-device></div>
+    </div>
+    <div class="hotline-status" data-status>⏳</div>
+    <div class="hotline-actions">
+      <button class="call" data-call>📞 <span data-call-label></span></button>
+      <button class="secondary hidden" data-activate>🖥️ <span data-activate-label></span></button>
+      <button class="secondary hidden" data-hangup>⛔ <span data-hangup-label></span></button>
+    </div>
+    <p class="hotline-note" data-note></p>
+  </div>
+</section>
+<style>
+.fox-hotline{padding:18px 0}.hotline-card{border:1px solid #f1d5c0;border-radius:22px;background:#fffaf6;padding:22px;box-shadow:0 12px 32px rgba(20,24,35,.06)}.hotline-head{display:flex;justify-content:space-between;gap:16px}.eyebrow{margin:0 0 4px;color:#f36a0a;font-size:11px;font-weight:900;letter-spacing:.12em}.hotline-card h2{margin:0;color:#172033;font-size:24px}.hotline-card p{color:#667085}.device-badge{align-self:flex-start;border-radius:999px;background:#fff;border:1px solid #eee;padding:9px 12px;font-size:11px;font-weight:900}.hotline-status{margin-top:16px;border-radius:12px;background:#f7f7f7;padding:12px;color:#667085;font-size:13px}.hotline-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}.call,.secondary{border:0;border-radius:999px;padding:13px 18px;font-weight:900;cursor:pointer}.call{background:#18a957;color:#fff}.secondary{background:#eef0f3;color:#172033}.hidden{display:none!important}.hotline-note{font-size:11px;margin-bottom:0}@media(max-width:650px){.hotline-head{display:block}.device-badge{display:inline-block;margin-top:10px}.hotline-actions{display:grid;grid-template-columns:1fr}.call,.secondary{width:100%}}
+</style>
+<script define:vars={{ locale }}>
+const root=document.querySelector('[data-fox-hotline]');
+if(root){
+ const $=s=>root.querySelector(s); const status=$('[data-status]'), callBtn=$('[data-call]'), activate=$('[data-activate]'), activateLabel=$('[data-activate-label]'), hangup=$('[data-hangup]'), hangupLabel=$('[data-hangup-label]'), device=$('[data-device]'), title=$('[data-title]'), subtitle=$('[data-subtitle]'), note=$('[data-note]');
+ const mobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); const isDesktop=!mobile; const isReceiver=isDesktop&&localStorage.getItem('fox.receiver')==='1';
+ const texts={sk:{title:'FOX PRIAMA LINKA',sub:'Priame volanie medzi mobilom a FOX PC bez QR párovania.',pc:'🖥️ FOX PC – PRIJÍMAČ',mobile:'📱 MOBIL – VOLAJÚCI',ready:'FOX PC je online a pripravený prijímať hovory.',offline:'FOX PC prijímač nie je aktivovaný.',call:'ZAVOLAŤ NA FOX PC',calling:'VOLÁM NA FOX PC…',incoming:'🔔 PRICHÁDZAJÚCI HOVOR',accept:'PRIJATIE HOVORU',end:'UKONČIŤ HOVOR',note:'Zariadenie sa identifikuje ako PC alebo mobil. Rovnaká Wi‑Fi neprekáža.'},de:{title:'FOX DIREKTLEITUNG',sub:'Direkter Anruf zwischen Mobilgerät und FOX-PC ohne QR-Kopplung.',pc:'🖥️ FOX PC – EMPFÄNGER',mobile:'📱 MOBIL – ANRUFER',ready:'FOX PC ist online und bereit für Anrufe.',offline:'FOX-PC-Empfänger ist nicht aktiviert.',call:'FOX-PC ANRUFEN',calling:'FOX PC WIRD ANGERUFEN…',incoming:'🔔 EINGEHENDER ANRUF',accept:'ANRUF ANNEHMEN',end:'ANRUF BEENDEN',note:'Das Gerät wird als PC oder Mobilgerät erkannt. Gleiches WLAN ist kein Problem.'},en:{title:'FOX DIRECT LINE',sub:'Direct call between mobile and FOX PC without QR pairing.',pc:'🖥️ FOX PC – RECEIVER',mobile:'📱 MOBILE – CALLER',ready:'FOX PC is online and ready to receive calls.',offline:'FOX PC receiver is not activated.',call:'CALL FOX PC',calling:'CALLING FOX PC…',incoming:'🔔 INCOMING CALL',accept:'ACCEPT CALL',end:'END CALL',note:'The device is identified as PC or mobile. Same Wi‑Fi is not a problem.'}};
+ const t=texts[locale]||texts.en; activateLabel.textContent=locale==='de'?'DIESEN PC ALS FOX-EMPFÄNGER AKTIVIEREN':locale==='sk'?'AKTIVOVAŤ TENTO PC AKO FOX PRIJÍMAČ':'ACTIVATE THIS PC AS FOX RECEIVER'; title.textContent=t.title; subtitle.textContent=t.sub; device.textContent=isReceiver?t.pc:t.mobile; hangupLabel.textContent=t.end; note.textContent=t.note;
+ if(isDesktop&&!isReceiver){activate.classList.remove('hidden');callBtn.classList.add('hidden');status.textContent=t.offline;activate.onclick=()=>{localStorage.setItem('fox.receiver','1');location.reload()}}
+ let peer=null, call=null, localStream=null, pending=null;
+ const peerId='FOX-WDFOX-PC';
+ const loadPeer=()=>new Promise((resolve,reject)=>{if(window.Peer)return resolve();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>window.Peer?resolve():reject(Error('PeerJS unavailable'));s.onerror=reject;document.head.appendChild(s)});
+ const setStatus=x=>status.textContent=x;
+ const stop=()=>{try{call?.close()}catch{};call=null;try{localStream?.getTracks().forEach(t=>t.stop())}catch{};localStream=null;hangup.classList.add('hidden');callBtn.classList.remove('hidden');callLabel.textContent=isReceiver?t.accept:t.call};
+ const ensureMic=async()=>localStream||await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+ const answer=async()=>{if(!pending)return;try{localStream=await ensureMic();const c=pending;pending=null;c.answer(localStream);call=c;c.on('stream',s=>{const a=new Audio();a.autoplay=true;a.srcObject=s;a.play().catch(()=>{});window.__FOX_DIRECT_AUDIO__=a});c.on('close',stop);setStatus('☎️ '+t.ready);hangup.classList.remove('hidden');callBtn.classList.add('hidden')}catch(e){setStatus('❌ '+(e.message||e))}};
+ const initReceiver=async()=>{await loadPeer();peer=new Peer(peerId,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]},metadata:{deviceType:'desktop',foxRole:'receiver'}});peer.on('open',()=>setStatus('🟢 '+t.ready));peer.on('call',c=>{pending=c;setStatus(t.incoming);callLabel.textContent=t.accept;callBtn.classList.remove('hidden');callBtn.onclick=answer});peer.on('error',e=>setStatus('❌ PeerJS: '+(e.type||e.message||'error')));peer.on('disconnected',()=>{setStatus('⚠️ PeerJS odpojený – obnovujem…');try{peer.reconnect()}catch{}})};
+ const initCaller=async()=>{await loadPeer();peer=new Peer(undefined,{config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]},metadata:{deviceType:mobile?'mobile':'desktop',foxRole:'caller'}});peer.on('open',()=>setStatus(t.offline));callBtn.onclick=async()=>{try{setStatus(t.calling);localStream=await ensureMic();call=peer.call(peerId,localStream,{metadata:{foxDirect:true,deviceType:mobile?'mobile':'desktop',foxRole:'caller'}});call.on('stream',s=>{const a=new Audio();a.autoplay=true;a.srcObject=s;a.play().catch(()=>{});window.__FOX_DIRECT_AUDIO__=a;setStatus('🟢 '+t.ready)});call.on('close',stop);call.on('error',e=>setStatus('❌ '+(e.type||e.message||'call error')));callBtn.classList.add('hidden');hangup.classList.remove('hidden')}catch(e){setStatus('❌ '+(e.message||e))}}};
+ hangup.onclick=stop;
+ (async()=>{try{if(isReceiver)await initReceiver();else await initCaller()}catch(e){setStatus('❌ '+(e.message||e))}})();
+}
+</script>
