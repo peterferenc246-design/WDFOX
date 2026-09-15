@@ -58,7 +58,6 @@
         window.__WDFOX_TAWK_OPEN_PENDING = false;
         window.setTimeout(openTawk, 0);
       }
-      window.setTimeout(openTawk, 0);
     };
   }
 
@@ -81,32 +80,18 @@
     return true;
   }
 
-  function ensure() {
-    bindTrigger();
-    if (!widgetPresent()) {
-      loadNative();
-    } else {
-      openTawk();
-    }
-  }
-
+  // Load the native Tawk widget and leave it in Tawk's own minimized desktop
+  // state so the Attention Grabber (“We Are Here!”) can appear normally.
   installOnLoadBridge();
   bindTrigger();
-  ensure();
+  loadNative();
 
-  // The language loader is retained. If its Tawk request does not produce
-  // the native widget, retry once through the same official Tawk embed URL.
+  // If the first language-loader request was blocked or did not create the
+  // widget, retry once through the same official Tawk embed URL.
   window.setTimeout(function () {
     if (!widgetPresent()) {
       window.__WDFOX_TAWK_EMBED_REQUESTED = false;
       loadNative();
     }
   }, 5000);
-
-  [1000, 2500, 7000, 10000].forEach(function (delay) {
-    window.setTimeout(function () {
-      bindTrigger();
-      if (widgetPresent()) openTawk();
-    }, delay);
-  });
 })();
