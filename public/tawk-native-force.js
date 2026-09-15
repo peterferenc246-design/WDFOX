@@ -12,6 +12,16 @@
 
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
+  window.Tawk_API.autoStart = true;
+  window.Tawk_API.customStyle = window.Tawk_API.customStyle || { zIndex: '2147483647' };
+
+  function showNativeWidget() {
+    try {
+      if (window.Tawk_API && typeof window.Tawk_API.showWidget === 'function') {
+        window.Tawk_API.showWidget();
+      }
+    } catch (_) {}
+  }
 
   // Keep Tawk's own desktop widget visible. Do not auto-open the chat window.
   window.Tawk_API.onLoad = function () {
@@ -20,9 +30,11 @@
       window.Tawk_API.maximize();
       return;
     }
-    if (typeof window.Tawk_API.showWidget === 'function') {
-      window.Tawk_API.showWidget();
-    }
+    showNativeWidget();
+  };
+
+  window.Tawk_API.onStatusChange = function () {
+    showNativeWidget();
   };
 
   // tawk-language-loader.js may already have loaded the localized Tawk script.
