@@ -35,12 +35,10 @@ const script = `<script id="${marker}">
   function requestOpen(){
     window.__WDFOX_TAWK_OPEN_REQUEST=true;
     setTawkPointerEvents(false);
-    if(openNativeTawk()){
-      window.setTimeout(function(){setTawkPointerEvents(true);},200);
-      window.setTimeout(function(){setTawkPointerEvents(true);},600);
-      return;
-    }
+    openNativeTawk();
+    window.setTimeout(openNativeTawk,100);
     window.setTimeout(openNativeTawk,250);
+    window.setTimeout(openNativeTawk,500);
     window.setTimeout(openNativeTawk,750);
     window.setTimeout(openNativeTawk,1500);
   }
@@ -49,20 +47,21 @@ const script = `<script id="${marker}">
   }
   function bind(){
     setTawkPointerEvents(false);
-    document.addEventListener('click',function(e){
+    var activate=function(e){
       var b=e.target&&e.target.closest&&e.target.closest('#fox-tawk-attention .fox-here');
       if(!b)return;
       e.preventDefault();
       e.stopImmediatePropagation();
       requestOpen();
-    },true);
-    document.addEventListener('touchend',function(e){
-      var b=e.target&&e.target.closest&&e.target.closest('#fox-tawk-attention .fox-here');
-      if(!b)return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      requestOpen();
-    },{capture:true,passive:false});
+    };
+    document.addEventListener('pointerup',activate,true);
+    document.addEventListener('touchend',activate,{capture:true,passive:false});
+    document.addEventListener('click',activate,true);
+    var observer=new MutationObserver(function(){
+      setTawkPointerEvents(isMaximized(window.Tawk_API));
+      pendingOpen();
+    });
+    observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','style','class','id']});
     window.setInterval(function(){
       var open=isMaximized(window.Tawk_API);
       setTawkPointerEvents(open);
