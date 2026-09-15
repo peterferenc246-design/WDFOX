@@ -31,6 +31,31 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
+      - name: Force native Tawk widget into built HTML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          widgets = {
+              'sk': '1k1b9121q',
+              'de': '1k1bb2aln',
+              'en': '1k1bb9ast',
+              'hr': '1k1bjvbjq',
+              'fr': '1k1blk6o4',
+              'it': '1k1bovo5t',
+              'pl': '1k1bp5qda',
+              'es': '1k1bp6lk5',
+              'sv': '1k1bpdngj',
+          }
+          widget_json = ','.join(f"{k}:\'{v}\'" for k, v in widgets.items())
+          snippet = f'''<script data-wdfox-tawk-force>\n(function(){{\n  var PROPERTY_ID='6a951d52c3c46c344587662a';\n  var WIDGETS={{{widget_json}}};\n  var lang=(document.documentElement.lang||'sk').toLowerCase().split(/[-_]/)[0];\n  if(!WIDGETS[lang])lang='sk';\n  window.Tawk_API=window.Tawk_API||{{}};\n  window.Tawk_API.autoStart=true;\n  window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2147483647'}};\n  function show(){{\n    try{{if(typeof window.Tawk_API.start==='function')window.Tawk_API.start({{showWidget:true}});}}catch(_){{}}\n    try{{if(typeof window.Tawk_API.showWidget==='function')window.Tawk_API.showWidget();}}catch(_){{}}\n    document.querySelectorAll('#tawkchat-container,#tawkchat-minified-wrapper,iframe[src*=\\\"tawk.to\\\"],iframe[title*=\\\"chat\\\" i]').forEach(function(el){{\n      el.style.setProperty('position','fixed','important');\n      el.style.setProperty('right','20px','important');\n      el.style.setProperty('bottom','20px','important');\n      el.style.setProperty('left','auto','important');\n      el.style.setProperty('top','auto','important');\n      el.style.setProperty('z-index','2147483647','important');\n      el.style.setProperty('visibility','visible','important');\n      el.style.setProperty('opacity','1','important');\n      el.style.setProperty('display','block','important');\n    }});\n  }}\n  var old=window.Tawk_API.onLoad;\n  window.Tawk_API.onLoad=function(){{try{{if(typeof old==='function')old();}}catch(_){{}}show();}};\n  function inject(){{\n    if(document.querySelector('iframe[src*=\\\"tawk.to\\\"]')){{show();return;}}\n    if(document.getElementById('wdfox-tawk-direct'))return;\n    var s=document.createElement('script');\n    s.id='wdfox-tawk-direct';\n    s.async=true;\n    s.src='https://embed.tawk.to/'+PROPERTY_ID+'/'+WIDGETS[lang];\n    s.charset='UTF-8';\n    s.setAttribute('crossorigin','*');\n    document.body.appendChild(s);\n  }}\n  [0,500,1500,3000,5000,8000].forEach(function(ms){{setTimeout(function(){{show();if(ms>=3000)inject();}},ms);}});\n}})();\n</script>'''
+
+          for path in Path('dist').rglob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              if 'data-wdfox-tawk-force' not in text:
+                  text = text.replace('</body>', snippet + '</body>')
+                  path.write_text(text, encoding='utf-8')
+          PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
