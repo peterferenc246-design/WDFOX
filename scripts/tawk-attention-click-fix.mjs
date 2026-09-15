@@ -30,20 +30,37 @@ const script = `<script id="${marker}">
     }catch(e){}
     return false;
   }
+  function directChatUrl(){
+    try{
+      var b=document.querySelector('#fox-tawk-attention .fox-here');
+      return b&&b.getAttribute('data-tawk-chat-url')||'';
+    }catch(e){return '';}
+  }
+  function directFallback(){
+    var url=directChatUrl();
+    if(url){window.location.href=url;return true;}
+    return false;
+  }
   function openFromAttention(){
     tawkFrames(true);
     if(openNativeTawk()){
       window.setTimeout(function(){tawkFrames(false);},700);
       return true;
     }
-    window.__WDFOX_TAWK_PENDING=true;
+    window.__WDFOX_TAWK_PENDING=0;
     return false;
   }
   function pendingOpen(){
-    if(!window.__WDFOX_TAWK_PENDING)return;
+    if(typeof window.__WDFOX_TAWK_PENDING!=='number')return;
     if(openNativeTawk()){
-      window.__WDFOX_TAWK_PENDING=false;
+      window.__WDFOX_TAWK_PENDING=null;
       window.setTimeout(function(){tawkFrames(false);},700);
+      return;
+    }
+    window.__WDFOX_TAWK_PENDING++;
+    if(window.__WDFOX_TAWK_PENDING>=12){
+      window.__WDFOX_TAWK_PENDING=null;
+      directFallback();
     }
   }
   function bind(){
