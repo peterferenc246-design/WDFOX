@@ -22,12 +22,12 @@
 (function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=8';s.defer=true;document.head.appendChild(s);})();
 (function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=3';s.defer=true;document.head.appendChild(s);})();
 (function(){
-  /* Restore the original FOX floating chat button from commit d64e54b. */
+  /* Exact original FOX chat button from commit d64e54b. */
   function install(){
     if(document.querySelector('.live-chat-bubble'))return;
     var style=document.createElement('style');
     style.id='fox-original-live-chat-style';
-    style.textContent='.live-chat-bubble{position:fixed!important;z-index:2147483646!important;right:24px!important;bottom:24px!important;width:92px!important;height:92px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:.25rem!important;border-radius:50%!important;background:#f36a0a!important;color:#fff!important;box-shadow:0 10px 28px rgba(20,28,42,.25)!important;font-size:.72rem!important;font-weight:700!important;text-decoration:none!important;transition:transform .2s ease,box-shadow .2s ease!important}.live-chat-bubble:hover{transform:translateY(-4px)!important;box-shadow:0 14px 32px rgba(20,28,42,.32)!important}.live-chat-icon{font-size:1.2rem!important;line-height:1!important}@media(max-width:760px){.live-chat-bubble{right:16px!important;bottom:16px!important;width:76px!important;height:76px!important;font-size:.65rem!important}}';
+    style.textContent='.live-chat-bubble{position:relative;z-index:2;margin:1rem 1rem 0 auto;width:92px;height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;border-radius:50%;background:var(--orange);color:#fff;box-shadow:0 10px 28px rgba(20,28,42,.25);font-size:.72rem;font-weight:700;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}.live-chat-bubble:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(20,28,42,.32)}.live-chat-icon{font-size:1.2rem;line-height:1}@media(max-width:760px){.live-chat-bubble{margin-right:.6rem;width:76px;height:76px;font-size:.65rem}}';
     document.head.appendChild(style);
     var b=document.createElement('a');
     b.className='live-chat-bubble';
@@ -39,5 +39,10 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
 (function(){
+  /* The current Tawk launcher is not part of the original FOX button. Hide only its launcher UI. */
+  var style=document.createElement('style');
+  style.id='fox-hide-tawk-launcher';
+  style.textContent='iframe[src*="tawk.to"],#tawkchat-container{display:none!important}';
+  document.head.appendChild(style);
   var old=document.getElementById('fox-tawk-launcher');if(old)old.remove();
 })();
