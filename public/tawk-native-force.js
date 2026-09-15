@@ -23,19 +23,8 @@
     return false;
   }
 
-  function installOnLoadBridge() {
-    window.Tawk_API = window.Tawk_API || {};
-    if (window.Tawk_API.__WDFOX_ONLOAD_BRIDGE) return;
-    var previous = window.Tawk_API.onLoad;
-    window.Tawk_API.__WDFOX_ONLOAD_BRIDGE = true;
-    window.Tawk_API.onLoad = function () {
-      try { if (typeof previous === 'function') previous(); } catch (_) {}
-      if (window.__WDFOX_TAWK_OPEN_PENDING) {
-        window.__WDFOX_TAWK_OPEN_PENDING = false;
-        window.setTimeout(openTawk, 0);
-      }
-      try { if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget(); } catch (_) {}
-    };
+  function widgetPresent() {
+    return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"]');
   }
 
   function bindTrigger() {
@@ -48,35 +37,76 @@
       if (!trigger) return;
       event.preventDefault();
       event.stopPropagation();
-      if (!openTawk()) window.__WDFOX_TAWK_OPEN_PENDING = true;
+      if (openTawk()) return;
+      window.__WDFOX_TAWK_OPEN_PENDING = true;
+      var attempts = 0;
+      var retry = window.setInterval(function () {
+        attempts += 1;
+        if (openTawk() || attempts >= 40) window.clearInterval(retry);
+      }, 250);
     }, true);
   }
 
-  function nativeWidgetPresent() {
-    return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"]');
+  function installOnLoadBridge() {
+    window.Tawk_API = window.Tawk_API || {};
+    if (window.Tawk_API.__WDFOX_ONLOAD_BRIDGE) return;
+    var previous = window.Tawk_API.onLoad;
+    window.Tawk_API.__WDFOX_ONLOAD_BRIDGE = true;
+    window.Tawk_API.onLoad = function () {
+      try { if (typeof previous === 'function') previous(); } catch (_) {}
+      if (window.__WDFOX_TAWK_OPEN_PENDING) {
+        window.__WDFOX_TAWK_OPEN_PENDING = false;
+        window.setTimeout(openTawk, 0);
+      }
+      window.setTimeout(openTawk, 0);
+    };
   }
 
-  function loadNativeIfNeeded() {
-    if (nativeWidgetPresent()) return;
-    var existing = document.querySelector('script[src*="embed.tawk.to/"]');
-    if (existing) return;
+  function loadNative() {
+    if (widgetPresent()) return false;
+    if (window.__WDFOX_TAWK_EMBED_REQUESTED) return false;
 
+    window.__WDFOX_TAWK_EMBED_REQUESTED = true;
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
     installOnLoadBridge();
 
     var script = document.createElement('script');
+    script.id = 'wdfox-native-tawk-embed';
     script.async = true;
     script.src = 'https://embed.tawk.to/' + PROPERTY_ID + '/' + WIDGETS[language()];
     script.charset = 'UTF-8';
     script.setAttribute('crossorigin', '*');
     document.head.appendChild(script);
+    return true;
+  }
+
+  function ensure() {
+    bindTrigger();
+    if (!widgetPresent()) {
+      loadNative();
+    } else {
+      openTawk();
+    }
   }
 
   installOnLoadBridge();
   bindTrigger();
-  loadNativeIfNeeded();
+  ensure();
 
-  window.setTimeout(loadNativeIfNeeded, 2000);
-  window.setTimeout(loadNativeIfNeeded, 5000);
+  // The language loader is retained. If its Tawk request does not produce
+  // the native widget, retry once through the same official Tawk embed URL.
+  window.setTimeout(function () {
+    if (!widgetPresent()) {
+      window.__WDFOX_TAWK_EMBED_REQUESTED = false;
+      loadNative();
+    }
+  }, 5000);
+
+  [1000, 2500, 7000, 10000].forEach(function (delay) {
+    window.setTimeout(function () {
+      bindTrigger();
+      if (widgetPresent()) openTawk();
+    }, delay);
+  });
 })();
