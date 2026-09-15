@@ -31,7 +31,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Install clean Tawk widget and clickable attention banner
+      - name: Install clean Tawk widget and Attention Grabber bubble
         run: |
           python - <<'PY'
           import re
@@ -62,25 +62,17 @@ jobs:
           </script>'''
 
           attention = '''<style id="fox-tawk-attention-style">
-          #fox-tawk-attention{position:fixed!important;left:12px!important;right:auto!important;top:50%!important;bottom:auto!important;z-index:2147483647!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;align-items:center!important;gap:10px!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;filter:drop-shadow(0 6px 18px rgba(0,0,0,.30))!important;transform:translateY(-50%) translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;}
-          #fox-tawk-attention .fox-here{display:block!important;background:#fff!important;color:#111!important;border-radius:18px!important;padding:11px 16px!important;font-size:17px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important;border:2px solid #18b887!important;box-shadow:0 4px 16px rgba(0,0,0,.22)!important;}
-          #fox-tawk-attention .fox-here span{font-size:20px!important;margin-right:5px!important;}
-          #fox-tawk-attention .fox-chat{width:54px!important;height:54px!important;border-radius:50%!important;background:#18b887!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:25px!important;box-shadow:0 4px 14px rgba(0,0,0,.30)!important;}
-          @media(max-width:700px){#fox-tawk-attention{left:10px!important;right:auto!important;top:50%!important;bottom:auto!important}#fox-tawk-attention .fox-here{font-size:15px!important;padding:10px 12px!important}#fox-tawk-attention .fox-chat{width:50px!important;height:50px!important;font-size:22px!important}}
+          #fox-tawk-attention{position:fixed!important;right:18px!important;bottom:82px!important;left:auto!important;top:auto!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;filter:drop-shadow(0 5px 14px rgba(0,0,0,.22))!important;}
+          #fox-tawk-attention .fox-here{position:relative!important;display:block!important;background:#fff!important;color:#202124!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:12px!important;padding:11px 15px!important;font-size:15px!important;font-weight:700!important;line-height:1.15!important;white-space:nowrap!important;box-shadow:0 3px 14px rgba(0,0,0,.16)!important;}
+          #fox-tawk-attention .fox-here:after{content:""!important;position:absolute!important;right:19px!important;bottom:-7px!important;width:12px!important;height:12px!important;background:#fff!important;border-right:1px solid rgba(0,0,0,.12)!important;border-bottom:1px solid rgba(0,0,0,.12)!important;transform:rotate(45deg)!important;}
+          #fox-tawk-attention .fox-here span{font-size:18px!important;margin-right:4px!important;}
+          @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:72px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important}}
           </style>
           <div id="fox-tawk-attention" role="button" tabindex="0" aria-label="Open live chat">
             <div class="fox-here"><span>👋</span>We Are Here!</div>
-            <div class="fox-chat">💬</div>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
-            function keepBannerAboveTawk(){
-              var b=document.getElementById('fox-tawk-attention');
-              if(b){b.style.setProperty('z-index','2147483647','important');b.style.setProperty('display','flex','important');}
-              document.querySelectorAll('iframe[src*="tawk.to"],iframe[title*="chat" i],#tawkchat-container').forEach(function(el){
-                el.style.setProperty('z-index','2147483646','important');
-              });
-            }
             function maximize(){
               try{
                 if(window.Tawk_API&&typeof window.Tawk_API.showWidget==='function')window.Tawk_API.showWidget();
@@ -103,9 +95,6 @@ jobs:
               if(!b)return;
               b.addEventListener('click',openTawk);
               b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openTawk();}});
-              keepBannerAboveTawk();
-              new MutationObserver(keepBannerAboveTawk).observe(document.body,{childList:true,subtree:true});
-              setInterval(keepBannerAboveTawk,1000);
             }
             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
           })();
@@ -115,7 +104,6 @@ jobs:
               text = path.read_text(encoding='utf-8')
               for pattern in remove_patterns:
                   text = pattern.sub('', text)
-
               lang_match = re.search(r'<html[^>]*lang=["\']([^"\']+)["\']', text, re.I)
               lang = (lang_match.group(1).lower().split('-')[0].split('_')[0] if lang_match else 'sk')
               widget_id = WIDGETS.get(lang)
@@ -145,7 +133,7 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live www.foxprof.club serves the new Tawk banner
+      - name: Verify live www.foxprof.club serves the new Tawk Attention Grabber
         shell: bash
         run: |
           set -euo pipefail
@@ -153,14 +141,14 @@ jobs:
           for attempt in 1 2 3 4 5; do
             echo "Live verification attempt ${attempt}: ${url}"
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if grep -q 'fox-tawk-attention' <<<"$html" && grep -q '1k1b9121q' <<<"$html"; then
-              echo 'LIVE_TAWK_BANNER=OK'
+            if grep -q 'fox-tawk-attention' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && grep -q 'We Are Here!' <<<"$html"; then
+              echo 'LIVE_TAWK_ATTENTION_GRABBER=OK'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
             fi
-            echo 'Expected Tawk markers not yet visible from the custom domain.'
+            echo 'Expected Tawk Attention Grabber markers not yet visible from the custom domain.'
             sleep 8
           done
-          echo 'LIVE_TAWK_BANNER=FAIL'
-          echo 'The custom domain is not serving the deployed WDFOX artifact containing the new Tawk banner.'
+          echo 'LIVE_TAWK_ATTENTION_GRABBER=FAIL'
+          echo 'The custom domain is not serving the deployed WDFOX artifact containing the new Tawk Attention Grabber.'
           exit 1
