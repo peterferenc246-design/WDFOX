@@ -22,23 +22,31 @@
 
   function showWidget() {
     var api = window.Tawk_API;
-    if (!api) return;
+    if (!api) return false;
     try {
-      if (typeof api.showWidget === 'function') api.showWidget();
-      else if (typeof api.start === 'function') api.start({ showWidget: true });
+      if (typeof api.showWidget === 'function') {
+        api.showWidget();
+        return true;
+      }
+      if (typeof api.start === 'function') {
+        api.start({ showWidget: true });
+        return true;
+      }
     } catch (_) {}
+    return false;
   }
 
   function maximizeWidget() {
     var api = window.Tawk_API;
-    if (!api) return;
+    if (!api) return false;
     try {
       if (typeof api.maximize === 'function') {
         api.maximize();
-      } else {
-        showWidget();
+        return true;
       }
+      showWidget();
     } catch (_) {}
+    return false;
   }
 
   function bindLiveChatTrigger() {
@@ -48,13 +56,22 @@
     document.addEventListener('click', function (event) {
       var target = event.target;
       if (!target || !target.closest) return;
-
       var trigger = target.closest('.live-chat-bubble');
       if (!trigger) return;
 
       event.preventDefault();
       event.stopPropagation();
-      maximizeWidget();
+
+      if (maximizeWidget()) return;
+
+      // Tawk may still be loading. Retry the requested action after its API is ready.
+      var attempts = 0;
+      var retry = window.setInterval(function () {
+        attempts += 1;
+        if (maximizeWidget() || attempts >= 40) {
+          window.clearInterval(retry);
+        }
+      }, 250);
     }, true);
   }
 
