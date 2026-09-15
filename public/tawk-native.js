@@ -22,16 +22,20 @@
   window.Tawk_API.customStyle = window.Tawk_API.customStyle || { zIndex: '2147483647' };
   window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
 
-  function makeVisible() {
+  function showWidget() {
     var api = window.Tawk_API;
-    if (api) {
-      try { if (typeof api.start === 'function') api.start({ showWidget: true }); } catch (_) {}
-      try { if (typeof api.showWidget === 'function') api.showWidget(); } catch (_) {}
-      try {
-        if (typeof api.isChatHidden === 'function' && api.isChatHidden() && typeof api.toggleVisibility === 'function') api.toggleVisibility();
-      } catch (_) {}
-    }
+    if (!api) return;
+    try { if (typeof api.start === 'function') api.start({ showWidget: true }); } catch (_) {}
+    try { if (typeof api.showWidget === 'function') api.showWidget(); } catch (_) {}
+    try {
+      if (typeof api.isChatHidden === 'function' && api.isChatHidden() && typeof api.toggleVisibility === 'function') {
+        api.toggleVisibility();
+      }
+    } catch (_) {}
+  }
 
+  function forceVisible() {
+    showWidget();
     document.querySelectorAll('#tawkchat-container, #tawkchat-minified-wrapper, iframe[src*="tawk.to"], iframe[title*="chat" i]').forEach(function (el) {
       el.style.setProperty('position', 'fixed', 'important');
       el.style.setProperty('right', '20px', 'important');
@@ -48,7 +52,8 @@
   var previousOnLoad = window.Tawk_API.onLoad;
   window.Tawk_API.onLoad = function () {
     try { if (typeof previousOnLoad === 'function') previousOnLoad(); } catch (_) {}
-    makeVisible();
+    showWidget();
+    window.setTimeout(forceVisible, 100);
   };
 
   function load() {
@@ -62,11 +67,11 @@
       script.setAttribute('crossorigin', '*');
       (document.body || document.head || document.documentElement).appendChild(script);
     }
-    makeVisible();
+    forceVisible();
   }
 
   [0, 250, 750, 1500, 3000, 5000, 8000].forEach(function (delay) {
     window.setTimeout(load, delay);
   });
-  window.setInterval(makeVisible, 10000);
+  window.setInterval(forceVisible, 10000);
 })();
