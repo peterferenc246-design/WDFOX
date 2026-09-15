@@ -31,6 +31,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
+      - name: Add Tawk mobile click layer after build
+        run: node scripts/tawk-attention-click-fix.mjs
       - name: Install clean Tawk widget and Attention Grabber bubble
         run: |
           python - <<'PY'
