@@ -53,11 +53,11 @@ jobs:
           }
 
           remove_patterns = [
-              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*>.*?embed\\.tawk\\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
-              re.compile(r'<script[^>]*>\\s*\\(function\\(\\)\\{\\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\\s*<script[^>]*>.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*>.*?embed\.tawk\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
+              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\s*<script[^>]*>.*?</script>', re.I | re.S),
           ]
 
           def native_snippet(widget_id):
