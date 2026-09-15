@@ -40,7 +40,6 @@ jobs:
           PROPERTY_ID = '6a951d52c3c46c344587662a'
           WIDGETS = {'sk': '1k1b9121q'}
 
-          # Remove every previous Tawk implementation from the generated HTML.
           remove_patterns = [
               re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
               re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
@@ -63,11 +62,11 @@ jobs:
           </script>'''
 
           attention = '''<style id="fox-tawk-attention-style">
-          #fox-tawk-attention{position:fixed!important;right:16px!important;bottom:92px!important;z-index:2147483647!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;align-items:center!important;gap:10px!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;filter:drop-shadow(0 6px 18px rgba(0,0,0,.28))!important;transform:translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;}
+          #fox-tawk-attention{position:fixed!important;left:50%!important;right:auto!important;bottom:96px!important;z-index:2147483647!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;align-items:center!important;gap:10px!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;filter:drop-shadow(0 6px 18px rgba(0,0,0,.30))!important;transform:translateX(-50%) translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;}
           #fox-tawk-attention .fox-here{display:block!important;background:#fff!important;color:#111!important;border-radius:18px!important;padding:11px 16px!important;font-size:17px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important;border:2px solid #18b887!important;box-shadow:0 4px 16px rgba(0,0,0,.22)!important;}
           #fox-tawk-attention .fox-here span{font-size:20px!important;margin-right:5px!important;}
           #fox-tawk-attention .fox-chat{width:54px!important;height:54px!important;border-radius:50%!important;background:#18b887!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:25px!important;box-shadow:0 4px 14px rgba(0,0,0,.30)!important;}
-          @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:78px!important}#fox-tawk-attention .fox-here{font-size:15px!important;padding:10px 12px!important}#fox-tawk-attention .fox-chat{width:50px!important;height:50px!important;font-size:22px!important}}
+          @media(max-width:700px){#fox-tawk-attention{left:50%!important;right:auto!important;bottom:84px!important}#fox-tawk-attention .fox-here{font-size:15px!important;padding:10px 12px!important}#fox-tawk-attention .fox-chat{width:50px!important;height:50px!important;font-size:22px!important}}
           </style>
           <div id="fox-tawk-attention" role="button" tabindex="0" aria-label="Open live chat">
             <div class="fox-here"><span>👋</span>We Are Here!</div>
@@ -83,6 +82,8 @@ jobs:
               return false;
             }
             function openTawk(){
+              var b=document.getElementById('fox-tawk-attention');
+              if(b)b.style.display='none';
               if(maximize())return;
               var tries=0;
               var timer=setInterval(function(){
@@ -118,6 +119,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -128,3 +130,27 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-live:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live www.foxprof.club serves the new Tawk banner
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
+          for attempt in 1 2 3 4 5; do
+            echo "Live verification attempt ${attempt}: ${url}"
+            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
+            if grep -q 'fox-tawk-attention' <<<"$html" && grep -q '1k1b9121q' <<<"$html"; then
+              echo 'LIVE_TAWK_BANNER=OK'
+              echo 'LIVE_TAWK_WIDGET=1k1b9121q'
+              exit 0
+            fi
+            echo 'Expected Tawk markers not yet visible from the custom domain.'
+            sleep 8
+          done
+          echo 'LIVE_TAWK_BANNER=FAIL'
+          echo 'The custom domain is not serving the deployed WDFOX artifact containing the new Tawk banner.'
+          exit 1
