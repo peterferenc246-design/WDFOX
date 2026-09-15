@@ -51,11 +51,11 @@ jobs:
           }
 
           remove_patterns = [
-              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*>.*?embed\\.tawk\\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
-              re.compile(r'<script[^>]*>\\s*\\(function\\(\\)\\{\\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\\s*<script[^>]*>.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*>.*?embed\.tawk\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
+              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\s*<script[^>]*>.*?</script>', re.I | re.S),
           ]
 
           def native_snippet(widget_id):
@@ -65,8 +65,11 @@ jobs:
           Tawk_API.onLoad=function(){{
             try{{if(typeof WDFOX_TAWK_PREVIOUS_ONLOAD==='function')WDFOX_TAWK_PREVIOUS_ONLOAD();}}catch(e){{}}
             try{{
-              if(window.__WDFOX_TAWK_OPEN_REQUEST && typeof Tawk_API.showWidget==='function')Tawk_API.showWidget();
-              if(window.__WDFOX_TAWK_OPEN_REQUEST && typeof Tawk_API.maximize==='function')Tawk_API.maximize();
+              if(window.__WDFOX_TAWK_OPEN_REQUEST){{
+                if(typeof Tawk_API.showWidget==='function')Tawk_API.showWidget();
+                if(typeof Tawk_API.maximize==='function')Tawk_API.maximize();
+                window.__WDFOX_TAWK_OPEN_REQUEST=false;
+              }}
             }}catch(e){{}}
           }};
           (function(){{
@@ -80,7 +83,7 @@ jobs:
           </script>'''
 
           attention = '''<style id="fox-tawk-attention-style">
-          #fox-tawk-attention{position:fixed!important;right:18px!important;bottom:150px!important;left:auto!important;top:auto!important;width:max-content!important;height:auto!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:none!important;isolation:isolate!important;margin:0!important;padding:0!important;}
+          #fox-tawk-attention{position:fixed!important;right:18px!important;bottom:150px!important;left:auto!important;top:auto!important;width:max-content!important;height:auto!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:none!important;isolation:isolate!important;margin:0!important;padding:0!important;}
           #fox-tawk-attention .fox-here{appearance:none!important;-webkit-appearance:none!important;position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;color:#202124!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:12px!important;padding:11px 15px!important;font-size:15px!important;font-weight:700!important;line-height:1.15!important;white-space:nowrap!important;box-shadow:0 3px 14px rgba(0,0,0,.16)!important;cursor:pointer!important;pointer-events:auto!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;min-width:145px!important;min-height:44px!important;text-decoration:none!important;}
           #fox-tawk-attention .fox-here:after{content:""!important;position:absolute!important;right:19px!important;bottom:-7px!important;width:12px!important;height:12px!important;background:#fff!important;border-right:1px solid rgba(0,0,0,.12)!important;border-bottom:1px solid rgba(0,0,0,.12)!important;transform:rotate(45deg)!important;pointer-events:none!important;}
           #fox-tawk-attention .fox-here span{font-size:18px!important;margin-right:4px!important;pointer-events:none!important;}
@@ -97,6 +100,7 @@ jobs:
               try{
                 if(typeof api.showWidget==='function')api.showWidget();
                 if(typeof api.maximize==='function')api.maximize();
+                window.__WDFOX_TAWK_OPEN_REQUEST=false;
                 return true;
               }catch(e){return false;}
             }
@@ -108,7 +112,11 @@ jobs:
                 e.preventDefault();
                 e.stopPropagation();
                 window.__WDFOX_TAWK_OPEN_REQUEST=true;
-                openNative();
+                if(!openNative()){
+                  window.setTimeout(openNative,250);
+                  window.setTimeout(openNative,750);
+                  window.setTimeout(openNative,1500);
+                }
               },false);
             }
             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
