@@ -78,13 +78,13 @@ jobs:
 
           attention = '''<style id="fox-tawk-attention-style">
           #fox-tawk-attention{position:fixed!important;right:18px!important;bottom:150px!important;left:auto!important;top:auto!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;filter:drop-shadow(0 5px 14px rgba(0,0,0,.22))!important;margin:0!important;padding:0!important;}
-          #fox-tawk-attention .fox-here{appearance:none!important;-webkit-appearance:none!important;position:relative!important;display:block!important;background:#fff!important;color:#202124!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:12px!important;padding:11px 15px!important;font-size:15px!important;font-weight:700!important;line-height:1.15!important;white-space:nowrap!important;box-shadow:0 3px 14px rgba(0,0,0,.16)!important;cursor:pointer!important;pointer-events:auto!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important;}
+          #fox-tawk-attention .fox-here{appearance:none!important;-webkit-appearance:none!important;position:relative!important;display:block!important;background:#fff!important;color:#202124!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:12px!important;padding:11px 15px!important;font-size:15px!important;font-weight:700!important;line-height:1.15!important;white-space:nowrap!important;box-shadow:0 3px 14px rgba(0,0,0,.16)!important;cursor:pointer!important;pointer-events:auto!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;}
           #fox-tawk-attention .fox-here:after{content:""!important;position:absolute!important;right:19px!important;bottom:-7px!important;width:12px!important;height:12px!important;background:#fff!important;border-right:1px solid rgba(0,0,0,.12)!important;border-bottom:1px solid rgba(0,0,0,.12)!important;transform:rotate(45deg)!important;pointer-events:none!important;}
           #fox-tawk-attention .fox-here span{font-size:18px!important;margin-right:4px!important;pointer-events:none!important;}
           @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:120px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important}}
           </style>
           <div id="fox-tawk-attention" aria-label="Open live chat">
-            <button type="button" class="fox-here" aria-label="Open live chat"><span>👋</span>We Are Here!</button>
+            <button type="button" class="fox-here" data-tawk-chat-url="https://tawk.to/chat/''' + PROPERTY_ID + '''/''' + widget_id + '''?layout=modern" aria-label="Open live chat"><span>👋</span>We Are Here!</button>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
@@ -124,7 +124,7 @@ jobs:
               lang = (lang_match.group(1).lower().split('-')[0].split('_')[0] if lang_match else 'sk')
               widget_id = WIDGETS.get(lang)
               if widget_id and '</body>' in text:
-                  text = text.replace('</body>', native_snippet(widget_id) + '\n' + attention + '\n</body>', 1)
+                  text = text.replace('</body>', native_snippet(widget_id) + '\n' + attention.replace("''' + widget_id + '''", widget_id) + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
           PY
       - name: Setup Pages
