@@ -5,15 +5,23 @@ const root = path.resolve('dist');
 const marker = 'wdfox-tawk-attention-click-fix';
 const script = `<script id="${marker}">
 (function(){
+  function hideAttention(){
+    var b=document.getElementById('fox-tawk-attention');
+    if(b)b.style.setProperty('display','none','important');
+  }
+  function isMaximized(api){
+    try{
+      return !!(api && typeof api.isChatMaximized==='function' && api.isChatMaximized());
+    }catch(e){return false;}
+  }
   function openNativeTawk(){
     var api=window.Tawk_API;
     if(!api)return false;
     try{
       if(typeof api.showWidget==='function')api.showWidget();
       if(typeof api.maximize==='function')api.maximize();
-      if(typeof api.isChatMaximized==='function' && api.isChatMaximized()){
-        var b=document.getElementById('fox-tawk-attention');
-        if(b)b.style.setProperty('display','none','important');
+      if(isMaximized(api)){
+        hideAttention();
         return true;
       }
     }catch(e){}
