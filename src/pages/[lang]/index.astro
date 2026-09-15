@@ -38,3 +38,15 @@ const content = await getLandingContent(lang);
   window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input)};
 })();
 </script>
+
+<style is:inline>
+/* Keep the native Tawk.to widget fully inside the viewport. */
+iframe[title="chat widget"] {
+  position: fixed !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 2147483645 !important;
+}
+</style>
