@@ -10,20 +10,25 @@
   var lang = (document.documentElement.lang || 'sk').toLowerCase().split(/[-_]/)[0];
   if (!WIDGETS[lang]) lang = 'sk';
 
-  // Native Tawk initialization — no custom replacement widget and no auto-maximize.
   window.Tawk_API = window.Tawk_API || {};
-  window.Tawk_LoadStart = new Date();
+  window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
 
-  // Preserve the native minimized Tawk state so Tawk's desktop Attention Grabber
-  // (“We Are Here!”) can be displayed by Tawk itself.
+  // Keep Tawk's own desktop widget visible. Do not auto-open the chat window.
   window.Tawk_API.onLoad = function () {
     if (window.__WDFOX_TAWK_OPEN_PENDING && typeof window.Tawk_API.maximize === 'function') {
       window.__WDFOX_TAWK_OPEN_PENDING = false;
       window.Tawk_API.maximize();
+      return;
+    }
+    if (typeof window.Tawk_API.showWidget === 'function') {
+      window.Tawk_API.showWidget();
     }
   };
 
-  if (!document.getElementById('wdfox-native-tawk-embed')) {
+  // tawk-language-loader.js may already have loaded the localized Tawk script.
+  // Never inject a second Tawk embed, which can suppress the native widget.
+  var existingEmbed = document.querySelector('script[src*="embed.tawk.to/"]');
+  if (!existingEmbed && !document.getElementById('wdfox-native-tawk-embed')) {
     var script = document.createElement('script');
     script.id = 'wdfox-native-tawk-embed';
     script.async = true;
