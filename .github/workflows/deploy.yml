@@ -52,8 +52,9 @@ jobs:
       - name: Force native Tawk widget visible
         run: |
           python - <<'PY'
+          import os
           from pathlib import Path
-          snippet = '<script src="/tawk-native-force.js?v=20260915"></script>'
+          snippet = '<script src="/tawk-native-force.js?v=' + os.environ['GITHUB_SHA'] + '"></script>'
           for path in Path('dist').rglob('*.html'):
               text = path.read_text(encoding='utf-8')
               if '/tawk-native-force.js' not in text:
