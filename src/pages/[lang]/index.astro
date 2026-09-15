@@ -43,12 +43,14 @@ const content = await getLandingContent(lang);
 (() => {
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_API.autoStart = true;
+  window.Tawk_API.customStyle = window.Tawk_API.customStyle || { zIndex: '2147483647' };
 
   const forceTawkVisible = () => {
     const api = window.Tawk_API;
     if (api) {
       try { if (typeof api.start === 'function') api.start({ showWidget: true }); } catch (_) {}
       try { if (typeof api.showWidget === 'function') api.showWidget(); } catch (_) {}
+      try { if (typeof api.isChatHidden === 'function' && api.isChatHidden() && typeof api.toggleVisibility === 'function') api.toggleVisibility(); } catch (_) {}
     }
 
     document.querySelectorAll('#tawkchat-container, #tawkchat-minified-wrapper, iframe[src*="tawk.to"], iframe[title*="chat" i]').forEach((el) => {
@@ -57,9 +59,10 @@ const content = await getLandingContent(lang);
       el.style.setProperty('bottom', '20px', 'important');
       el.style.setProperty('left', 'auto', 'important');
       el.style.setProperty('top', 'auto', 'important');
-      el.style.setProperty('z-index', '2147483646', 'important');
+      el.style.setProperty('z-index', '2147483647', 'important');
       el.style.setProperty('visibility', 'visible', 'important');
       el.style.setProperty('opacity', '1', 'important');
+      el.style.setProperty('display', 'block', 'important');
     });
   };
 
@@ -69,6 +72,7 @@ const content = await getLandingContent(lang);
     forceTawkVisible();
   };
 
-  [500, 1500, 3000, 5000].forEach((delay) => window.setTimeout(forceTawkVisible, delay));
+  [250, 500, 1000, 1500, 2500, 4000, 6000, 9000].forEach((delay) => window.setTimeout(forceTawkVisible, delay));
+  window.setInterval(forceTawkVisible, 10000);
 })();
 </script>
