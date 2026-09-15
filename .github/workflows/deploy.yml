@@ -63,8 +63,15 @@ jobs:
           def native_snippet(widget_id):
               return f'''<script type="text/javascript" id="fox-tawk-native">
           var Tawk_API=Tawk_API||{{}},Tawk_LoadStart=Tawk_LoadStart||new Date();
+          var WDFOX_TAWK_PREVIOUS_ONLOAD=Tawk_API.onLoad;
           Tawk_API.onLoad=function(){{
-            try{{if(typeof Tawk_API.hideWidget==='function')Tawk_API.hideWidget();}}catch(e){{}}
+            try{{if(typeof WDFOX_TAWK_PREVIOUS_ONLOAD==='function')WDFOX_TAWK_PREVIOUS_ONLOAD();}}catch(e){{}}
+            try{{
+              if(window.__WDFOX_TAWK_OPEN_REQUEST){{
+                if(typeof Tawk_API.showWidget==='function')Tawk_API.showWidget();
+                if(typeof Tawk_API.maximize==='function')Tawk_API.maximize();
+              }}
+            }}catch(e){{}}
           }};
           (function(){{
             var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
@@ -84,7 +91,7 @@ jobs:
           @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:120px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important;min-width:135px!important;min-height:44px!important}}
           </style>
           <div id="fox-tawk-attention" aria-label="Open live chat">
-            <a class="fox-here" href="https://tawk.to/chat/__PROPERTY_ID__/__WIDGET_ID__?layout=modern" data-tawk-chat-url="https://tawk.to/chat/__PROPERTY_ID__/__WIDGET_ID__?layout=modern" target="_blank" rel="noopener" aria-label="Open live chat"><span>👋</span>We Are Here!</a>
+            <a class="fox-here" href="#" data-tawk-chat-url="" target="_self" rel="noopener" aria-label="Open live chat"><span>👋</span>We Are Here!</a>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
@@ -106,24 +113,25 @@ jobs:
             function openNative(){
               try{
                 if(window.Tawk_API&&typeof window.Tawk_API.showWidget==='function')window.Tawk_API.showWidget();
-                if(window.Tawk_API&&typeof window.Tawk_API.maximize==='function'){window.Tawk_API.maximize();return true;}
+                if(window.Tawk_API&&typeof window.Tawk_API.maximize==='function')window.Tawk_API.maximize();
+                if(!isMaximized()&&window.Tawk_API&&typeof window.Tawk_API.toggle==='function')window.Tawk_API.toggle();
               }catch(e){}
-              return false;
+              return isMaximized();
             }
             function bind(){
               var button=document.querySelector('#fox-tawk-attention .fox-here');
               if(!button)return;
               button.addEventListener('click',function(e){
-                if(!window.Tawk_API||typeof window.Tawk_API.maximize!=='function')return;
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                if(!openNative())window.__WDFOX_TAWK_PENDING=true;
+                window.__WDFOX_TAWK_OPEN_REQUEST=true;
+                openNative();
               },true);
               button.addEventListener('touchend',function(e){
-                if(!window.Tawk_API||typeof window.Tawk_API.maximize!=='function')return;
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                if(!openNative())window.__WDFOX_TAWK_PENDING=true;
+                window.__WDFOX_TAWK_OPEN_REQUEST=true;
+                openNative();
               },{capture:true,passive:false});
             }
             tawkElements(true);
@@ -131,8 +139,8 @@ jobs:
             window.setInterval(function(){
               var open=isMaximized();
               tawkElements(!open);
-              if(!open&&window.__WDFOX_TAWK_PENDING)openNative();
-              if(isMaximized())window.__WDFOX_TAWK_PENDING=false;
+              if(window.__WDFOX_TAWK_OPEN_REQUEST&&!open)openNative();
+              if(isMaximized())window.__WDFOX_TAWK_OPEN_REQUEST=false;
             },200);
           })();
           </script>'''
