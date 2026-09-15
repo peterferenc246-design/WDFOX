@@ -6,9 +6,8 @@ const marker = 'wdfox-tawk-attention-click-fix';
 const script = `<script id="${marker}">
 (function(){
   function isMaximized(api){
-    try{
-      return !!(api && typeof api.isChatMaximized==='function' && api.isChatMaximized());
-    }catch(e){return false;}
+    try{return !!(api&&typeof api.isChatMaximized==='function'&&api.isChatMaximized());}
+    catch(e){return false;}
   }
   function tawkFrames(block){
     try{
@@ -20,47 +19,30 @@ const script = `<script id="${marker}">
       });
     }catch(e){}
   }
-  function directChatUrl(){
-    try{
-      var b=document.querySelector('#fox-tawk-attention .fox-here');
-      return b&&(b.getAttribute('data-tawk-chat-url')||b.getAttribute('href'))||'';
-    }catch(e){return '';}
-  }
-  function directFallback(){
-    var url=directChatUrl();
-    if(url){window.location.assign(url);return true;}
-    return false;
-  }
   function openNativeTawk(){
     var api=window.Tawk_API;
-    if(!api||typeof api.maximize!=='function')return false;
+    if(!api)return false;
     try{
       if(typeof api.showWidget==='function')api.showWidget();
-      api.maximize();
-      return isMaximized(api);
-    }catch(e){return false;}
+      if(typeof api.maximize==='function')api.maximize();
+      if(isMaximized(api))return true;
+      if(typeof api.toggle==='function'){
+        api.toggle();
+        if(isMaximized(api))return true;
+      }
+    }catch(e){}
+    return isMaximized(api);
   }
-  function openFromAttention(){
+  function requestOpen(){
+    window.__WDFOX_TAWK_OPEN_REQUEST=true;
     tawkFrames(true);
-    if(openNativeTawk()){
-      window.__WDFOX_TAWK_PENDING=null;
-      window.setTimeout(function(){tawkFrames(false);},700);
-      return true;
-    }
-    window.__WDFOX_TAWK_PENDING=1;
-    return false;
+    return openNativeTawk();
   }
   function pendingOpen(){
-    if(typeof window.__WDFOX_TAWK_PENDING!=='number')return;
+    if(!window.__WDFOX_TAWK_OPEN_REQUEST)return;
     if(openNativeTawk()){
-      window.__WDFOX_TAWK_PENDING=null;
-      window.setTimeout(function(){tawkFrames(false);},700);
-      return;
-    }
-    window.__WDFOX_TAWK_PENDING++;
-    if(window.__WDFOX_TAWK_PENDING>=12){
-      window.__WDFOX_TAWK_PENDING=null;
-      directFallback();
+      window.__WDFOX_TAWK_OPEN_REQUEST=false;
+      window.setTimeout(function(){tawkFrames(false);},150);
     }
   }
   function bind(){
@@ -68,24 +50,29 @@ const script = `<script id="${marker}">
     document.addEventListener('click',function(e){
       var b=e.target&&e.target.closest&&e.target.closest('#fox-tawk-attention .fox-here');
       if(!b)return;
-      if(!window.Tawk_API||typeof window.Tawk_API.maximize!=='function')return;
       e.preventDefault();
       e.stopImmediatePropagation();
-      openFromAttention();
+      requestOpen();
     },true);
     document.addEventListener('touchend',function(e){
       var b=e.target&&e.target.closest&&e.target.closest('#fox-tawk-attention .fox-here');
       if(!b)return;
-      if(!window.Tawk_API||typeof window.Tawk_API.maximize!=='function')return;
       e.preventDefault();
       e.stopImmediatePropagation();
-      openFromAttention();
+      requestOpen();
     },{capture:true,passive:false});
     window.setInterval(function(){
-      if(isMaximized(window.Tawk_API))tawkFrames(false);
-      else tawkFrames(true);
-      pendingOpen();
+      if(isMaximized(window.Tawk_API)){
+        window.__WDFOX_TAWK_OPEN_REQUEST=false;
+        tawkFrames(false);
+      }else if(window.__WDFOX_TAWK_OPEN_REQUEST){
+        tawkFrames(true);
+        pendingOpen();
+      }else{
+        tawkFrames(true);
+      }
     },250);
+    pendingOpen();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
 })();
