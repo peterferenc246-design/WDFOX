@@ -31,7 +31,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Install the official Tawk widget in every generated HTML page
+      - name: Install Tawk widget with guaranteed visible mobile fallback
         run: |
           python - <<'PY'
           import re
@@ -40,12 +40,7 @@ jobs:
           remove_patterns = [
               re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
               re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
-              re.compile(
-                  r'<script[^>]*>\s*\(function\(\)\{\s*'
-                  r'var PROPERTY_ID=[\'\"]6a951d52c3c46c344587662a[\'\"];.*?'
-                  r'\}\)\(\);\s*</script>',
-                  re.S,
-              ),
+              re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=[\'\"]6a951d52c3c46c344587662a[\'\"];.*?\}\)\(\);\s*</script>', re.I|re.S),
           ]
 
           tawk = '''<script type="text/javascript">
@@ -58,40 +53,28 @@ jobs:
           s1.setAttribute('crossorigin','*');
           s0.parentNode.insertBefore(s1,s0);
           })();
-          </script>
-          <style id="fox-tawk-fallback-style">
-          #fox-tawk-direct-chat{display:none;position:fixed;right:16px;bottom:16px;z-index:2147483646;border:0;border-radius:999px;padding:13px 18px;background:#f36a0a;color:#fff;font:700 14px/1.1 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.28);cursor:pointer}
-          @media(max-width:560px){#fox-tawk-direct-chat{right:14px;bottom:14px;padding:12px 16px}}
+          </script>'''
+
+          fallback = '''<style id="fox-tawk-fallback-style">
+          #fox-tawk-direct-chat{position:fixed!important;right:16px!important;bottom:16px!important;z-index:2147483647!important;display:block!important;border:0!important;border-radius:999px!important;padding:13px 18px!important;background:#f36a0a!important;color:#fff!important;font:700 14px/1.1 system-ui,sans-serif!important;box-shadow:0 8px 28px rgba(0,0,0,.28)!important;cursor:pointer!important}
+          @media(max-width:560px){#fox-tawk-direct-chat{right:14px!important;bottom:14px!important;padding:12px 16px!important}}
           </style>
-          <button id="fox-tawk-direct-chat" type="button" aria-label="Open live chat">💬 Chat</button>
+          <button id="fox-tawk-direct-chat" type="button" aria-label="Open live chat">💬 Live Chat</button>
           <script>
           (function(){
             var button=document.getElementById('fox-tawk-direct-chat');
             var direct='https://tawk.to/chat/6a951d52c3c46c344587662a/1k1b9121q';
             function hasWidget(){return !!document.querySelector('iframe[src*="tawk.to"],#tawkchat-container');}
-            function showFallback(){if(!hasWidget() && button)button.style.display='block';}
             function hideFallback(){if(button)button.style.display='none';}
             function openChat(){
               try{
-                if(window.Tawk_API && typeof window.Tawk_API.toggle==='function'){
-                  window.Tawk_API.toggle();
-                  return;
-                }
-                if(window.Tawk_API && typeof window.Tawk_API.showWidget==='function'){
-                  window.Tawk_API.showWidget();
-                  return;
-                }
-              }catch(_){ }
-              window.open(direct,'_blank','noopener');
+                if(window.Tawk_API && typeof window.Tawk_API.toggle==='function'){window.Tawk_API.toggle();return;}
+                if(window.Tawk_API && typeof window.Tawk_API.showWidget==='function'){window.Tawk_API.showWidget();return;}
+              }catch(e){}
+              window.location.href=direct;
             }
             if(button)button.addEventListener('click',openChat);
-            var checks=0;
-            var timer=setInterval(function(){
-              checks++;
-              if(hasWidget()){hideFallback();clearInterval(timer);return;}
-              if(checks>=12){showFallback();clearInterval(timer);}
-            },500);
-            window.addEventListener('load',function(){setTimeout(showFallback,6500)});
+            var timer=setInterval(function(){if(hasWidget()){hideFallback();clearInterval(timer);}},500);
           })();
           </script>'''
 
@@ -102,7 +85,7 @@ jobs:
               text = re.sub(r'\s*<script[^>]+embed\.tawk\.to/6a951d52c3c46c344587662a/1k1b9121q[^>]*>.*?</script>', '', text, flags=re.I|re.S)
               text = re.sub(r'\s*<style[^>]+id=["\']fox-tawk-fallback-style["\'][^>]*>.*?</style>\s*<button[^>]+id=["\']fox-tawk-direct-chat["\'][^>]*>.*?</button>\s*<script>.*?</script>', '', text, flags=re.I|re.S)
               if '</body>' in text:
-                  text = text.replace('</body>', tawk + '\n</body>', 1)
+                  text = text.replace('</body>', tawk + '\n' + fallback + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
           PY
       - name: Setup Pages
