@@ -31,17 +31,17 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Remove duplicate Tawk fallback
+      - name: Remove legacy inline Tawk bootstrap
         run: |
           python - <<'PY'
           import re
           from pathlib import Path
 
+          # Remove only inline scripts containing the WDFOX Tawk property.
+          # External language loader scripts and all unrelated site scripts remain untouched.
           pattern = re.compile(
-              r'<script[^>]*>\s*\(function\(\)\{\s*'
-              r'var PROPERTY_ID=[\'\"]6a951d52c3c46c344587662a[\'\"];\s*'
-              r'var WIDGETS=\{.*?</script>',
-              re.DOTALL,
+              r'<script(?![^>]*src=)[^>]*>.*?6a951d52c3c46c344587662a.*?</script>',
+              re.DOTALL | re.IGNORECASE,
           )
 
           for path in Path('dist').rglob('*.html'):
@@ -49,7 +49,8 @@ jobs:
               cleaned, count = pattern.subn('', text)
               if count:
                   path.write_text(cleaned, encoding='utf-8')
-      - name: Force native Tawk widget visible
+                  print(f'Removed {count} legacy Tawk inline block(s) from {path}')
+      - name: Install clean native Tawk bridge
         run: |
           python - <<'PY'
           import os
