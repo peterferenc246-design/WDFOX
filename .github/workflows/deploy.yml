@@ -40,7 +40,17 @@ jobs:
           from pathlib import Path
 
           PROPERTY_ID = '6a951d52c3c46c344587662a'
-          WIDGETS = {'sk': '1k1b9121q'}
+          WIDGETS = {
+              'sk': '1k1b9121q',
+              'de': '1k1bb2aln',
+              'en': '1k1bb9ast',
+              'hr': '1k1bjvbjq',
+              'fr': '1k1blk6o4',
+              'it': '1k1bovo5t',
+              'pl': '1k1bp5qda',
+              'es': '1k1bp6lk5',
+              'sv': '1k1bpdngj',
+          }
 
           remove_patterns = [
               re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
