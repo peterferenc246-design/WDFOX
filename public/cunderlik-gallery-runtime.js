@@ -21,3 +21,22 @@
 })();
 (function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=8';s.defer=true;document.head.appendChild(s);})();
 (function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=3';s.defer=true;document.head.appendChild(s);})();
+(function(){
+  var show=function(){
+    if(window.Tawk_API&&typeof window.Tawk_API.showWidget==='function'){
+      try{window.Tawk_API.showWidget();return true;}catch(_){}
+    }
+    return false;
+  };
+  window.Tawk_API=window.Tawk_API||{};
+  var previous=window.Tawk_API.onLoad;
+  window.Tawk_API.onLoad=function(){
+    if(typeof previous==='function'){try{previous.apply(this,arguments);}catch(_){}
+    }
+    show();
+  };
+  var tries=0;
+  var wait=setInterval(function(){
+    if(show()||++tries>40)clearInterval(wait);
+  },250);
+})();
