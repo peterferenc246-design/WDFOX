@@ -38,3 +38,4 @@ const content = await getLandingContent(lang);
   window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input)};
 })();
 </script>
+<script is:inline src="/tawk-click-fix.js?v=1"></script>
