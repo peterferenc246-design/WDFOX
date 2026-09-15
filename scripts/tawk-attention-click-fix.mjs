@@ -16,35 +16,45 @@ const script = `<script id="${marker}">
   function ensureWidgetVisible(){
     var api=window.Tawk_API;
     if(!api)return;
-    try{if(typeof api.showWidget==='function')api.showWidget();}catch(e){}
+    try{
+      if(typeof api.showWidget==='function')api.showWidget();
+    }catch(e){}
   }
   function installMobileIcon(){
-    if(document.getElementById('wdfox-tawk-mobile-icon-style'))return;
-    var style=document.createElement('style');
-    style.id='wdfox-tawk-mobile-icon-style';
-    style.textContent='@media(max-width:700px){'+
-      '#fox-tawk-attention{right:12px!important;bottom:120px!important;width:68px!important;height:68px!important;z-index:2147483647!important;}'+
-      '#fox-tawk-attention .fox-here{width:68px!important;height:68px!important;min-width:68px!important;min-height:68px!important;padding:0!important;border:0!important;border-radius:50%!important;background:#0369a9!important;color:transparent!important;font-size:0!important;line-height:0!important;box-shadow:0 3px 12px rgba(0,0,0,.20)!important;display:flex!important;align-items:center!important;justify-content:center!important;position:relative!important;overflow:visible!important;touch-action:manipulation!important;pointer-events:auto!important;}'+
-      '#fox-tawk-attention .fox-here span{display:block!important;position:relative!important;width:43px!important;height:32px!important;margin:0!important;padding:0!important;font-size:0!important;line-height:0!important;background:#fff!important;border-radius:50%!important;pointer-events:none!important;}'+
-      '#fox-tawk-attention .fox-here span:after{content:""!important;position:absolute!important;left:10px!important;bottom:-7px!important;width:13px!important;height:13px!important;background:#fff!important;clip-path:polygon(0 0,100% 0,100% 100%)!important;transform:rotate(10deg)!important;}'+
-      '#fox-tawk-attention .fox-here:after{content:"1"!important;position:absolute!important;right:-3px!important;top:-7px!important;width:30px!important;height:30px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#d71920!important;color:#fff!important;border:2px solid #fff!important;border-radius:50%!important;font:700 17px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:none!important;pointer-events:none!important;}'+
-    '}';
-    (document.head||document.documentElement).appendChild(style);
+    try{
+      if(document.getElementById('wdfox-tawk-mobile-icon-style'))return;
+      var style=document.createElement('style');
+      style.id='wdfox-tawk-mobile-icon-style';
+      style.textContent='@media(max-width:700px){#fox-tawk-attention .fox-here{width:64px!important;height:64px!important;min-width:64px!important;min-height:64px!important;padding:0!important;border:0!important;border-radius:50%!important;background:#087bb5!important;color:transparent!important;font-size:0!important;line-height:0!important;box-shadow:0 4px 16px rgba(0,0,0,.22)!important;overflow:visible!important;position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important}#fox-tawk-attention .fox-here:before{content:""!important;display:block!important;width:30px!important;height:22px!important;background:#fff!important;border-radius:50%!important;position:absolute!important;left:17px!important;top:18px!important}#fox-tawk-attention .fox-here:after{content:""!important;display:block!important;position:absolute!important;left:26px!important;top:36px!important;width:10px!important;height:10px!important;background:#fff!important;transform:skewY(-35deg) rotate(35deg)!important;border:0!important;border-radius:0 0 3px 0!important;pointer-events:none!important}#fox-tawk-attention .fox-here span{display:none!important}#fox-tawk-attention .fox-here .wdfox-chat-dot{display:block!important;position:absolute!important;left:27px!important;top:27px!important;width:11px!important;height:7px!important;border-bottom:2px solid #087bb5!important;border-radius:50%!important;z-index:2!important}#fox-tawk-attention .fox-here .wdfox-chat-badge{display:flex!important;position:absolute!important;right:-3px!important;top:-6px!important;width:24px!important;height:24px!important;align-items:center!important;justify-content:center!important;background:#c91f26!important;color:#fff!important;border-radius:50%!important;font:700 13px/1 system-ui,sans-serif!important;z-index:5!important;box-shadow:0 1px 3px rgba(0,0,0,.18)!important}#fox-tawk-attention .fox-here .wdfox-chat-label{display:none!important}}';
+      document.head.appendChild(style);
+      var link=document.querySelector('#fox-tawk-attention .fox-here');
+      if(link&&!link.querySelector('.wdfox-chat-badge')){
+        var dot=document.createElement('span');
+        dot.className='wdfox-chat-dot';
+        dot.setAttribute('aria-hidden','true');
+        var badge=document.createElement('span');
+        badge.className='wdfox-chat-badge';
+        badge.textContent='1';
+        badge.setAttribute('aria-hidden','true');
+        link.appendChild(dot);
+        link.appendChild(badge);
+      }
+    }catch(e){}
   }
   function bind(){
-    installMobileIcon();
     keepAttentionOnTop();
     ensureWidgetVisible();
+    installMobileIcon();
     var observer=new MutationObserver(function(){
-      installMobileIcon();
       keepAttentionOnTop();
       ensureWidgetVisible();
+      installMobileIcon();
     });
     observer.observe(document.documentElement,{subtree:true,childList:true});
     window.setInterval(function(){
-      installMobileIcon();
       keepAttentionOnTop();
       ensureWidgetVisible();
+      installMobileIcon();
     },1000);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
