@@ -25,20 +25,12 @@ const content = await getLandingContent(lang);
   <FoxLiveTranslator locale={lang} />
   <FoxGeminiAudioBridge />
   <FoxAnalyzerLauncher locale={lang} />
-  <a class="live-chat-bubble" href="#kontakt" aria-label="Live chat"><span class="live-chat-icon">✦</span><span>Live chat</span></a>
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
     <a href={`/${lang}/#portfolio`}>{content.nav.portfolio}</a>
     <a href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
 </BaseLayout>
-
-<style is:inline>
-.live-chat-bubble{position:fixed;z-index:2147483646;right:24px;bottom:24px;width:92px;height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;border-radius:50%;background:var(--orange);color:#fff;box-shadow:0 10px 28px rgba(20,28,42,.25);font-size:.72rem;font-weight:700;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
-.live-chat-bubble:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(20,28,42,.32)}
-.live-chat-icon{font-size:1.2rem;line-height:1}
-@media(max-width:760px){.live-chat-bubble{right:16px;bottom:16px;width:76px;height:76px;font-size:.65rem}}
-</style>
 
 <script is:inline>
 (() => {
