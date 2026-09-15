@@ -53,11 +53,11 @@ jobs:
           }
 
           remove_patterns = [
-              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*>.*?embed\.tawk\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
-              re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\s*<script[^>]*>.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*>.*?embed\\.tawk\\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*>\\s*\\(function\\(\\)\\{\\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
+              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\\s*<script[^>]*>.*?</script>', re.I | re.S),
           ]
 
           def native_snippet(widget_id):
@@ -92,33 +92,48 @@ jobs:
           @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:120px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important;min-width:135px!important;min-height:44px!important}}
           </style>
           <div id="fox-tawk-attention" aria-label="Open live chat">
-            <button class="fox-here" type="button" aria-label="Open live chat"><span>👋</span>We Are Here!</button>
+            <a class="fox-here" href="https://tawk.to/chat/__PROPERTY_ID__/__WIDGET_ID__?layout=modern" aria-label="Open live chat"><span>👋</span>We Are Here!</a>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
+            function maximized(api){
+              try{return !!(api&&typeof api.isChatMaximized==='function'&&api.isChatMaximized());}
+              catch(e){return false;}
+            }
             function openNative(){
               var api=window.Tawk_API;
               if(!api)return false;
               try{
                 if(typeof api.showWidget==='function')api.showWidget();
                 if(typeof api.maximize==='function')api.maximize();
-                window.__WDFOX_TAWK_OPEN_REQUEST=false;
-                return true;
+                return maximized(api);
               }catch(e){return false;}
             }
             function bind(){
-              var button=document.querySelector('#fox-tawk-attention .fox-here');
-              if(!button||button.dataset.wdfxBound==='1')return;
-              button.dataset.wdfxBound='1';
-              button.addEventListener('click',function(e){
+              var link=document.querySelector('#fox-tawk-attention .fox-here');
+              if(!link||link.dataset.wdfxBound==='1')return;
+              link.dataset.wdfxBound='1';
+              link.addEventListener('click',function(e){
+                var api=window.Tawk_API;
+                if(!api||typeof api.maximize!=='function')return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.__WDFOX_TAWK_OPEN_REQUEST=true;
-                if(!openNative()){
-                  window.setTimeout(openNative,250);
-                  window.setTimeout(openNative,750);
-                  window.setTimeout(openNative,1500);
+                if(openNative()){
+                  window.__WDFOX_TAWK_OPEN_REQUEST=false;
+                  return;
                 }
+                [250,750,1500].forEach(function(ms){
+                  window.setTimeout(function(){
+                    if(openNative())window.__WDFOX_TAWK_OPEN_REQUEST=false;
+                  },ms);
+                });
+                window.setTimeout(function(){
+                  if(!maximized(window.Tawk_API)){
+                    window.__WDFOX_TAWK_OPEN_REQUEST=false;
+                    window.location.href=link.href;
+                  }
+                },1800);
               },false);
             }
             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
