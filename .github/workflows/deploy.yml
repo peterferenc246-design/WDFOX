@@ -31,17 +31,6 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Inject dedicated native Tawk fallback
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          snippet = '<script src="/tawk-native.js?v=20260915"></script>'
-          for path in Path('dist').rglob('*.html'):
-              text = path.read_text(encoding='utf-8')
-              if '/tawk-native.js' not in text:
-                  text = text.replace('</body>', snippet + '</body>')
-                  path.write_text(text, encoding='utf-8')
-          PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
