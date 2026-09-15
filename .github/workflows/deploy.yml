@@ -31,8 +31,6 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Add Tawk attention click handler after build
-        run: node scripts/tawk-attention-click-fix.mjs
       - name: Install clean Tawk widget and Attention Grabber bubble
         run: |
           python - <<'PY'
@@ -53,11 +51,11 @@ jobs:
           }
 
           remove_patterns = [
-              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*>.*?embed\.tawk\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
-              re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\s*<script[^>]*>.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*>.*?embed\\.tawk\\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
+              re.compile(r'<script[^>]*>\\s*\\(function\\(\\)\\{\\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
+              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\\s*<script[^>]*>.*?</script>', re.I | re.S),
           ]
 
           def native_snippet(widget_id):
@@ -67,10 +65,8 @@ jobs:
           Tawk_API.onLoad=function(){{
             try{{if(typeof WDFOX_TAWK_PREVIOUS_ONLOAD==='function')WDFOX_TAWK_PREVIOUS_ONLOAD();}}catch(e){{}}
             try{{
-              if(window.__WDFOX_TAWK_OPEN_REQUEST){{
-                if(typeof Tawk_API.showWidget==='function')Tawk_API.showWidget();
-                if(typeof Tawk_API.maximize==='function')Tawk_API.maximize();
-              }}
+              if(window.__WDFOX_TAWK_OPEN_REQUEST && typeof Tawk_API.showWidget==='function')Tawk_API.showWidget();
+              if(window.__WDFOX_TAWK_OPEN_REQUEST && typeof Tawk_API.maximize==='function')Tawk_API.maximize();
             }}catch(e){{}}
           }};
           (function(){{
@@ -91,57 +87,31 @@ jobs:
           @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:120px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important;min-width:135px!important;min-height:44px!important}}
           </style>
           <div id="fox-tawk-attention" aria-label="Open live chat">
-            <a class="fox-here" href="#" data-tawk-chat-url="" target="_self" rel="noopener" aria-label="Open live chat"><span>👋</span>We Are Here!</a>
+            <button class="fox-here" type="button" aria-label="Open live chat"><span>👋</span>We Are Here!</button>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
-            function isMaximized(){
-              try{return !!(window.Tawk_API&&typeof window.Tawk_API.isChatMaximized==='function'&&window.Tawk_API.isChatMaximized());}catch(e){return false;}
-            }
-            function tawkElements(block){
-              try{
-                document.querySelectorAll('iframe, [id*="tawk" i], [class*="tawk" i]').forEach(function(el){
-                  if(el.id==='fox-tawk-attention'||(el.closest&&el.closest('#fox-tawk-attention')))return;
-                  var src=el.getAttribute&&el.getAttribute('src')||'';
-                  var id=el.id||'';
-                  var cls=typeof el.className==='string'?el.className:'';
-                  var isTawk=src.indexOf('tawk.to')!==-1||id.toLowerCase().indexOf('tawk')!==-1||cls.toLowerCase().indexOf('tawk')!==-1;
-                  if(isTawk)el.style.setProperty('pointer-events',block?'none':'auto','important');
-                });
-              }catch(e){}
-            }
             function openNative(){
+              var api=window.Tawk_API;
+              if(!api)return false;
               try{
-                if(window.Tawk_API&&typeof window.Tawk_API.showWidget==='function')window.Tawk_API.showWidget();
-                if(window.Tawk_API&&typeof window.Tawk_API.maximize==='function')window.Tawk_API.maximize();
-                if(!isMaximized()&&window.Tawk_API&&typeof window.Tawk_API.toggle==='function')window.Tawk_API.toggle();
-              }catch(e){}
-              return isMaximized();
+                if(typeof api.showWidget==='function')api.showWidget();
+                if(typeof api.maximize==='function')api.maximize();
+                return true;
+              }catch(e){return false;}
             }
             function bind(){
               var button=document.querySelector('#fox-tawk-attention .fox-here');
-              if(!button)return;
+              if(!button||button.dataset.wdfxBound==='1')return;
+              button.dataset.wdfxBound='1';
               button.addEventListener('click',function(e){
                 e.preventDefault();
-                e.stopImmediatePropagation();
+                e.stopPropagation();
                 window.__WDFOX_TAWK_OPEN_REQUEST=true;
                 openNative();
-              },true);
-              button.addEventListener('touchend',function(e){
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                window.__WDFOX_TAWK_OPEN_REQUEST=true;
-                openNative();
-              },{capture:true,passive:false});
+              },false);
             }
-            tawkElements(true);
             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
-            window.setInterval(function(){
-              var open=isMaximized();
-              tawkElements(!open);
-              if(window.__WDFOX_TAWK_OPEN_REQUEST&&!open)openNative();
-              if(isMaximized())window.__WDFOX_TAWK_OPEN_REQUEST=false;
-            },200);
           })();
           </script>'''
 
