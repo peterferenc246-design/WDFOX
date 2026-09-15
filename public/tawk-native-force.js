@@ -12,8 +12,22 @@
     return WIDGETS[lang] ? lang : 'sk';
   }
 
-  function hasWidget() {
-    return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"], iframe[title*="chat" i]');
+  function state() {
+    return {
+      script: !!document.querySelector('script[src*="embed.tawk.to/"]'),
+      iframe: !!document.querySelector('iframe[src*="tawk.to"], iframe[title*="chat" i]'),
+      container: !!document.querySelector('#tawkchat-container'),
+      api: !!window.Tawk_API,
+      showWidget: !!(window.Tawk_API && typeof window.Tawk_API.showWidget === 'function'),
+      status: !!(window.Tawk_API && typeof window.Tawk_API.getStatus === 'function') ? window.Tawk_API.getStatus() : 'unknown'
+    };
+  }
+
+  function diagnose() {
+    try {
+      window.WDFOX_TAWK_DIAGNOSTIC = state();
+      console.info('[WDFOX Tawk]', window.WDFOX_TAWK_DIAGNOSTIC);
+    } catch (_) {}
   }
 
   function showWidget() {
@@ -26,23 +40,24 @@
   }
 
   function loadNative() {
-    if (hasWidget()) {
+    if (state().iframe || state().container) {
       showWidget();
+      diagnose();
       return;
     }
 
-    var existing = document.querySelector('script[src*="embed.tawk.to/"]');
-    if (existing) return;
+    if (document.querySelector('script[src*="embed.tawk.to/"]')) {
+      diagnose();
+      return;
+    }
 
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
-
     var previousOnLoad = window.Tawk_API.onLoad;
     window.Tawk_API.onLoad = function () {
-      try {
-        if (typeof previousOnLoad === 'function') previousOnLoad();
-      } catch (_) {}
+      try { if (typeof previousOnLoad === 'function') previousOnLoad(); } catch (_) {}
       showWidget();
+      diagnose();
     };
 
     var s1 = document.createElement('script');
@@ -51,16 +66,17 @@
     s1.src = 'https://embed.tawk.to/' + PROPERTY_ID + '/' + WIDGETS[language()];
     s1.charset = 'UTF-8';
     s1.setAttribute('crossorigin', '*');
+    s1.onload = diagnose;
+    s1.onerror = function () {
+      window.WDFOX_TAWK_DIAGNOSTIC = { error: 'Tawk embed script failed to load', src: s1.src };
+      console.error('[WDFOX Tawk]', window.WDFOX_TAWK_DIAGNOSTIC);
+    };
     if (s0 && s0.parentNode) s0.parentNode.insertBefore(s1, s0);
     else (document.head || document.body || document.documentElement).appendChild(s1);
+    diagnose();
   }
 
   window.setTimeout(loadNative, 1500);
-  window.setTimeout(function () {
-    if (hasWidget()) showWidget();
-    else loadNative();
-  }, 5000);
-  window.setTimeout(function () {
-    if (hasWidget()) showWidget();
-  }, 9000);
+  window.setTimeout(function () { loadNative(); diagnose(); }, 5000);
+  window.setTimeout(function () { showWidget(); diagnose(); }, 9000);
 })();
