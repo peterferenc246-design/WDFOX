@@ -16,8 +16,21 @@
     return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"], iframe[title*="chat" i]');
   }
 
+  function positionWidget() {
+    if (window.innerWidth < 769) return;
+    var container = document.getElementById('tawkchat-container');
+    if (!container) return;
+    container.style.setProperty('position', 'fixed', 'important');
+    container.style.setProperty('right', '72px', 'important');
+    container.style.setProperty('bottom', '12px', 'important');
+    container.style.setProperty('z-index', '2147483647', 'important');
+  }
+
   function inject() {
-    if (hasWidget()) return;
+    if (hasWidget()) {
+      positionWidget();
+      return;
+    }
 
     document.querySelectorAll('script[src*="embed.tawk.to/"]').forEach(function (node) {
       node.remove();
@@ -29,6 +42,7 @@
       try {
         if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget();
       } catch (_) {}
+      positionWidget();
     };
 
     var s1 = document.createElement('script');
@@ -44,5 +58,7 @@
   window.setTimeout(inject, 1200);
   window.setTimeout(function () {
     if (!hasWidget()) inject();
+    else positionWidget();
   }, 5000);
+  window.setInterval(positionWidget, 1000);
 })();
