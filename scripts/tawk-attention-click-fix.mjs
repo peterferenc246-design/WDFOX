@@ -52,6 +52,9 @@ const script = `<script id="${marker}">
     var activate=function(e){
       var b=e.target&&e.target.closest&&e.target.closest('#fox-tawk-attention .fox-here');
       if(!b)return;
+      // The Attention Grabber is now a real link with its own native-first
+      // handler and direct-chat fallback. Do not cancel or swallow its event.
+      if(b.tagName==='A')return;
       e.preventDefault();
       e.stopImmediatePropagation();
       requestOpen();
