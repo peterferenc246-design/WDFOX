@@ -84,7 +84,7 @@ jobs:
           @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:120px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important;min-width:135px!important;min-height:44px!important}}
           </style>
           <div id="fox-tawk-attention" aria-label="Open live chat">
-            <a class="fox-here" href="https://tawk.to/chat/''' + PROPERTY_ID + '''/''' + widget_id + '''?layout=modern" target="_blank" rel="noopener" aria-label="Open live chat"><span>👋</span>We Are Here!</a>
+            <a class="fox-here" href="https://tawk.to/chat/__PROPERTY_ID__/__WIDGET_ID__?layout=modern" data-tawk-chat-url="https://tawk.to/chat/__PROPERTY_ID__/__WIDGET_ID__?layout=modern" target="_blank" rel="noopener" aria-label="Open live chat"><span>👋</span>We Are Here!</a>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
@@ -145,7 +145,7 @@ jobs:
               lang = (lang_match.group(1).lower().split('-')[0].split('_')[0] if lang_match else 'sk')
               widget_id = WIDGETS.get(lang)
               if widget_id and '</body>' in text:
-                  rendered_attention = attention.replace("''' + PROPERTY_ID + '''", PROPERTY_ID).replace("''' + widget_id + '''", widget_id)
+                  rendered_attention = attention.replace('__PROPERTY_ID__', PROPERTY_ID).replace('__WIDGET_ID__', widget_id)
                   text = text.replace('</body>', native_snippet(widget_id) + '\n' + rendered_attention + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
           PY
