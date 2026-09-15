@@ -19,7 +19,10 @@ const script = `<script id="${marker}">
   function setTawkPointerEvents(enabled){
     try{
       document.querySelectorAll('iframe,[id*="tawk" i],[class*="tawk" i]').forEach(function(el){
-        if(isTawkElement(el))el.style.setProperty('pointer-events',enabled?'auto':'none','important');
+        if(isTawkElement(el)){
+          var value=enabled?'auto':'none';
+          if(el.style.getPropertyValue('pointer-events')!==value)el.style.setProperty('pointer-events',value,'important');
+        }
       });
     }catch(e){}
   }
@@ -61,7 +64,7 @@ const script = `<script id="${marker}">
       setTawkPointerEvents(isMaximized(window.Tawk_API));
       pendingOpen();
     });
-    observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','style','class','id']});
+    observer.observe(document.documentElement,{subtree:true,childList:true});
     window.setInterval(function(){
       var open=isMaximized(window.Tawk_API);
       setTawkPointerEvents(open);
