@@ -9,6 +9,16 @@ import Home from "./pages/Home";
 
 function TawkWidget() {
   useEffect(() => {
+    const w = window as typeof window & {
+      Tawk_API?: Record<string, unknown>;
+      Tawk_LoadStart?: Date;
+    };
+
+    // Tawk's official bootstrap requires these globals to exist before
+    // the embed loader is inserted.
+    w.Tawk_API = w.Tawk_API || {};
+    w.Tawk_LoadStart = w.Tawk_LoadStart || new Date();
+
     if (document.getElementById("tawkto-widget-script")) return;
 
     const script = document.createElement("script");
@@ -18,12 +28,14 @@ function TawkWidget() {
     script.charset = "UTF-8";
     script.setAttribute("crossorigin", "*");
 
-    document.head.appendChild(script);
-
-    return () => {
-      // Keep the Tawk widget alive during normal SPA navigation.
-      // The script is intentionally not removed on component cleanup.
-    };
+    // Insert into the document before the first script element, matching
+    // Tawk's official installation snippet as closely as possible.
+    const firstScript = document.getElementsByTagName("script")[0];
+    if (firstScript?.parentNode) {
+      firstScript.parentNode.insertBefore(script, firstScript);
+    } else {
+      document.head.appendChild(script);
+    }
   }, []);
 
   return null;
@@ -43,7 +55,7 @@ function Router() {
 // NOTE: About Theme
 // - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
 //   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+// - If you want to make theme switchable, pass `switchable` ThemeProvider and `useTheme` hook
 
 function App() {
   return (
