@@ -5,10 +5,6 @@ const root = path.resolve('dist');
 const marker = 'wdfox-tawk-attention-click-fix';
 const script = `<script id="${marker}">
 (function(){
-  function hideAttention(){
-    var b=document.getElementById('fox-tawk-attention');
-    if(b)b.style.setProperty('display','none','important');
-  }
   function isMaximized(api){
     try{
       return !!(api && typeof api.isChatMaximized==='function' && api.isChatMaximized());
@@ -20,10 +16,7 @@ const script = `<script id="${marker}">
     try{
       if(typeof api.showWidget==='function')api.showWidget();
       if(typeof api.maximize==='function')api.maximize();
-      if(isMaximized(api)){
-        hideAttention();
-        return true;
-      }
+      return isMaximized(api);
     }catch(e){}
     return false;
   }
