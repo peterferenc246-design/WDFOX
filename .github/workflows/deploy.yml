@@ -31,17 +31,17 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Remove legacy inline Tawk bootstrap
+      - name: Remove duplicate Tawk fallback
         run: |
           python - <<'PY'
           import re
           from pathlib import Path
 
-          # Remove only inline scripts containing the WDFOX Tawk property.
-          # External language loader scripts and all unrelated site scripts remain untouched.
           pattern = re.compile(
-              r'<script(?![^>]*src=)[^>]*>.*?6a951d52c3c46c344587662a.*?</script>',
-              re.DOTALL | re.IGNORECASE,
+              r'<script[^>]*>\s*\(function\(\)\{\s*'
+              r'var PROPERTY_ID=[\'\"]6a951d52c3c46c344587662a[\'\"];\s*'
+              r'var WIDGETS=\{.*?</script>',
+              re.DOTALL,
           )
 
           for path in Path('dist').rglob('*.html'):
@@ -49,30 +49,7 @@ jobs:
               cleaned, count = pattern.subn('', text)
               if count:
                   path.write_text(cleaned, encoding='utf-8')
-                  print(f'Removed {count} legacy Tawk inline block(s) from {path}')
-      - name: Remove remaining Tawk force script
-        run: |
-          python - <<'PY'
-          import re
-          from pathlib import Path
-
-          # A legacy site component can emit this force-open block after </html>.
-          # Remove only that Tawk-specific block; do not alter any other scripts.
-          patterns = [
-              re.compile(r'<script[^>]*>.*?forceTawkVisible.*?</script>', re.DOTALL | re.IGNORECASE),
-              re.compile(r'<script[^>]*>.*?Tawk_API\.autoStart.*?</script>', re.DOTALL | re.IGNORECASE),
-          ]
-
-          for path in Path('dist').rglob('*.html'):
-              text = path.read_text(encoding='utf-8')
-              total = 0
-              for pattern in patterns:
-                  text, count = pattern.subn('', text)
-                  total += count
-              if total:
-                  path.write_text(text, encoding='utf-8')
-                  print(f'Removed {total} legacy Tawk force block(s) from {path}')
-      - name: Install clean native Tawk bridge
+      - name: Force native Tawk widget visible
         run: |
           python - <<'PY'
           import os
