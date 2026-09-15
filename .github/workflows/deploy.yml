@@ -49,16 +49,19 @@ jobs:
               cleaned, count = pattern.subn('', text)
               if count:
                   path.write_text(cleaned, encoding='utf-8')
-      - name: Add clean native Tawk bootstrap
+      - name: Place native Tawk bootstrap before Tawk loader
         run: |
           python - <<'PY'
           from pathlib import Path
-          snippet = '<script src="/tawk-native-bootstrap.js?v=1"></script>'
+          bootstrap = '<script src="/tawk-native-bootstrap.js?v=2"></script>'
+          loader_marker = '<script src="/tawk-language-loader.js?v=20260914b"></script>'
           for path in Path('dist').rglob('*.html'):
               text = path.read_text(encoding='utf-8')
-              if '/tawk-native-bootstrap.js' not in text:
-                  text = text.replace('</body>', snippet + '</body>')
-                  path.write_text(text, encoding='utf-8')
+              text = text.replace('<script src="/tawk-native-bootstrap.js?v=1"></script>', '')
+              text = text.replace(bootstrap, '')
+              if loader_marker in text and bootstrap not in text:
+                  text = text.replace(loader_marker, bootstrap + loader_marker, 1)
+              path.write_text(text, encoding='utf-8')
           PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
