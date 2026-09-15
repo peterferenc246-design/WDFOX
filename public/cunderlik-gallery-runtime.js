@@ -22,20 +22,22 @@
 (function(){var s=document.createElement('script');s.src='/contact-map-runtime.js?v=8';s.defer=true;document.head.appendChild(s);})();
 (function(){var s=document.createElement('script');s.src='/hero-marketing-runtime.js?v=3';s.defer=true;document.head.appendChild(s);})();
 (function(){
-  var PROPERTY_ID='6a951d52c3c46c344587662a';
-  var WIDGET_ID={sk:'1k1b9121q',de:'1k1bb2aln',en:'1k1bb9ast',hr:'1k1bjvbjq',fr:'1k1blk6o4',it:'1k1bovo5t',pl:'1k1bp5qda',es:'1k1bp6lk5',sv:'1k1bpdngj'};
-  var lang=(document.documentElement.lang||'sk').toLowerCase().split(/[-_]/)[0];
-  if(!WIDGET_ID[lang])lang='sk';
-  function ready(){return !!document.querySelector('iframe[src*="tawk.to"],#tawkchat-container');}
-  function openChat(){if(window.Tawk_API&&typeof window.Tawk_API.maximize==='function'){try{window.Tawk_API.maximize();return;}catch(_){} } window.open('https://tawk.to/chat/'+PROPERTY_ID+'/'+WIDGET_ID[lang],'_blank','noopener,noreferrer');}
+  /* Restore the original FOX floating chat button from commit d64e54b. */
   function install(){
-    if(document.getElementById('fox-tawk-launcher'))return;
+    if(document.querySelector('.live-chat-bubble'))return;
     var style=document.createElement('style');
-    style.textContent='#fox-tawk-launcher{position:fixed;right:20px;bottom:92px;z-index:2147483646;border:0;border-radius:999px;padding:12px 18px;background:#111820;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.28);font:700 14px/1 system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;gap:9px}#fox-tawk-launcher span{width:10px;height:10px;border-radius:50%;background:#19c37d;display:block;box-shadow:0 0 0 4px rgba(25,195,125,.16)}@media(max-width:560px){#fox-tawk-launcher{right:14px;bottom:88px;padding:11px 15px;font-size:13px}}';
+    style.id='fox-original-live-chat-style';
+    style.textContent='.live-chat-bubble{position:fixed!important;z-index:2147483646!important;right:24px!important;bottom:24px!important;width:92px!important;height:92px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:.25rem!important;border-radius:50%!important;background:#f36a0a!important;color:#fff!important;box-shadow:0 10px 28px rgba(20,28,42,.25)!important;font-size:.72rem!important;font-weight:700!important;text-decoration:none!important;transition:transform .2s ease,box-shadow .2s ease!important}.live-chat-bubble:hover{transform:translateY(-4px)!important;box-shadow:0 14px 32px rgba(20,28,42,.32)!important}.live-chat-icon{font-size:1.2rem!important;line-height:1!important}@media(max-width:760px){.live-chat-bubble{right:16px!important;bottom:16px!important;width:76px!important;height:76px!important;font-size:.65rem!important}}';
     document.head.appendChild(style);
-    var b=document.createElement('button');b.id='fox-tawk-launcher';b.type='button';b.setAttribute('aria-label','Open live chat');b.innerHTML='<span></span>Live Chat';b.onclick=openChat;document.body.appendChild(b);
-    function sync(){if(ready())b.style.display='none';else b.style.display='flex';}
-    sync();setInterval(sync,1000);
+    var b=document.createElement('a');
+    b.className='live-chat-bubble';
+    b.href='#kontakt';
+    b.setAttribute('aria-label','Live chat');
+    b.innerHTML='<span class="live-chat-icon">✦</span><span>Live chat</span>';
+    document.body.appendChild(b);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+(function(){
+  var old=document.getElementById('fox-tawk-launcher');if(old)old.remove();
 })();
