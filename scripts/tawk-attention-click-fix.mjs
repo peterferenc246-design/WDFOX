@@ -25,11 +25,7 @@ const script = `<script id="${marker}">
     try{
       if(typeof api.showWidget==='function')api.showWidget();
       if(typeof api.maximize==='function')api.maximize();
-      if(isMaximized(api))return true;
-      if(typeof api.toggle==='function'){
-        api.toggle();
-        if(isMaximized(api))return true;
-      }
+      return isMaximized(api);
     }catch(e){}
     return isMaximized(api);
   }
