@@ -39,3 +39,25 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
+(function(){
+  function fixTawkHitArea(){
+    var nodes=document.querySelectorAll('#tawkchat-container,iframe[src*="tawk.to"],iframe[title*="chat" i]');
+    nodes.forEach(function(node){
+      node.style.setProperty('pointer-events','auto','important');
+      node.style.setProperty('z-index','2147483647','important');
+      if(node.parentElement){
+        node.parentElement.style.setProperty('pointer-events','auto','important');
+        node.parentElement.style.setProperty('z-index','2147483647','important');
+      }
+    });
+    var consent=document.getElementById('fox-meta-consent');
+    if(consent){
+      consent.style.setProperty('pointer-events','none','important');
+      consent.querySelectorAll('button').forEach(function(btn){btn.style.setProperty('pointer-events','auto','important');});
+    }
+  }
+  fixTawkHitArea();
+  var observer=new MutationObserver(fixTawkHitArea);
+  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class']});
+  setInterval(fixTawkHitArea,1000);
+})();
