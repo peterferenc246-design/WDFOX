@@ -31,17 +31,24 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Restore proven native Tawk widget
+      - name: Remove duplicate Tawk fallback
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
-          snippet = '<script src="/tawk-native-restore.js?v=20260915"></script>'
+
+          pattern = re.compile(
+              r'<script[^>]*>\s*\(function\(\)\{\s*'
+              r'var PROPERTY_ID=[\'\"]6a951d52c3c46c344587662a[\'\"];\s*'
+              r'var WIDGETS=\{.*?</script>',
+              re.DOTALL,
+          )
+
           for path in Path('dist').rglob('*.html'):
               text = path.read_text(encoding='utf-8')
-              if '/tawk-native-restore.js' not in text:
-                  text = text.replace('</body>', snippet + '</body>')
-                  path.write_text(text, encoding='utf-8')
-          PY
+              cleaned, count = pattern.subn('', text)
+              if count:
+                  path.write_text(cleaned, encoding='utf-8')
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
