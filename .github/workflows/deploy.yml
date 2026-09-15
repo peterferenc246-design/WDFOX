@@ -63,6 +63,9 @@ jobs:
           def native_snippet(widget_id):
               return f'''<script type="text/javascript" id="fox-tawk-native">
           var Tawk_API=Tawk_API||{{}},Tawk_LoadStart=Tawk_LoadStart||new Date();
+          Tawk_API.onLoad=function(){
+            try{if(typeof Tawk_API.hideWidget==='function')Tawk_API.hideWidget();}catch(e){}
+          };
           (function(){{
             var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
             s1.async=true;
@@ -93,8 +96,6 @@ jobs:
               return false;
             }
             function openTawk(){
-              var b=document.getElementById('fox-tawk-attention');
-              if(b)b.style.display='none';
               if(maximize())return;
               var tries=0;
               var timer=setInterval(function(){
