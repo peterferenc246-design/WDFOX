@@ -45,7 +45,7 @@ jobs:
               re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
               re.compile(r'<script[^>]*>.*?embed\.tawk\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
               re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<div[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</div>\s*<script[^>]*>.*?</script>', re.I | re.S),
+              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\s*<script[^>]*>.*?</script>', re.I | re.S),
           ]
 
           def native_snippet(widget_id):
@@ -62,14 +62,14 @@ jobs:
           </script>'''
 
           attention = '''<style id="fox-tawk-attention-style">
-          #fox-tawk-attention{position:fixed!important;right:18px!important;bottom:82px!important;left:auto!important;top:auto!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;filter:drop-shadow(0 5px 14px rgba(0,0,0,.22))!important;}
-          #fox-tawk-attention .fox-here{position:relative!important;display:block!important;background:#fff!important;color:#202124!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:12px!important;padding:11px 15px!important;font-size:15px!important;font-weight:700!important;line-height:1.15!important;white-space:nowrap!important;box-shadow:0 3px 14px rgba(0,0,0,.16)!important;}
-          #fox-tawk-attention .fox-here:after{content:""!important;position:absolute!important;right:19px!important;bottom:-7px!important;width:12px!important;height:12px!important;background:#fff!important;border-right:1px solid rgba(0,0,0,.12)!important;border-bottom:1px solid rgba(0,0,0,.12)!important;transform:rotate(45deg)!important;}
-          #fox-tawk-attention .fox-here span{font-size:18px!important;margin-right:4px!important;}
+          #fox-tawk-attention{position:fixed!important;right:18px!important;bottom:82px!important;left:auto!important;top:auto!important;z-index:2147483647!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;transform:translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;filter:drop-shadow(0 5px 14px rgba(0,0,0,.22))!important;margin:0!important;padding:0!important;}
+          #fox-tawk-attention .fox-here{appearance:none!important;-webkit-appearance:none!important;position:relative!important;display:block!important;background:#fff!important;color:#202124!important;border:1px solid rgba(0,0,0,.12)!important;border-radius:12px!important;padding:11px 15px!important;font-size:15px!important;font-weight:700!important;line-height:1.15!important;white-space:nowrap!important;box-shadow:0 3px 14px rgba(0,0,0,.16)!important;cursor:pointer!important;pointer-events:auto!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important;}
+          #fox-tawk-attention .fox-here:after{content:""!important;position:absolute!important;right:19px!important;bottom:-7px!important;width:12px!important;height:12px!important;background:#fff!important;border-right:1px solid rgba(0,0,0,.12)!important;border-bottom:1px solid rgba(0,0,0,.12)!important;transform:rotate(45deg)!important;pointer-events:none!important;}
+          #fox-tawk-attention .fox-here span{font-size:18px!important;margin-right:4px!important;pointer-events:none!important;}
           @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:72px!important}#fox-tawk-attention .fox-here{font-size:14px!important;padding:10px 13px!important;border-radius:11px!important}}
           </style>
-          <div id="fox-tawk-attention" role="button" tabindex="0" aria-label="Open live chat">
-            <div class="fox-here"><span>👋</span>We Are Here!</div>
+          <div id="fox-tawk-attention" aria-label="Open live chat">
+            <button type="button" class="fox-here" aria-label="Open live chat"><span>👋</span>We Are Here!</button>
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
@@ -90,11 +90,14 @@ jobs:
                 if(maximize()||tries>=40){clearInterval(timer);}
               },250);
             }
+            window.__WDFOX_OPEN_TAWK=openTawk;
             function bind(){
               var b=document.getElementById('fox-tawk-attention');
-              if(!b)return;
-              b.addEventListener('click',openTawk);
-              b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openTawk();}});
+              var button=b&&b.querySelector('.fox-here');
+              if(!button)return;
+              button.onclick=function(e){e.preventDefault();e.stopPropagation();openTawk();};
+              button.ontouchend=function(e){e.preventDefault();e.stopPropagation();openTawk();};
+              b.onclick=function(e){if(e.target===b){e.preventDefault();openTawk();}};
             }
             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
           })();
