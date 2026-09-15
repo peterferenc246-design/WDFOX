@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -6,6 +7,27 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
+function TawkWidget() {
+  useEffect(() => {
+    if (document.getElementById("tawkto-widget-script")) return;
+
+    const script = document.createElement("script");
+    script.id = "tawkto-widget-script";
+    script.async = true;
+    script.src = "https://embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q";
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
+
+    document.head.appendChild(script);
+
+    return () => {
+      // Keep the Tawk widget alive during normal SPA navigation.
+      // The script is intentionally not removed on component cleanup.
+    };
+  }, []);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -32,6 +54,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
+          <TawkWidget />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
