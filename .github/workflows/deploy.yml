@@ -31,7 +31,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Remove duplicate Tawk fallback
+      - name: Remove obsolete Tawk fallback from generated pages
         run: |
           python - <<'PY'
           import re
@@ -49,15 +49,14 @@ jobs:
               cleaned, count = pattern.subn('', text)
               if count:
                   path.write_text(cleaned, encoding='utf-8')
-      - name: Force native Tawk widget visible
+      - name: Add clean native Tawk bootstrap
         run: |
           python - <<'PY'
-          import os
           from pathlib import Path
-          snippet = '<script src="/tawk-native-force.js?v=' + os.environ['GITHUB_SHA'] + '"></script>'
+          snippet = '<script src="/tawk-native-bootstrap.js?v=1"></script>'
           for path in Path('dist').rglob('*.html'):
               text = path.read_text(encoding='utf-8')
-              if '/tawk-native-force.js' not in text:
+              if '/tawk-native-bootstrap.js' not in text:
                   text = text.replace('</body>', snippet + '</body>')
                   path.write_text(text, encoding='utf-8')
           PY
