@@ -38,3 +38,37 @@ const content = await getLandingContent(lang);
   window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input)};
 })();
 </script>
+
+<script is:inline>
+(() => {
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_API.autoStart = true;
+
+  const forceTawkVisible = () => {
+    const api = window.Tawk_API;
+    if (api) {
+      try { if (typeof api.start === 'function') api.start({ showWidget: true }); } catch (_) {}
+      try { if (typeof api.showWidget === 'function') api.showWidget(); } catch (_) {}
+    }
+
+    document.querySelectorAll('#tawkchat-container, #tawkchat-minified-wrapper, iframe[src*="tawk.to"], iframe[title*="chat" i]').forEach((el) => {
+      el.style.setProperty('position', 'fixed', 'important');
+      el.style.setProperty('right', '20px', 'important');
+      el.style.setProperty('bottom', '20px', 'important');
+      el.style.setProperty('left', 'auto', 'important');
+      el.style.setProperty('top', 'auto', 'important');
+      el.style.setProperty('z-index', '2147483646', 'important');
+      el.style.setProperty('visibility', 'visible', 'important');
+      el.style.setProperty('opacity', '1', 'important');
+    });
+  };
+
+  const previousOnLoad = window.Tawk_API.onLoad;
+  window.Tawk_API.onLoad = function () {
+    try { if (typeof previousOnLoad === 'function') previousOnLoad(); } catch (_) {}
+    forceTawkVisible();
+  };
+
+  [500, 1500, 3000, 5000].forEach((delay) => window.setTimeout(forceTawkVisible, delay));
+})();
+</script>
