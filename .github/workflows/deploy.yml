@@ -63,11 +63,11 @@ jobs:
           </script>'''
 
           attention = '''<style id="fox-tawk-attention-style">
-          #fox-tawk-attention{position:fixed!important;right:16px!important;bottom:18px!important;z-index:2147483646!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;align-items:center!important;gap:10px!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;filter:drop-shadow(0 6px 18px rgba(0,0,0,.22))!important;}
-          #fox-tawk-attention .fox-here{display:block!important;background:#fff!important;color:#111!important;border-radius:18px!important;padding:10px 15px!important;font-size:17px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important;border:1px solid rgba(0,0,0,.12)!important;}
+          #fox-tawk-attention{position:fixed!important;right:16px!important;bottom:92px!important;z-index:2147483647!important;display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;align-items:center!important;gap:10px!important;cursor:pointer!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;filter:drop-shadow(0 6px 18px rgba(0,0,0,.28))!important;transform:translateZ(0)!important;isolation:isolate!important;mix-blend-mode:normal!important;}
+          #fox-tawk-attention .fox-here{display:block!important;background:#fff!important;color:#111!important;border-radius:18px!important;padding:11px 16px!important;font-size:17px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important;border:2px solid #18b887!important;box-shadow:0 4px 16px rgba(0,0,0,.22)!important;}
           #fox-tawk-attention .fox-here span{font-size:20px!important;margin-right:5px!important;}
-          #fox-tawk-attention .fox-chat{width:54px!important;height:54px!important;border-radius:50%!important;background:#18b887!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:25px!important;box-shadow:0 4px 14px rgba(0,0,0,.22)!important;}
-          @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:12px!important}#fox-tawk-attention .fox-here{font-size:15px!important;padding:9px 11px!important}#fox-tawk-attention .fox-chat{width:50px!important;height:50px!important;font-size:22px!important}}
+          #fox-tawk-attention .fox-chat{width:54px!important;height:54px!important;border-radius:50%!important;background:#18b887!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:25px!important;box-shadow:0 4px 14px rgba(0,0,0,.30)!important;}
+          @media(max-width:700px){#fox-tawk-attention{right:12px!important;bottom:78px!important}#fox-tawk-attention .fox-here{font-size:15px!important;padding:10px 12px!important}#fox-tawk-attention .fox-chat{width:50px!important;height:50px!important;font-size:22px!important}}
           </style>
           <div id="fox-tawk-attention" role="button" tabindex="0" aria-label="Open live chat">
             <div class="fox-here"><span>👋</span>We Are Here!</div>
@@ -75,13 +75,20 @@ jobs:
           </div>
           <script id="fox-tawk-attention-script">
           (function(){
-            function openTawk(){
+            function maximize(){
               try{
                 if(window.Tawk_API&&typeof window.Tawk_API.showWidget==='function')window.Tawk_API.showWidget();
-                if(window.Tawk_API&&typeof window.Tawk_API.maximize==='function'){window.Tawk_API.maximize();return;}
-                if(window.Tawk_API&&typeof window.Tawk_API.toggle==='function'){window.Tawk_API.toggle();return;}
+                if(window.Tawk_API&&typeof window.Tawk_API.maximize==='function'){window.Tawk_API.maximize();return true;}
               }catch(e){}
-              window.open('https://tawk.to/chat/6a951d52c3c46c344587662a/1k1b9121q?layout=modern','_blank','noopener');
+              return false;
+            }
+            function openTawk(){
+              if(maximize())return;
+              var tries=0;
+              var timer=setInterval(function(){
+                tries++;
+                if(maximize()||tries>=40){clearInterval(timer);}
+              },250);
             }
             function bind(){
               var b=document.getElementById('fox-tawk-attention');
