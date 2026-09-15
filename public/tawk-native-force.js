@@ -29,6 +29,35 @@
     } catch (_) {}
   }
 
+  function maximizeWidget() {
+    var api = window.Tawk_API;
+    if (!api) return;
+    try {
+      if (typeof api.maximize === 'function') {
+        api.maximize();
+      } else {
+        showWidget();
+      }
+    } catch (_) {}
+  }
+
+  function bindLiveChatTrigger() {
+    if (document.__WDFOX_TAWK_TRIGGER_BOUND) return;
+    document.__WDFOX_TAWK_TRIGGER_BOUND = true;
+
+    document.addEventListener('click', function (event) {
+      var target = event.target;
+      if (!target || !target.closest) return;
+
+      var trigger = target.closest('.live-chat-bubble');
+      if (!trigger) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      maximizeWidget();
+    }, true);
+  }
+
   function positionWidget() {
     if (window.innerWidth < 769) return;
     var container = document.getElementById('tawkchat-container');
@@ -65,6 +94,7 @@
   }
 
   function ensure() {
+    bindLiveChatTrigger();
     if (hasWidget()) {
       showWidget();
       positionWidget();
@@ -79,6 +109,7 @@
   window.setTimeout(ensure, 6000);
   window.setTimeout(ensure, 10000);
   window.setInterval(function () {
+    bindLiveChatTrigger();
     if (hasWidget()) {
       showWidget();
       positionWidget();
