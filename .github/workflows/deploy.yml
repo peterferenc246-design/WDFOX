@@ -50,6 +50,28 @@ jobs:
               if count:
                   path.write_text(cleaned, encoding='utf-8')
                   print(f'Removed {count} legacy Tawk inline block(s) from {path}')
+      - name: Remove remaining Tawk force script
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          # A legacy site component can emit this force-open block after </html>.
+          # Remove only that Tawk-specific block; do not alter any other scripts.
+          patterns = [
+              re.compile(r'<script[^>]*>.*?forceTawkVisible.*?</script>', re.DOTALL | re.IGNORECASE),
+              re.compile(r'<script[^>]*>.*?Tawk_API\.autoStart.*?</script>', re.DOTALL | re.IGNORECASE),
+          ]
+
+          for path in Path('dist').rglob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              total = 0
+              for pattern in patterns:
+                  text, count = pattern.subn('', text)
+                  total += count
+              if total:
+                  path.write_text(text, encoding='utf-8')
+                  print(f'Removed {total} legacy Tawk force block(s) from {path}')
       - name: Install clean native Tawk bridge
         run: |
           python - <<'PY'
