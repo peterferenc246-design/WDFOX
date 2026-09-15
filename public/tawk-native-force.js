@@ -13,39 +13,54 @@
   }
 
   function hasWidget() {
-    return !!document.querySelector('iframe[src*="tawk.to"], #tawkchat-container, iframe[title*="chat" i]');
+    return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"], iframe[title*="chat" i]');
   }
 
-  function show() {
+  function showWidget() {
     var api = window.Tawk_API;
-    if (!api) return false;
+    if (!api) return;
     try {
-      if (typeof api.showWidget === 'function') { api.showWidget(); return true; }
-      if (typeof api.start === 'function') { api.start({ showWidget: true }); return true; }
+      if (typeof api.showWidget === 'function') api.showWidget();
+      else if (typeof api.start === 'function') api.start({ showWidget: true });
     } catch (_) {}
-    return false;
   }
 
   function loadNative() {
-    if (hasWidget()) { show(); return; }
+    if (hasWidget()) {
+      showWidget();
+      return;
+    }
+
+    var existing = document.querySelector('script[src*="embed.tawk.to/"]');
+    if (existing) return;
+
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
-    var oldLoad = window.Tawk_API.onLoad;
+
+    var previousOnLoad = window.Tawk_API.onLoad;
     window.Tawk_API.onLoad = function () {
-      try { if (typeof oldLoad === 'function') oldLoad(); } catch (_) {}
-      show();
+      try {
+        if (typeof previousOnLoad === 'function') previousOnLoad();
+      } catch (_) {}
+      showWidget();
     };
-    if (document.getElementById('tawk-native-direct')) return;
-    var s = document.createElement('script');
-    s.id = 'tawk-native-direct';
-    s.async = true;
-    s.src = 'https://embed.tawk.to/' + PROPERTY_ID + '/' + WIDGETS[language()];
-    s.charset = 'UTF-8';
-    s.setAttribute('crossorigin', '*');
-    (document.body || document.head || document.documentElement).appendChild(s);
+
+    var s1 = document.createElement('script');
+    var s0 = document.getElementsByTagName('script')[0];
+    s1.async = true;
+    s1.src = 'https://embed.tawk.to/' + PROPERTY_ID + '/' + WIDGETS[language()];
+    s1.charset = 'UTF-8';
+    s1.setAttribute('crossorigin', '*');
+    if (s0 && s0.parentNode) s0.parentNode.insertBefore(s1, s0);
+    else (document.head || document.body || document.documentElement).appendChild(s1);
   }
 
-  window.setTimeout(loadNative, 1000);
-  window.setTimeout(function () { if (!hasWidget()) loadNative(); else show(); }, 3500);
-  window.setTimeout(function () { if (!hasWidget()) loadNative(); else show(); }, 7000);
+  window.setTimeout(loadNative, 1500);
+  window.setTimeout(function () {
+    if (hasWidget()) showWidget();
+    else loadNative();
+  }, 5000);
+  window.setTimeout(function () {
+    if (hasWidget()) showWidget();
+  }, 9000);
 })();
