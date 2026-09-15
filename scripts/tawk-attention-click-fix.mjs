@@ -5,7 +5,7 @@ const root = path.resolve('dist');
 const marker = 'wdfox-tawk-attention-click-fix';
 const script = `<script id="${marker}">
 (function(){
-  var PROPERTY_ID='6a951d52c3c46c344587662a';
+  var WDFOX_PROPERTY_ID='6a951d52c3c46c344587662a';
   var WIDGETS={sk:'1k1b9121q',de:'1k1bb2aln',en:'1k1bb9ast',hr:'1k1bjvbjq',fr:'1k1blk6o4',it:'1k1bovo5t',pl:'1k1bp5qda',es:'1k1bp6lk5',sv:'1k1bpdngj'};
   function widgetId(){
     var lang=(document.documentElement.lang||'sk').toLowerCase().split('-')[0].split('_')[0];
@@ -32,7 +32,7 @@ const script = `<script id="${marker}">
       if(!link){
         link=document.createElement('a');
         link.className='fox-here';
-        link.href='https://tawk.to/chat/'+PROPERTY_ID+'/'+widgetId()+'?layout=modern';
+        link.href='https://tawk.to/chat/'+WDFOX_PROPERTY_ID+'/'+widgetId()+'?layout=modern';
         link.setAttribute('aria-label','Open live chat');
         attention.replaceChildren(link);
       }
