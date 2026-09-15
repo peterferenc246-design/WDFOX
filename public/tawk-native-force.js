@@ -13,7 +13,11 @@
   }
 
   function hasWidget() {
-    return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"], iframe[title*="chat" i]');
+    return !!document.querySelector('#tawkchat-container, iframe[src*="tawk.to"]');
+  }
+
+  function hasTawkScript() {
+    return !!document.querySelector('#tawk-language-script, script[data-wdfox-tawk-native="1"], script[src*="embed.tawk.to/"]');
   }
 
   function showWidget() {
@@ -35,48 +39,38 @@
     container.style.setProperty('z-index', '2147483647', 'important');
   }
 
-  function loadNative() {
-    if (hasWidget()) {
-      showWidget();
-      positionWidget();
-      return;
-    }
+  function loadNativeFallback() {
+    if (hasWidget() || hasTawkScript()) return;
 
-    var api = window.Tawk_API;
-    if (!api) {
-      window.Tawk_API = {};
-      api = window.Tawk_API;
-    }
+    window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
 
-    if (!api.__WDFOX_NATIVE_ONLOAD) {
-      var previousOnLoad = api.onLoad;
-      api.__WDFOX_NATIVE_ONLOAD = true;
-      api.onLoad = function () {
+    if (!window.Tawk_API.__WDFOX_NATIVE_ONLOAD) {
+      var previousOnLoad = window.Tawk_API.onLoad;
+      window.Tawk_API.__WDFOX_NATIVE_ONLOAD = true;
+      window.Tawk_API.onLoad = function () {
         try { if (typeof previousOnLoad === 'function') previousOnLoad(); } catch (_) {}
         showWidget();
         positionWidget();
       };
     }
 
-    var existing = document.querySelector('script[data-wdfox-tawk-native="1"]');
-    if (!existing) {
-      existing = document.createElement('script');
-      existing.async = true;
-      existing.setAttribute('data-wdfox-tawk-native', '1');
-      existing.src = 'https://embed.tawk.to/' + PROPERTY_ID + '/' + WIDGETS[language()];
-      existing.charset = 'UTF-8';
-      existing.setAttribute('crossorigin', '*');
-      (document.head || document.body || document.documentElement).appendChild(existing);
-    }
+    var script = document.createElement('script');
+    script.id = 'tawk-wdfox-native-fallback';
+    script.async = true;
+    script.src = 'https://embed.tawk.to/' + PROPERTY_ID + '/' + WIDGETS[language()];
+    script.charset = 'UTF-8';
+    script.setAttribute('crossorigin', '*');
+    (document.head || document.body || document.documentElement).appendChild(script);
   }
 
   function ensure() {
-    if (!hasWidget()) loadNative();
-    else {
+    if (hasWidget()) {
       showWidget();
       positionWidget();
+      return;
     }
+    if (!hasTawkScript()) loadNativeFallback();
   }
 
   ensure();
