@@ -22,25 +22,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      - name: Move fox image to horizontal center
+      - name: Apply permanent fox centering CSS fix
         run: |
           python - <<'PY'
-          import re
           from pathlib import Path
-          p = Path('.github/workflows/deploy.yml')
+          p = Path('src/styles/site.css')
           text = p.read_text(encoding='utf-8')
-          pattern = r'<image x=["\'][^"\']+["\'] y=["\']48["\'] width=["\'][^"\']+["\'] height=["\']84["\'] preserveAspectRatio=["\']none["\']'
-          replacement = '<image x="70" y="48" width="100" height="84" preserveAspectRatio="none"'
-          text, count = re.subn(pattern, replacement, text, count=1)
-          if count != 1:
-              raise SystemExit(f'Attention Grabber fox image element not found (matches={count})')
-          p.write_text(text, encoding='utf-8')
+          rule = '\n/* WDFOX Attention Grabber: center fox under the message */\n#fox-tawk-button .fox-attention-svg image{transform:translateX(-39.5px)!important}\n'
+          if '#fox-tawk-button .fox-attention-svg image{transform:translateX(-39.5px)!important}' not in text:
+              p.write_text(text.rstrip() + rule, encoding='utf-8')
+          else:
+              print('Permanent centering rule already present')
           PY
-          git add .github/workflows/deploy.yml
-          git commit -m "Center Attention Grabber fox image"
-          git push origin main
-      - name: Remove temporary fixer
-        run: |
-          git rm .github/workflows/fix-tawk-center.yml
-          git commit -m "Remove temporary Attention Grabber fixer"
+          git add src/styles/site.css
+          git commit -m "Center Attention Grabber fox under sentence"
           git push origin main
