@@ -510,3 +510,12 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 #fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}
 #fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}
 #fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
+
+/* Requested contact visual restoration */
+.register-address{display:flex!important;gap:.65rem!important;margin-top:10px!important;line-height:1.55!important;color:#fff!important;}
+.register-address strong{font-weight:800!important;}
+.contact-socials a svg{display:block!important;width:20px!important;height:20px!important;}
+#fox-tawk-button .fox-tawk-attention > img:first-child{display:none!important;}
+#fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}
+#fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}
+#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
