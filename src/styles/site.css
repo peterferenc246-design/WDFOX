@@ -455,3 +455,5 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 
 .language-switcher { position: relative; z-index: 20; }
 .language-flag { cursor: pointer; pointer-events: auto; }
+/* WDFOX Attention Grabber: center fox under the message */
+#fox-tawk-button .fox-attention-svg image{transform:translateX(-39.5px)!important}
