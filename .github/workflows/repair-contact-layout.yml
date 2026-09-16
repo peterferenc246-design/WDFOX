@@ -17,7 +17,7 @@ jobs:
           p=Path('src/components/Landing.astro')
           t=p.read_text(encoding='utf-8')
           if 'class="register-address"' not in t:
-              raise SystemExit('Address block missing: manual source inspection required')
+              raise SystemExit('Address block missing')
           css=Path('src/styles/site.css')
           s=css.read_text(encoding='utf-8')
           marker='/* Requested contact visual restoration */'
@@ -29,5 +29,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/styles/site.css
           git diff --cached --check
-          git commit -m 'Restore address social icons and attention icon' || true
-          git push || true
+          git commit -m 'Restore contact address social icons and attention icon'
+          git push
