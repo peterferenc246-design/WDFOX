@@ -85,7 +85,7 @@ jobs:
           #fox-tawk-button .fox-tawk-attention:hover .fox-attention-svg{{transform:scale(1.05) rotate(-1deg)!important}}
           #fox-tawk-button .fox-tawk-attention:active .fox-attention-svg{{transform:scale(.97)!important}}
           #fox-tawk-button .fox-tawk-open{{display:none!important}}
-          @media(max-width:700px){{#fox-tawk-button{{right:12px!important;bottom:18px!important;pointer-events:auto!important}}#fox-tawk-button .fox-tawk-attention{{display:none!important}}#fox-tawk-button .fox-tawk-open{{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:138px!important;min-height:46px!important;padding:11px 14px!important;border:0!important;border-radius:999px!important;background:#005eff!important;color:#fff!important;font:700 14px/1.1 system-ui,-apple-system,"Segoe UI",sans-serif!important;box-shadow:0 4px 18px rgba(0,0,0,.22)!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}}}
+          @media(max-width:700px){{#fox-tawk-button{{right:0!important;bottom:0!important;width:200px!important;height:140px!important;pointer-events:auto!important;overflow:visible!important}}#fox-tawk-button .fox-tawk-attention{{display:block!important}}#fox-tawk-button .fox-tawk-open{{display:none!important}}}}
           </style>
           <div id="fox-tawk-button" aria-label="Open live chat">
             <button class="fox-tawk-attention" type="button" aria-label="Open live chat">{attention_svg()}</button>
