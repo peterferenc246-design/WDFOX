@@ -70,7 +70,7 @@ jobs:
                   <filter id="fox-attention-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".24"/></filter>
                   <path id="fox-attention-arc" d="M 0 52 Q 120 -2 240 52"/>
                 </defs>
-                <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#fff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
+                <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#005eff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
                 <text x="20" y="82" font-size="28" transform="rotate(-18 20 82)">👋</text>
                 <circle cx="104" cy="94" r="36" fill="#08a84f" filter="url(#fox-attention-shadow)"/>
                 <path d="M88 91c0-9 8-15 18-15s18 6 18 15-8 15-18 15c-3 0-6-.6-8.5-1.8L90 108l1.6-7.3C89.4 98 88 94.7 88 91z" fill="#fff"/>
