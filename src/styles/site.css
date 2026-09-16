@@ -457,3 +457,12 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .language-flag { cursor: pointer; pointer-events: auto; }
 /* WDFOX Attention Grabber: center fox under the message */
 #fox-tawk-button .fox-attention-svg image{transform:translateX(-39.5px)!important}
+
+
+/* WDFOX Attention Grabber: requested side emojis and white-background cleanup */
+#fox-tawk-button .fox-tawk-attention{isolation:isolate!important;}
+#fox-tawk-button .fox-attention-svg image{mix-blend-mode:multiply!important;}
+#fox-tawk-button .fox-tawk-attention::before,#fox-tawk-button .fox-tawk-attention::after{position:absolute!important;top:78px!important;z-index:3!important;display:block!important;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;font-size:27px!important;line-height:1!important;pointer-events:none!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.22))!important;}
+#fox-tawk-button .fox-tawk-attention::before{content:"✍"!important;left:18px!important;transform:rotate(-10deg)!important;}
+#fox-tawk-button .fox-tawk-attention::after{content:"🤝"!important;right:18px!important;transform:rotate(10deg)!important;}
+@media(max-width:700px){#fox-tawk-button .fox-tawk-attention::before,#fox-tawk-button .fox-tawk-attention::after{top:78px!important;font-size:27px!important;}#fox-tawk-button .fox-tawk-attention::before{left:18px!important;}#fox-tawk-button .fox-tawk-attention::after{right:18px!important;}}
