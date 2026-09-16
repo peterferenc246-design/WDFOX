@@ -15,14 +15,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Apply requested enhancements
+      - name: Prepare requested enhancements
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('.github/workflows/deploy.yml')
-          text = path.read_text(encoding='utf-8')
+          source = Path('.github/workflows/deploy.yml')
+          target = Path('deploy.yml.attention-preview')
+          text = source.read_text(encoding='utf-8')
 
           new_svg = """          def attention_svg():
               return f'''<svg class="fox-attention-svg" viewBox="0 0 240 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
@@ -65,21 +66,12 @@ jobs:
               raise SystemExit('Expected Tawk bind marker not found')
           text = text.replace(marker, replacement, 1)
 
-          path.write_text(text, encoding='utf-8')
+          target.write_text(text, encoding='utf-8')
           PY
-      - name: Commit and push
+      - name: Publish prepared workflow content for direct repository update
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows/deploy.yml
-          git commit -m "Enhance Attention Grabber graphics" || exit 0
-          git push
-      - name: Remove temporary fixer
-        if: success()
-        run: |
-          rm -f .github/workflows/apply-attention-enhancements.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A .github/workflows/apply-attention-enhancements.yml
-          git commit -m "Remove temporary Attention Grabber enhancer" || exit 0
+          git add deploy.yml.attention-preview
+          git commit -m "Prepare Attention Grabber graphics enhancement" || exit 0
           git push
