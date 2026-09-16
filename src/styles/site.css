@@ -466,3 +466,25 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 #fox-tawk-button .fox-tawk-attention::before{content:"✍"!important;left:18px!important;transform:rotate(-10deg)!important;}
 #fox-tawk-button .fox-tawk-attention::after{content:"🤝"!important;right:18px!important;transform:rotate(10deg)!important;}
 @media(max-width:700px){#fox-tawk-button .fox-tawk-attention::before,#fox-tawk-button .fox-tawk-attention::after{top:78px!important;font-size:27px!important;}#fox-tawk-button .fox-tawk-attention::before{left:18px!important;}#fox-tawk-button .fox-tawk-attention::after{right:18px!important;}}
+
+/* WDFOX requested contact repair */
+.register-contact-identity{display:grid;gap:1rem;margin-top:1.5rem;}
+.register-person-name{font-size:1rem;line-height:1.35;}
+.register-person-name strong{font-weight:800;}
+.register-person-name small{display:inline-block;margin-top:.2rem;color:#fff;font-size:.82rem;}
+.register-media-row{display:flex;align-items:flex-start;gap:1rem;margin-top:.35rem;}
+.register-photo{display:block;width:255px;height:170px;object-fit:cover;border-radius:0;flex:0 0 255px;}
+.register-map-wrap{width:140px;flex:0 0 140px;}
+.register-map{display:block;width:140px;height:290px;border:0;border-radius:12px;background:#e7edf0;}
+.register-map-link{display:block;margin-top:.35rem;font-size:.72rem;font-weight:700;text-decoration:underline!important;}
+.register-contact-details{display:grid;gap:.55rem;line-height:1.55;margin:0!important;white-space:normal!important;width:auto!important;}
+.register-address{margin:0;display:flex;gap:.65rem;line-height:1.55;}
+.contact-socials{display:flex;gap:.65rem;margin-top:.75rem;}
+.contact-socials a{display:inline-grid!important;place-items:center;width:2rem;height:2rem;border:1px solid rgba(255,255,255,.35);border-radius:50%;text-decoration:none!important;color:#fff!important;}
+.contact-socials a:hover{border-color:var(--orange);color:var(--orange)!important;}
+@media(max-width:900px){.register-media-row{flex-wrap:wrap}.register-photo{width:min(100%,270px);height:auto;flex-basis:auto}.register-map-wrap{width:min(100%,270px);flex-basis:270px}.register-map{width:100%;height:260px;}}
+@media(max-width:760px){.register-media-row{display:grid;grid-template-columns:1fr;}.register-photo{width:100%;max-width:270px}.register-map-wrap{width:100%;max-width:270px}.register-map{width:100%;height:260px;}}
+/* The fox PNG contains a white matte. Remove isolation so multiply blends against the page. */
+#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
+#fox-tawk-button .fox-attention-svg{background:transparent!important;}
+#fox-tawk-button .fox-attention-svg image{mix-blend-mode:multiply!important;}
