@@ -1,0 +1,33 @@
+name: Restore contact block morning layout
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  restore:
+    if: ${{ github.event.head_commit.message != 'Restore contact block morning layout' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore only contact block CSS
+        run: |
+          cat >> src/styles/site.css <<'EOF'
+
+/* WDFOX — FINAL MORNING CONTACT BLOCK RESTORATION */
+.register-media-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:16px!important;align-items:start!important;}
+.register-photo{width:100%!important;height:170px!important;object-fit:cover!important;border-radius:0!important;}
+.register-map-wrap{width:100%!important;max-width:none!important;flex:initial!important;}
+.register-map{display:block!important;width:100%!important;height:170px!important;border:0!important;border-radius:12px!important;background:#e7edf0!important;}
+.register-map-link{display:block!important;margin-top:6px!important;font-size:.72rem!important;font-weight:700!important;text-decoration:underline!important;}
+.contact-socials{display:flex!important;align-items:center!important;gap:12px!important;margin-top:14px!important;}
+.contact-socials a{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;border:1px solid rgba(255,255,255,.48)!important;border-radius:50%!important;background:transparent!important;color:#fff!important;text-decoration:none!important;}
+.contact-socials a svg{display:block!important;width:21px!important;height:21px!important;visibility:visible!important;opacity:1!important;color:currentColor!important;}
+@media(max-width:900px){.register-media-row{grid-template-columns:1fr!important}.register-photo{width:min(100%,270px)!important}.register-map-wrap{width:min(100%,270px)!important}.register-map{width:100%!important;height:220px!important;}}
+EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/styles/site.css
+          git diff --cached --check
+          git commit -m 'Restore contact block morning layout'
+          git push
