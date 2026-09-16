@@ -65,12 +65,12 @@ jobs:
               return inline_script_re.sub(keep, text)
 
           def attention_svg():
-              return '''<svg class="fox-attention-svg" viewBox="0 0 200 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
+              return '''<svg class="fox-attention-svg" viewBox="0 0 240 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <filter id="fox-attention-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".24"/></filter>
-                  <path id="fox-attention-arc" d="M 0 52 Q 100 -2 200 52"/>
+                  <path id="fox-attention-arc" d="M 0 52 Q 120 -2 240 52"/>
                 </defs>
-                <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#fff" stroke="#00a9c9" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
+                <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#fff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
                 <text x="20" y="82" font-size="28" transform="rotate(-18 20 82)">👋</text>
                 <circle cx="104" cy="94" r="36" fill="#08a84f" filter="url(#fox-attention-shadow)"/>
                 <path d="M88 91c0-9 8-15 18-15s18 6 18 15-8 15-18 15c-3 0-6-.6-8.5-1.8L90 108l1.6-7.3C89.4 98 88 94.7 88 91z" fill="#fff"/>
@@ -80,12 +80,12 @@ jobs:
           def snippet(widget):
               return f'''<style id="fox-tawk-button-style">
           #fox-tawk-button{{position:fixed!important;right:18px!important;bottom:18px!important;z-index:2147483646!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;margin:0!important;padding:0!important}}
-          #fox-tawk-button .fox-tawk-attention{{position:relative!important;display:block!important;width:200px!important;height:140px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}
-          #fox-tawk-button .fox-attention-svg{{display:block!important;width:200px!important;height:140px!important;overflow:visible!important;transition:transform .18s ease!important}}
+          #fox-tawk-button .fox-tawk-attention{{position:relative!important;display:block!important;width:240px!important;height:140px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}
+          #fox-tawk-button .fox-attention-svg{{display:block!important;width:240px!important;height:140px!important;overflow:visible!important;transition:transform .18s ease!important}}
           #fox-tawk-button .fox-tawk-attention:hover .fox-attention-svg{{transform:scale(1.05) rotate(-1deg)!important}}
           #fox-tawk-button .fox-tawk-attention:active .fox-attention-svg{{transform:scale(.97)!important}}
           #fox-tawk-button .fox-tawk-open{{display:none!important}}
-          @media(max-width:700px){{#fox-tawk-button{{right:0!important;bottom:0!important;width:200px!important;height:140px!important;pointer-events:auto!important;overflow:visible!important}}#fox-tawk-button .fox-tawk-attention{{display:block!important}}#fox-tawk-button .fox-tawk-open{{display:none!important}}}}
+          @media(max-width:700px){{#fox-tawk-button{{right:0!important;bottom:0!important;width:240px!important;height:140px!important;pointer-events:auto!important;overflow:visible!important}}#fox-tawk-button .fox-tawk-attention{{display:block!important}}#fox-tawk-button .fox-tawk-open{{display:none!important}}}}
           </style>
           <div id="fox-tawk-button" aria-label="Open live chat">
             <button class="fox-tawk-attention" type="button" aria-label="Open live chat">{attention_svg()}</button>
