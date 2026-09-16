@@ -1,3 +1,4 @@
+# Temporary repair workflow; removed after deployment verification.
 name: Repair contact map and social icons
 on:
   push:
@@ -16,36 +17,13 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-
           p = Path('src/components/Landing.astro')
           t = p.read_text(encoding='utf-8')
-
-          replacement = '''<section class="contact-section section-wrap" id="kontakt"><div class="contact-card register-contact-banner"><div class="contact-copy"><p class="eyebrow">{content.contactEyebrow}</p><h2>{content.contactTitle}<br /><em>{content.contactAccent}</em></h2><p>{content.contactDescription}</p><div class="register-contact-identity"><div class="register-person-name"><strong>Peter Ferenc</strong><br /><small>Iniciátor, koordinátor a realizátor</small></div><div class="register-media-row"><img class="register-photo" src="/images/peter-ferenc.jpg" alt="Peter Ferenc" /><div class="register-map-wrap"><iframe class="register-map" title="Mapa adresy Rammelkam 2, 84036 Kumhausen" src="https://www.google.com/maps?q=Rammelkam+2,+84036+Kumhausen,+Germany&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a class="register-map-link" href="https://www.google.com/maps/search/?api=1&amp;query=Rammelkam+2,+84036+Kumhausen,+Germany" target="_blank" rel="noopener noreferrer">Otvoriť mapu ↗</a></div></div><div class="register-right-details register-contact-details"><div>📧 <strong>E-Mail:</strong> <a href="mailto:info@foxprof.club">info@foxprof.club</a></div><div>🌐 <strong>Web:</strong> <a href="https://foxprof.club/" target="_blank" rel="noopener noreferrer">foxprof.club</a></div><div>📞 <strong>Telefon:</strong> <a href="tel:+4915731733332">+49 157 317 33332</a></div><div>📠 <strong>Fax:</strong> +1 231 538 6409</div></div><div class="register-address"><span>📍</span><div><strong>Anschrift</strong><br />Rammelkam 2<br />84036 Kumhausen<br />Deutschland</div></div></div></div><div class="register-contact-content"><form class="register-contact-form" id="contact-form"><label for="contact-name">Name <span>*</span></label><input id="contact-name" name="name" required /><label for="contact-email">E-Mail <span>*</span></label><input id="contact-email" name="email" type="email" required /><label for="contact-message">Nachricht <span>*</span></label><textarea id="contact-message" name="message" required minlength="5"></textarea><button type="submit">Absenden</button></form><p class="contact-form-status" id="contact-form-status" role="status" aria-live="polite"></p><h4 class="register-follow">Folgen Sie uns</h4><div class="contact-socials"><a href="https://www.facebook.com/StopTelekomKartellEuropa" target="_blank" rel="noopener noreferrer" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V5h-3c-2.8 0-4 1.7-4 4v2H8v3h2v6h3v-6h3l.5-3H13V9c0-.7.3-1 1-1Z" fill="currentColor"/></svg></a><a href="https://x.com/FOXtiptop" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h3.7l4 5.2L17 4h2l-5.3 6.3L19.5 20h-3.7l-4.4-5.7L6.8 20h-2l5.7-6.8L5 4Zm3 1.7H7.1l8.7 12.6h.9L8 5.7Z" fill="currentColor"/></svg></a><a href="https://www.instagram.com/fiasfoxspravodlivost/" target="_blank" rel="noopener noreferrer" title="Instagram" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.8" r="1.1" fill="currentColor"/></svg></a><a href="https://www.linkedin.com/in/foxpro-peter-ferenc-025913196/" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.2 8.4A1.7 1.7 0 1 0 6.2 5a1.7 1.7 0 0 0 0 3.4ZM5 10h2.4v9H5v-9Zm4 0h2.3v1.2h.1c.3-.7 1.2-1.5 2.6-1.5 2.8 0 3.3 1.8 3.3 4.2V19H15v-4.5c0-1.1 0-2.5-1.5-2.5s-1.7 1.2-1.7 2.4V19H9v-9Z" fill="currentColor"/></svg></a></div></div></div></section>'''
-
-          t, n = re.subn(r'<section class="contact-section section-wrap" id="kontakt">.*?</section>', replacement, t, count=1, flags=re.S)
-          if n != 1:
-              raise SystemExit('contact section not found')
-          p.write_text(t, encoding='utf-8')
-
+          if '<svg viewBox="0 0 24 24"' not in t:
+              raise SystemExit('repair already missing; stop')
           css = Path('src/styles/site.css')
           s = css.read_text(encoding='utf-8')
-          marker = '/* WDFOX contact map/social restoration v2 */'
-          if marker not in s:
-              s += '''\n\n/* WDFOX contact map/social restoration v2 */\n.register-media-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:16px!important;align-items:start!important;}\n.register-photo{width:100%!important;height:170px!important;object-fit:cover!important;border-radius:0!important;}\n.register-map-wrap{width:100%!important;max-width:none!important;flex:initial!important;}\n.register-map{display:block!important;width:100%!important;height:170px!important;border:0!important;border-radius:12px!important;background:#e7edf0!important;}\n.register-map-link{display:block!important;margin-top:6px!important;font-size:.72rem!important;font-weight:700!important;text-decoration:underline!important;}\n.contact-socials{display:flex!important;align-items:center!important;gap:12px!important;margin-top:14px!important;}\n.contact-socials a{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:50%!important;text-decoration:none!important;color:#fff!important;background:transparent!important;}\n.contact-socials a svg{display:block!important;width:18px!important;height:18px!important;fill:currentColor!important;}\n.contact-socials a:hover{border-color:var(--orange)!important;color:var(--orange)!important;background:rgba(243,106,10,.08)!important;}\n@media(max-width:900px){.register-media-row{grid-template-columns:1fr!important}.register-photo{width:min(100%,270px)!important}.register-map-wrap{width:min(100%,270px)!important}.register-map{width:100%!important;height:220px!important;}}\n'''
-              css.write_text(s, encoding='utf-8')
+          if 'WDFOX contact map/social restoration v2' not in s:
+              raise SystemExit('contact restoration CSS missing; stop')
+          print('Contact repair already applied; preserving files.')
           PY
-      - name: Verify only requested contact files changed
-        shell: bash
-        run: |
-          git diff -- src/components/Landing.astro src/styles/site.css
-          test -f src/components/Landing.astro
-          test -f src/styles/site.css
-      - name: Commit
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/components/Landing.astro src/styles/site.css
-          git diff --cached --check
-          git commit -m "Restore contact map layout and social icons"
-          git push
