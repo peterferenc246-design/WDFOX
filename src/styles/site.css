@@ -488,3 +488,16 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 #fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
 #fox-tawk-button .fox-attention-svg{background:transparent!important;}
 #fox-tawk-button .fox-attention-svg image{mix-blend-mode:multiply!important;}
+
+
+/* WDFOX contact map/social restoration v2 */
+.register-media-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:16px!important;align-items:start!important;}
+.register-photo{width:100%!important;height:170px!important;object-fit:cover!important;border-radius:0!important;}
+.register-map-wrap{width:100%!important;max-width:none!important;flex:initial!important;}
+.register-map{display:block!important;width:100%!important;height:170px!important;border:0!important;border-radius:12px!important;background:#e7edf0!important;}
+.register-map-link{display:block!important;margin-top:6px!important;font-size:.72rem!important;font-weight:700!important;text-decoration:underline!important;}
+.contact-socials{display:flex!important;align-items:center!important;gap:12px!important;margin-top:14px!important;}
+.contact-socials a{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:50%!important;text-decoration:none!important;color:#fff!important;background:transparent!important;}
+.contact-socials a svg{display:block!important;width:18px!important;height:18px!important;fill:currentColor!important;}
+.contact-socials a:hover{border-color:var(--orange)!important;color:var(--orange)!important;background:rgba(243,106,10,.08)!important;}
+@media(max-width:900px){.register-media-row{grid-template-columns:1fr!important}.register-photo{width:min(100%,270px)!important}.register-map-wrap{width:min(100%,270px)!important}.register-map{width:100%!important;height:220px!important;}}
