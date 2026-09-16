@@ -20,7 +20,6 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
 
           path = Path('.github/workflows/deploy.yml')
           text = path.read_text(encoding='utf-8')
@@ -36,10 +35,10 @@ jobs:
                 <image id="fox-attention-fox" x="110" y="48" width="99" height="84" preserveAspectRatio="none" href="data:image/png;base64,{FOX_HEAD_PNG}"/>
               </svg>'''"""
 
-          pattern = re.compile(r"(?ms)^\\s{10}def attention_svg\\(\\):\\n.*?^\\s{14}</svg>'''" )
-          text, count = pattern.subn(new_svg.rstrip(), text, count=1)
-          if count != 1:
-              raise SystemExit(f'Attention Grabber SVG block not found: {count}')
+          start = text.index('def attention_svg():')
+          start = text.rfind('\n', 0, start) + 1
+          end = text.index("</svg>'''", start) + len("</svg>'''")
+          text = text[:start] + new_svg.rstrip() + text[end:]
 
           marker = "            function bind(){{var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');"
           replacement = """            function removeWhiteBackground(){{
