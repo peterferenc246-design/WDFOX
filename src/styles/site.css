@@ -501,3 +501,12 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 .contact-socials a svg{display:block!important;width:18px!important;height:18px!important;fill:currentColor!important;}
 .contact-socials a:hover{border-color:var(--orange)!important;color:var(--orange)!important;background:rgba(243,106,10,.08)!important;}
 @media(max-width:900px){.register-media-row{grid-template-columns:1fr!important}.register-photo{width:min(100%,270px)!important}.register-map-wrap{width:min(100%,270px)!important}.register-map{width:100%!important;height:220px!important;}}
+
+/* Requested contact visual restoration */
+.register-address{display:flex!important;gap:.65rem!important;margin-top:10px!important;line-height:1.55!important;color:#fff!important;}
+.register-address strong{font-weight:800!important;}
+.contact-socials a svg{display:block!important;width:20px!important;height:20px!important;}
+#fox-tawk-button .fox-tawk-attention > img:first-child{display:none!important;}
+#fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}
+#fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}
+#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
