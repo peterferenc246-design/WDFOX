@@ -31,7 +31,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Install native Tawk widget only
+      - name: Install lazy native Tawk chat
         run: |
           python - <<'PY'
           import re
@@ -53,21 +53,44 @@ jobs:
           remove_patterns = [
               re.compile(r'<script[^>]*src=["\']/tawk-language-loader\.js[^>]*></script>', re.I),
               re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\.js[^>]*></script>', re.I),
+              re.compile(r'<script[^>]*src=["\']/tawk-native-force\.js[^>]*></script>', re.I),
               re.compile(r'<script[^>]*>.*?embed\.tawk\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
               re.compile(r'<script[^>]*>\s*\(function\(\)\{\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-attention-style["\'][^>]*>.*?</style>\s*<[^>]*id=["\']fox-tawk-attention["\'][^>]*>.*?</[^>]+>\s*<script[^>]*>.*?</script>', re.I | re.S),
           ]
 
-          def native_snippet(widget_id):
-              return f'''<script type="text/javascript">
-          var Tawk_API=Tawk_API||{{}},Tawk_LoadStart=new Date();
+          def lazy_snippet(widget_id):
+              return f'''<script id="fox-tawk-lazy">
           (function(){{
-            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-            s1.async=true;
-            s1.src='https://embed.tawk.to/{PROPERTY_ID}/{widget_id}';
-            s1.charset='UTF-8';
-            s1.setAttribute('crossorigin','*');
-            s0.parentNode.insertBefore(s1,s0);
+            var PROPERTY_ID='{PROPERTY_ID}', WIDGET_ID='{widget_id}', loaded=false, loading=false;
+            function openChat(){{
+              window.__WDFOX_TAWK_OPEN_PENDING=true;
+              var api=window.Tawk_API;
+              if(api && typeof api.showWidget==='function'){{try{{api.showWidget();}}catch(_){{}}}}
+              if(api && typeof api.maximize==='function'){{try{{api.maximize();window.__WDFOX_TAWK_OPEN_PENDING=false;}}catch(_){{}}}}
+            }}
+            function load(){{
+              if(loaded||loading){{openChat();return;}}
+              loading=true;
+              window.Tawk_API=window.Tawk_API||{{}};
+              window.Tawk_LoadStart=new Date();
+              window.Tawk_API.customStyle={{zIndex:'2147483647 !important'}};
+              window.Tawk_API.onLoad=function(){{loaded=true;loading=false;openChat();}};
+              var s=document.createElement('script');
+              s.async=true;
+              s.src='https://embed.tawk.to/{PROPERTY_ID}/{widget_id}';
+              s.charset='UTF-8';
+              s.setAttribute('crossorigin','*');
+              s.onload=function(){{loaded=true;loading=false;openChat();}};
+              document.head.appendChild(s);
+            }}
+            function bind(){{
+              var button=document.querySelector('.live-chat-bubble');
+              if(!button||button.dataset.wdfxTawkBound==='1')return;
+              button.dataset.wdfxTawkBound='1';
+              button.addEventListener('click',function(e){{e.preventDefault();load();}},false);
+              button.addEventListener('touchend',function(e){{e.preventDefault();load();}},{{passive:false}});
+            }}
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
           }})();
           </script>'''
 
@@ -79,7 +102,7 @@ jobs:
               lang = (lang_match.group(1).lower().split('-')[0].split('_')[0] if lang_match else 'sk')
               widget_id = WIDGETS.get(lang)
               if widget_id and '</body>' in text:
-                  text = text.replace('</body>', native_snippet(widget_id) + '\n</body>', 1)
+                  text = text.replace('</body>', lazy_snippet(widget_id) + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
           PY
       - name: Setup Pages
@@ -104,7 +127,7 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live www.foxprof.club serves the native Tawk widget
+      - name: Verify live www.foxprof.club serves lazy native Tawk chat
         shell: bash
         run: |
           set -euo pipefail
@@ -112,14 +135,13 @@ jobs:
           for attempt in 1 2 3 4 5; do
             echo "Live verification attempt ${attempt}: ${url}"
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html" && ! grep -q 'fox-tawk-attention' <<<"$html" && ! grep -q 'tawk-attention-click-fix' <<<"$html"; then
-              echo 'LIVE_TAWK_NATIVE=OK'
+            if grep -q 'fox-tawk-lazy' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && grep -q 'live-chat-bubble' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+              echo 'LIVE_TAWK_LAZY_NATIVE=OK'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
             fi
-            echo 'Expected clean native Tawk widget not yet visible from the custom domain.'
+            echo 'Expected lazy native Tawk chat not yet visible from the custom domain.'
             sleep 8
           done
-          echo 'LIVE_TAWK_NATIVE=FAIL'
-          echo 'The custom domain is not serving the clean native Tawk artifact.'
+          echo 'LIVE_TAWK_LAZY_NATIVE=FAIL'
           exit 1
