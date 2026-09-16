@@ -2,11 +2,12 @@ name: Restore contact block morning layout
 on:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/restore-contact-final.yml'
 permissions:
   contents: write
 jobs:
   restore:
-    if: ${{ github.event.head_commit.message != 'Restore contact block morning layout' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
