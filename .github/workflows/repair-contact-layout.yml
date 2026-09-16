@@ -1,10 +1,12 @@
 name: Repair contact section once
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 permissions:
   contents: write
 jobs:
   repair:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,19 +14,17 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
           p=Path('src/components/Landing.astro')
           t=p.read_text(encoding='utf-8')
-          # Restore the address block if it is absent.
           if 'class="register-address"' not in t:
-              needle='</div></div></div></div><div class="register-contact-content">'
+              needle='</div></div></div><div class="register-contact-content">'
               addr='<div class="register-address"><span>📍</span><div><strong>Anschrift</strong><br />Rammelkam 2<br />84036 Kumhausen<br />Deutschland</div></div>'
               if needle not in t: raise SystemExit('contact insertion point not found')
-              t=t.replace(needle, '</div></div></div>'+addr+'</div><div class="register-contact-content">', 1)
+              t=t.replace(needle, '</div></div></div>'+addr+'<div class="register-contact-content">', 1)
           p.write_text(t,encoding='utf-8')
           css=Path('src/styles/site.css')
           s=css.read_text(encoding='utf-8')
-          s += '''\n/* Requested contact visual restoration */\n.register-address{display:flex!important;gap:.65rem!important;margin-top:10px!important;line-height:1.55!important;color:#fff!important;}\n.register-address strong{font-weight:800!important;}\n.contact-socials a svg{display:block!important;width:20px!important;height:20px!important;}\n/* Hide only the old decorative icon inside Attention Grabber. */\n#fox-tawk-button .fox-tawk-attention > img:first-child{display:none!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}\n#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}\n'''
+          s += '''\n/* Requested contact visual restoration */\n.register-address{display:flex!important;gap:.65rem!important;margin-top:10px!important;line-height:1.55!important;color:#fff!important;}\n.register-address strong{font-weight:800!important;}\n.contact-socials a svg{display:block!important;width:20px!important;height:20px!important;}\n#fox-tawk-button .fox-tawk-attention > img:first-child{display:none!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}\n#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}\n'''
           css.write_text(s,encoding='utf-8')
           PY
           git config user.name 'github-actions[bot]'
