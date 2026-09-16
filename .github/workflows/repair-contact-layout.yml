@@ -1,33 +1,14 @@
 name: Repair contact section once
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
-  repair:
-    if: github.actor != 'github-actions[bot]'
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply exact contact repair
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('src/components/Landing.astro')
-          t=p.read_text(encoding='utf-8')
-          if 'class="register-address"' not in t:
-              raise SystemExit('Address block missing')
-          css=Path('src/styles/site.css')
-          s=css.read_text(encoding='utf-8')
-          marker='/* Requested contact visual restoration */'
-          if marker not in s:
-              s += '''\n/* Requested contact visual restoration */\n.register-address{display:flex!important;gap:.65rem!important;margin-top:10px!important;line-height:1.55!important;color:#fff!important;}\n.register-address strong{font-weight:800!important;}\n.contact-socials{display:flex!important;align-items:center!important;gap:12px!important;margin-top:14px!important;}\n.contact-socials a{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:50%!important;color:#fff!important;background:transparent!important;}\n.contact-socials a svg{display:block!important;width:20px!important;height:20px!important;}\n#fox-tawk-button .fox-tawk-attention > img:first-child{display:none!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}\n#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}\n'''
-              css.write_text(s,encoding='utf-8')
-          PY
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/styles/site.css
-          git diff --cached --check
-          git commit -m 'Restore contact address social icons and attention icon'
-          git push
+      - run: |
+          test -n "$(grep -c 'class=\"register-address\"' src/components/Landing.astro)"
+          grep -q 'contact-socials' src/components/Landing.astro
+          grep -q 'fox-tawk-attention' src/styles/site.css
