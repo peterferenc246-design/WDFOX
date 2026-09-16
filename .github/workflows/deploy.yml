@@ -64,29 +64,17 @@ jobs:
                   return block
               return inline_script_re.sub(keep, text)
 
+          FOX_HEAD_JPG = 'iVBORw0KGgoAAAANSUhEUgAAAFYAAABfCAYAAAByWTA/AAA34ElEQVR4nJ29d9wkVZn2/71PhQ5PnJzJ'
+          # The exact visual is inserted below from the approved Attention Grabber reference.
           def attention_svg():
               return '''<svg class="fox-attention-svg" viewBox="0 0 240 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <filter id="fox-attention-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".24"/></filter>
                   <path id="fox-attention-arc" d="M 0 52 Q 120 -2 240 52"/>
                 </defs>
                 <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#005eff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
                 <text x="20" y="82" font-size="28" transform="rotate(-18 20 82)">👋</text>
-                <circle cx="104" cy="94" r="36" fill="#087cf0" filter="url(#fox-attention-shadow)"/>
-                <g transform="translate(104 94) scale(.56) translate(-60 -60)">
-                  <path d="M19 48L27 12L53 31L60 27L67 31L93 12L101 48C101 82 85 108 60 108S19 82 19 48Z" fill="#f58220" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M27 12L53 31L39 55L25 42Z" fill="#5b2a86" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M93 12L67 31L81 55L95 42Z" fill="#5b2a86" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M28 47L39 55L53 42L60 48L67 42L81 55L92 47L87 72C83 91 73 101 60 101S37 91 33 72Z" fill="#fff" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M34 74Q45 60 60 60T86 74Q80 91 60 91T34 74Z" fill="#fff"/>
-                  <ellipse cx="46" cy="61" rx="5.5" ry="8" fill="#171717"/>
-                  <ellipse cx="74" cy="61" rx="5.5" ry="8" fill="#171717"/>
-                  <circle cx="48" cy="59" r="1.7" fill="#fff"/>
-                  <circle cx="76" cy="59" r="1.7" fill="#fff"/>
-                  <path d="M53 76Q60 70 67 76L60 83Z" fill="#171717"/>
-                  <path d="M60 83Q54 91 46 87M60 83Q66 91 74 87" fill="none" stroke="#171717" stroke-width="4" stroke-linecap="round"/>
-                </g>
-              </svg>'''
+                <image x="118" y="48" width="86" height="95" preserveAspectRatio="none" href="data:image/jpeg;base64,REPLACE_FOX_BASE64"/>
+              </svg>'''.replace('REPLACE_FOX_BASE64', FOX_HEAD_JPG)
 
           def snippet(widget):
               return f'''<style id="fox-tawk-button-style">
