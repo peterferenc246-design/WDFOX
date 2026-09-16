@@ -15,63 +15,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Prepare requested enhancements
+      - name: Apply requested visual changes
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-
-          source = Path('.github/workflows/deploy.yml')
-          target = Path('deploy.yml.attention-preview')
-          text = source.read_text(encoding='utf-8')
-
-          new_svg = """          def attention_svg():
-              return f'''<svg class="fox-attention-svg" viewBox="0 0 240 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <path id="fox-attention-arc" d="M 0 52 Q 120 -2 240 52"/>
-                </defs>
-                <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#005eff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
-                <text x="20" y="104" font-size="27" transform="rotate(-10 20 104)">✍</text>
-                <text x="182" y="104" font-size="27" transform="rotate(10 182 104)">🤝</text>
-                <image id="fox-attention-fox" x="110" y="48" width="99" height="84" preserveAspectRatio="none" href="data:image/png;base64,{FOX_HEAD_PNG}"/>
-              </svg>'''"""
-
-          start = text.index('def attention_svg():')
-          start = text.rfind('\n', 0, start) + 1
-          end = text.index("</svg>'''", start) + len("</svg>'''")
-          text = text[:start] + new_svg.rstrip() + text[end:]
-
-          marker = "            function bind(){{var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');"
-          replacement = """            function removeWhiteBackground(){{
-              var image=document.getElementById('fox-attention-fox');
-              if(!image || image.dataset.wdfxTransparent==='1')return;
-              var src=image.getAttribute('href'); if(!src || src.indexOf('data:image/png;base64,')!==0)return;
-              var img=new Image();
-              img.onload=function(){{
-                try{{
-                  var c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
-                  c.width=img.naturalWidth;c.height=img.naturalHeight;ctx.drawImage(img,0,0);
-                  var d=ctx.getImageData(0,0,c.width,c.height),p=d.data,w=c.width,h=c.height,seen=new Uint8Array(w*h),q=[],i,x,y,n;
-                  function add(px,py){{if(px<0||py<0||px>=w||py>=h)return;n=py*w+px;if(seen[n])return;seen[n]=1;q.push(n)}}
-                  for(x=0;x<w;x++){{add(x,0);add(x,h-1)}} for(y=0;y<h;y++){{add(0,y);add(w-1,y)}}
-                  while(q.length){{n=q.pop();x=n%w;y=(n-x)/w;i=n*4;if(p[i]>238&&p[i+1]>238&&p[i+2]>238&&Math.max(p[i],p[i+1],p[i+2])-Math.min(p[i],p[i+1],p[i+2])<18)p[i+3]=0;else continue;add(x+1,y);add(x-1,y);add(x,y+1);add(x,y-1)}}
-                  ctx.putImageData(d,0,0);image.setAttribute('href',c.toDataURL('image/png'));image.dataset.wdfxTransparent='1';
-                }}catch(_){{}}
-              }};
-              img.src=src;
-            }}
-
-            function bind(){{removeWhiteBackground();var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');"""
+          path = Path('src/styles/site.css')
+          text = path.read_text(encoding='utf-8')
+          marker = '/* WDFOX Attention Grabber: requested side emojis and white-background cleanup */'
           if marker not in text:
-              raise SystemExit('Expected Tawk bind marker not found')
-          text = text.replace(marker, replacement, 1)
-
-          target.write_text(text, encoding='utf-8')
+              text += '''\n\n/* WDFOX Attention Grabber: requested side emojis and white-background cleanup */\n#fox-tawk-button .fox-tawk-attention{isolation:isolate!important;}\n#fox-tawk-button .fox-attention-svg image{mix-blend-mode:multiply!important;}\n#fox-tawk-button .fox-tawk-attention::before,#fox-tawk-button .fox-tawk-attention::after{position:absolute!important;top:78px!important;z-index:3!important;display:block!important;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;font-size:27px!important;line-height:1!important;pointer-events:none!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.22))!important;}\n#fox-tawk-button .fox-tawk-attention::before{content:"✍"!important;left:18px!important;transform:rotate(-10deg)!important;}\n#fox-tawk-button .fox-tawk-attention::after{content:"🤝"!important;right:18px!important;transform:rotate(10deg)!important;}\n@media(max-width:700px){#fox-tawk-button .fox-tawk-attention::before,#fox-tawk-button .fox-tawk-attention::after{top:78px!important;font-size:27px!important;}#fox-tawk-button .fox-tawk-attention::before{left:18px!important;}#fox-tawk-button .fox-tawk-attention::after{right:18px!important;}}\n'''
+          path.write_text(text, encoding='utf-8')
           PY
-      - name: Publish prepared workflow content for direct repository update
+      - name: Commit visual changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add deploy.yml.attention-preview
-          git commit -m "Prepare Attention Grabber graphics enhancement" || exit 0
+          git add src/styles/site.css
+          git commit -m "Add Attention Grabber side emojis and remove white background" || exit 0
           git push
