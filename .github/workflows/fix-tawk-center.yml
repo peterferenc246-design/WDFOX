@@ -1,0 +1,47 @@
+name: Fix Attention Grabber fox center
+
+on:
+  workflow_run:
+    workflows: ["Deploy Astro site to GitHub Pages"]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  fix:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Move fox to center of sentence
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python - <<'PY2'
+          from pathlib import Path
+          p=Path('.github/workflows/deploy.yml')
+          text=p.read_text(encoding='utf-8')
+          old=text
+          text=text.replace('cx="160" cy="96" r="36"', 'cx="120" cy="96" r="36"')
+          text=text.replace('translate(160 96) scale(.56)', 'translate(120 96) scale(.56)')
+          if text==old:
+              raise SystemExit('Expected fox position not found')
+          p.write_text(text, encoding='utf-8')
+          PY2
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/deploy.yml
+          git commit -m "Center Attention Grabber fox under sentence"
+          git push origin main
+          gh workflow run deploy.yml --ref main
+      - name: Remove temporary fixer
+        if: always()
+        run: |
+          git rm .github/workflows/fix-tawk-center.yml
+          git commit -m "Remove temporary Attention Grabber fixer"
+          git push origin main
