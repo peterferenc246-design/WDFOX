@@ -1,0 +1,32 @@
+name: Repair contact section once
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repair requested contact details
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('src/components/Landing.astro')
+          t=p.read_text(encoding='utf-8')
+          # Restore visible address directly below contact details.
+          addr='''<div class="register-address"><span>📍</span><div><strong>Anschrift</strong><br />Rammelkam 2<br />84036 Kumhausen<br />Deutschland</div></div>'''
+          t=re.sub(r'<div class="register-address">.*?</div>\s*</div>\s*</div>', addr+'</div></div>', t, count=1, flags=re.S)
+          p.write_text(t,encoding='utf-8')
+          css=Path('src/styles/site.css')
+          s=css.read_text(encoding='utf-8')
+          s += '''\n/* Requested contact visual restoration */\n.register-address{display:flex!important;gap:.65rem!important;margin-top:10px!important;line-height:1.55!important;color:#fff!important;}\n.register-address strong{font-weight:800!important;}\n.contact-socials a svg{display:block!important;width:20px!important;height:20px!important;stroke:currentColor!important;fill:currentColor!important;}\n/* Hide the old decorative attention icon; keep the requested fox grabber. */\n#fox-tawk-button .fox-tawk-attention > img:first-child{display:none!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg{background:transparent!important;}\n#fox-tawk-button .fox-tawk-attention .fox-attention-svg image{mix-blend-mode:multiply!important;}\n#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}\n'''
+          css.write_text(s,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/components/Landing.astro src/styles/site.css
+          git diff --cached --check
+          git commit -m 'Restore contact address and attention icon cleanup'
+          git push
