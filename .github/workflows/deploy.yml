@@ -65,12 +65,12 @@ jobs:
               return inline_script_re.sub(keep, text)
 
           def attention_svg():
-              return '''<svg class="fox-attention-svg" viewBox="0 0 180 135" role="img" aria-label="We Are Here — open live chat" xmlns="http://www.w3.org/2000/svg">
+              return '''<svg class="fox-attention-svg" viewBox="0 0 180 135" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <filter id="fox-attention-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity=".24"/></filter>
                   <path id="fox-attention-arc" d="M 22 45 Q 90 0 158 45"/>
                 </defs>
-                <text font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800" fill="#fff" stroke="#00a9c9" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">We Are Here!</textPath></text>
+                <text font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="800" fill="#fff" stroke="#00a9c9" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
                 <text x="18" y="76" font-size="28" transform="rotate(-18 18 76)">👋</text>
                 <circle cx="96" cy="87" r="36" fill="#08a84f" filter="url(#fox-attention-shadow)"/>
                 <path d="M80 84c0-9 8-15 18-15s18 6 18 15-8 15-18 15c-3 0-6-.6-8.5-1.8L82 101l1.6-7.3C81.4 91 80 87.7 80 84z" fill="#fff"/>
@@ -138,7 +138,7 @@ jobs:
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'fox-tawk-attention' <<<"$html" && grep -q 'We Are Here!' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+            if grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'fox-tawk-attention' <<<"$html" && grep -q 'I am here for you!' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
               echo 'LIVE_DESKTOP_ATTENTION_GRABBER=OK'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
