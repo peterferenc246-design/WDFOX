@@ -31,88 +31,37 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Astro site
         run: pnpm run build
-      - name: Install lazy native Tawk chat
+      - name: Install visible native Tawk chat button
         run: |
           python - <<'PY'
           import re
           from pathlib import Path
 
           PROPERTY_ID = '6a951d52c3c46c344587662a'
-          WIDGETS = {
-              'sk': '1k1b9121q',
-              'de': '1k1bb2aln',
-              'en': '1k1bb9ast',
-              'hr': '1k1bjvbjq',
-              'fr': '1k1blk6o4',
-              'it': '1k1bovo5t',
-              'pl': '1k1bp5qda',
-              'es': '1k1bp6lk5',
-              'sv': '1k1bpdngj',
-          }
+          WIDGETS = {'sk':'1k1b9121q','de':'1k1bb2aln','en':'1k1bb9ast','hr':'1k1bjvbjq','fr':'1k1blk6o4','it':'1k1bovo5t','pl':'1k1bp5qda','es':'1k1bp6lk5','sv':'1k1bpdngj'}
+          script_re = re.compile(r'<script\\b[^>]*>.*?</script\\s*>', re.I | re.S)
+          src_re = re.compile(r'<script\\b[^>]*src=["\\'][^"\\']*tawk[^"\\']*["\\'][^>]*>\\s*</script\\s*>', re.I | re.S)
+          old_button_re = re.compile(r'<style\\b[^>]*id=["\\']fox-tawk-button-style["\\'][^>]*>.*?</style\\s*>\\s*<div\\b[^>]*id=["\\']fox-tawk-button["\\'][^>]*>.*?</div\\s*>\\s*<script\\b[^>]*id=["\\']fox-tawk-lazy["\\'][^>]*>.*?</script\\s*>', re.I | re.S)
 
-          remove_patterns = [
-              re.compile(r'<script[^>]*src=["\']/tawk-language-loader\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*src=["\']/tawk-native-bootstrap\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*src=["\']/tawk-native-force\\.js[^>]*></script>', re.I),
-              re.compile(r'<script[^>]*>.*?embed\\.tawk\\.to/6a951d52c3c46c344587662a.*?</script>', re.I | re.S),
-              re.compile(r'<script[^>]*>\\s*\\(function\\(\\)\\{\\s*var PROPERTY_ID=["\']6a951d52c3c46c344587662a["\'];.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-button-style["\'][^>]*>.*?</style>\\s*<div[^>]*id=["\']fox-tawk-button["\'][^>]*>.*?</div>\\s*<script[^>]*id=["\']fox-tawk-button-script["\'][^>]*>.*?</script>', re.I | re.S),
-              re.compile(r'<style[^>]*id=["\']fox-tawk-lazy-style["\'][^>]*>.*?</style>\\s*<div[^>]*id=["\']fox-tawk-button["\'][^>]*>.*?</div>\\s*<script[^>]*id=["\']fox-tawk-lazy["\'][^>]*>.*?</script>', re.I | re.S),
-          ]
+          def clean(text):
+              text = old_button_re.sub('', text)
+              text = src_re.sub('', text)
+              def keep(m):
+                  block = m.group(0)
+                  if 'embed.tawk.to' in block or 'Tawk_API' in block or 'tawk-language-loader' in block:
+                      return ''
+                  return block
+              return script_re.sub(keep, text)
 
-          def lazy_snippet(widget_id):
-              return f'''<style id="fox-tawk-button-style">
-          #fox-tawk-button{{position:fixed!important;right:18px!important;bottom:24px!important;z-index:2147483646!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;margin:0!important;padding:0!important}}
-          #fox-tawk-button .fox-tawk-open{{appearance:none!important;-webkit-appearance:none!important;display:flex!important;align-items:center!important;gap:8px!important;min-width:148px!important;min-height:48px!important;padding:12px 16px!important;border:0!important;border-radius:999px!important;background:#005eff!important;color:#fff!important;font:700 15px/1.1 system-ui,-apple-system,"Segoe UI",sans-serif!important;box-shadow:0 4px 18px rgba(0,0,0,.22)!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important}}
-          #fox-tawk-button .fox-tawk-open span{{font-size:20px!important;line-height:1!important;pointer-events:none!important}}
-          @media(max-width:700px){{#fox-tawk-button{{right:12px!important;bottom:18px!important}}#fox-tawk-button .fox-tawk-open{{min-width:138px!important;min-height:46px!important;padding:11px 14px!important;font-size:14px!important}}}}
-          </style>
-          <div id="fox-tawk-button" aria-label="Open live chat">
-            <button class="fox-tawk-open" type="button" aria-label="Open live chat"><span>💬</span>Live chat</button>
-          </div>
-          <script id="fox-tawk-lazy">
-          (function(){{
-            var PROPERTY_ID='{PROPERTY_ID}', WIDGET_ID='{widget_id}', loaded=false, loading=false;
-            function openChat(){{
-              var api=window.Tawk_API;
-              if(api && typeof api.showWidget==='function'){{try{{api.showWidget();}}catch(_){{}}}}
-              if(api && typeof api.maximize==='function'){{try{{api.maximize();}}catch(_){{}}}}
-            }}
-            function load(){{
-              if(loaded||loading){{openChat();return;}}
-              loading=true;
-              window.Tawk_API=window.Tawk_API||{{}};
-              window.Tawk_LoadStart=new Date();
-              window.Tawk_API.customStyle={{zIndex:'2147483647 !important'}};
-              window.Tawk_API.onLoad=function(){{loaded=true;loading=false;openChat();}};
-              var s=document.createElement('script');
-              s.async=true;
-              s.src='https://embed.tawk.to/{PROPERTY_ID}/{widget_id}';
-              s.charset='UTF-8';
-              s.setAttribute('crossorigin','*');
-              s.onload=function(){{loaded=true;loading=false;openChat();}};
-              document.head.appendChild(s);
-            }}
-            function bind(){{
-              var button=document.querySelector('#fox-tawk-button .fox-tawk-open');
-              if(!button||button.dataset.wdfxTawkBound==='1')return;
-              button.dataset.wdfxTawkBound='1';
-              button.addEventListener('click',function(e){{e.preventDefault();load();}},false);
-              button.addEventListener('touchend',function(e){{e.preventDefault();load();}},{{passive:false}});
-            }}
-            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
-          }})();
-          </script>'''
+          def snippet(widget):
+              return f'''<style id="fox-tawk-button-style">#fox-tawk-button{{position:fixed!important;right:18px!important;bottom:24px!important;z-index:2147483646!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}}#fox-tawk-button .fox-tawk-open{{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:148px!important;min-height:48px!important;padding:12px 16px!important;border:0!important;border-radius:999px!important;background:#005eff!important;color:#fff!important;font:700 15px/1.1 system-ui,-apple-system,"Segoe UI",sans-serif!important;box-shadow:0 4px 18px rgba(0,0,0,.22)!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}#fox-tawk-button .fox-tawk-open span{{font-size:20px!important;line-height:1!important}}@media(max-width:700px){{#fox-tawk-button{{right:12px!important;bottom:18px!important}}#fox-tawk-button .fox-tawk-open{{min-width:138px!important;min-height:46px!important;padding:11px 14px!important;font-size:14px!important}}}}</style><div id="fox-tawk-button" aria-label="Open live chat"><button class="fox-tawk-open" type="button" aria-label="Open live chat"><span>💬</span>Live chat</button></div><script id="fox-tawk-lazy">(function(){{var PROPERTY_ID='{PROPERTY_ID}',WIDGET_ID='{widget}';function openChat(){{var a=window.Tawk_API;if(a&&typeof a.showWidget==='function')try{{a.showWidget()}}catch(e){{}}if(a&&typeof a.maximize==='function')try{{a.maximize()}}catch(e){{}}}}function loadChat(){{window.Tawk_API=window.Tawk_API||{{}};window.Tawk_LoadStart=new Date();window.Tawk_API.customStyle={{zIndex:'2147483647 !important'}};window.Tawk_API.onLoad=openChat;var s=document.createElement('script');s.async=true;s.src='https://embed.tawk.to/'+PROPERTY_ID+'/'+WIDGET_ID;s.charset='UTF-8';s.setAttribute('crossorigin','*');s.onload=openChat;document.head.appendChild(s)}}function bind(){{var b=document.querySelector('#fox-tawk-button .fox-tawk-open');if(!b||b.dataset.wdfxTawkBound==='1')return;b.dataset.wdfxTawkBound='1';b.addEventListener('click',function(e){{e.preventDefault();loadChat()}},false);b.addEventListener('touchend',function(e){{e.preventDefault();loadChat()}},{{passive:false}})}}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind()}})();</script>'''
 
           for path in Path('dist').rglob('*.html'):
-              text = path.read_text(encoding='utf-8')
-              for pattern in remove_patterns:
-                  text = pattern.sub('', text)
-              lang_match = re.search(r'<html[^>]*lang=["\']([^"\']+)["\']', text, re.I)
-              lang = (lang_match.group(1).lower().split('-')[0].split('_')[0] if lang_match else 'sk')
-              widget_id = WIDGETS.get(lang)
-              if widget_id and '</body>' in text:
-                  text = text.replace('</body>', lazy_snippet(widget_id) + '\n</body>', 1)
+              text = clean(path.read_text(encoding='utf-8'))
+              m = re.search(r'<html[^>]*lang=["\\']([^"\\']+)["\\']', text, re.I)
+              lang = (m.group(1).lower().split('-')[0].split('_')[0] if m else 'sk')
+              if lang in WIDGETS and '</body>' in text:
+                  text = text.replace('</body>', snippet(WIDGETS[lang])+'\\n</body>', 1)
               path.write_text(text, encoding='utf-8')
           PY
       - name: Setup Pages
@@ -137,20 +86,14 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live www.foxprof.club serves visible lazy Tawk button
+      - name: Verify live Tawk button
         shell: bash
         run: |
           set -euo pipefail
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
-            echo "Live verification attempt ${attempt}: ${url}"
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if grep -q 'fox-tawk-button' <<<"$html" && grep -q 'fox-tawk-lazy' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html" && ! grep -q 'tawk-attention-click-fix' <<<"$html"; then
-              echo 'LIVE_TAWK_BUTTON=OK'
-              echo 'LIVE_TAWK_WIDGET=1k1b9121q'
-              exit 0
-            fi
-            echo 'Expected visible lazy Tawk button not yet visible from the custom domain.'
+            if grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-lazy"' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then echo 'LIVE_TAWK_BUTTON=OK'; exit 0; fi
             sleep 8
           done
           echo 'LIVE_TAWK_BUTTON=FAIL'
