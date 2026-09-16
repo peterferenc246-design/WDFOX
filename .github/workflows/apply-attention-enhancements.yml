@@ -20,21 +20,12 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('.github/workflows/deploy.yml')
           text = path.read_text(encoding='utf-8')
 
-          old_svg = """          def attention_svg():
-              return f'''<svg class="fox-attention-svg" viewBox="0 0 240 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <path id="fox-attention-arc" d="M 0 52 Q 120 -2 240 52"/>
-                </defs>
-                <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#005eff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
-                <text x="20" y="82" font-size="28" transform="rotate(-18 20 82)">👋</text>
-                <image x="110" y="48" width="99" height="84" preserveAspectRatio="none" href="data:image/png;base64,{FOX_HEAD_PNG}"/>
-              </svg>'''"""
-
-          new_svg = """          def attention_svg():
+          new_svg = '''          def attention_svg():
               return f'''<svg class="fox-attention-svg" viewBox="0 0 240 140" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <path id="fox-attention-arc" d="M 0 52 Q 120 -2 240 52"/>
@@ -43,11 +34,12 @@ jobs:
                 <text x="20" y="104" font-size="27" transform="rotate(-10 20 104)">✍</text>
                 <text x="182" y="104" font-size="27" transform="rotate(10 182 104)">🤝</text>
                 <image id="fox-attention-fox" x="110" y="48" width="99" height="84" preserveAspectRatio="none" href="data:image/png;base64,{FOX_HEAD_PNG}"/>
-              </svg>'''"""
+              </svg>''' '''
 
-          if old_svg not in text:
-              raise SystemExit('Expected Attention Grabber SVG block not found')
-          text = text.replace(old_svg, new_svg, 1)
+          pattern = re.compile(r'(?ms)^\s{10}def attention_svg\(\):\n.*?^\s{14}</svg>\'\'\'')
+          text, count = pattern.subn(new_svg.rstrip(), text, count=1)
+          if count != 1:
+              raise SystemExit(f'Attention Grabber SVG block not found: {count}')
 
           marker = "            function bind(){{var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');"
           replacement = """            function removeWhiteBackground(){{
