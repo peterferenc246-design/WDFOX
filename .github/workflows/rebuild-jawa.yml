@@ -17,6 +17,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Apply requested contact visual repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! grep -q 'WDFOX requested contact visual repair' src/styles/site.css; then
+            cat >> src/styles/site.css <<'EOF'
+
+/* WDFOX requested contact visual repair */
+.register-address{display:flex!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2!important;gap:.65rem!important;margin-top:12px!important;color:#fff!important;line-height:1.55!important;}
+.register-address strong{font-weight:800!important;color:#fff!important;}
+.contact-socials{display:flex!important;align-items:center!important;gap:12px!important;margin-top:14px!important;}
+.contact-socials a{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;border:1px solid rgba(255,255,255,.48)!important;border-radius:50%!important;background:transparent!important;color:#fff!important;text-decoration:none!important;}
+.contact-socials a svg{display:block!important;width:21px!important;height:21px!important;visibility:visible!important;opacity:1!important;color:currentColor!important;}
+.contact-socials a:hover{color:var(--orange)!important;border-color:var(--orange)!important;}
+#fox-tawk-button .fox-tawk-attention > img{display:none!important;}
+#fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
+#fox-tawk-button .fox-tawk-attention::before{content:"✍"!important;display:block!important;}
+#fox-tawk-button .fox-tawk-attention::after{content:"🤝"!important;display:block!important;}
+#fox-tawk-button .fox-attention-svg{background:transparent!important;isolation:auto!important;}
+#fox-tawk-button .fox-attention-svg image{mix-blend-mode:multiply!important;}
+EOF
+          fi
       - name: Rebuild and verify WebP
         shell: bash
         run: |
@@ -32,14 +54,15 @@ jobs:
           test "$(wc -c < public/images/cunderlik-gallery/cunderlik-jawa-final.webp)" -eq 49574
           file public/images/cunderlik-gallery/cunderlik-jawa-final.webp | grep -qi 'webp'
           echo "1663b05e84fd3dc0d6a9bda0828ef93c7537bcedb593cb0564c3f7bcd47ba002  public/images/cunderlik-gallery/cunderlik-jawa-final.webp" | sha256sum -c -
-      - name: Commit rebuilt image
+      - name: Commit rebuilt image and contact repair
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/images/cunderlik-gallery/cunderlik-jawa-final.webp
+          git add src/styles/site.css public/images/cunderlik-gallery/cunderlik-jawa-final.webp
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Rebuild verified Jawa gallery image'
+          git diff --cached --check
+          git commit -m 'Repair contact visuals without changing other features'
           git pull --rebase origin main
           git push origin HEAD:main
