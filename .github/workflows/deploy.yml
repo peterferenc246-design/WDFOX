@@ -73,13 +73,18 @@ jobs:
                 <text font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" fill="#f58220" stroke="#005eff" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-attention-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
                 <text x="20" y="82" font-size="28" transform="rotate(-18 20 82)">👋</text>
                 <circle cx="104" cy="94" r="36" fill="#087cf0" filter="url(#fox-attention-shadow)"/>
-                <g transform="translate(104 94) scale(.58) translate(-60 -60)">
-                  <path d="M18 42L27 10l25 18 16-9 25 18 9 32c-2 28-22 47-51 47S20 87 18 42z" fill="#f58220" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M31 25l4 29 17-16zM89 25l-4 29-17-16z" fill="#fff" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
-                  <path d="M31 82c8-15 20-21 29-21s21 6 29 21c-7 13-17 20-29 20S38 95 31 82z" fill="#fff" stroke="#171717" stroke-width="5"/>
-                  <ellipse cx="48" cy="61" rx="6" ry="8" fill="#171717"/><ellipse cx="72" cy="61" rx="6" ry="8" fill="#171717"/>
-                  <path d="M54 76q6-6 12 0l-6 6z" fill="#171717"/>
-                  <path d="M60 82q-6 9-15 5M60 82q6 9 15 5" fill="none" stroke="#171717" stroke-width="4" stroke-linecap="round"/>
+                <g transform="translate(104 94) scale(.56) translate(-60 -60)">
+                  <path d="M19 48L27 12L53 31L60 27L67 31L93 12L101 48C101 82 85 108 60 108S19 82 19 48Z" fill="#f58220" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
+                  <path d="M27 12L53 31L39 55L25 42Z" fill="#5b2a86" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
+                  <path d="M93 12L67 31L81 55L95 42Z" fill="#5b2a86" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
+                  <path d="M28 47L39 55L53 42L60 48L67 42L81 55L92 47L87 72C83 91 73 101 60 101S37 91 33 72Z" fill="#fff" stroke="#171717" stroke-width="5" stroke-linejoin="round"/>
+                  <path d="M34 74Q45 60 60 60T86 74Q80 91 60 91T34 74Z" fill="#fff"/>
+                  <ellipse cx="46" cy="61" rx="5.5" ry="8" fill="#171717"/>
+                  <ellipse cx="74" cy="61" rx="5.5" ry="8" fill="#171717"/>
+                  <circle cx="48" cy="59" r="1.7" fill="#fff"/>
+                  <circle cx="76" cy="59" r="1.7" fill="#fff"/>
+                  <path d="M53 76Q60 70 67 76L60 83Z" fill="#171717"/>
+                  <path d="M60 83Q54 91 46 87M60 83Q66 91 74 87" fill="none" stroke="#171717" stroke-width="4" stroke-linecap="round"/>
                 </g>
               </svg>'''
 
