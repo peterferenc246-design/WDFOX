@@ -488,3 +488,10 @@ body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; color: var(
 #fox-tawk-button .fox-tawk-attention{isolation:auto!important;}
 #fox-tawk-button .fox-attention-svg{background:transparent!important;}
 #fox-tawk-button .fox-attention-svg image{mix-blend-mode:multiply!important;}
+
+
+/* WDFOX requested Tawk image button */
+#fox-tawk-button{background:transparent!important;}
+#fox-tawk-button .fox-tawk-attention{background:transparent!important;box-shadow:none!important;border:0!important;}
+#fox-tawk-button .fox-tawk-attention > *{display:none!important;}
+#fox-tawk-button .fox-tawk-attention::after{content:""!important;display:block!important;position:absolute!important;inset:0!important;background-image:url("https://webdizain-bbyygbqm.manus.space/manus-storage/webdizainfox-fox-hero_22939d0f.png")!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;transform:none!important;filter:drop-shadow(0 8px 10px rgba(0,0,0,.22))!important;}
