@@ -15,30 +15,38 @@
   window.Tawk_API.autoStart = true;
   window.Tawk_API.customStyle = window.Tawk_API.customStyle || { zIndex: '2147483647' };
 
-  function showNativeWidget() {
+  // The FOX button is the only visible chat launcher.
+  // Tawk's native floating launcher is hidden; the chat window remains available
+  // through the FOX button below.
+  function hideNativeWidget() {
     try {
-      if (window.Tawk_API && typeof window.Tawk_API.showWidget === 'function') {
-        window.Tawk_API.showWidget();
+      if (window.Tawk_API && typeof window.Tawk_API.hideWidget === 'function') {
+        window.Tawk_API.hideWidget();
       }
     } catch (_) {}
   }
 
-  // Keep Tawk's own desktop widget visible. Do not auto-open the chat window.
   window.Tawk_API.onLoad = function () {
+    hideNativeWidget();
     if (window.__WDFOX_TAWK_OPEN_PENDING && typeof window.Tawk_API.maximize === 'function') {
       window.__WDFOX_TAWK_OPEN_PENDING = false;
       window.Tawk_API.maximize();
-      return;
     }
-    showNativeWidget();
   };
 
   window.Tawk_API.onStatusChange = function () {
-    showNativeWidget();
+    hideNativeWidget();
   };
 
-  // Keep the FOX chat button at the intended fixed position without changing
-  // the native Tawk chat window itself.
+  // Some Tawk loaders call showWidget after their own initialization.
+  // Re-hide only the native launcher; do not touch the chat window.
+  var hideAttempts = 0;
+  var hideTimer = window.setInterval(function () {
+    hideAttempts += 1;
+    hideNativeWidget();
+    if (hideAttempts >= 30) window.clearInterval(hideTimer);
+  }, 250);
+
   function styleFoxChatButton() {
     if (document.getElementById('wdfox-chat-button-style')) return;
     var style = document.createElement('style');
@@ -52,8 +60,6 @@
   }
   styleFoxChatButton();
 
-  // tawk-language-loader.js may already have loaded the localized Tawk script.
-  // Never inject a second Tawk embed, which can suppress the native widget.
   var existingEmbed = document.querySelector('script[src*="embed.tawk.to/"]');
   if (!existingEmbed && !document.getElementById('wdfox-native-tawk-embed')) {
     var script = document.createElement('script');
@@ -65,7 +71,7 @@
     document.body.appendChild(script);
   }
 
-  // Keep the existing FOX Live chat control connected to the native Tawk API.
+  // Existing FOX Live button opens the Tawk chat window.
   document.addEventListener('click', function (event) {
     var target = event.target;
     if (!target || !target.closest) return;
