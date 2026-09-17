@@ -37,6 +37,21 @@
     showNativeWidget();
   };
 
+  // Keep the FOX chat button at the intended fixed position without changing
+  // the native Tawk chat window itself.
+  function styleFoxChatButton() {
+    if (document.getElementById('wdfox-chat-button-style')) return;
+    var style = document.createElement('style');
+    style.id = 'wdfox-chat-button-style';
+    style.textContent = [
+      '.live-chat-bubble{position:fixed!important;right:72px!important;bottom:12px!important;left:auto!important;top:auto!important;z-index:2147483646!important;}',
+      '@media(max-width:900px){.live-chat-bubble{right:18px!important;bottom:18px!important;}}',
+      '@media(max-width:560px){.live-chat-bubble{right:14px!important;bottom:14px!important;}}'
+    ].join('');
+    (document.head || document.documentElement).appendChild(style);
+  }
+  styleFoxChatButton();
+
   // tawk-language-loader.js may already have loaded the localized Tawk script.
   // Never inject a second Tawk embed, which can suppress the native widget.
   var existingEmbed = document.querySelector('script[src*="embed.tawk.to/"]');
