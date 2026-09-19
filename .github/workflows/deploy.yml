@@ -82,7 +82,11 @@ jobs:
           #fox-tawk-launcher:hover{{transform:translateY(-3px) scale(1.025)}}
           #fox-tawk-launcher:active{{transform:scale(.97)}}
           #fox-tawk-launcher svg{{display:block;width:100%;height:100%;overflow:visible}}
-          @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}}}
+          #fox-tawk-panel{{position:fixed;right:18px;bottom:18px;z-index:2147483647;width:370px;height:min(590px,calc(100vh - 36px));display:none;background:#fff;border-radius:16px;box-shadow:0 14px 50px rgba(0,0,0,.3);overflow:hidden}}
+          #fox-tawk-panel.is-open{{display:block}}
+          #fox-tawk-frame{{display:block;width:100%;height:100%;border:0;background:#fff}}
+          #fox-tawk-close{{position:absolute;right:9px;top:8px;z-index:3;width:34px;height:34px;border:0;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font:700 25px/32px Arial,sans-serif;cursor:pointer}}
+          @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}#fox-tawk-panel{{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);border-radius:14px}}}}
           </style>
           <button id="fox-tawk-launcher" type="button" aria-label="Open live chat">
             <svg viewBox="0 0 250 174" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
@@ -95,43 +99,35 @@ jobs:
               <text x="207" y="110" text-anchor="middle" font-size="28" transform="rotate(5 207 110)">🤝</text>
             </svg>
           </button>
+          <div id="fox-tawk-panel" role="dialog" aria-label="Live chat" aria-hidden="true">
+            <button id="fox-tawk-close" type="button" aria-label="Close live chat">×</button>
+            <iframe id="fox-tawk-frame" title="Tawk live chat" data-src="https://tawk.to/chat/{PROPERTY_ID}/{widget}" allow="microphone; camera; autoplay; clipboard-write"></iframe>
+          </div>
           <script id="fox-tawk-direct-config">
           window.Tawk_API=window.Tawk_API||{{}};
           window.Tawk_LoadStart=new Date();
-          window.__FOX_TAWK_READY=false;
-          window.__FOX_TAWK_PENDING=false;
-          window.Tawk_API.onLoad=function(){{
-            window.__FOX_TAWK_READY=true;
-            try{{
-              if(window.__FOX_TAWK_PENDING){{
-                window.Tawk_API.showWidget();
-                window.Tawk_API.maximize();
-                window.__FOX_TAWK_PENDING=false;
-              }}else{{
-                window.Tawk_API.hideWidget();
-              }}
-            }}catch(e){{}}
-          }};
-          window.Tawk_API.onChatMaximized=function(){{
-            var launcher=document.getElementById('fox-tawk-launcher');
-            if(launcher)launcher.style.display='none';
-          }};
-          window.Tawk_API.onChatMinimized=function(){{
-            var launcher=document.getElementById('fox-tawk-launcher');
-            if(launcher)launcher.style.display='block';
-          }};
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
+            var panel=document.getElementById('fox-tawk-panel');
+            var frame=document.getElementById('fox-tawk-frame');
+            var close=document.getElementById('fox-tawk-close');
             function openSmallChat(e){{
               if(e){{e.preventDefault();e.stopPropagation();}}
-              window.__FOX_TAWK_PENDING=true;
-              var api=window.Tawk_API||{{}};
-              if(window.__FOX_TAWK_READY&&typeof api.maximize==='function'){{
-                try{{api.showWidget();api.maximize();window.__FOX_TAWK_PENDING=false;}}catch(err){{}}
-              }}
+              if(!frame.src||frame.src==='about:blank')frame.src=frame.dataset.src;
+              panel.classList.add('is-open');
+              panel.setAttribute('aria-hidden','false');
+              launcher.style.display='none';
+            }}
+            function closeSmallChat(e){{
+              if(e){{e.preventDefault();e.stopPropagation();}}
+              panel.classList.remove('is-open');
+              panel.setAttribute('aria-hidden','true');
+              launcher.style.display='block';
             }}
             launcher.addEventListener('click',openSmallChat,false);
             launcher.addEventListener('touchend',openSmallChat,{{passive:false}});
+            close.addEventListener('click',closeSmallChat,false);
+            document.addEventListener('keydown',function(e){{if(e.key==='Escape')closeSmallChat(e)}});
           }})();
           </script>
           <script id="fox-tawk-direct" async src="https://embed.tawk.to/{PROPERTY_ID}/{widget}" charset="UTF-8" crossorigin="*"></script>'''
