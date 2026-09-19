@@ -77,6 +77,15 @@ jobs:
               </svg>'''
 
           def snippet(widget):
+              return f'''<script id="fox-tawk-direct-config">
+          window.Tawk_API=window.Tawk_API||{{}};
+          window.Tawk_LoadStart=new Date();
+          window.Tawk_API.onLoad=function(){{
+            try{{window.Tawk_API.showWidget();}}catch(e){{}}
+          }};
+          </script>
+          <script id="fox-tawk-direct" async src="https://embed.tawk.to/{PROPERTY_ID}/{widget}" charset="UTF-8" crossorigin="*"></script>'''
+
               return f'''<style id="fox-tawk-button-style">
           #fox-tawk-button{{display:none!important}}
           #fox-tawk-button .fox-tawk-attention{{position:relative!important;display:block!important;width:240px!important;height:140px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}
@@ -138,7 +147,7 @@ jobs:
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q '#fox-tawk-button{display:none!important}' <<<"$html" && grep -q 'loadChat()' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-direct"' <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
               echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
