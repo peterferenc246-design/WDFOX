@@ -32,6 +32,7 @@ jobs:
       - name: Build Astro site
         run: pnpm run build
       - name: Install desktop Attention Grabber and native Tawk chat
+        if: ${{ false }}
         run: |
           python - <<'PY'
           import re
@@ -130,19 +131,19 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live Attention Grabber and Tawk
+      - name: Verify live Tawk loader without fox overlay
         shell: bash
         run: |
           set -euo pipefail
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'fox-tawk-attention' <<<"$html" && grep -q 'I am here for you!' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
-              echo 'LIVE_DESKTOP_ATTENTION_GRABBER=OK'
+            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'tawk-language-loader.js' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+              echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
             fi
             sleep 8
           done
-          echo 'LIVE_DESKTOP_ATTENTION_GRABBER=FAIL'
+          echo 'LIVE_TAWK_WITHOUT_FOX_OVERLAY=FAIL'
           exit 1
