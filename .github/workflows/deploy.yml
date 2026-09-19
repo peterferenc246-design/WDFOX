@@ -78,7 +78,7 @@ jobs:
 
           def snippet(widget):
               return f'''<style id="fox-tawk-launcher-style">
-          #fox-tawk-launcher{{position:fixed;right:18px;bottom:18px;z-index:2147483646;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation}}
+          #fox-tawk-launcher{{position:fixed!important;right:18px;bottom:18px;z-index:2147483647!important;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation}}
           #fox-tawk-launcher:hover{{transform:translateY(-3px) scale(1.025)}}
           #fox-tawk-launcher:active{{transform:scale(.97)}}
           #fox-tawk-launcher svg{{display:block;width:100%;height:100%;overflow:visible}}
@@ -98,11 +98,21 @@ jobs:
           <script id="fox-tawk-direct-config">
           window.Tawk_API=window.Tawk_API||{{}};
           window.Tawk_LoadStart=new Date();
-          window.Tawk_API.onLoad=function(){{try{{window.Tawk_API.showWidget();}}catch(e){{}}}};
-          document.getElementById('fox-tawk-launcher').addEventListener('click',function(e){{
-            e.preventDefault();
-            try{{window.Tawk_API.showWidget();window.Tawk_API.maximize();}}catch(err){{window.open('https://tawk.to/chat/{PROPERTY_ID}/{widget}','_blank','noopener,noreferrer')}}
-          }});
+          window.Tawk_API.onLoad=function(){{try{{window.Tawk_API.hideWidget();}}catch(e){{}}}};
+          (function(){{
+            var launcher=document.getElementById('fox-tawk-launcher');
+            function openTawk(e){{
+              if(e){{e.preventDefault();e.stopPropagation();}}
+              var api=window.Tawk_API||{{}};
+              if(typeof api.maximize==='function'){{
+                try{{api.showWidget();api.maximize();launcher.style.display='none';return;}}catch(err){{}}
+              }}
+              window.open('https://tawk.to/chat/{PROPERTY_ID}/{widget}','_blank');
+            }}
+            launcher.addEventListener('click',openTawk,false);
+            launcher.addEventListener('touchend',openTawk,{{passive:false}});
+            launcher.addEventListener('keydown',function(e){{if(e.key==='Enter'||e.key===' ')openTawk(e)}});
+          }})();
           </script>
           <script id="fox-tawk-direct" async src="https://embed.tawk.to/{PROPERTY_ID}/{widget}" charset="UTF-8" crossorigin="*"></script>'''
 
