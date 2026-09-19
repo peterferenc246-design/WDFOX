@@ -77,12 +77,21 @@ jobs:
               </svg>'''
 
           def snippet(widget):
-              return f'''<script id="fox-tawk-direct-config">
+              return f'''<style id="fox-tawk-launcher-style">
+          #fox-tawk-launcher{{position:fixed;right:20px;bottom:20px;z-index:2147483646;width:64px;height:64px;border:0;border-radius:50%;display:grid;place-items:center;background:#f36a0a;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.28);font:700 28px/1 system-ui,sans-serif;cursor:pointer}}
+          #fox-tawk-launcher:hover{{background:#df5700;transform:translateY(-2px)}}
+          @media(max-width:700px){{#fox-tawk-launcher{{right:14px;bottom:14px;width:60px;height:60px}}}}
+          </style>
+          <button id="fox-tawk-launcher" type="button" aria-label="Open live chat">💬</button>
+          <script id="fox-tawk-direct-config">
           window.Tawk_API=window.Tawk_API||{{}};
           window.Tawk_LoadStart=new Date();
           window.Tawk_API.onLoad=function(){{
             try{{window.Tawk_API.showWidget();}}catch(e){{}}
           }};
+          document.getElementById('fox-tawk-launcher').addEventListener('click',function(){{
+            try{{window.Tawk_API.showWidget();window.Tawk_API.maximize();}}catch(e){{}}
+          }});
           </script>
           <script id="fox-tawk-direct" async src="https://embed.tawk.to/{PROPERTY_ID}/{widget}" charset="UTF-8" crossorigin="*"></script>'''
 
@@ -147,7 +156,7 @@ jobs:
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-direct"' <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q 'id="fox-tawk-direct"' <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
               echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
