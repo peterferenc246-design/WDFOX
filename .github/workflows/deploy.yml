@@ -82,11 +82,7 @@ jobs:
           #fox-tawk-launcher:hover{{transform:translateY(-3px) scale(1.025)}}
           #fox-tawk-launcher:active{{transform:scale(.97)}}
           #fox-tawk-launcher svg{{display:block;width:100%;height:100%;overflow:visible}}
-          #fox-tawk-panel{{position:fixed;right:18px;bottom:18px;z-index:2147483647;width:370px;height:min(590px,calc(100vh - 36px));display:none;background:#fff;border-radius:16px;box-shadow:0 14px 50px rgba(0,0,0,.3);overflow:hidden}}
-          #fox-tawk-panel.is-open{{display:block}}
-          #fox-tawk-frame{{display:block;width:100%;height:100%;border:0;background:#fff}}
-          #fox-tawk-close{{position:absolute;right:9px;top:8px;z-index:3;width:34px;height:34px;border:0;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font:700 25px/32px Arial,sans-serif;cursor:pointer}}
-          @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}#fox-tawk-panel{{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);border-radius:14px}}}}
+          @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}}}
           </style>
           <button id="fox-tawk-launcher" type="button" aria-label="Open live chat">
             <svg viewBox="0 0 250 174" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
@@ -99,38 +95,62 @@ jobs:
               <text x="207" y="110" text-anchor="middle" font-size="28" transform="rotate(5 207 110)">🤝</text>
             </svg>
           </button>
-          <div id="fox-tawk-panel" role="dialog" aria-label="Live chat" aria-hidden="true">
-            <button id="fox-tawk-close" type="button" aria-label="Close live chat">×</button>
-            <iframe id="fox-tawk-frame" title="Tawk live chat" data-src="https://tawk.to/chat/{PROPERTY_ID}/{widget}" allow="microphone; camera; autoplay; clipboard-write"></iframe>
-          </div>
           <script id="fox-tawk-direct-config">
-          window.Tawk_API=window.Tawk_API||{{}};
-          window.Tawk_LoadStart=new Date();
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
-            var panel=document.getElementById('fox-tawk-panel');
-            var frame=document.getElementById('fox-tawk-frame');
-            var close=document.getElementById('fox-tawk-close');
-            function openSmallChat(e){{
-              if(e){{e.preventDefault();e.stopPropagation();}}
-              if(!frame.src||frame.src==='about:blank')frame.src=frame.dataset.src;
-              panel.classList.add('is-open');
-              panel.setAttribute('aria-hidden','false');
+            var loaded=false,loading=false,pending=false;
+            window.Tawk_API=window.Tawk_API||{{}};
+            window.Tawk_LoadStart=new Date();
+
+            function maximizeOfficialWidget(){{
+              if(!loaded||!pending)return;
+              try{{
+                window.Tawk_API.showWidget();
+                window.Tawk_API.maximize();
+                pending=false;
+              }}catch(e){{}}
+            }}
+
+            window.Tawk_API.onLoad=function(){{
+              loaded=true;
+              maximizeOfficialWidget();
+            }};
+            window.Tawk_API.onChatMaximized=function(){{
               launcher.style.display='none';
-            }}
-            function closeSmallChat(e){{
-              if(e){{e.preventDefault();e.stopPropagation();}}
-              panel.classList.remove('is-open');
-              panel.setAttribute('aria-hidden','true');
+            }};
+            window.Tawk_API.onChatMinimized=function(){{
               launcher.style.display='block';
+            }};
+            window.Tawk_API.onChatHidden=function(){{
+              launcher.style.display='block';
+            }};
+
+            function loadOfficialTawk(){{
+              if(loaded){{maximizeOfficialWidget();return;}}
+              if(loading)return;
+              loading=true;
+              var s1=document.createElement('script');
+              var s0=document.getElementsByTagName('script')[0];
+              s1.id='fox-tawk-direct';
+              s1.async=true;
+              s1.src='https://embed.tawk.to/{PROPERTY_ID}/{widget}';
+              s1.charset='UTF-8';
+              s1.setAttribute('crossorigin','*');
+              s1.onerror=function(){{loading=false;}};
+              s0.parentNode.insertBefore(s1,s0);
             }}
-            launcher.addEventListener('click',openSmallChat,false);
-            launcher.addEventListener('touchend',openSmallChat,{{passive:false}});
-            close.addEventListener('click',closeSmallChat,false);
-            document.addEventListener('keydown',function(e){{if(e.key==='Escape')closeSmallChat(e)}});
+
+            function openOfficialTawk(e){{
+              if(e){{e.preventDefault();e.stopPropagation();}}
+              pending=true;
+              if(loaded)maximizeOfficialWidget();
+              else loadOfficialTawk();
+            }}
+
+            launcher.addEventListener('click',openOfficialTawk,false);
+            launcher.addEventListener('touchend',openOfficialTawk,{{passive:false}});
           }})();
-          </script>
-          <script id="fox-tawk-direct" async src="https://embed.tawk.to/{PROPERTY_ID}/{widget}" charset="UTF-8" crossorigin="*"></script>'''
+          </script>'''
 
               return f'''<style id="fox-tawk-button-style">
           #fox-tawk-button{{display:none!important}}
@@ -193,7 +213,7 @@ jobs:
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q 'id="fox-tawk-direct"' <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html"; then
+            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q "s1.id='fox-tawk-direct'" <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html"; then
               echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
