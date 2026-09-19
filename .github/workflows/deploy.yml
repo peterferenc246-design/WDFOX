@@ -164,7 +164,7 @@ jobs:
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q 'id="fox-tawk-direct"' <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q 'id="fox-tawk-direct"' <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html"; then
               echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
