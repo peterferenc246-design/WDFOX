@@ -84,7 +84,7 @@ jobs:
           #fox-tawk-launcher svg{{display:block;width:100%;height:100%;overflow:visible}}
           @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}}}
           </style>
-          <a id="fox-tawk-launcher" href="https://tawk.to/chat/{PROPERTY_ID}/{widget}" target="_blank" rel="noopener noreferrer" aria-label="Open live chat">
+          <button id="fox-tawk-launcher" type="button" aria-label="Open live chat">
             <svg viewBox="0 0 250 174" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
               <defs><path id="fox-launcher-arc" d="M 8 76 Q 125 2 242 76"/></defs>
               <text font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="900" fill="#ff922d" stroke="#0664e8" stroke-width="2.8" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-launcher-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
@@ -94,14 +94,23 @@ jobs:
               <text x="125" y="68" text-anchor="middle" font-size="29">❤️</text>
               <text x="207" y="110" text-anchor="middle" font-size="28" transform="rotate(5 207 110)">🤝</text>
             </svg>
-          </a>
+          </button>
           <script id="fox-tawk-direct-config">
           window.Tawk_API=window.Tawk_API||{{}};
           window.Tawk_LoadStart=new Date();
           window.__FOX_TAWK_READY=false;
+          window.__FOX_TAWK_PENDING=false;
           window.Tawk_API.onLoad=function(){{
             window.__FOX_TAWK_READY=true;
-            try{{window.Tawk_API.hideWidget();}}catch(e){{}}
+            try{{
+              if(window.__FOX_TAWK_PENDING){{
+                window.Tawk_API.showWidget();
+                window.Tawk_API.maximize();
+                window.__FOX_TAWK_PENDING=false;
+              }}else{{
+                window.Tawk_API.hideWidget();
+              }}
+            }}catch(e){{}}
           }};
           window.Tawk_API.onChatMaximized=function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
@@ -113,14 +122,16 @@ jobs:
           }};
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
-            launcher.addEventListener('click',function(e){{
+            function openSmallChat(e){{
+              if(e){{e.preventDefault();e.stopPropagation();}}
+              window.__FOX_TAWK_PENDING=true;
               var api=window.Tawk_API||{{}};
               if(window.__FOX_TAWK_READY&&typeof api.maximize==='function'){{
-                e.preventDefault();
-                e.stopPropagation();
-                try{{api.showWidget();api.maximize();}}catch(err){{window.__FOX_TAWK_READY=false;}}
+                try{{api.showWidget();api.maximize();window.__FOX_TAWK_PENDING=false;}}catch(err){{}}
               }}
-            }},false);
+            }}
+            launcher.addEventListener('click',openSmallChat,false);
+            launcher.addEventListener('touchend',openSmallChat,{{passive:false}});
           }})();
           </script>
           <script id="fox-tawk-direct" async src="https://embed.tawk.to/{PROPERTY_ID}/{widget}" charset="UTF-8" crossorigin="*"></script>'''
