@@ -32,7 +32,6 @@ jobs:
       - name: Build Astro site
         run: pnpm run build
       - name: Install desktop Attention Grabber and native Tawk chat
-        if: ${{ false }}
         run: |
           python - <<'PY'
           import re
@@ -79,7 +78,7 @@ jobs:
 
           def snippet(widget):
               return f'''<style id="fox-tawk-button-style">
-          #fox-tawk-button{{position:fixed!important;right:18px!important;bottom:18px!important;z-index:2147483646!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;margin:0!important;padding:0!important}}
+          #fox-tawk-button{{display:none!important}}
           #fox-tawk-button .fox-tawk-attention{{position:relative!important;display:block!important;width:240px!important;height:140px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}
           #fox-tawk-button .fox-attention-svg{{display:block!important;width:240px!important;height:140px!important;overflow:visible!important;transition:transform .18s ease!important}}
           #fox-tawk-button .fox-tawk-attention:hover .fox-attention-svg{{transform:scale(1.05) rotate(-1deg)!important}}
@@ -97,7 +96,8 @@ jobs:
             function openChat(){{var a=window.Tawk_API;if(a&&typeof a.showWidget==='function')try{{a.showWidget()}}catch(e){{}}if(a&&typeof a.maximize==='function')try{{a.maximize()}}catch(e){{}}}}
             function loadChat(){{if(loaded){{openChat();return}}if(loading)return;loading=true;window.Tawk_API=window.Tawk_API||{{}};window.Tawk_LoadStart=new Date();window.Tawk_API.customStyle={{zIndex:'2147483647 !important'}};window.Tawk_API.onLoad=function(){{loaded=true;loading=false;openChat()}};var s=document.createElement('script');s.async=true;s.src='https://embed.tawk.to/'+PROPERTY_ID+'/'+WIDGET_ID;s.charset='UTF-8';s.setAttribute('crossorigin','*');s.onload=function(){{loaded=true;loading=false;openChat()}};document.head.appendChild(s)}}
             function bind(){{var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');buttons.forEach(function(b){{if(b.dataset.wdfxTawkBound==='1')return;b.dataset.wdfxTawkBound='1';b.addEventListener('click',function(e){{e.preventDefault();loadChat()}},false);b.addEventListener('touchend',function(e){{e.preventDefault();loadChat()}},{{passive:false}})}})}}
-            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind()
+            function init(){{bind();loadChat()}}
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()
           }})();
           </script>'''
 
@@ -131,14 +131,14 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live Tawk loader without fox overlay
+      - name: Verify live Tawk loader without visible fox overlay
         shell: bash
         run: |
           set -euo pipefail
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'tawk-language-loader.js' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
+            if grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q '#fox-tawk-button{display:none!important}' <<<"$html" && grep -q 'loadChat()' <<<"$html" && grep -q '1k1b9121q' <<<"$html" && ! grep -q 'tawk.to/chat/' <<<"$html"; then
               echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
