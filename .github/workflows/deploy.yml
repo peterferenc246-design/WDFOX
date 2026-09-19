@@ -95,60 +95,47 @@ jobs:
               <text x="207" y="110" text-anchor="middle" font-size="28" transform="rotate(5 207 110)">🤝</text>
             </svg>
           </button>
+          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>
           <script id="fox-tawk-direct-config">
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
-            var loaded=false,loading=false,pending=false;
+            var pending=false;
             window.Tawk_API=window.Tawk_API||{{}};
-            window.Tawk_LoadStart=new Date();
+            var previousOnLoad=window.Tawk_API.onLoad;
 
-            function maximizeOfficialWidget(){{
-              if(!loaded||!pending)return;
+            function openOfficialWidget(){{
+              var api=window.Tawk_API||{{}};
+              if(typeof api.maximize!=='function')return false;
               try{{
-                window.Tawk_API.showWidget();
-                window.Tawk_API.maximize();
+                if(typeof api.showWidget==='function')api.showWidget();
+                api.maximize();
                 pending=false;
-              }}catch(e){{}}
+                return true;
+              }}catch(e){{return false;}}
             }}
 
             window.Tawk_API.onLoad=function(){{
-              loaded=true;
-              maximizeOfficialWidget();
+              try{{if(typeof previousOnLoad==='function')previousOnLoad();}}catch(e){{}}
+              if(pending)window.setTimeout(openOfficialWidget,50);
             }};
-            window.Tawk_API.onChatMaximized=function(){{
-              launcher.style.display='none';
-            }};
-            window.Tawk_API.onChatMinimized=function(){{
-              launcher.style.display='block';
-            }};
-            window.Tawk_API.onChatHidden=function(){{
-              launcher.style.display='block';
-            }};
+            window.Tawk_API.onChatMaximized=function(){{launcher.style.display='none';}};
+            window.Tawk_API.onChatMinimized=function(){{launcher.style.display='block';}};
+            window.Tawk_API.onChatHidden=function(){{launcher.style.display='block';}};
 
-            function loadOfficialTawk(){{
-              if(loaded){{maximizeOfficialWidget();return;}}
-              if(loading)return;
-              loading=true;
-              var s1=document.createElement('script');
-              var s0=document.getElementsByTagName('script')[0];
-              s1.id='fox-tawk-direct';
-              s1.async=true;
-              s1.src='https://embed.tawk.to/{PROPERTY_ID}/{widget}';
-              s1.charset='UTF-8';
-              s1.setAttribute('crossorigin','*');
-              s1.onerror=function(){{loading=false;}};
-              s0.parentNode.insertBefore(s1,s0);
-            }}
-
-            function openOfficialTawk(e){{
+            function requestOfficialWidget(e){{
               if(e){{e.preventDefault();e.stopPropagation();}}
               pending=true;
-              if(loaded)maximizeOfficialWidget();
-              else loadOfficialTawk();
+              if(!openOfficialWidget()){{
+                var attempts=0;
+                var timer=window.setInterval(function(){{
+                  attempts++;
+                  if(openOfficialWidget()||attempts>=100)window.clearInterval(timer);
+                }},100);
+              }}
             }}
 
-            launcher.addEventListener('click',openOfficialTawk,false);
-            launcher.addEventListener('touchend',openOfficialTawk,{{passive:false}});
+            launcher.addEventListener('click',requestOfficialWidget,false);
+            launcher.addEventListener('touchend',requestOfficialWidget,{{passive:false}});
           }})();
           </script>'''
 
@@ -213,7 +200,7 @@ jobs:
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5; do
             html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/1.0' "$url" || true)"
-            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q "s1.id='fox-tawk-direct'" <<<"$html" && grep -q 'embed.tawk.to/6a951d52c3c46c344587662a/1k1b9121q' <<<"$html"; then
+            if ! grep -q 'id="fox-tawk-button"' <<<"$html" && grep -q 'id="fox-tawk-launcher"' <<<"$html" && grep -q 'id="fox-tawk-language-loader"' <<<"$html" && grep -q '/tawk-language-loader.js' <<<"$html"; then
               echo 'LIVE_FOX_OVERLAY=REMOVED'
               echo 'LIVE_TAWK_WIDGET=1k1b9121q'
               exit 0
