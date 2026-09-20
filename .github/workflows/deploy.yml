@@ -100,18 +100,6 @@ jobs:
             <label style="display:block;padding:8px"><input type="checkbox" id="fox-chat-floating"> <span id="fox-chat-floating-label">Plávajúce okno</span></label>
             <span id="fox-chat-status" role="status"></span>
           </details>
-          <style id="fox-tawk-size">
-          @media (min-width:701px){
-            iframe[src*="tawk.to"]{
-              width:350px!important;
-              height:560px!important;
-              max-width:calc(100vw - 20px)!important;
-              max-height:calc(100vh - 20px)!important;
-              right:18px!important;
-              bottom:18px!important;
-            }
-          }
-          </style>
           <script id="fox-tawk-direct-config">
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
