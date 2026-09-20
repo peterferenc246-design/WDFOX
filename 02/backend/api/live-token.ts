@@ -46,12 +46,16 @@ export async function POST(request: Request): Promise<Response> {
     const newSessionExpireTime = new Date(now + 60 * 1000).toISOString();
     const generationConfig = {
       responseModalities:['AUDIO'],
-      inputAudioTranscription:{},
-      outputAudioTranscription:{},
       translationConfig:{
         targetLanguageCode,
         echoTargetLanguage:false
       }
+    };
+    const bidiGenerateContentSetup = {
+      model:`models/${MODEL}`,
+      generationConfig,
+      inputAudioTranscription:{},
+      outputAudioTranscription:{}
     };
 
     const upstream = await fetch(TOKEN_API,{
@@ -61,23 +65,20 @@ export async function POST(request: Request): Promise<Response> {
         uses:1,
         expireTime,
         newSessionExpireTime,
-        bidiGenerateContentSetup:{
-          model:`models/${MODEL}`,
-          generationConfig
-        }
+        bidiGenerateContentSetup
       })
     });
 
     const raw = await upstream.text();
     if (!upstream.ok) {
-      return reply({error:`Gemini token HTTP ${upstream.status}`,detail:raw.slice(0,700)},upstream.status,request);
+      return reply({error:`Gemini token HTTP ${upstream.status}`,detail:raw.slice(0,900)},upstream.status,request);
     }
 
     const data = JSON.parse(raw);
     const token = String(data?.name || '').trim();
     if (!token) return reply({error:'Gemini did not return an ephemeral token'},502,request);
 
-    return reply({token,model:MODEL,target:targetLanguageCode,expireTime,newSessionExpireTime,config:generationConfig},200,request);
+    return reply({token,model:MODEL,target:targetLanguageCode,expireTime,newSessionExpireTime,setup:bidiGenerateContentSetup},200,request);
   } catch (error: any) {
     console.error('live-token failed',error);
     return reply({error:error?.message || 'Failed to create Gemini Live token'},500,request);
