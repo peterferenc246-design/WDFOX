@@ -78,11 +78,11 @@ jobs:
 
           def snippet(widget):
               return f'''<style id="fox-tawk-launcher-style">
-          #fox-tawk-launcher{{position:fixed!important;inset:auto!important;right:18px;bottom:18px;margin:0!important;z-index:2147483647!important;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation;isolation:isolate}}
+          #fox-tawk-launcher{{position:fixed!important;top:auto!important;left:auto!important;right:18px!important;bottom:18px!important;margin:0!important;z-index:2147483647!important;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation;isolation:isolate}}
           #fox-tawk-launcher:hover{{transform:translateY(-3px) scale(1.025)}}
           #fox-tawk-launcher:active{{transform:scale(.97)}} #fox-tawk-launcher:focus-visible{{outline:3px solid #0664e8;outline-offset:3px}}
           #fox-tawk-launcher svg{{display:block;width:100%;height:100%;overflow:visible;pointer-events:none!important}} #fox-tawk-launcher svg *{{pointer-events:none!important}}
-          @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}}}
+          @media(max-width:700px){{#fox-tawk-launcher{{right:4px!important;bottom:8px!important;width:210px;height:146px}}}}
           </style>
           <button id="fox-tawk-launcher" type="button" popover="manual" aria-label="Open live chat">
             <svg viewBox="0 0 250 174" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
