@@ -199,8 +199,6 @@ jobs:
           </script>
           <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>'''
 
-              return f'''<style id="fox-tawk-launcher-style">
-
           for path in Path('dist').rglob('*.html'):
               text = clean(path.read_text(encoding='utf-8'))
               m = re.search(r'<html[^>]*lang=["\']([^"\']+)["\']', text, re.I)
