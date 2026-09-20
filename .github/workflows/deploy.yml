@@ -122,6 +122,7 @@ jobs:
               var api=window.Tawk_API||{{}};
               if(typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
               try{{
+                if(typeof api.start==='function')api.start({{showWidget:true}});
                 if(typeof api.showWidget==='function')api.showWidget();
                 if(typeof api.maximize==='function')api.maximize();
                 else api.toggle();
