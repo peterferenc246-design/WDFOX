@@ -9,8 +9,6 @@
   const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
   const API_URL = 'https://wdfox.vercel.app/api/gemini-audio';
 
-  // Free Tier protection: do NOT send fixed 3.2 s chunks anymore.
-  // Record small local chunks, detect actual speech, then send one request per utterance.
   const CHUNK_MS = 500;
   const SILENCE_MS = 1100;
   const MAX_UTTERANCE_MS = 12000;
@@ -234,6 +232,10 @@
       }
 
       if (r.status === 429) {
+        if (d?.code === 'DAILY_QUOTA_EXCEEDED') {
+          throw Error('Gemini Free Tier denná kvóta je dnes vyčerpaná');
+        }
+
         const headerRetry = Number(r.headers.get('Retry-After') || 0);
         const retrySeconds = Math.max(Number(d?.retryAfterSeconds || 0), headerRetry, 30);
         if (attempt < MAX_RETRIES) {
@@ -241,9 +243,7 @@
           await wait(retrySeconds * 1000);
           continue;
         }
-        throw Error(d?.code === 'DAILY_QUOTA_EXCEEDED'
-          ? 'Free Tier denná kvóta je dnes vyčerpaná'
-          : 'Gemini Free Tier limit 429 – veta zostala nepreložená');
+        throw Error('Gemini Free Tier rate limit 429 – skúste vetu po chvíli zopakovať');
       }
 
       if (r.status === 503 && attempt < MAX_RETRIES) {
