@@ -114,6 +114,7 @@ jobs:
             floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating-v3',String(floating.checked));}}catch(e){{}}status.textContent='';}});
             function showLauncher(){{launcher.style.setProperty('display','block','important');launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');}}
             window.Tawk_API=window.Tawk_API||{{}};
+            window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000'}};
             var previousOnLoad=window.Tawk_API.onLoad;
 
             function openOfficialWidget(){{
@@ -195,7 +196,7 @@ jobs:
           (function(){{
             var PROPERTY_ID='{PROPERTY_ID}',WIDGET_ID='{widget}',loaded=false,loading=false;
             function openChat(){{var a=window.Tawk_API;if(a&&typeof a.showWidget==='function')try{{a.showWidget()}}catch(e){{}}if(a&&typeof a.maximize==='function')try{{a.maximize()}}catch(e){{}}}}
-            function loadChat(){{if(loaded){{openChat();return}}if(loading)return;loading=true;window.Tawk_API=window.Tawk_API||{{}};window.Tawk_LoadStart=new Date();window.Tawk_API.customStyle={{zIndex:'2000000000'}};var previousOnLoad=window.Tawk_API.onLoad;window.Tawk_API.onLoad=function(){{try{{if(typeof previousOnLoad==='function')previousOnLoad();}}catch(e){{}}loaded=true;loading=false;openChat()}};var s=document.createElement('script');s.async=true;s.src='https://embed.tawk.to/'+PROPERTY_ID+'/'+WIDGET_ID;s.charset='UTF-8';s.setAttribute('crossorigin','*');s.onload=function(){{loaded=true;loading=false;openChat()}};document.head.appendChild(s)}}
+            function loadChat(){{if(loaded){{openChat();return}}if(document.querySelector('script[src*="embed.tawk.to/"]')){{loaded=true;return}}if(loading)return;loading=true;window.Tawk_API=window.Tawk_API||{{}};window.Tawk_LoadStart=new Date();var previousOnLoad=window.Tawk_API.onLoad;window.Tawk_API.onLoad=function(){{try{{if(typeof previousOnLoad==='function')previousOnLoad();}}catch(e){{}}loaded=true;loading=false;openChat()}};var s=document.createElement('script');s.async=true;s.src='https://embed.tawk.to/'+PROPERTY_ID+'/'+WIDGET_ID;s.charset='UTF-8';s.setAttribute('crossorigin','*');s.onload=function(){{loaded=true;loading=false;openChat()}};document.head.appendChild(s)}}
             function bind(){{var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');buttons.forEach(function(b){{if(b.dataset.wdfxTawkBound==='1')return;b.dataset.wdfxTawkBound='1';b.addEventListener('click',function(e){{e.preventDefault();loadChat()}},false);b.addEventListener('touchend',function(e){{e.preventDefault();loadChat()}},{{passive:false}})}})}}
             function init(){{bind();loadChat()}}
             if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()
