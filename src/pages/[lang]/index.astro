@@ -3,7 +3,6 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
-import FoxGeminiAudioBridge from "../../components/FoxGeminiAudioBridge.astro";
 import FoxHangupButton from "../../components/FoxHangupButton.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
@@ -24,7 +23,6 @@ const content = await getLandingContent(lang);
   <FoxHangupButton />
   <script is:inline src="/fox-webrtc-hardening.js?v=20260920a"></script>
   <FoxLiveTranslator locale={lang} />
-  <FoxGeminiAudioBridge />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
@@ -35,7 +33,56 @@ const content = await getLandingContent(lang);
 
 <script is:inline>
 (() => {
-  const LIVE='https://wdfox-live-translator.vercel.app', GEMINI='https://wdfox-gemini-api.vercel.app', nativeFetch=window.fetch.bind(window);
-  window.fetch=(input,init)=>{const url=typeof input==='string'?input:input?.url||'';if(url.startsWith('/api/')){const base=url.startsWith('/api/gemini-chat')?GEMINI:LIVE;const target=base+url;return typeof input==='string'?nativeFetch(target,init):nativeFetch(new Request(target,input),init)}return nativeFetch(input)};
+  const LIVE='https://wdfox-live-translator.vercel.app';
+  const TRANSLATOR='https://wdfox-live-translat-3tvrbla7c-peters-projects-db101134.vercel.app';
+  const nativeFetch=window.fetch.bind(window);
+
+  window.fetch=async(input,init)=>{
+    const url=typeof input==='string'?input:input?.url||'';
+
+    if(url.startsWith('/api/gemini-chat')){
+      try{
+        const original=JSON.parse(String(init?.body||'{}'));
+        const prompt=String(original?.message||'');
+        const match=prompt.match(/Translate only this spoken sentence from (.+?) to (.+?)\.[\s\S]*?Sentence:\s*([\s\S]*)$/);
+        const sourceLanguage=match?.[1]?.trim()||'English';
+        const targetLanguage=match?.[2]?.trim()||'Slovak';
+        const text=match?.[3]?.trim()||prompt;
+
+        const r=await nativeFetch(TRANSLATOR+'/api/translate-text',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Accept':'application/json'},
+          body:JSON.stringify({text,sourceLanguage,targetLanguage}),
+          cache:'no-store'
+        });
+        const d=await r.json().catch(()=>({}));
+        const translated=String(d?.translatedText||d?.translation||d?.text||'').trim();
+        return new Response(JSON.stringify({
+          text:translated,
+          translation:translated,
+          interactionId:null,
+          error:d?.error
+        }),{
+          status:r.status,
+          statusText:r.statusText,
+          headers:{'Content-Type':'application/json'}
+        });
+      }catch(e){
+        return new Response(JSON.stringify({error:e?.message||'Translation bridge failed'}),{
+          status:502,
+          headers:{'Content-Type':'application/json'}
+        });
+      }
+    }
+
+    if(url.startsWith('/api/')){
+      const target=LIVE+url;
+      return typeof input==='string'
+        ? nativeFetch(target,init)
+        : nativeFetch(new Request(target,input),init);
+    }
+
+    return nativeFetch(input,init);
+  };
 })();
 </script>
