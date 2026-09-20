@@ -199,29 +199,7 @@ jobs:
           </script>
           <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>'''
 
-              return f'''<style id="fox-tawk-button-style">
-          #fox-tawk-button{{display:none!important}}
-          #fox-tawk-button .fox-tawk-attention{{position:relative!important;display:block!important;width:240px!important;height:140px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important}}
-          #fox-tawk-button .fox-attention-svg{{display:block!important;width:240px!important;height:140px!important;overflow:visible!important;transition:transform .18s ease!important}}
-          #fox-tawk-button .fox-tawk-attention:hover .fox-attention-svg{{transform:scale(1.05) rotate(-1deg)!important}}
-          #fox-tawk-button .fox-tawk-attention:active .fox-attention-svg{{transform:scale(.97)!important}}
-          #fox-tawk-button .fox-tawk-open{{display:none!important}}
-          @media(max-width:700px){{#fox-tawk-button{{right:0!important;bottom:0!important;width:240px!important;height:140px!important;pointer-events:auto!important;overflow:visible!important}}#fox-tawk-button .fox-tawk-attention{{display:block!important}}#fox-tawk-button .fox-tawk-open{{display:none!important}}}}
-          </style>
-          <div id="fox-tawk-button" aria-label="Open live chat">
-            <button class="fox-tawk-attention" type="button" aria-label="Open live chat">{attention_svg()}</button>
-            <button class="fox-tawk-open" type="button" aria-label="Open live chat"><span>💬</span>Live chat</button>
-          </div>
-          <script id="fox-tawk-lazy">
-          (function(){{
-            var PROPERTY_ID='{PROPERTY_ID}',WIDGET_ID='{widget}',loaded=false,loading=false;
-            function openChat(){{var a=window.Tawk_API;if(a&&typeof a.showWidget==='function')try{{a.showWidget()}}catch(e){{}}if(a&&typeof a.maximize==='function')try{{a.maximize()}}catch(e){{}}}}
-            function loadChat(){{if(loaded){{openChat();return}}if(document.querySelector('script[src*="embed.tawk.to/"]')){{loaded=true;return}}if(loading)return;loading=true;window.Tawk_API=window.Tawk_API||{{}};window.Tawk_LoadStart=new Date();var previousOnLoad=window.Tawk_API.onLoad;window.Tawk_API.onLoad=function(){{try{{if(typeof previousOnLoad==='function')previousOnLoad();}}catch(e){{}}loaded=true;loading=false;openChat()}};var s=document.createElement('script');s.async=true;s.src='https://embed.tawk.to/'+PROPERTY_ID+'/'+WIDGET_ID;s.charset='UTF-8';s.setAttribute('crossorigin','*');s.onload=function(){{loaded=true;loading=false;openChat()}};document.head.appendChild(s)}}
-            function bind(){{var buttons=document.querySelectorAll('#fox-tawk-button .fox-tawk-attention,#fox-tawk-button .fox-tawk-open');buttons.forEach(function(b){{if(b.dataset.wdfxTawkBound==='1')return;b.dataset.wdfxTawkBound='1';b.addEventListener('click',function(e){{e.preventDefault();loadChat()}},false);b.addEventListener('touchend',function(e){{e.preventDefault();loadChat()}},{{passive:false}})}})}}
-            function init(){{bind();loadChat()}}
-            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init()
-          }})();
-          </script>'''
+              return f'''<style id="fox-tawk-launcher-style">
 
           for path in Path('dist').rglob('*.html'):
               text = clean(path.read_text(encoding='utf-8'))
