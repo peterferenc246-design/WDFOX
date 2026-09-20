@@ -159,7 +159,7 @@ jobs:
               pending=false;
             }}
 
-            launcher.addEventListener('click',requestOfficialWidget,false); launcher.addEventListener('pointerup',requestOfficialWidget,false);
+            launcher.addEventListener('click',requestOfficialWidget,false);
             showLauncher();
           }})();
           </script>
