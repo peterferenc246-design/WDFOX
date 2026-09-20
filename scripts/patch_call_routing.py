@@ -1,0 +1,119 @@
+from pathlib import Path
+
+p = Path('src/components/FoxLiveTranslator.astro')
+s = p.read_text()
+
+replacements = []
+
+replacements.append((
+"""  const FOX_STATION_ID='FOX-WDFOX';
+  const pageParams=new URLSearchParams(location.search);
+  const hasRemotePeer=pageParams.has('foxPeer');
+  const isMobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isPcStation=!isMobile&&!hasRemotePeer;
+  let currentMode='translator',recognition=null,recognizing=false,peer=null,peerReady=false,remoteId=pageParams.get('foxPeer')||FOX_STATION_ID,dataConn=null,mediaConn=null,pendingCall=null,localStream=null,screenStream=null,screenCall=null,ringTimer=null,audioCtx=null,ringing=false,interactionId=null,speechRate=1,stopping=false;
+""",
+"""  const FOX_STATION_ID='FOX-WDFOX';
+  const AVAILABILITY_API='https://wdfox.vercel.app/api/availability';
+  const pageParams=new URLSearchParams(location.search);
+  const hasRemotePeer=pageParams.has('foxPeer');
+  const isMobile=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const ownerKey=localStorage.getItem('foxOwnerKey')||'';
+  const ownerDevice=ownerKey&&!hasRemotePeer?(isMobile?'mobile':'pc'):null;
+  const isOwnerStation=Boolean(ownerDevice);
+  const isPcStation=ownerDevice==='pc';
+  let currentMode='translator',recognition=null,recognizing=false,peer=null,peerReady=false,remoteId=pageParams.get('foxPeer')||null,dataConn=null,mediaConn=null,pendingCall=null,localStream=null,screenStream=null,screenCall=null,ringTimer=null,audioCtx=null,ringing=false,interactionId=null,speechRate=1,stopping=false,routeHeartbeat=null;
+"""))
+
+replacements.append((
+"""  const loadScript=(src,test)=>new Promise((resolve,reject)=>{if(test())return resolve();const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});const loadPeer=()=>loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',()=>!!window.Peer);const loadQr=()=>loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',()=>!!window.QRCode);const setComm=v=>{commStatus.textContent=v};
+""",
+"""  const loadScript=(src,test)=>new Promise((resolve,reject)=>{if(test())return resolve();const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});const loadPeer=()=>loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',()=>!!window.Peer);const loadQr=()=>loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',()=>!!window.QRCode);const setComm=v=>{commStatus.textContent=v};
+  const resolveRoute=async()=>{const r=await fetch(AVAILABILITY_API,{cache:'no-store'});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d?.error||`Routing HTTP ${r.status}`);if(!d?.route?.peerId)throw Error(locale==='de'?'WebDizainFOX ist derzeit nicht erreichbar.':'WebDizainFOX momentálne nie je dostupný.');return d.route};
+  const registerOwnerPeer=async()=>{if(!isOwnerStation||!ownerKey||!peer?.id||!peerReady)return false;try{const r=await fetch(AVAILABILITY_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ownerKey},body:JSON.stringify({action:'heartbeat',device:ownerDevice,peerId:peer.id}),cache:'no-store'});if(!r.ok)return false;window.__foxRoutingPeer={device:ownerDevice,peerId:peer.id};return true}catch{return false}};
+  const startRouteHeartbeat=()=>{if(!isOwnerStation)return;if(routeHeartbeat)clearInterval(routeHeartbeat);void registerOwnerPeer();routeHeartbeat=setInterval(()=>void registerOwnerPeer(),15000)};
+  window.addEventListener('fox:availability',()=>{if(isOwnerStation&&peerReady)void registerOwnerPeer()});
+  window.addEventListener('beforeunload',()=>{if(routeHeartbeat)clearInterval(routeHeartbeat)});
+"""))
+
+replacements.append((
+"""  const attachMedia=mc=>{mediaConn=mc;mc.on('stream',s=>{remoteAudio.srcObject=s;remoteAudio.muted=true;remoteAudio.volume=0;remoteAudio.play().catch(()=>{})});mc.on('close',()=>{stopRecognition();setComm(t.waiting)});mc.on('error',e=>setComm('❌ Hovor: '+(e?.message||'chyba')))};
+""",
+"""  const attachMedia=mc=>{mediaConn=mc;mc.on('stream',s=>{remoteAudio.srcObject=s;const sameLanguage=source.value===target.value;remoteAudio.muted=!sameLanguage;remoteAudio.volume=sameLanguage?1:0;remoteAudio.play().catch(()=>{})});mc.on('close',()=>{stopRecognition();setComm(t.waiting)});mc.on('error',e=>setComm('❌ Hovor: '+(e?.message||'chyba')))};
+"""))
+
+replacements.append((
+"if(m.type==='call-request'){primeAudio();startRing();callBtn.disabled=false;callLabel.textContent=t.accept;setComm(t.incoming)}",
+"if(m.type==='call-request'){if(m.source&&m.target){source.value=m.target;target.value=m.source;syncLabels()}setMode('communicator');primeAudio();startRing();callBtn.disabled=false;callLabel.textContent=t.accept;setComm(t.incoming)}"))
+
+replacements.append((
+"peer=new Peer(stationId,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}});peer.on('connection',c=>wireData(c));",
+"peer=new Peer(stationId,{debug:1,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}});peer.on('open',()=>{peerReady=true;if(isOwnerStation)startRouteHeartbeat()});peer.on('connection',c=>wireData(c));"))
+
+replacements.append((
+"pendingCall=mc;primeAudio();startRing();callBtn.disabled=false;callLabel.textContent=t.accept;setComm(t.incoming)",
+"if(mc.metadata?.source&&mc.metadata?.target){source.value=mc.metadata.target;target.value=mc.metadata.source;syncLabels()}setMode('communicator');pendingCall=mc;primeAudio();startRing();callBtn.disabled=false;callLabel.textContent=t.accept;setComm(t.incoming)"))
+
+replacements.append((
+"peer.on('disconnected',()=>{setComm('⚠️ PeerJS odpojený – pripájam…');try{peer.reconnect()}catch{}});",
+"peer.on('disconnected',()=>{peerReady=false;setComm('⚠️ PeerJS odpojený – pripájam…');try{peer.reconnect()}catch{}});"))
+
+old_request = """  const requestCall=async()=>{if(!remoteId){setComm(t.waiting);return}try{unlockAudio();await openPeer();await ensureLocal();const c=peer.connect(remoteId,{reliable:true,label:'fox-control',metadata:{foxRole:'client',source:source.value,target:target.value}});wireData(c);await new Promise((resolve,reject)=>{if(c.open)return resolve();let settled=false;const finish=(fn,v)=>{if(settled)return;settled=true;clearTimeout(tm);fn(v)};const tm=setTimeout(()=>finish(reject,Error('FOX PC sa neozval. Skontrolujte, či je komunikátor na PC otvorený.')),20000);c.once('open',()=>finish(resolve));c.once('error',e=>finish(reject,e))});send({type:'call-request',source:source.value,target:target.value,at:Date.now()});const mc=peer.call(remoteId,localStream,{metadata:{foxAudio:true}});attachMedia(mc);setComm(t.calling);callBtn.disabled=true;callLabel.textContent=t.call;setTimeout(()=>{if(currentMode==='communicator'&&!recognizing)startRecognition()},500)}catch(e){callBtn.disabled=false;callLabel.textContent=t.call;setComm('❌ '+(e?.message||'Hovor sa nepodaril'))}};
+"""
+new_request = """  const requestCall=async()=>{try{unlockAudio();if(!remoteId){const route=await resolveRoute();remoteId=route.peerId;setComm('📞 '+(route.target==='mobile'?'MOBIL':'KANCELÁRIA PC')+'…')}await openPeer();await ensureLocal();const c=peer.connect(remoteId,{reliable:true,label:'fox-control',metadata:{foxRole:'client',source:source.value,target:target.value}});wireData(c);await new Promise((resolve,reject)=>{if(c.open)return resolve();let settled=false;const finish=(fn,v)=>{if(settled)return;settled=true;clearTimeout(tm);fn(v)};const tm=setTimeout(()=>finish(reject,Error('Cieľové zariadenie sa neozvalo.')),20000);c.once('open',()=>finish(resolve));c.once('error',e=>finish(reject,e))});send({type:'call-request',source:source.value,target:target.value,at:Date.now()});const mc=peer.call(remoteId,localStream,{metadata:{foxAudio:true,source:source.value,target:target.value}});attachMedia(mc);setComm(t.calling);callBtn.disabled=true;callLabel.textContent=t.call;setTimeout(()=>{if(currentMode==='communicator'&&!recognizing)startRecognition()},500)}catch(e){if(!hasRemotePeer)remoteId=null;callBtn.disabled=false;callLabel.textContent=t.call;setComm('❌ '+(e?.message||'Hovor sa nepodaril'))}};
+"""
+replacements.append((old_request,new_request))
+
+replacements.append((
+"modes.forEach(b=>b.onclick=()=>setMode(b.dataset.mode));",
+"modes.forEach(b=>b.onclick=()=>{const next=b.dataset.mode;if(next==='communicator'&&!hasRemotePeer&&!isOwnerStation){target.value='sk';syncLabels()}setMode(next)});"))
+
+old_boot = """  (async()=>{const qs=new URLSearchParams(location.search),qsSource=qs.get('foxSource'),qsTarget=qs.get('foxTarget');if(qsSource&&qsTarget){source.value=qsTarget;target.value=qsSource;syncLabels();setMode('communicator');}if(isPcStation){try{await openPeer();setComm('🟢 FOX PC ONLINE – čakám na hovor');callBtn.disabled=true;callLabel.textContent=t.call;}catch(e){setComm('❌ FOX PC sa nepodarilo pripojiť: '+(e?.message||e))}}else if(qsSource&&qsTarget){try{await openPeer();callBtn.disabled=false;callLabel.textContent=t.call;setComm(t.waiting)}catch(e){setComm('❌ '+(e?.message||'Spojenie sa nepodarilo'))}}})();
+"""
+new_boot = """  (async()=>{const qs=new URLSearchParams(location.search),qsSource=qs.get('foxSource'),qsTarget=qs.get('foxTarget');if(qsSource&&qsTarget){source.value=qsTarget;target.value=qsSource;syncLabels();setMode('communicator');}if(isOwnerStation){try{await openPeer();setComm(ownerDevice==='mobile'?'🟢 FOX MOBIL pripravený na hovory':'🟢 FOX PC pripravený na hovory');callBtn.disabled=true;callLabel.textContent=t.call;}catch(e){setComm('❌ FOX zariadenie sa nepodarilo pripojiť: '+(e?.message||e))}}else if(qsSource&&qsTarget){try{await openPeer();callBtn.disabled=false;callLabel.textContent=t.call;setComm(t.waiting)}catch(e){setComm('❌ '+(e?.message||'Spojenie sa nepodarilo'))}}else{callBtn.disabled=false;callLabel.textContent=t.call}})();
+"""
+replacements.append((old_boot,new_boot))
+
+for old,new in replacements:
+    if old not in s:
+        raise SystemExit('Translator patch anchor not found: '+old[:160])
+    s=s.replace(old,new,1)
+
+p.write_text(s)
+
+b = Path('src/components/FoxGeminiAudioBridge.astro')
+bs = b.read_text()
+old = """  const targetLanguage = () => {
+    const selectedSource = sourceSelect?.value || 'sk';
+    const selectedTarget = targetSelect?.value || 'en';
+    const code = hasRemotePeer ? selectedSource : selectedTarget;
+    return targetCodes[code] || code;
+  };
+"""
+new = """  const targetLanguage = () => {
+    const selectedSource = sourceSelect?.value || 'sk';
+    const code = selectedSource;
+    return targetCodes[code] || code;
+  };
+"""
+if old not in bs:
+    raise SystemExit('Gemini target-language patch anchor not found')
+bs = bs.replace(old,new,1)
+
+old = """    const target = targetLanguage();
+    if (!target) return;
+"""
+new = """    if (sourceSelect?.value && targetSelect?.value && sourceSelect.value === targetSelect.value) {
+      if (socket || captureContext) closeLive('same language');
+      setStatus('🟢 PRIAMY HOVOR – preklad nie je potrebný');
+      return;
+    }
+    const target = targetLanguage();
+    if (!target) return;
+"""
+if old not in bs:
+    raise SystemExit('Gemini same-language patch anchor not found')
+bs = bs.replace(old,new,1)
+b.write_text(bs)
+
+print('FOX routing patch applied')
