@@ -1,12 +1,143 @@
 const LANGUAGES = new Set(['bg','hr','cs','da','nl','en','et','fi','fr','de','el','hu','ga','it','lv','lt','lb','mt','pl','pt','ro','sk','sl','es','sv']);
 const LANGUAGE_NAMES: Record<string, string> = { bg:'Bulgarian',hr:'Croatian',cs:'Czech',da:'Danish',nl:'Dutch',en:'English',et:'Estonian',fi:'Finnish',fr:'French',de:'German',el:'Greek',hu:'Hungarian',ga:'Irish',it:'Italian',lv:'Latvian',lt:'Lithuanian',lb:'Luxembourgish',mt:'Maltese',pl:'Polish',pt:'Portuguese',ro:'Romanian',sk:'Slovak',sl:'Slovenian',es:'Spanish',sv:'Swedish' };
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
+const DEFAULT_FREE_MODEL = 'gemini-3.8-flash';
 const ALLOWED_ORIGINS = new Set(['https://foxprof.club','https://www.foxprof.club']);
-function corsHeaders(request?: Request): HeadersInit { const origin=request?.headers.get('Origin')||''; return {'Cache-Control':'no-store',...(ALLOWED_ORIGINS.has(origin)?{'Access-Control-Allow-Origin':origin,'Vary':'Origin'}:{}),'Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'86400'}; }
-function json(body: unknown,status=200,request?: Request,extra?: HeadersInit): Response { return Response.json(body,{status,headers:{...corsHeaders(request),...(extra||{})}}); }
-function base64(bytes: Uint8Array): string { let binary=''; for(let i=0;i<bytes.length;i+=0x8000) binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000)); return btoa(binary); }
-async function gemini(model:string,body:unknown,timeoutMs=30000):Promise<any>{ const key=process.env.GEMINI_API_KEY; if(!key) throw new Error('GEMINI_API_KEY is not configured in Vercel'); const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),timeoutMs); try { const response=await fetch(`${GEMINI_API}/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(body),signal:controller.signal}); if(!response.ok){ const message=await response.text(); const error=new Error(`Gemini ${response.status}: ${message}`); (error as any).status=response.status; throw error; } return response.json(); } finally { clearTimeout(timer); } }
-function firstText(data:any):string{return String(data?.candidates?.[0]?.content?.parts?.find((p:any)=>p.text)?.text||'').trim();}
-function parseResult(text:string){ try { const clean=text.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim(); const parsed=JSON.parse(clean); if(parsed.transcript&&parsed.translatedText)return {transcript:String(parsed.transcript).trim(),translatedText:String(parsed.translatedText).trim()}; } catch {} const tm=text.match(/(?:TRANSCRIPT|TRANSKRIPT)\s*:\s*([\s\S]*?)(?:\n(?:TRANSLATION|ÜBERSETZUNG|PREKLAD)\s*:\s*([\s\S]*))?$/i); if(tm?.[1]&&tm?.[2])return {transcript:tm[1].trim(),translatedText:tm[2].trim()}; return null; }
-export async function OPTIONS(request:Request):Promise<Response>{return new Response(null,{status:204,headers:corsHeaders(request)});}
-export async function POST(request:Request):Promise<Response>{ try { const form=await request.formData(); const audio=form.get('audio'); const sourceLanguage=String(form.get('sourceLanguage')??''); const targetLanguage=String(form.get('targetLanguage')??''); if(!(audio instanceof File))return json({error:'Missing audio file'},400,request); if(!LANGUAGES.has(sourceLanguage)||!LANGUAGES.has(targetLanguage)||sourceLanguage===targetLanguage)return json({error:'Unsupported or identical language selection'},400,request); const bytes=new Uint8Array(await audio.arrayBuffer()); if(!bytes.length)return json({error:'Audio file is empty'},400,request); if(bytes.length>4*1024*1024)return json({error:'Audio file is too large (maximum 4 MB)'},413,request); const sourceName=LANGUAGE_NAMES[sourceLanguage]; const targetName=LANGUAGE_NAMES[targetLanguage]; const mimeType=audio.type||'audio/webm'; const model=process.env.TRANSLATION_MODEL||process.env.GEMINI_MODEL||'gemini-3.8-flash'; const result=await gemini(model,{contents:[{parts:[{text:`You are a professional live interpreter. Listen to this ${sourceName} speech and return ONLY valid JSON with exactly two string fields: transcript and translatedText. transcript must contain the exact spoken ${sourceName} words. translatedText must be the natural ${targetName} translation. Do not add commentary, markdown or extra fields.`},{inlineData:{mimeType,data:base64(bytes)}}]}]}); const parsed=parseResult(firstText(result)); if(!parsed?.transcript||!parsed.translatedText)return json({error:'No usable speech translation returned by Gemini'},422,request); return json({transcript:parsed.transcript,translatedText:parsed.translatedText,sourceLanguage,targetLanguage,voiceMode:'browser'},200,request); } catch(error){ console.error('translate-voice failed',error); const status=Number((error as any)?.status||0); if(status===429){ return json({error:'Gemini kvóta bola prekročená. FOX dočasne spomalí preklad.',code:'QUOTA_EXCEEDED',retryAfterSeconds:30},429,request,{'Retry-After':'30'}); } return json({error:`Translation service failed: ${error instanceof Error?error.message:'Unknown error'}`},500,request); } }
+
+function corsHeaders(request?: Request): HeadersInit {
+  const origin=request?.headers.get('Origin')||'';
+  return {
+    'Cache-Control':'no-store',
+    ...(ALLOWED_ORIGINS.has(origin)?{'Access-Control-Allow-Origin':origin,'Vary':'Origin'}:{}),
+    'Access-Control-Allow-Methods':'POST, OPTIONS',
+    'Access-Control-Allow-Headers':'Content-Type',
+    'Access-Control-Max-Age':'86400'
+  };
+}
+
+function json(body: unknown,status=200,request?: Request,extra?: HeadersInit): Response {
+  return Response.json(body,{status,headers:{...corsHeaders(request),...(extra||{})}});
+}
+
+function base64(bytes: Uint8Array): string {
+  let binary='';
+  for(let i=0;i<bytes.length;i+=0x8000) binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+  return btoa(binary);
+}
+
+function apiKey(): string {
+  const key=process.env.GEMINI_FREE_API_KEY||process.env.GEMINI_API_KEY;
+  if(!key) throw new Error('GEMINI_FREE_API_KEY or GEMINI_API_KEY is not configured in Vercel');
+  return key;
+}
+
+function freeModel(): string {
+  return process.env.GEMINI_FREE_MODEL||DEFAULT_FREE_MODEL;
+}
+
+async function gemini(model:string,body:unknown,timeoutMs=30000):Promise<any>{
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try {
+    const response=await fetch(`${GEMINI_API}/${model}:generateContent`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-goog-api-key':apiKey()},
+      body:JSON.stringify(body),
+      signal:controller.signal
+    });
+    if(!response.ok){
+      const message=await response.text();
+      const error=new Error(`Gemini ${response.status}: ${message}`);
+      (error as any).status=response.status;
+      throw error;
+    }
+    return response.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function firstText(data:any):string{
+  return String(data?.candidates?.[0]?.content?.parts?.find((p:any)=>p.text)?.text||'').trim();
+}
+
+function parseResult(text:string){
+  try {
+    const clean=text.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+    const parsed=JSON.parse(clean);
+    if(parsed.transcript&&parsed.translatedText){
+      return {transcript:String(parsed.transcript).trim(),translatedText:String(parsed.translatedText).trim()};
+    }
+  } catch {}
+  const tm=text.match(/(?:TRANSCRIPT|TRANSKRIPT)\s*:\s*([\s\S]*?)(?:\n(?:TRANSLATION|ÜBERSETZUNG|PREKLAD)\s*:\s*([\s\S]*))?$/i);
+  if(tm?.[1]&&tm?.[2]) return {transcript:tm[1].trim(),translatedText:tm[2].trim()};
+  return null;
+}
+
+export async function OPTIONS(request:Request):Promise<Response>{
+  return new Response(null,{status:204,headers:corsHeaders(request)});
+}
+
+export async function POST(request:Request):Promise<Response>{
+  try {
+    const form=await request.formData();
+    const audio=form.get('audio');
+    const sourceLanguage=String(form.get('sourceLanguage')??'');
+    const targetLanguage=String(form.get('targetLanguage')??'');
+
+    if(!(audio instanceof File)) return json({error:'Missing audio file'},400,request);
+    if(!LANGUAGES.has(sourceLanguage)||!LANGUAGES.has(targetLanguage)||sourceLanguage===targetLanguage){
+      return json({error:'Unsupported or identical language selection'},400,request);
+    }
+
+    const bytes=new Uint8Array(await audio.arrayBuffer());
+    if(!bytes.length) return json({error:'Audio file is empty'},400,request);
+    if(bytes.length>4*1024*1024) return json({error:'Audio file is too large (maximum 4 MB)'},413,request);
+
+    const sourceName=LANGUAGE_NAMES[sourceLanguage];
+    const targetName=LANGUAGE_NAMES[targetLanguage];
+    const mimeType=audio.type||'audio/webm';
+    const model=freeModel();
+
+    const result=await gemini(model,{
+      contents:[{parts:[
+        {text:`You are a professional live interpreter. Listen to this ${sourceName} speech and return ONLY valid JSON with exactly two string fields: transcript and translatedText. transcript must contain the exact spoken ${sourceName} words. translatedText must be the natural ${targetName} translation. Do not add commentary, markdown or extra fields.`},
+        {inlineData:{mimeType,data:base64(bytes)}}
+      ]}],
+      generationConfig:{responseMimeType:'application/json',temperature:0.1}
+    });
+
+    const parsed=parseResult(firstText(result));
+    if(!parsed?.transcript||!parsed.translatedText){
+      return json({error:'No usable speech translation returned by Gemini'},422,request);
+    }
+
+    return json({
+      transcript:parsed.transcript,
+      translatedText:parsed.translatedText,
+      sourceLanguage,
+      targetLanguage,
+      voiceMode:'browser',
+      model,
+      keySource:process.env.GEMINI_FREE_API_KEY?'GEMINI_FREE_API_KEY':'GEMINI_API_KEY'
+    },200,request);
+  } catch(error){
+    console.error('translate-voice failed',error);
+    const status=Number((error as any)?.status||0);
+
+    if(status===402){
+      return json({
+        error:'Gemini kľúč je naviazaný na vyčerpaný Paid/Prepay projekt. Nastav GEMINI_FREE_API_KEY z Free Tier projektu alebo odpoj billing od existujúceho Gemini projektu.',
+        code:'FREE_TIER_KEY_REQUIRED'
+      },402,request);
+    }
+    if(status===429){
+      return json({error:'Gemini Free Tier kvóta bola dočasne prekročená. FOX skúsi pokračovať po krátkej pauze.',code:'QUOTA_EXCEEDED',retryAfterSeconds:30},429,request,{'Retry-After':'30'});
+    }
+    if(status===503){
+      return json({error:'Gemini model je dočasne vyťažený. Skús znova o chvíľu.',code:'MODEL_BUSY',retryAfterSeconds:3},503,request,{'Retry-After':'3'});
+    }
+
+    return json({error:`Translation service failed: ${error instanceof Error?error.message:'Unknown error'}`},500,request);
+  }
+}
