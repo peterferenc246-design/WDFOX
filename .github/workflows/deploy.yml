@@ -113,6 +113,7 @@ jobs:
             try{{floating.checked=localStorage.getItem('wdfox-chat-floating-v3')==='true';}}catch(e){{}}
             floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating-v3',String(floating.checked));}}catch(e){{}}status.textContent='';}});
             function showLauncher(){{launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');if(typeof launcher.showPopover==='function'){{try{{if(!launcher.matches(':popover-open'))launcher.showPopover();return;}}catch(e){{}}}}launcher.style.setProperty('display','block','important');}}
+            function hideNativeWidget(){{var api=window.Tawk_API||{{}};try{{if(typeof api.hideWidget==='function')api.hideWidget();}}catch(e){{}}}}
             window.Tawk_API=window.Tawk_API||{{}};
             window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000'}};
             var previousOnLoad=window.Tawk_API.onLoad;
@@ -144,11 +145,13 @@ jobs:
             window.Tawk_API.onLoad=function(){{
               ready=true;
               try{{if(typeof previousOnLoad==='function')previousOnLoad();}}catch(e){{}}
+              hideNativeWidget();
               if(pending)window.setTimeout(openOfficialWidget,50);
             }};
-            window.Tawk_API.onChatMaximized=showLauncher;
-            window.Tawk_API.onChatMinimized=showLauncher;
-            window.Tawk_API.onChatHidden=showLauncher;
+            window.Tawk_API.onChatMaximized=function(){{showLauncher();}};
+            window.Tawk_API.onChatMinimized=function(){{hideNativeWidget();showLauncher();}};
+            window.Tawk_API.onChatHidden=function(){{hideNativeWidget();showLauncher();}};
+            window.Tawk_API.onStatusChange=function(){{hideNativeWidget();}};
 
             function requestOfficialWidget(e){{
               if(e){{e.preventDefault();e.stopPropagation();}}
