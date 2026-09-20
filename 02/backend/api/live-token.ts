@@ -44,7 +44,7 @@ export async function POST(request: Request): Promise<Response> {
     const now = Date.now();
     const expireTime = new Date(now + 20 * 60 * 1000).toISOString();
     const newSessionExpireTime = new Date(now + 60 * 1000).toISOString();
-    const config = {
+    const generationConfig = {
       responseModalities:['AUDIO'],
       inputAudioTranscription:{},
       outputAudioTranscription:{},
@@ -61,9 +61,9 @@ export async function POST(request: Request): Promise<Response> {
         uses:1,
         expireTime,
         newSessionExpireTime,
-        liveConnectConstraints:{
+        bidiGenerateContentSetup:{
           model:`models/${MODEL}`,
-          config
+          generationConfig
         }
       })
     });
@@ -77,7 +77,7 @@ export async function POST(request: Request): Promise<Response> {
     const token = String(data?.name || '').trim();
     if (!token) return reply({error:'Gemini did not return an ephemeral token'},502,request);
 
-    return reply({token,model:MODEL,target:targetLanguageCode,expireTime,newSessionExpireTime,config},200,request);
+    return reply({token,model:MODEL,target:targetLanguageCode,expireTime,newSessionExpireTime,config:generationConfig},200,request);
   } catch (error: any) {
     console.error('live-token failed',error);
     return reply({error:error?.message || 'Failed to create Gemini Live token'},500,request);
