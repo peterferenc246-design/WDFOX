@@ -38,11 +38,40 @@ const content = await getLandingContent(lang);
   const LIVE='https://wdfox-live-translator.vercel.app';
   const TRANSLATOR='https://wdfox.vercel.app';
   const nativeFetch=window.fetch.bind(window);
+  const isCommunicator=()=>document.querySelector('[data-fox-live]')?.classList.contains('is-call-mode')===true;
+
+  // Gemini Live already provides the translated audio in communicator mode.
+  // Suppress the legacy browser TTS so it cannot echo/duplicate the Live audio.
+  try{
+    if(window.speechSynthesis && !window.__foxNativeSpeechSpeak){
+      window.__foxNativeSpeechSpeak=window.speechSynthesis.speak.bind(window.speechSynthesis);
+      window.speechSynthesis.speak=(utterance)=>{
+        if(isCommunicator() && window.__foxGeminiAudioBridge) return;
+        return window.__foxNativeSpeechSpeak(utterance);
+      };
+    }
+  }catch{}
 
   window.fetch=async(input,init)=>{
     const url=typeof input==='string'?input:input?.url||'';
 
     if(url.startsWith('/api/gemini-chat')){
+      // COMMUNICATOR = Gemini Live only. Never call the legacy REST translator.
+      if(isCommunicator() && window.__foxGeminiAudioBridge){
+        const current=String(document.querySelector('[data-translation]')?.textContent||'').trim();
+        const liveText=current || '\u200B';
+        return new Response(JSON.stringify({
+          text:liveText,
+          translation:liveText,
+          interactionId:null,
+          liveOnly:true
+        }),{
+          status:200,
+          headers:{'Content-Type':'application/json','Cache-Control':'no-store'}
+        });
+      }
+
+      // Stand-alone TRANSLATOR mode keeps the existing REST text translation.
       try{
         const original=JSON.parse(String(init?.body||'{}'));
         const prompt=String(original?.message||'');
