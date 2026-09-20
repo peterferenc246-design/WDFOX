@@ -115,7 +115,7 @@ jobs:
             function showLauncher(){{launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');if(typeof launcher.showPopover==='function'){{try{{if(!launcher.matches(':popover-open'))launcher.showPopover();return;}}catch(e){{}}}}launcher.style.setProperty('display','block','important');}}
             function hideNativeWidget(){{var api=window.Tawk_API||{{}};try{{if(typeof api.hideWidget==='function')api.hideWidget();}}catch(e){{}}}}
             window.Tawk_API=window.Tawk_API||{{}};
-            window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000',visibility:{{desktop:{{xOffset:'18',yOffset:'18',position:'br'}},mobile:{{xOffset:'4',yOffset:'8',position:'br'}}}}}}};
+            window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000'}};
             var previousOnLoad=window.Tawk_API.onLoad;
 
             function openOfficialWidget(){{
@@ -157,24 +157,13 @@ jobs:
               if(e){{e.preventDefault();e.stopPropagation();}}
               pending=true;
               showLauncher();
-              if(!floating.checked){{
-                if(openOfficialWidget()){{status.textContent='';return;}}
-                status.textContent=lang==='sk'?'Chat sa načítava…':'Loading chat…';
-                waitForOfficialWidget();
-                window.setTimeout(function(){{if(pending){{status.textContent=lang==='sk'?'Chat sa nenačítal. Skúste plávajúce okno.':'Chat unavailable. Try the floating window.';document.getElementById('fox-chat-settings').open=true;}}}},10000);
+              if(openOfficialWidget()){{
+                status.textContent='';
                 return;
               }}
-              pending=false;
-              if(ready&&typeof window.Tawk_API.popup==='function'){{window.Tawk_API.popup();return;}}
-              var popupWidth=420,popupHeight=640;
-              var left=Math.max(0,Math.round((window.screen.width-popupWidth)/2));
-              var top=Math.max(0,Math.round((window.screen.height-popupHeight)/2));
-              window.open(
-                'https://tawk.to/chat/{PROPERTY_ID}/{widget}',
-                'WDFOX_Tawk_Chat',
-                'popup=yes,width='+popupWidth+',height='+popupHeight+',left='+left+',top='+top+',resizable=yes,scrollbars=yes'
-              );
-              pending=false;
+              status.textContent=lang==='sk'?'Chat sa načítava…':'Loading chat…';
+              waitForOfficialWidget();
+              window.setTimeout(function(){{if(pending){{status.textContent=lang==='sk'?'Chat sa nenačítal.':'Chat unavailable.';document.getElementById('fox-chat-settings').open=true;}}}},10000);
             }}
 
             var lastActivation=0;
@@ -200,14 +189,6 @@ jobs:
               if(target===launcher || pointInsideLauncher(e)){{e.preventDefault();e.stopPropagation();activateLauncher(e);}}
             }},true);
             showLauncher();
-            // Direct fallback after the user gesture: keep the launcher usable if the Tawk JS API is delayed.
-            window.setTimeout(function(){{
-              if(pending && !ready){{
-                pending=false;
-                var directUrl='https://tawk.to/chat/6a951d52c3c46c344587662a/'+(lang==='sk'?'1k1b9121q':lang==='de'?'1k1bb2aln':lang==='en'?'1k1bb9ast':lang==='hr'?'1k1bjvbjq':lang==='fr'?'1k1blk6o4':lang==='it'?'1k1bovo5t':lang==='pl'?'1k1bp5qda':lang==='es'?'1k1bp6lk5':'1k1bpdngj');
-                window.open(directUrl,'WDFOX_Tawk_Chat','popup=yes,width=420,height=640,resizable=yes,scrollbars=yes');
-              }}
-            }},2500);
           }})();
           </script>
           <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>'''
