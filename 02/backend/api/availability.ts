@@ -1,4 +1,6 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+// Vercel Runtime Cache is available in production; older local package types may not expose getCache yet.
+// @ts-ignore
 import { getCache } from '@vercel/functions';
 
 const CACHE_KEY = 'wdfox:availability:v1';
@@ -40,8 +42,8 @@ function reply(request: Request, body: unknown, status = 200): Response {
 
 async function readState(): Promise<AvailabilityState> {
   try {
-    const cache = getCache();
-    const value = await cache.get(CACHE_KEY) as AvailabilityState | null;
+    const cache: any = getCache();
+    const value: any = await cache.get(CACHE_KEY);
     if (!value || typeof value !== 'object') return DEFAULT_STATE;
     return {
       pc: Boolean(value.pc),
@@ -55,7 +57,7 @@ async function readState(): Promise<AvailabilityState> {
 }
 
 async function writeState(state: AvailabilityState): Promise<void> {
-  const cache = getCache();
+  const cache: any = getCache();
   await cache.set(CACHE_KEY, state, {
     ttl: 31_536_000,
     tags: ['wdfox-availability']
@@ -109,10 +111,11 @@ export async function POST(request: Request): Promise<Response> {
     return reply(request, { error: 'INVALID_DEVICE' }, 400);
   }
 
+  const device: 'pc' | 'mobile' = body.device;
   const current = await readState();
   const next: AvailabilityState = {
     ...current,
-    [body.device]: typeof body.online === 'boolean' ? body.online : !current[body.device],
+    [device]: typeof body.online === 'boolean' ? body.online : !current[device],
     updatedAt: new Date().toISOString()
   };
 
