@@ -200,6 +200,14 @@ jobs:
               if(target===launcher || pointInsideLauncher(e)){{e.preventDefault();e.stopPropagation();activateLauncher(e);}}
             }},true);
             showLauncher();
+            // Direct fallback after the user gesture: keep the launcher usable if the Tawk JS API is delayed.
+            window.setTimeout(function(){{
+              if(pending && !ready){{
+                pending=false;
+                var directUrl='https://tawk.to/chat/6a951d52c3c46c344587662a/'+(lang==='sk'?'1k1b9121q':lang==='de'?'1k1bb2aln':lang==='en'?'1k1bb9ast':lang==='hr'?'1k1bjvbjq':lang==='fr'?'1k1blk6o4':lang==='it'?'1k1bovo5t':lang==='pl'?'1k1bp5qda':lang==='es'?'1k1bp6lk5':'1k1bpdngj');
+                window.open(directUrl,'WDFOX_Tawk_Chat','popup=yes,width=420,height=640,resizable=yes,scrollbars=yes');
+              }}
+            }},2500);
           }})();
           </script>
           <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>'''
