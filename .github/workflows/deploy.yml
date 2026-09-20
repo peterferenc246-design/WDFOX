@@ -95,17 +95,30 @@ jobs:
               <text x="207" y="110" text-anchor="middle" font-size="28" transform="rotate(5 207 110)">🤝</text>
             </svg>
           </button>
-          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>
+          <details id="fox-chat-settings" style="position:fixed;right:18px;bottom:195px;z-index:2147483647;background:white;color:#172333;border-radius:10px;padding:8px;box-shadow:0 3px 14px #0003;font:14px system-ui">
+            <summary aria-label="Chat settings" style="cursor:pointer">⚙️</summary>
+            <label style="display:block;padding:8px"><input type="checkbox" id="fox-chat-floating"> <span id="fox-chat-floating-label">Plávajúce okno</span></label>
+            <span id="fox-chat-status" role="status"></span>
+          </details>
           <script id="fox-tawk-direct-config">
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
             var pending=false;
+            var ready=false;
+            var floating=document.getElementById('fox-chat-floating');
+            var status=document.getElementById('fox-chat-status');
+            var lang=document.documentElement.lang.split('-')[0];
+            var labels={{sk:'Plávajúce okno',de:'Schwebendes Fenster',en:'Floating window',hr:'Plutajući prozor',fr:'Fenêtre flottante',it:'Finestra mobile',pl:'Pływające okno',es:'Ventana flotante',sv:'Flytande fönster'}};
+            document.getElementById('fox-chat-floating-label').textContent=labels[lang]||labels.en;
+            try{{floating.checked=localStorage.getItem('wdfox-chat-floating')==='true';}}catch(e){{}}
+            floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating',String(floating.checked));}}catch(e){{}}status.textContent='';}});
+            function showLauncher(){{launcher.style.setProperty('display','block','important');launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');}}
             window.Tawk_API=window.Tawk_API||{{}};
             var previousOnLoad=window.Tawk_API.onLoad;
 
             function openOfficialWidget(){{
               var api=window.Tawk_API||{{}};
-              if(typeof api.maximize!=='function')return false;
+              if(!ready||typeof api.maximize!=='function')return false;
               try{{
                 if(typeof api.showWidget==='function')api.showWidget();
                 api.maximize();
@@ -115,17 +128,26 @@ jobs:
             }}
 
             window.Tawk_API.onLoad=function(){{
+              ready=true;
               try{{if(typeof previousOnLoad==='function')previousOnLoad();}}catch(e){{}}
               if(pending)window.setTimeout(openOfficialWidget,50);
             }};
-            window.Tawk_API.onChatMaximized=function(){{launcher.style.display='none';}};
-            window.Tawk_API.onChatMinimized=function(){{launcher.style.display='block';}};
-            window.Tawk_API.onChatHidden=function(){{launcher.style.display='block';}};
+            window.Tawk_API.onChatMaximized=showLauncher;
+            window.Tawk_API.onChatMinimized=showLauncher;
+            window.Tawk_API.onChatHidden=showLauncher;
 
             function requestOfficialWidget(e){{
               if(e){{e.preventDefault();e.stopPropagation();}}
               pending=true;
-              if(openOfficialWidget())return;
+              showLauncher();
+              if(!floating.checked){{
+                if(openOfficialWidget()){{status.textContent='';return;}}
+                status.textContent=lang==='sk'?'Chat sa načítava…':'Loading chat…';
+                window.setTimeout(function(){{if(pending&&!ready){{status.textContent=lang==='sk'?'Chat sa nenačítal. Skúste plávajúce okno.':'Chat unavailable. Try the floating window.';document.getElementById('fox-chat-settings').open=true;}}}},10000);
+                return;
+              }}
+              pending=false;
+              if(ready&&typeof window.Tawk_API.popup==='function'){{window.Tawk_API.popup();return;}}
               var popupWidth=420,popupHeight=640;
               var left=Math.max(0,Math.round((window.screen.width-popupWidth)/2));
               var top=Math.max(0,Math.round((window.screen.height-popupHeight)/2));
@@ -138,9 +160,10 @@ jobs:
             }}
 
             launcher.addEventListener('click',requestOfficialWidget,false);
-            launcher.addEventListener('touchend',requestOfficialWidget,{{passive:false}});
+            showLauncher();
           }})();
-          </script>'''
+          </script>
+          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js"></script>'''
 
               return f'''<style id="fox-tawk-button-style">
           #fox-tawk-button{{display:none!important}}
