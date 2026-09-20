@@ -175,19 +175,19 @@ jobs:
             }}
 
             var lastActivation=0;
-            function activateLauncher(e){
+            function activateLauncher(e){{
               var now=Date.now();
               if(now-lastActivation<700)return;
               lastActivation=now;
               requestOfficialWidget(e);
-            }
+            }}
             launcher.onclick=activateLauncher;
             launcher.onpointerup=activateLauncher;
-            launcher.onpointerdown=function(e){ if(e.pointerType!=='mouse') activateLauncher(e); };
-            document.addEventListener('click',function(e){
+            launcher.onpointerdown=function(e){{ if(e.pointerType!=='mouse') activateLauncher(e); }};
+            document.addEventListener('click',function(e){{
               var target=e.target && e.target.closest ? e.target.closest('#fox-tawk-launcher') : null;
               if(target===launcher) activateLauncher(e);
-            },true);
+            }},true);
             showLauncher();
           }})();
           </script>
