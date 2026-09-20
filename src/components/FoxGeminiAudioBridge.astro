@@ -44,8 +44,7 @@
   const connected = () => !!stream()?.getAudioTracks?.().some(track => track.readyState === 'live');
   const targetLanguage = () => {
     const selectedSource = sourceSelect?.value || 'sk';
-    const selectedTarget = targetSelect?.value || 'en';
-    const code = hasRemotePeer ? selectedSource : selectedTarget;
+    const code = selectedSource;
     return targetCodes[code] || code;
   };
 
@@ -318,6 +317,11 @@
     const currentStream = stream();
     if (!connected() || !currentStream) {
       if (socket || captureContext) closeLive('remote audio ended');
+      return;
+    }
+    if (sourceSelect?.value && targetSelect?.value && sourceSelect.value === targetSelect.value) {
+      if (socket || captureContext) closeLive('same language');
+      setStatus('🟢 PRIAMY HOVOR – preklad nie je potrebný');
       return;
     }
     const target = targetLanguage();
