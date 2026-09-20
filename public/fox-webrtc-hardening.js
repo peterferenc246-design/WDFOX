@@ -1,10 +1,11 @@
 /* FOX LIVE WebRTC hardening layer.
- * Loaded before FoxLiveTranslator. Does not touch Tawk, UI or language logic.
+ * Loaded before FoxLiveTranslator. Does not touch Tawk or page design.
  */
 (() => {
   if (window.__FOX_WEBRTC_HARDENING__) return;
   window.__FOX_WEBRTC_HARDENING__ = true;
 
+  const EU_LANGS = new Set(['bg','hr','cs','da','nl','en','et','fi','fr','de','el','hu','ga','it','lv','lt','mt','pl','pt','ro','sk','sl','es','sv']);
   const baseIce = [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun.cloudflare.com:3478' }
@@ -29,6 +30,29 @@
       seen.add(key);
       return true;
     });
+  };
+
+  const syncLanguagePair = (payload = {}) => {
+    const src = String(payload.source || '').toLowerCase();
+    const dst = String(payload.target || '').toLowerCase();
+    if (!EU_LANGS.has(src) || !EU_LANGS.has(dst) || src === dst) return;
+
+    const root = document.querySelector('[data-fox-live]');
+    const source = root?.querySelector('[data-source]');
+    const target = root?.querySelector('[data-target]');
+    if (!source || !target) return;
+
+    let changed = false;
+    if (source.value !== src) { source.value = src; changed = true; }
+    if (target.value !== dst) { target.value = dst; changed = true; }
+    if (!changed) return;
+
+    source.dispatchEvent(new Event('change', { bubbles:true }));
+    target.dispatchEvent(new Event('change', { bubbles:true }));
+    const detail = { source:src, target:dst, at:Date.now() };
+    window.__FOX_REMOTE_LANGUAGE_PAIR__ = detail;
+    window.dispatchEvent(new CustomEvent('fox:language-pair', { detail }));
+    console.info('[FOX LIVE] language pair synced from mobile', detail);
   };
 
   const candidateSummary = async (pc) => {
@@ -129,6 +153,14 @@
         }
       };
       const instance = peerId === undefined ? new Ctor(hardened) : new Ctor(peerId, hardened);
+
+      instance.on?.('connection', (conn) => {
+        syncLanguagePair(conn?.metadata || {});
+        conn?.on?.('data', (message) => {
+          if (message?.type === 'call-request') syncLanguagePair(message);
+        });
+      });
+
       instance.on?.('error', (error) => {
         if (error?.type === 'unavailable-id') {
           window.dispatchEvent(new CustomEvent('fox:peer-id-conflict', { detail: { id: peerId || '', error } }));
