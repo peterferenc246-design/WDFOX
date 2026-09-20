@@ -110,8 +110,8 @@ jobs:
             var lang=document.documentElement.lang.split('-')[0];
             var labels={{sk:'Plávajúce okno',de:'Schwebendes Fenster',en:'Floating window',hr:'Plutajući prozor',fr:'Fenêtre flottante',it:'Finestra mobile',pl:'Pływające okno',es:'Ventana flotante',sv:'Flytande fönster'}};
             document.getElementById('fox-chat-floating-label').textContent=labels[lang]||labels.en;
-            try{{floating.checked=localStorage.getItem('wdfox-chat-floating-v2')==='true';}}catch(e){{}}
-            floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating-v2',String(floating.checked));}}catch(e){{}}status.textContent='';}});
+            try{{floating.checked=localStorage.getItem('wdfox-chat-floating-v3')==='true';}}catch(e){{}}
+            floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating-v3',String(floating.checked));}}catch(e){{}}status.textContent='';}});
             function showLauncher(){{launcher.style.setProperty('display','block','important');launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');}}
             window.Tawk_API=window.Tawk_API||{{}};
             var previousOnLoad=window.Tawk_API.onLoad;
