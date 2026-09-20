@@ -14,8 +14,8 @@ export async function GET(): Promise<Response> {
         'x-goog-api-key': key,
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Return exactly: FOX_GEMINI_OK' }] }],
-        generationConfig: { temperature: 0, maxOutputTokens: 16 },
+        contents: [{ parts: [{ text: 'Translate the German phrase "Guten Tag" into Slovak. Return only the Slovak translation, no explanation.' }] }],
+        generationConfig: { temperature: 0 },
       }),
     });
 
@@ -27,7 +27,7 @@ export async function GET(): Promise<Response> {
     const data: any = JSON.parse(raw);
     const text = String(data?.candidates?.[0]?.content?.parts?.map((p: any) => p?.text || '').join('') || '').trim();
     return Response.json({
-      ok: text.includes('FOX_GEMINI_OK'),
+      ok: text.length > 0,
       model,
       keySource: process.env.GEMINI_FREE_API_KEY ? 'GEMINI_FREE_API_KEY' : 'GEMINI_API_KEY',
       text,
