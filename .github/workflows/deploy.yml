@@ -187,9 +187,17 @@ jobs:
             launcher.onclick=activateLauncher;
             launcher.onpointerup=activateLauncher;
             launcher.onpointerdown=function(e){{ if(e.pointerType!=='mouse') activateLauncher(e); }};
+            function pointInsideLauncher(e){{
+              if(!launcher || !e || typeof e.clientX!=='number' || typeof e.clientY!=='number')return false;
+              var r=launcher.getBoundingClientRect();
+              return e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+            }}
+            document.addEventListener('pointerdown',function(e){{
+              if(pointInsideLauncher(e)){{e.preventDefault();e.stopPropagation();activateLauncher(e);}}
+            }},true);
             document.addEventListener('click',function(e){{
               var target=e.target && e.target.closest ? e.target.closest('#fox-tawk-launcher') : null;
-              if(target===launcher) activateLauncher(e);
+              if(target===launcher || pointInsideLauncher(e)){{e.preventDefault();e.stopPropagation();activateLauncher(e);}}
             }},true);
             showLauncher();
           }})();
