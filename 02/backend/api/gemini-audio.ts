@@ -53,6 +53,31 @@ function parseTranslation(text: string): { transcript: string; translatedText: s
   return null;
 }
 
+function quotaInfo(raw: string, upstream: Response): {code: string; retryAfterSeconds?: number; quotaWindow: string} {
+  const lower = raw.toLowerCase();
+  const headerRetry = Number(upstream.headers.get('retry-after') || 0);
+
+  if (
+    lower.includes('perday') ||
+    lower.includes('requestsperday') ||
+    lower.includes('generate_requests_per_day') ||
+    lower.includes('generaterequestsperdayperprojectpermodel')
+  ) {
+    return {code:'DAILY_QUOTA_EXCEEDED', quotaWindow:'day'};
+  }
+
+  if (
+    lower.includes('perminute') ||
+    lower.includes('requestsperminute') ||
+    lower.includes('requests_per_minute') ||
+    lower.includes('rpm')
+  ) {
+    return {code:'RATE_LIMITED', quotaWindow:'minute', retryAfterSeconds: Math.max(headerRetry, 60)};
+  }
+
+  return {code:'QUOTA_EXCEEDED', quotaWindow:'unknown', retryAfterSeconds: Math.max(headerRetry, 30)};
+}
+
 export async function OPTIONS(request: Request): Promise<Response> {
   return new Response(null, {status: 204, headers: corsHeaders(request)});
 }
@@ -110,13 +135,27 @@ export async function POST(request: Request): Promise<Response> {
 
     const raw = await upstream.text();
     if (!upstream.ok) {
-      const retry = upstream.status === 429 ? 30 : upstream.status === 503 ? 3 : undefined;
+      if (upstream.status === 429) {
+        const quota = quotaInfo(raw, upstream);
+        console.warn('gemini-audio quota', JSON.stringify({model:selectedModel, ...quota, detail:raw.slice(0, 900)}));
+        return json({
+          error: quota.code === 'DAILY_QUOTA_EXCEEDED'
+            ? 'Gemini Free Tier denná kvóta pre tento model je vyčerpaná.'
+            : 'Gemini Free Tier dočasne prekročil rate limit.',
+          code: quota.code,
+          quotaWindow: quota.quotaWindow,
+          detail: raw.slice(0, 900),
+          ...(quota.retryAfterSeconds ? {retryAfterSeconds: quota.retryAfterSeconds} : {})
+        }, 429, request, quota.retryAfterSeconds ? {'Retry-After': String(quota.retryAfterSeconds)} : undefined);
+      }
+
+      const retry = upstream.status === 503 ? 3 : undefined;
       return json({
         error: `Gemini HTTP ${upstream.status}`,
-        code: upstream.status === 402 ? 'FREE_TIER_KEY_REQUIRED' : upstream.status === 429 ? 'QUOTA_EXCEEDED' : upstream.status === 503 ? 'MODEL_BUSY' : 'GEMINI_ERROR',
-        detail: raw.slice(0, 600),
+        code: upstream.status === 402 ? 'FREE_TIER_KEY_REQUIRED' : upstream.status === 503 ? 'MODEL_BUSY' : 'GEMINI_ERROR',
+        detail: raw.slice(0, 900),
         ...(retry ? {retryAfterSeconds: retry} : {})
-      }, upstream.status === 402 ? 402 : upstream.status === 429 ? 429 : upstream.status === 503 ? 503 : 502, request, retry ? {'Retry-After': String(retry)} : undefined);
+      }, upstream.status === 402 ? 402 : upstream.status === 503 ? 503 : 502, request, retry ? {'Retry-After': String(retry)} : undefined);
     }
 
     const data = JSON.parse(raw);
