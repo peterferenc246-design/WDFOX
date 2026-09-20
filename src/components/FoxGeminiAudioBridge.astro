@@ -2,349 +2,338 @@
 (() => {
   const root = document.querySelector('[data-fox-live]') || document.querySelector('[data-app]');
   if (!root || window.__foxGeminiAudioBridge) return;
-
   window.__foxGeminiAudioBridge = true;
+
+  const MODEL = 'gemini-3.5-live-translate-preview';
+  const TOKEN_URL = 'https://wdfox.vercel.app/api/live-token';
+  const WS_BASE = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained';
   const hasRemotePeer = new URLSearchParams(location.search).has('foxPeer');
   const localeNames = {de:'German',sk:'Slovak',en:'English',fr:'French',it:'Italian',pl:'Polish',es:'Spanish',sv:'Swedish',hr:'Croatian',cs:'Czech',nl:'Dutch',da:'Danish',fi:'Finnish',et:'Estonian',el:'Greek',hu:'Hungarian',ga:'Irish',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pt:'Portuguese',ro:'Romanian',sl:'Slovenian',bg:'Bulgarian'};
-  const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
-  const API_URL = 'https://wdfox.vercel.app/api/gemini-audio';
-
-  const CHUNK_MS = 500;
-  const SILENCE_MS = 1100;
-  const MAX_UTTERANCE_MS = 12000;
-  const MIN_UTTERANCE_MS = 650;
-  const PRE_ROLL_CHUNKS = 2;
-  const VAD_THRESHOLD = 0.018;
-  const MIN_REQUEST_GAP_MS = 12000;
-  const MAX_RETRIES = 2;
+  const targetCodes = {pt:'pt-PT'};
 
   const q = (s) => root.querySelector(s);
   const status = q('[data-comm-status]') || q('[data-status]');
-  const audio = q('[data-remote-audio]') || q('[data-audio-el]');
-  const sent = q('[data-sent]');
-  const received = q('[data-received]');
+  const remoteAudio = q('[data-remote-audio]') || q('[data-audio-el]');
   const transcript = q('[data-transcript]');
   const translation = q('[data-translation]');
   const sourceSelect = q('[data-source]');
   const targetSelect = q('[data-target]');
-  const play = q('[data-play]');
+  const playButton = q('[data-play]');
+  const audioButton = q('[data-audio]');
 
-  let recorder = null;
-  let recorderMime = '';
-  let running = false;
-  let stopping = false;
-  let queue = Promise.resolve();
-  let lastTranscript = '';
-  let lastTranslation = '';
-  let lastRequestAt = 0;
+  let socket = null;
+  let socketReady = false;
+  let captureContext = null;
+  let captureSource = null;
+  let captureProcessor = null;
+  let captureSink = null;
+  let outputContext = null;
+  let nextPlayTime = 0;
+  let activeStream = null;
+  let activeTarget = '';
+  let generation = 0;
+  let reconnectTimer = null;
+  let inputHistory = '';
+  let outputHistory = '';
+  let inputCurrent = '';
+  let outputCurrent = '';
+  let quotaBlocked = false;
 
-  let audioContext = null;
-  let analyser = null;
-  let vadTimer = null;
-  let vadData = null;
-  let voiceNow = false;
-  let lastVoiceAt = 0;
-  let utteranceStartAt = 0;
-  let utteranceChunks = [];
-  let preRoll = [];
-
-  const setStatus = (s) => { if (status && s) status.textContent = s; };
-  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-  const append = (box, text) => {
-    if (!box || !text) return;
-    if (box.textContent.trim() === '—') box.textContent = '';
-    const p = document.createElement('div');
-    p.textContent = text;
-    box.appendChild(p);
-    box.scrollTop = box.scrollHeight;
-  };
-
-  const languagePair = () => {
+  const setStatus = (text) => { if (status && text) status.textContent = text; };
+  const stream = () => remoteAudio?.srcObject || null;
+  const connected = () => !!stream()?.getAudioTracks?.().some(track => track.readyState === 'live');
+  const targetLanguage = () => {
     const selectedSource = sourceSelect?.value || 'sk';
     const selectedTarget = targetSelect?.value || 'en';
-    return hasRemotePeer
-      ? { source: selectedTarget, target: selectedSource }
-      : { source: selectedSource, target: selectedTarget };
+    const code = hasRemotePeer ? selectedSource : selectedTarget;
+    return targetCodes[code] || code;
   };
 
-  const speak = (text, targetCode) => {
-    if (!text || !window.speechSynthesis) return;
-    try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = voices[targetCode] || targetCode;
-      u.rate = .96;
-      speechSynthesis.speak(u);
-    } catch {}
-  };
-
-  const mime = () => ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(x => window.MediaRecorder?.isTypeSupported?.(x)) || '';
-  const stream = () => audio?.srcObject || null;
-  const connected = () => !!stream()?.getAudioTracks?.().some(t => t.readyState === 'live');
-
-  const blobToBase64 = (blob) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const value = String(reader.result || '');
-      const comma = value.indexOf(',');
-      resolve(comma >= 0 ? value.slice(comma + 1) : value);
-    };
-    reader.onerror = () => reject(reader.error || Error('Audio encoding failed'));
-    reader.readAsDataURL(blob);
-  });
-
-  function teardownVAD() {
-    if (vadTimer) clearInterval(vadTimer);
-    vadTimer = null;
-    analyser = null;
-    vadData = null;
-    voiceNow = false;
-    lastVoiceAt = 0;
-    try { audioContext?.close?.(); } catch {}
-    audioContext = null;
+  function renderTranscripts() {
+    const left = [inputHistory, inputCurrent].filter(Boolean).join(inputHistory && inputCurrent ? '\n' : '');
+    const right = [outputHistory, outputCurrent].filter(Boolean).join(outputHistory && outputCurrent ? '\n' : '');
+    if (left && transcript) transcript.textContent = left;
+    if (right && translation) translation.textContent = right;
+    if (right && playButton) playButton.disabled = false;
   }
 
-  function setupVAD(s) {
-    teardownVAD();
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return false;
-      audioContext = new AudioCtx();
-      const source = audioContext.createMediaStreamSource(s);
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 512;
-      analyser.smoothingTimeConstant = 0.2;
-      source.connect(analyser);
-      vadData = new Uint8Array(analyser.fftSize);
-      audioContext.resume?.().catch(() => {});
+  function mergePiece(current, piece) {
+    piece = String(piece || '').trim();
+    if (!piece) return current;
+    if (!current) return piece;
+    if (piece === current || current.endsWith(piece)) return current;
+    if (piece.startsWith(current)) return piece;
+    const spacer = /[\s,.;:!?]$/.test(current) || /^[,.;:!?]/.test(piece) ? '' : ' ';
+    return current + spacer + piece;
+  }
 
-      vadTimer = setInterval(() => {
-        if (!analyser || !vadData) return;
-        analyser.getByteTimeDomainData(vadData);
+  function finalizeTurn() {
+    if (inputCurrent) inputHistory = [inputHistory, inputCurrent].filter(Boolean).join(inputHistory ? '\n' : '').slice(-5000);
+    if (outputCurrent) outputHistory = [outputHistory, outputCurrent].filter(Boolean).join(outputHistory ? '\n' : '').slice(-5000);
+    inputCurrent = '';
+    outputCurrent = '';
+    renderTranscripts();
+  }
+
+  function base64FromBytes(bytes) {
+    let binary = '';
+    const step = 0x8000;
+    for (let i = 0; i < bytes.length; i += step) {
+      binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + step, bytes.length)));
+    }
+    return btoa(binary);
+  }
+
+  function pcm16Base64(float32, inputRate) {
+    const outputRate = 16000;
+    let samples = float32;
+    if (inputRate !== outputRate) {
+      const ratio = inputRate / outputRate;
+      const length = Math.max(1, Math.round(float32.length / ratio));
+      const down = new Float32Array(length);
+      let sourceOffset = 0;
+      for (let i = 0; i < length; i++) {
+        const nextOffset = Math.min(float32.length, Math.round((i + 1) * ratio));
         let sum = 0;
-        for (let i = 0; i < vadData.length; i++) {
-          const n = (vadData[i] - 128) / 128;
-          sum += n * n;
+        let count = 0;
+        for (; sourceOffset < nextOffset; sourceOffset++) {
+          sum += float32[sourceOffset];
+          count++;
         }
-        const rms = Math.sqrt(sum / vadData.length);
-        voiceNow = rms >= VAD_THRESHOLD;
-        const now = Date.now();
-
-        if (voiceNow) lastVoiceAt = now;
-
-        if (utteranceChunks.length) {
-          const age = utteranceStartAt ? now - utteranceStartAt : 0;
-          const silence = lastVoiceAt ? now - lastVoiceAt : age;
-          if ((age >= MIN_UTTERANCE_MS && silence >= SILENCE_MS) || age >= MAX_UTTERANCE_MS) {
-            flushUtterance();
-          }
-        }
-      }, 100);
-      return true;
-    } catch (e) {
-      console.warn('FOX VAD unavailable', e);
-      teardownVAD();
-      return false;
+        down[i] = count ? sum / count : 0;
+      }
+      samples = down;
     }
-  }
-
-  function rememberPreRoll(chunk) {
-    preRoll.push(chunk);
-    while (preRoll.length > PRE_ROLL_CHUNKS) preRoll.shift();
-  }
-
-  function flushUtterance(force = false) {
-    if (!utteranceChunks.length) return;
-    const now = Date.now();
-    const duration = utteranceStartAt ? now - utteranceStartAt : 0;
-    const chunks = utteranceChunks;
-    utteranceChunks = [];
-    utteranceStartAt = 0;
-    preRoll = [];
-
-    if (!force && duration < MIN_UTTERANCE_MS) return;
-    const type = recorderMime || chunks.find(x => x?.type)?.type || 'audio/webm';
-    const blob = new Blob(chunks, {type});
-    if (blob.size < 1400) return;
-    enqueue(blob, languagePair());
-  }
-
-  async function upload(blob, pair) {
-    if (!blob || blob.size < 1400) return;
-
-    const audioBase64 = await blobToBase64(blob);
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      const gap = MIN_REQUEST_GAP_MS - (Date.now() - lastRequestAt);
-      if (gap > 0) {
-        setStatus(`GEMINI: veta čaká vo fronte ${Math.ceil(gap / 1000)} s…`);
-        await wait(gap);
-      }
-
-      setStatus(`GEMINI AUDIO: ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}…`);
-      lastRequestAt = Date.now();
-
-      let r;
-      let d = {};
-      try {
-        r = await fetch(API_URL, {
-          method:'POST',
-          headers:{'Content-Type':'application/json', Accept:'application/json'},
-          body:JSON.stringify({
-            audioBase64,
-            mimeType: blob.type || 'audio/webm',
-            source: pair.source,
-            target: pair.target
-          }),
-          cache:'no-store'
-        });
-        d = await r.json().catch(() => ({}));
-      } catch (networkError) {
-        if (attempt < MAX_RETRIES) {
-          setStatus('GEMINI: sieťová chyba, opakujem o 3 s…');
-          await wait(3000);
-          continue;
-        }
-        throw networkError;
-      }
-
-      if (r.ok) {
-        const src = String(d?.transcript || '').trim();
-        const dst = String(d?.translation || d?.translatedText || '').trim();
-
-        if (src && src !== lastTranscript) {
-          lastTranscript = src;
-          if (transcript) transcript.textContent = src;
-          append(sent, src);
-        }
-        if (dst && dst !== lastTranslation) {
-          lastTranslation = dst;
-          if (translation) translation.textContent = dst;
-          if (play) play.disabled = false;
-          append(received, dst);
-          speak(dst, pair.target);
-        }
-
-        if (src || dst) setStatus(`GEMINI ✓ ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}`);
-        else setStatus('GEMINI AUDIO: nič nerozpoznal');
-        return;
-      }
-
-      if (r.status === 429) {
-        if (d?.code === 'DAILY_QUOTA_EXCEEDED') {
-          throw Error('Gemini Free Tier denná kvóta je dnes vyčerpaná');
-        }
-
-        const headerRetry = Number(r.headers.get('Retry-After') || 0);
-        const retrySeconds = Math.max(Number(d?.retryAfterSeconds || 0), headerRetry, 30);
-        if (attempt < MAX_RETRIES) {
-          setStatus(`GEMINI Free Tier: limit 429, veta zostáva vo fronte. Opakujem o ${retrySeconds} s…`);
-          await wait(retrySeconds * 1000);
-          continue;
-        }
-        throw Error('Gemini Free Tier rate limit 429 – skúste vetu po chvíli zopakovať');
-      }
-
-      if (r.status === 503 && attempt < MAX_RETRIES) {
-        const retrySeconds = Math.max(Number(d?.retryAfterSeconds || 0), 3);
-        setStatus(`GEMINI je vyťažený, opakujem o ${retrySeconds} s…`);
-        await wait(retrySeconds * 1000);
-        continue;
-      }
-
-      throw Error(d?.error || `Gemini HTTP ${r.status}`);
+    const pcm = new Int16Array(samples.length);
+    for (let i = 0; i < samples.length; i++) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
     }
+    return base64FromBytes(new Uint8Array(pcm.buffer));
   }
 
-  function enqueue(blob, pair) {
-    queue = queue
-      .then(() => upload(blob, pair))
-      .catch((e) => setStatus(`❌ GEMINI AUDIO: ${e?.message || 'chyba'}`));
+  function ensureOutputContext() {
+    if (!outputContext) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      outputContext = new AudioCtx();
+      nextPlayTime = outputContext.currentTime;
+    }
+    if (outputContext.state === 'suspended') outputContext.resume().catch(() => {});
+    return outputContext;
   }
 
-  function startRecorder() {
-    const s = stream();
-    if (!s || stopping || running) return;
-    recorderMime = mime();
+  function playTranslatedPcm(base64, mimeType) {
+    const ctx = ensureOutputContext();
+    if (!ctx || !base64) return;
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const frames = Math.floor(bytes.length / 2);
+    if (!frames) return;
+    const samples = new Float32Array(frames);
+    const view = new DataView(bytes.buffer);
+    for (let i = 0; i < frames; i++) samples[i] = view.getInt16(i * 2, true) / 32768;
+    const match = String(mimeType || '').match(/rate=(\d+)/i);
+    const rate = match ? Number(match[1]) : 24000;
+    const buffer = ctx.createBuffer(1, samples.length, rate);
+    buffer.copyToChannel(samples, 0);
+    const node = ctx.createBufferSource();
+    node.buffer = buffer;
+    node.connect(ctx.destination);
+    const startAt = Math.max(ctx.currentTime + 0.02, nextPlayTime);
+    node.start(startAt);
+    nextPlayTime = startAt + buffer.duration;
+  }
 
-    try {
-      recorder = recorderMime
-        ? new MediaRecorder(s,{mimeType:recorderMime,audioBitsPerSecond:64000})
-        : new MediaRecorder(s);
-    } catch(e) {
-      setStatus(`❌ MediaRecorder: ${e.message}`);
+  function stopCapture() {
+    try { if (captureProcessor) captureProcessor.onaudioprocess = null; } catch {}
+    try { captureSource?.disconnect(); } catch {}
+    try { captureProcessor?.disconnect(); } catch {}
+    try { captureSink?.disconnect(); } catch {}
+    try { captureContext?.close(); } catch {}
+    captureContext = captureSource = captureProcessor = captureSink = null;
+  }
+
+  function startCapture(mediaStream) {
+    stopCapture();
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) {
+      setStatus('❌ GEMINI LIVE: Web Audio API nie je dostupné');
       return;
     }
+    captureContext = new AudioCtx();
+    captureSource = captureContext.createMediaStreamSource(mediaStream);
+    captureProcessor = captureContext.createScriptProcessor(4096, 1, 1);
+    captureSink = captureContext.createGain();
+    captureSink.gain.value = 0;
+    captureSource.connect(captureProcessor);
+    captureProcessor.connect(captureSink);
+    captureSink.connect(captureContext.destination);
+    captureContext.resume().catch(() => {});
 
-    setupVAD(s);
-    running = true;
-    utteranceChunks = [];
-    preRoll = [];
-    utteranceStartAt = 0;
-
-    recorder.ondataavailable = (e) => {
-      if (!e.data?.size || stopping) return;
-      const now = Date.now();
-      const recentlyVoiced = lastVoiceAt && (now - lastVoiceAt < SILENCE_MS);
-
-      if (voiceNow || recentlyVoiced) {
-        if (!utteranceChunks.length) {
-          utteranceStartAt = now;
-          if (preRoll.length) utteranceChunks.push(...preRoll);
-          preRoll = [];
+    captureProcessor.onaudioprocess = (event) => {
+      if (!socketReady || !socket || socket.readyState !== WebSocket.OPEN) return;
+      const input = event.inputBuffer.getChannelData(0);
+      let energy = 0;
+      for (let i = 0; i < input.length; i += 32) energy += input[i] * input[i];
+      const rms = Math.sqrt(energy / Math.ceil(input.length / 32));
+      if (rms < 0.0012) return;
+      const data = pcm16Base64(input, captureContext.sampleRate);
+      socket.send(JSON.stringify({
+        realtimeInput:{
+          audio:{data,mimeType:'audio/pcm;rate=16000'}
         }
-        utteranceChunks.push(e.data);
-      } else if (utteranceChunks.length) {
-        utteranceChunks.push(e.data);
-      } else {
-        rememberPreRoll(e.data);
-      }
+      }));
     };
-
-    recorder.onerror = (e) => {
-      running = false;
-      teardownVAD();
-      setStatus(`❌ MediaRecorder: ${e?.error?.message || e?.message || 'chyba'}`);
-    };
-
-    recorder.onstop = () => {
-      running = false;
-      recorder = null;
-      teardownVAD();
-    };
-
-    try {
-      recorder.start(CHUNK_MS);
-      const pair = languagePair();
-      setStatus(`GEMINI VAD: počúvam ${localeNames[pair.source] || pair.source}; odosielam iba hovorené vety…`);
-    } catch(e) {
-      recorder = null;
-      running = false;
-      teardownVAD();
-      setStatus(`❌ Nahrávanie: ${e.message}`);
-    }
   }
 
-  function stopRecorder() {
-    flushUtterance(true);
-    stopping = true;
-    try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
-    recorder = null;
-    running = false;
-    teardownVAD();
+  function closeLive(reason = '') {
+    generation++;
+    socketReady = false;
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+    try { socket?.close(1000, reason.slice(0, 100)); } catch {}
+    socket = null;
+    stopCapture();
+    activeStream = null;
+    activeTarget = '';
+  }
+
+  function scheduleReconnect(delay = 4000) {
+    if (quotaBlocked || reconnectTimer) return;
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      tick();
+    }, delay);
+  }
+
+  async function connectLive(mediaStream, target) {
+    const myGeneration = ++generation;
+    activeStream = mediaStream;
+    activeTarget = target;
+    socketReady = false;
+    setStatus(`GEMINI LIVE: pripájam preklad → ${localeNames[target] || target}…`);
+
+    try {
+      const tokenResponse = await fetch(TOKEN_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json',Accept:'application/json'},
+        body:JSON.stringify({target}),
+        cache:'no-store'
+      });
+      const tokenData = await tokenResponse.json().catch(() => ({}));
+      if (!tokenResponse.ok || !tokenData?.token) throw new Error(tokenData?.error || `Token HTTP ${tokenResponse.status}`);
+      if (myGeneration !== generation) return;
+
+      const ws = new WebSocket(`${WS_BASE}?access_token=${encodeURIComponent(tokenData.token)}`);
+      socket = ws;
+
+      ws.onopen = () => {
+        if (myGeneration !== generation) return ws.close();
+        ws.send(JSON.stringify({
+          setup:{
+            model:`models/${MODEL}`,
+            generationConfig:{
+              responseModalities:['AUDIO'],
+              inputAudioTranscription:{},
+              outputAudioTranscription:{},
+              translationConfig:{targetLanguageCode:target,echoTargetLanguage:false}
+            }
+          }
+        }));
+      };
+
+      ws.onmessage = (event) => {
+        if (myGeneration !== generation) return;
+        let message;
+        try { message = JSON.parse(event.data); } catch { return; }
+
+        if (message?.setupComplete) {
+          socketReady = true;
+          quotaBlocked = false;
+          startCapture(mediaStream);
+          ensureOutputContext();
+          setStatus(`🟢 GEMINI LIVE ✓ online → ${localeNames[target] || target}`);
+          return;
+        }
+
+        if (message?.error) {
+          const msg = String(message.error?.message || message.error || 'Gemini Live error');
+          if (/429|resource_exhausted|quota/i.test(msg)) quotaBlocked = true;
+          setStatus(`❌ GEMINI LIVE: ${msg}`);
+          return;
+        }
+
+        const content = message?.serverContent;
+        if (!content) return;
+        if (content.inputTranscription?.text) {
+          inputCurrent = mergePiece(inputCurrent, content.inputTranscription.text);
+          renderTranscripts();
+        }
+        if (content.outputTranscription?.text) {
+          outputCurrent = mergePiece(outputCurrent, content.outputTranscription.text);
+          renderTranscripts();
+        }
+        const parts = content.modelTurn?.parts || [];
+        for (const part of parts) {
+          const inline = part?.inlineData;
+          if (inline?.data) playTranslatedPcm(inline.data, inline.mimeType);
+        }
+        if (content.turnComplete) {
+          finalizeTurn();
+          setStatus(`🟢 GEMINI LIVE ✓ online → ${localeNames[target] || target}`);
+        }
+      };
+
+      ws.onerror = () => {
+        if (myGeneration !== generation) return;
+        setStatus('❌ GEMINI LIVE: WebSocket spojenie zlyhalo');
+      };
+
+      ws.onclose = (event) => {
+        if (myGeneration !== generation) return;
+        socketReady = false;
+        stopCapture();
+        socket = null;
+        activeStream = null;
+        activeTarget = '';
+        if (!quotaBlocked && connected()) {
+          setStatus(`GEMINI LIVE: spojenie sa obnovuje…${event?.reason ? ' ' + event.reason : ''}`);
+          scheduleReconnect(3500);
+        }
+      };
+    } catch (error) {
+      if (myGeneration !== generation) return;
+      const msg = error?.message || 'pripojenie zlyhalo';
+      if (/429|resource_exhausted|quota/i.test(msg)) quotaBlocked = true;
+      setStatus(`❌ GEMINI LIVE: ${msg}`);
+      activeStream = null;
+      activeTarget = '';
+      scheduleReconnect(5000);
+    }
   }
 
   function tick() {
-    if (connected()) {
-      stopping = false;
-      if (!running) startRecorder();
-    } else if (running) {
-      stopRecorder();
+    const currentStream = stream();
+    if (!connected() || !currentStream) {
+      if (socket || captureContext) closeLive('remote audio ended');
+      return;
     }
+    const target = targetLanguage();
+    if (!target) return;
+    if (activeStream === currentStream && activeTarget === target && (socket || reconnectTimer)) return;
+    if (socket || captureContext) closeLive('stream or language changed');
+    quotaBlocked = false;
+    connectLive(currentStream, target);
   }
 
-  setInterval(tick,500);
+  sourceSelect?.addEventListener('change', () => { quotaBlocked = false; closeLive('language changed'); setTimeout(tick, 100); });
+  targetSelect?.addEventListener('change', () => { quotaBlocked = false; closeLive('language changed'); setTimeout(tick, 100); });
+  audioButton?.addEventListener('click', () => ensureOutputContext());
+  root.addEventListener('pointerdown', () => ensureOutputContext(), {passive:true});
+
+  setInterval(tick, 750);
   tick();
 })();
 </script>
