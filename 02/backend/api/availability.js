@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { getCache } from '@vercel/functions';
 
 const CACHE_KEY = 'wdfox:availability:v1';
-const OWNER_HASH = '2d99cdfdc1848ae2103cfefdb970f0407ffbc169c879439c67aa8f373bb081e6';
+const OWNER_HASH = 'c0290369a8377a940ea06fb9a7ae005d38036c1e8c09521dbdd94ee9bfa57dab';
 const ALLOWED_ORIGINS = new Set([
   'https://foxprof.club',
   'https://www.foxprof.club'
