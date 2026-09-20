@@ -78,13 +78,13 @@ jobs:
 
           def snippet(widget):
               return f'''<style id="fox-tawk-launcher-style">
-          #fox-tawk-launcher{{position:fixed!important;right:18px;bottom:18px;z-index:2147483647!important;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation;isolation:isolate}}
+          #fox-tawk-launcher{{position:fixed!important;inset:auto!important;right:18px;bottom:18px;margin:0!important;z-index:2147483647!important;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation;isolation:isolate}}
           #fox-tawk-launcher:hover{{transform:translateY(-3px) scale(1.025)}}
           #fox-tawk-launcher:active{{transform:scale(.97)}} #fox-tawk-launcher:focus-visible{{outline:3px solid #0664e8;outline-offset:3px}}
           #fox-tawk-launcher svg{{display:block;width:100%;height:100%;overflow:visible;pointer-events:none!important}} #fox-tawk-launcher svg *{{pointer-events:none!important}}
           @media(max-width:700px){{#fox-tawk-launcher{{right:4px;bottom:8px;width:210px;height:146px}}}}
           </style>
-          <button id="fox-tawk-launcher" type="button" aria-label="Open live chat">
+          <button id="fox-tawk-launcher" type="button" popover="manual" aria-label="Open live chat">
             <svg viewBox="0 0 250 174" role="img" aria-label="I am here for you — open live chat" xmlns="http://www.w3.org/2000/svg">
               <defs><path id="fox-launcher-arc" d="M 8 76 Q 125 2 242 76"/></defs>
               <text font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="900" fill="#ff922d" stroke="#0664e8" stroke-width="2.8" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-launcher-arc" startOffset="50%" text-anchor="middle">I am here for you!</textPath></text>
@@ -112,7 +112,7 @@ jobs:
             document.getElementById('fox-chat-floating-label').textContent=labels[lang]||labels.en;
             try{{floating.checked=localStorage.getItem('wdfox-chat-floating-v3')==='true';}}catch(e){{}}
             floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating-v3',String(floating.checked));}}catch(e){{}}status.textContent='';}});
-            function showLauncher(){{launcher.style.setProperty('display','block','important');launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');}}
+            function showLauncher(){{launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');if(typeof launcher.showPopover==='function'){{try{{if(!launcher.matches(':popover-open'))launcher.showPopover();return;}}catch(e){{}}}}launcher.style.setProperty('display','block','important');}}
             window.Tawk_API=window.Tawk_API||{{}};
             window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000'}};
             var previousOnLoad=window.Tawk_API.onLoad;
