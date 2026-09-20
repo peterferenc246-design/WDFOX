@@ -1,0 +1,134 @@
+---
+interface Props { locale: string }
+const { locale } = Astro.props;
+const copy = {
+  sk:{title:'DOSTUPNOSŤ PRE HOVORY',pc:'KANCELÁRIA PC',mobile:'MOBIL',online:'ONLINE',offline:'OFFLINE',owner:'REŽIM VLASTNÍKA',prompt:'Zadajte FOX owner key'},
+  de:{title:'ERREICHBARKEIT FÜR ANRUFE',pc:'BÜRO-PC',mobile:'MOBIL',online:'ONLINE',offline:'OFFLINE',owner:'INHABER-MODUS',prompt:'FOX Owner Key eingeben'},
+  en:{title:'CALL AVAILABILITY',pc:'OFFICE PC',mobile:'MOBILE',online:'ONLINE',offline:'OFFLINE',owner:'OWNER MODE',prompt:'Enter FOX owner key'},
+  fr:{title:'DISPONIBILITÉ DES APPELS',pc:'PC BUREAU',mobile:'MOBILE',online:'EN LIGNE',offline:'HORS LIGNE',owner:'MODE PROPRIÉTAIRE',prompt:'Entrez la clé FOX owner'},
+  it:{title:'DISPONIBILITÀ CHIAMATE',pc:'PC UFFICIO',mobile:'CELLULARE',online:'ONLINE',offline:'OFFLINE',owner:'MODALITÀ PROPRIETARIO',prompt:'Inserisci FOX owner key'},
+  pl:{title:'DOSTĘPNOŚĆ POŁĄCZEŃ',pc:'PC BIURO',mobile:'TELEFON',online:'ONLINE',offline:'OFFLINE',owner:'TRYB WŁAŚCICIELA',prompt:'Wpisz FOX owner key'},
+  es:{title:'DISPONIBILIDAD DE LLAMADAS',pc:'PC OFICINA',mobile:'MÓVIL',online:'ONLINE',offline:'OFFLINE',owner:'MODO PROPIETARIO',prompt:'Introduce FOX owner key'},
+  sv:{title:'SAMTALSTILLGÄNGLIGHET',pc:'KONTORS-PC',mobile:'MOBIL',online:'ONLINE',offline:'OFFLINE',owner:'ÄGARLÄGE',prompt:'Ange FOX owner key'},
+  hr:{title:'DOSTUPNOST ZA POZIVE',pc:'URED PC',mobile:'MOBITEL',online:'ONLINE',offline:'OFFLINE',owner:'VLASNIČKI NAČIN',prompt:'Unesite FOX owner key'}
+} as const;
+const t = copy[locale as keyof typeof copy] || copy.en;
+---
+<section class="fox-availability" data-availability data-copy={JSON.stringify(t)}>
+  <div class="availability-head">
+    <span>{t.title}</span>
+    <small data-owner-badge hidden>🔒 {t.owner}</small>
+  </div>
+  <div class="availability-grid">
+    <button type="button" class="availability-btn" data-device="pc" aria-pressed="false">
+      <span class="device">🖥️ {t.pc}</span>
+      <span class="state" data-state="pc"><i></i><b>{t.offline}</b></span>
+    </button>
+    <button type="button" class="availability-btn" data-device="mobile" aria-pressed="false">
+      <span class="device">📱 {t.mobile}</span>
+      <span class="state" data-state="mobile"><i></i><b>{t.offline}</b></span>
+    </button>
+  </div>
+</section>
+<style>
+.fox-availability{margin:16px auto 4px;max-width:1180px;padding:0 24px}.availability-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;color:#697386;font-size:10px;font-weight:900;letter-spacing:.09em}.availability-head small{color:#f36a0a;font-size:10px}.availability-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.availability-btn{appearance:none;border:1px solid #e8e8e8;border-radius:16px;background:#fff;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#172033;box-shadow:0 7px 24px rgba(20,24,35,.05);cursor:default}.availability-btn .device{font-size:12px;font-weight:900}.state{display:inline-flex;align-items:center;gap:7px;font-size:11px}.state i{width:9px;height:9px;border-radius:999px;background:#c8cdd5;box-shadow:0 0 0 4px rgba(200,205,213,.18)}.availability-btn.is-online{border-color:#bee8cf;background:#f7fff9}.availability-btn.is-online .state i{background:#18a957;box-shadow:0 0 0 4px rgba(24,169,87,.14)}.availability-btn.is-online .state b{color:#118347}.fox-availability.is-owner .availability-btn{cursor:pointer}.fox-availability.is-owner .availability-btn:hover{border-color:#f36a0a;transform:translateY(-1px)}.availability-btn.is-loading{opacity:.55;pointer-events:none}@media(max-width:650px){.fox-availability{padding:0 18px}.availability-grid{grid-template-columns:1fr}}
+</style>
+<script>
+(() => {
+  const root = document.querySelector('[data-availability]');
+  if (!root || root.__foxAvailability) return;
+  root.__foxAvailability = true;
+
+  const API = 'https://wdfox.vercel.app/api/availability';
+  const copy = JSON.parse(root.dataset.copy || '{}');
+  const buttons = [...root.querySelectorAll('[data-device]')];
+  const ownerBadge = root.querySelector('[data-owner-badge]');
+  const params = new URLSearchParams(location.search);
+  let ownerMode = params.get('foxOwner') === '1' || localStorage.getItem('foxOwnerMode') === '1';
+  let ownerKey = localStorage.getItem('foxOwnerKey') || '';
+  let state = {pc:false,mobile:false};
+
+  if (params.has('foxOwner')) {
+    params.delete('foxOwner');
+    const qs = params.toString();
+    history.replaceState({}, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    localStorage.setItem('foxOwnerMode','1');
+  }
+
+  const setOwnerUi = () => {
+    root.classList.toggle('is-owner', ownerMode);
+    if (ownerBadge) ownerBadge.hidden = !ownerMode;
+  };
+
+  const render = (next) => {
+    state = {...state,...next};
+    for (const btn of buttons) {
+      const device = btn.dataset.device;
+      const online = Boolean(state[device]);
+      btn.classList.toggle('is-online', online);
+      btn.setAttribute('aria-pressed', String(online));
+      const label = btn.querySelector('b');
+      if (label) label.textContent = online ? copy.online : copy.offline;
+    }
+  };
+
+  const load = async () => {
+    try {
+      const r = await fetch(API,{cache:'no-store'});
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const d = await r.json();
+      render({pc:d.pc,mobile:d.mobile});
+    } catch (e) {
+      console.warn('availability read failed', e);
+    }
+  };
+
+  const authenticate = async () => {
+    if (!ownerMode) return false;
+    if (!ownerKey) ownerKey = String(prompt(copy.prompt || 'FOX owner key') || '').trim();
+    if (!ownerKey) return false;
+    const r = await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+ownerKey},
+      body:JSON.stringify({action:'auth'}),
+      cache:'no-store'
+    });
+    if (!r.ok) {
+      ownerKey='';
+      localStorage.removeItem('foxOwnerKey');
+      alert('FOX owner key: ACCESS DENIED');
+      return false;
+    }
+    localStorage.setItem('foxOwnerKey', ownerKey);
+    return true;
+  };
+
+  const toggle = async (btn) => {
+    if (!ownerMode) return;
+    if (!(await authenticate())) return;
+    const device = btn.dataset.device;
+    btn.classList.add('is-loading');
+    try {
+      const r = await fetch(API,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+ownerKey},
+        body:JSON.stringify({device}),
+        cache:'no-store'
+      });
+      const d = await r.json().catch(()=>({}));
+      if (!r.ok) throw new Error(d.error || 'HTTP '+r.status);
+      render({pc:d.pc,mobile:d.mobile});
+      window.dispatchEvent(new CustomEvent('fox:availability',{detail:d}));
+    } catch (e) {
+      console.error('availability update failed', e);
+    } finally {
+      btn.classList.remove('is-loading');
+    }
+  };
+
+  buttons.forEach(btn => btn.addEventListener('click', () => toggle(btn)));
+  setOwnerUi();
+  load();
+  setInterval(load, 10000);
+})();
+</script>
