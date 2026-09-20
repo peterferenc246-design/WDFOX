@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Landing from "../../components/Landing.astro";
 import FoxAnalyzerLauncher from "../../components/FoxAnalyzerLauncher.astro";
 import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
+import FoxGeminiAudioBridge from "../../components/FoxGeminiAudioBridge.astro";
 import FoxHangupButton from "../../components/FoxHangupButton.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
@@ -23,6 +24,7 @@ const content = await getLandingContent(lang);
   <FoxHangupButton />
   <script is:inline src="/fox-webrtc-hardening.js?v=20260920a"></script>
   <FoxLiveTranslator locale={lang} />
+  <FoxGeminiAudioBridge />
   <FoxAnalyzerLauncher locale={lang} />
   <Fragment slot="footer-links">
     <a href={`/${lang}/#domov`}>{content.nav.home}</a>
