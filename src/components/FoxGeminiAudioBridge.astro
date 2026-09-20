@@ -7,8 +7,8 @@
   const hasRemotePeer = new URLSearchParams(location.search).has('foxPeer');
   const localeNames = {de:'German',sk:'Slovak',en:'English',fr:'French',it:'Italian',pl:'Polish',es:'Spanish',sv:'Swedish',hr:'Croatian',cs:'Czech',nl:'Dutch',da:'Danish',fi:'Finnish',et:'Estonian',el:'Greek',hu:'Hungarian',ga:'Irish',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pt:'Portuguese',ro:'Romanian',sl:'Slovenian',bg:'Bulgarian'};
   const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
-  const API_URL = '/api/translate-voice';
-  const SEGMENT_MS = 3600;
+  const API_URL = 'https://wdfox-live-translator.vercel.app/api/translate-voice';
+  const TIMESLICE_MS = 3200;
 
   const q = (s) => root.querySelector(s);
   const status = q('[data-comm-status]') || q('[data-status]');
@@ -24,9 +24,9 @@
   let recorder = null;
   let running = false;
   let stopping = false;
-  let uploading = false;
-  let segmentTimer = null;
-  let lastResultAt = 0;
+  let queue = Promise.resolve();
+  let lastTranscript = '';
+  let lastTranslation = '';
 
   const setStatus = (s) => { if (status && s) status.textContent = s; };
   const append = (box, text) => {
@@ -40,10 +40,7 @@
 
   const languagePair = () => {
     const selectedSource = sourceSelect?.value || 'sk';
-    const selectedTarget = targetSelect?.value || 'de';
-    // This bridge translates the REMOTE audio stream.
-    // PC receives mobile speech: selected source -> selected target.
-    // Mobile receives PC speech: selected target -> selected source.
+    const selectedTarget = targetSelect?.value || 'en';
     return hasRemotePeer
       ? { source: selectedTarget, target: selectedSource }
       : { source: selectedSource, target: selectedTarget };
@@ -65,8 +62,7 @@
   const connected = () => !!stream()?.getAudioTracks?.().some(t => t.readyState === 'live');
 
   async function upload(blob, pair) {
-    if (!blob || blob.size < 1200 || uploading || stopping) return;
-    uploading = true;
+    if (!blob || blob.size < 900 || stopping) return;
     try {
       setStatus(`GEMINI AUDIO: ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}…`);
       const form = new FormData();
@@ -81,41 +77,36 @@
       if (!r.ok) throw Error(d?.error || `Gemini HTTP ${r.status}`);
 
       const src = String(d?.transcript || '').trim();
-      const dst = String(d?.translatedText || d?.translation || '').trim();
-      if (src) {
+      const dst = String(d?.translatedText || d?.translation || d?.text || '').trim();
+
+      if (src && src !== lastTranscript) {
+        lastTranscript = src;
         if (transcript) transcript.textContent = src;
         append(sent, src);
       }
-      if (dst) {
+      if (dst && dst !== lastTranslation) {
+        lastTranslation = dst;
         if (translation) translation.textContent = dst;
         if (play) play.disabled = false;
         append(received, dst);
         speak(dst, pair.target);
       }
-      if (src || dst) {
-        lastResultAt = Date.now();
-        setStatus(`GEMINI ✓ ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}`);
-      } else {
-        setStatus('GEMINI AUDIO: nič nerozpoznal');
-      }
+
+      if (src || dst) setStatus(`GEMINI ✓ ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}`);
+      else setStatus('GEMINI AUDIO: nič nerozpoznal');
     } catch (e) {
       setStatus(`❌ GEMINI AUDIO: ${e?.message || 'chyba'}`);
-    } finally {
-      uploading = false;
-      if (!stopping && connected() && !running) startRecorder();
     }
   }
 
-  function clearSegmentTimer() {
-    if (segmentTimer) clearTimeout(segmentTimer);
-    segmentTimer = null;
+  function enqueue(blob, pair) {
+    queue = queue.then(() => upload(blob, pair)).catch(() => {});
   }
 
   function startRecorder() {
     const s = stream();
-    if (!s || stopping || running || uploading) return;
+    if (!s || stopping || running) return;
     const m = mime();
-    const pair = languagePair();
     try {
       recorder = m ? new MediaRecorder(s,{mimeType:m,audioBitsPerSecond:64000}) : new MediaRecorder(s);
     } catch(e) {
@@ -124,28 +115,23 @@
     }
 
     running = true;
-    const chunks = [];
-    recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
-    recorder.onerror = () => {
-      clearSegmentTimer();
+    recorder.ondataavailable = (e) => {
+      if (!e.data?.size || stopping) return;
+      enqueue(e.data, languagePair());
+    };
+    recorder.onerror = (e) => {
       running = false;
-      try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
+      setStatus(`❌ MediaRecorder: ${e?.error?.message || e?.message || 'chyba'}`);
     };
     recorder.onstop = () => {
-      clearSegmentTimer();
       running = false;
-      const type = recorder?.mimeType || m || 'audio/webm';
       recorder = null;
-      const b = new Blob(chunks,{type});
-      if (!stopping) void upload(b, pair);
     };
 
     try {
-      recorder.start();
+      recorder.start(TIMESLICE_MS);
+      const pair = languagePair();
       setStatus(`GEMINI AUDIO: počúvam ${localeNames[pair.source] || pair.source}…`);
-      segmentTimer = setTimeout(() => {
-        try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
-      }, SEGMENT_MS);
     } catch(e) {
       recorder = null;
       running = false;
@@ -155,7 +141,6 @@
 
   function stopRecorder() {
     stopping = true;
-    clearSegmentTimer();
     try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
     recorder = null;
     running = false;
@@ -164,18 +149,11 @@
   function tick() {
     if (connected()) {
       stopping = false;
-      if (!running && !uploading) startRecorder();
+      if (!running) startRecorder();
     } else if (running) {
       stopRecorder();
     }
   }
-
-  window.addEventListener('fox:language-pair', () => {
-    if (running) {
-      clearSegmentTimer();
-      try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
-    }
-  });
 
   setInterval(tick,500);
   tick();
