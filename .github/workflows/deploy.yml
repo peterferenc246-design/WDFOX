@@ -119,13 +119,26 @@ jobs:
 
             function openOfficialWidget(){{
               var api=window.Tawk_API||{{}};
-              if(!ready||typeof api.maximize!=='function')return false;
+              if(typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
               try{{
                 if(typeof api.showWidget==='function')api.showWidget();
-                api.maximize();
+                if(typeof api.maximize==='function')api.maximize();
+                else api.toggle();
                 pending=false;
                 return true;
               }}catch(e){{return false;}}
+            }}
+
+            function waitForOfficialWidget(){{
+              if(!pending)return;
+              if(openOfficialWidget()){{status.textContent='';return;}}
+              var attempts=0;
+              var timer=window.setInterval(function(){{
+                attempts++;
+                if(!pending){{window.clearInterval(timer);return;}}
+                if(openOfficialWidget()){{window.clearInterval(timer);return;}}
+                if(attempts>=50){{window.clearInterval(timer);}}
+              }},200);
             }}
 
             window.Tawk_API.onLoad=function(){{
@@ -144,7 +157,8 @@ jobs:
               if(!floating.checked){{
                 if(openOfficialWidget()){{status.textContent='';return;}}
                 status.textContent=lang==='sk'?'Chat sa načítava…':'Loading chat…';
-                window.setTimeout(function(){{if(pending&&!ready){{status.textContent=lang==='sk'?'Chat sa nenačítal. Skúste plávajúce okno.':'Chat unavailable. Try the floating window.';document.getElementById('fox-chat-settings').open=true;}}}},10000);
+                waitForOfficialWidget();
+                window.setTimeout(function(){{if(pending){{status.textContent=lang==='sk'?'Chat sa nenačítal. Skúste plávajúce okno.':'Chat unavailable. Try the floating window.';document.getElementById('fox-chat-settings').open=true;}}}},10000);
                 return;
               }}
               pending=false;
