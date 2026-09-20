@@ -115,7 +115,7 @@ jobs:
             function showLauncher(){{launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');if(typeof launcher.showPopover==='function'){{try{{if(!launcher.matches(':popover-open'))launcher.showPopover();return;}}catch(e){{}}}}launcher.style.setProperty('display','block','important');}}
             function hideNativeWidget(){{var api=window.Tawk_API||{{}};try{{if(typeof api.hideWidget==='function')api.hideWidget();}}catch(e){{}}}}
             window.Tawk_API=window.Tawk_API||{{}};
-            window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000'}};
+            window.Tawk_API.customStyle=window.Tawk_API.customStyle||{{zIndex:'2000000000',visibility:{{desktop:{{xOffset:'18',yOffset:'18',position:'br'}},mobile:{{xOffset:'4',yOffset:'8',position:'br'}}}}}}};
             var previousOnLoad=window.Tawk_API.onLoad;
 
             function openOfficialWidget(){{
