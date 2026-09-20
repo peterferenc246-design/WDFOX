@@ -4,23 +4,31 @@
   if (!root || window.__foxGeminiAudioBridge) return;
 
   window.__foxGeminiAudioBridge = true;
-  const isMobile = new URLSearchParams(location.search).has('foxPeer');
-  const sourceCode = isMobile ? 'de' : 'sk';
-  const targetCode = isMobile ? 'sk' : 'de';
+  const hasRemotePeer = new URLSearchParams(location.search).has('foxPeer');
   const localeNames = {de:'German',sk:'Slovak',en:'English',fr:'French',it:'Italian',pl:'Polish',es:'Spanish',sv:'Swedish',hr:'Croatian',cs:'Czech',nl:'Dutch',da:'Danish',fi:'Finnish',et:'Estonian',el:'Greek',hu:'Hungarian',ga:'Irish',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pt:'Portuguese',ro:'Romanian',sl:'Slovenian',bg:'Bulgarian'};
   const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
-  const API_URL = 'https://wdfox-live-translator-pfiwvb92n-podlahy24-1702.vercel.app/api/translate-voice?_vercel_share=f3KcV7njQsY8aEPAC0NzZGm1Dqco4EDt';
+  const API_URL = '/api/translate-voice';
+  const SEGMENT_MS = 3600;
 
   const q = (s) => root.querySelector(s);
   const status = q('[data-comm-status]') || q('[data-status]');
-  const live = q('[data-live]');
   const audio = q('[data-remote-audio]') || q('[data-audio-el]');
   const sent = q('[data-sent]');
   const received = q('[data-received]');
+  const transcript = q('[data-transcript]');
   const translation = q('[data-translation]');
-  let recorder = null, running = false, stopping = false, uploading = false;
+  const sourceSelect = q('[data-source]');
+  const targetSelect = q('[data-target]');
+  const play = q('[data-play]');
 
-  const setStatus = (s) => { if (status) status.textContent = s; };
+  let recorder = null;
+  let running = false;
+  let stopping = false;
+  let uploading = false;
+  let segmentTimer = null;
+  let lastResultAt = 0;
+
+  const setStatus = (s) => { if (status && s) status.textContent = s; };
   const append = (box, text) => {
     if (!box || !text) return;
     if (box.textContent.trim() === '—') box.textContent = '';
@@ -29,7 +37,19 @@
     box.appendChild(p);
     box.scrollTop = box.scrollHeight;
   };
-  const speak = (text) => {
+
+  const languagePair = () => {
+    const selectedSource = sourceSelect?.value || 'sk';
+    const selectedTarget = targetSelect?.value || 'de';
+    // This bridge translates the REMOTE audio stream.
+    // PC receives mobile speech: selected source -> selected target.
+    // Mobile receives PC speech: selected target -> selected source.
+    return hasRemotePeer
+      ? { source: selectedTarget, target: selectedSource }
+      : { source: selectedSource, target: selectedTarget };
+  };
+
+  const speak = (text, targetCode) => {
     if (!text || !window.speechSynthesis) return;
     try {
       speechSynthesis.cancel();
@@ -39,83 +59,125 @@
       speechSynthesis.speak(u);
     } catch {}
   };
+
   const mime = () => ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(x => window.MediaRecorder?.isTypeSupported?.(x)) || '';
   const stream = () => audio?.srcObject || null;
-  const connected = () => !!stream()?.getAudioTracks?.().some(t => t.readyState === 'live') && (!live || !live.classList.contains('hidden'));
+  const connected = () => !!stream()?.getAudioTracks?.().some(t => t.readyState === 'live');
 
-  async function upload(blob) {
+  async function upload(blob, pair) {
     if (!blob || blob.size < 1200 || uploading || stopping) return;
     uploading = true;
     try {
-      setStatus(`GEMINI AUDIO: ${localeNames[sourceCode]} → ${localeNames[targetCode]}…`);
+      setStatus(`GEMINI AUDIO: ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}…`);
       const form = new FormData();
       const ext = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
       form.append('audio', blob, `fox-live-${Date.now()}.${ext}`);
-      form.append('sourceLanguage', sourceCode);
-      form.append('targetLanguage', targetCode);
+      form.append('sourceLanguage', pair.source);
+      form.append('targetLanguage', pair.target);
       form.append('speakResult', 'false');
+
       const r = await fetch(API_URL, { method:'POST', headers:{Accept:'application/json'}, body:form, cache:'no-store' });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw Error(d?.error || `Gemini HTTP ${r.status}`);
+
       const src = String(d?.transcript || '').trim();
       const dst = String(d?.translatedText || d?.translation || '').trim();
-      if (src) append(sent, src);
-      if (dst) { append(received, dst); if (translation) translation.textContent = dst; speak(dst); }
-      setStatus(src || dst ? `GEMINI ✓ ${localeNames[sourceCode]} → ${localeNames[targetCode]}` : 'GEMINI AUDIO: nič nerozpoznal');
+      if (src) {
+        if (transcript) transcript.textContent = src;
+        append(sent, src);
+      }
+      if (dst) {
+        if (translation) translation.textContent = dst;
+        if (play) play.disabled = false;
+        append(received, dst);
+        speak(dst, pair.target);
+      }
+      if (src || dst) {
+        lastResultAt = Date.now();
+        setStatus(`GEMINI ✓ ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}`);
+      } else {
+        setStatus('GEMINI AUDIO: nič nerozpoznal');
+      }
     } catch (e) {
       setStatus(`❌ GEMINI AUDIO: ${e?.message || 'chyba'}`);
     } finally {
       uploading = false;
+      if (!stopping && connected() && !running) startRecorder();
     }
+  }
+
+  function clearSegmentTimer() {
+    if (segmentTimer) clearTimeout(segmentTimer);
+    segmentTimer = null;
   }
 
   function startRecorder() {
     const s = stream();
-    if (!s || stopping || running) return;
+    if (!s || stopping || running || uploading) return;
     const m = mime();
+    const pair = languagePair();
     try {
       recorder = m ? new MediaRecorder(s,{mimeType:m,audioBitsPerSecond:64000}) : new MediaRecorder(s);
     } catch(e) {
       setStatus(`❌ MediaRecorder: ${e.message}`);
       return;
     }
+
     running = true;
     const chunks = [];
     recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
-    recorder.onerror = () => { try { recorder.stop(); } catch {} };
-    recorder.onstop = () => {
-      const b = new Blob(chunks,{type:recorder?.mimeType||m||'audio/webm'});
-      recorder=null;
-      if (!stopping) startRecorder();
-      void upload(b);
+    recorder.onerror = () => {
+      clearSegmentTimer();
+      running = false;
+      try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
     };
+    recorder.onstop = () => {
+      clearSegmentTimer();
+      running = false;
+      const type = recorder?.mimeType || m || 'audio/webm';
+      recorder = null;
+      const b = new Blob(chunks,{type});
+      if (!stopping) void upload(b, pair);
+    };
+
     try {
       recorder.start();
-      setStatus(`GEMINI AUDIO: počúvam ${localeNames[sourceCode]}…`);
+      setStatus(`GEMINI AUDIO: počúvam ${localeNames[pair.source] || pair.source}…`);
+      segmentTimer = setTimeout(() => {
+        try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
+      }, SEGMENT_MS);
     } catch(e) {
-      recorder=null;
-      running=false;
+      recorder = null;
+      running = false;
       setStatus(`❌ Nahrávanie: ${e.message}`);
     }
   }
 
   function stopRecorder() {
-    stopping=true;
-    running=false;
-    try { if (recorder?.state==='recording') recorder.stop(); } catch {}
-    recorder=null;
+    stopping = true;
+    clearSegmentTimer();
+    try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
+    recorder = null;
+    running = false;
   }
 
   function tick() {
     if (connected()) {
-      stopping=false;
-      if (!running) startRecorder();
+      stopping = false;
+      if (!running && !uploading) startRecorder();
     } else if (running) {
       stopRecorder();
     }
   }
 
-  setInterval(tick,700);
+  window.addEventListener('fox:language-pair', () => {
+    if (running) {
+      clearSegmentTimer();
+      try { if (recorder?.state === 'recording') recorder.stop(); } catch {}
+    }
+  });
+
+  setInterval(tick,500);
   tick();
 })();
 </script>
