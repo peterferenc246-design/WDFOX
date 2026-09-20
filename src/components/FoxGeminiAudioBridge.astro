@@ -236,10 +236,10 @@
             model:`models/${MODEL}`,
             generationConfig:{
               responseModalities:['AUDIO'],
-              inputAudioTranscription:{},
-              outputAudioTranscription:{},
               translationConfig:{targetLanguageCode:target,echoTargetLanguage:false}
-            }
+            },
+            inputAudioTranscription:{},
+            outputAudioTranscription:{}
           }
         }));
       };
