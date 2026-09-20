@@ -7,7 +7,7 @@
   const hasRemotePeer = new URLSearchParams(location.search).has('foxPeer');
   const localeNames = {de:'German',sk:'Slovak',en:'English',fr:'French',it:'Italian',pl:'Polish',es:'Spanish',sv:'Swedish',hr:'Croatian',cs:'Czech',nl:'Dutch',da:'Danish',fi:'Finnish',et:'Estonian',el:'Greek',hu:'Hungarian',ga:'Irish',lv:'Latvian',lt:'Lithuanian',mt:'Maltese',pt:'Portuguese',ro:'Romanian',sl:'Slovenian',bg:'Bulgarian'};
   const voices = {sk:'sk-SK',de:'de-DE',en:'en-US',fr:'fr-FR',it:'it-IT',pl:'pl-PL',es:'es-ES',sv:'sv-SE',hr:'hr-HR',cs:'cs-CZ',nl:'nl-NL',da:'da-DK',fi:'fi-FI',et:'et-EE',el:'el-GR',hu:'hu-HU',ga:'ga-IE',lv:'lv-LV',lt:'lt-LT',mt:'mt-MT',pt:'pt-PT',ro:'ro-RO',sl:'sl-SI',bg:'bg-BG'};
-  const API_URL = 'https://wdfox.vercel.app/api/translate-voice';
+  const API_URL = 'https://wdfox.vercel.app/api/gemini-audio';
   const TIMESLICE_MS = 3200;
 
   const q = (s) => root.querySelector(s);
@@ -60,24 +60,38 @@
   const mime = () => ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(x => window.MediaRecorder?.isTypeSupported?.(x)) || '';
   const stream = () => audio?.srcObject || null;
   const connected = () => !!stream()?.getAudioTracks?.().some(t => t.readyState === 'live');
+  const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const value = String(reader.result || '');
+      const comma = value.indexOf(',');
+      resolve(comma >= 0 ? value.slice(comma + 1) : value);
+    };
+    reader.onerror = () => reject(reader.error || Error('Audio encoding failed'));
+    reader.readAsDataURL(blob);
+  });
 
   async function upload(blob, pair) {
     if (!blob || blob.size < 900 || stopping) return;
     try {
       setStatus(`GEMINI AUDIO: ${localeNames[pair.source] || pair.source} → ${localeNames[pair.target] || pair.target}…`);
-      const form = new FormData();
-      const ext = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
-      form.append('audio', blob, `fox-live-${Date.now()}.${ext}`);
-      form.append('sourceLanguage', pair.source);
-      form.append('targetLanguage', pair.target);
-      form.append('speakResult', 'false');
-
-      const r = await fetch(API_URL, { method:'POST', headers:{Accept:'application/json'}, body:form, cache:'no-store' });
+      const audioBase64 = await blobToBase64(blob);
+      const r = await fetch(API_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json', Accept:'application/json'},
+        body:JSON.stringify({
+          audioBase64,
+          mimeType: blob.type || 'audio/webm',
+          source: pair.source,
+          target: pair.target
+        }),
+        cache:'no-store'
+      });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw Error(d?.error || `Gemini HTTP ${r.status}`);
 
       const src = String(d?.transcript || '').trim();
-      const dst = String(d?.translatedText || d?.translation || d?.text || '').trim();
+      const dst = String(d?.translation || '').trim();
 
       if (src && src !== lastTranscript) {
         lastTranscript = src;
