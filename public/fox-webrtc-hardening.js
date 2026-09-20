@@ -156,6 +156,32 @@
     if (el && message) el.textContent = message;
   };
 
+  const unlockRemoteAudio = () => {
+    const audio = document.querySelector('[data-fox-live] [data-remote-audio]');
+    if (!audio) return;
+    try {
+      audio.muted = false;
+      audio.volume = 1;
+      if (audio.srcObject && audio.paused) void audio.play().catch(() => {});
+    } catch {}
+  };
+
+  const armRemoteAudio = () => {
+    unlockRemoteAudio();
+    let tries = 0;
+    const timer = setInterval(() => {
+      unlockRemoteAudio();
+      tries += 1;
+      if (tries >= 40) clearInterval(timer);
+    }, 250);
+  };
+
+  ['pointerdown', 'touchstart', 'keydown', 'click'].forEach((eventName) => {
+    document.addEventListener(eventName, unlockRemoteAudio, { passive: true, capture: true });
+  });
+  window.addEventListener('fox:rtc-state', armRemoteAudio);
+  document.addEventListener('DOMContentLoaded', armRemoteAudio, { once: true });
+
   window.addEventListener('fox:peer-id-conflict', () => {
     updateStatus('❌ FOX PC ID je už aktívne v inom okne alebo zariadení. Zatvorte starú FOX LIVE kartu a obnovte túto stránku.');
   });
@@ -166,6 +192,7 @@
     if (state.connectionState === 'connected' || state.iceConnectionState === 'connected' || state.iceConnectionState === 'completed') {
       if (failureTimer) clearTimeout(failureTimer);
       failureTimer = null;
+      armRemoteAudio();
       const route = state.route ? ` (${state.route})` : '';
       updateStatus(`🟢 WebRTC spojenie aktívne${route}`);
       return;
@@ -180,5 +207,6 @@
     }
   });
 
+  window.__FOX_UNLOCK_REMOTE_AUDIO__ = unlockRemoteAudio;
   window.__FOX_WEBRTC_DIAGNOSTICS__ = () => window.__FOX_RTC_LAST_STATE__ || null;
 })();
