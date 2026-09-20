@@ -111,7 +111,11 @@ jobs:
             var labels={{sk:'Plávajúce okno',de:'Schwebendes Fenster',en:'Floating window',hr:'Plutajući prozor',fr:'Fenêtre flottante',it:'Finestra mobile',pl:'Pływające okno',es:'Ventana flotante',sv:'Flytande fönster'}};
             document.getElementById('fox-chat-floating-label').textContent=labels[lang]||labels.en;
             try{{floating.checked=localStorage.getItem('wdfox-chat-floating-v3')==='true';}}catch(e){{}}
-            floating.addEventListener('change',function(){{try{{localStorage.setItem('wdfox-chat-floating-v3',String(floating.checked));}}catch(e){{}}status.textContent='';}});
+            floating.addEventListener('change',function(){{
+              try{{localStorage.setItem('wdfox-chat-floating-v3',String(floating.checked));}}catch(e){{}}
+              status.textContent='';
+              if(floating.checked){{hideNativeWidget();}}
+            }});
             function showLauncher(){{launcher.style.setProperty('visibility','visible','important');launcher.style.setProperty('opacity','1','important');launcher.style.setProperty('display','block','important');}}
             function hideNativeWidget(){{var api=window.Tawk_API||{{}};try{{if(typeof api.hideWidget==='function')api.hideWidget();}}catch(e){{}}}}
             window.Tawk_API=window.Tawk_API||{{}};
@@ -120,12 +124,18 @@ jobs:
 
             function openOfficialWidget(){{
               var api=window.Tawk_API||{{}};
-              if(typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
+              var floatingNow=!!floating.checked;
+              if(floatingNow && typeof api.popup!=='function' && typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
+              if(!floatingNow && typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
               try{{
-                if(typeof api.start==='function')api.start({{showWidget:true}});
-                if(typeof api.showWidget==='function')api.showWidget();
-                if(typeof api.maximize==='function')api.maximize();
-                else api.toggle();
+                if(typeof api.start==='function')api.start({{showWidget:!floatingNow}});
+                if(floatingNow && typeof api.popup==='function'){{
+                  api.popup();
+                }}else{{
+                  if(typeof api.showWidget==='function')api.showWidget();
+                  if(typeof api.maximize==='function')api.maximize();
+                  else api.toggle();
+                }}
                 pending=false;
                 return true;
               }}catch(e){{return false;}}
@@ -152,7 +162,7 @@ jobs:
             window.Tawk_API.onChatMaximized=function(){{showLauncher();}};
             window.Tawk_API.onChatMinimized=function(){{hideNativeWidget();showLauncher();}};
             window.Tawk_API.onChatHidden=function(){{hideNativeWidget();showLauncher();}};
-            window.Tawk_API.onStatusChange=function(){{hideNativeWidget();}};
+            window.Tawk_API.onStatusChange=function(){{if(!floating.checked)showLauncher();}};
 
             function requestOfficialWidget(e){{
               if(e){{e.preventDefault();e.stopPropagation();}}
