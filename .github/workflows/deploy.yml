@@ -124,18 +124,12 @@ jobs:
 
             function openOfficialWidget(){{
               var api=window.Tawk_API||{{}};
-              var floatingNow=!!floating.checked;
-              if(floatingNow && typeof api.popup!=='function' && typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
-              if(!floatingNow && typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
+              if(typeof api.maximize!=='function' && typeof api.toggle!=='function')return false;
               try{{
-                if(typeof api.start==='function')api.start({{showWidget:!floatingNow}});
-                if(floatingNow && typeof api.popup==='function'){{
-                  api.popup();
-                }}else{{
-                  if(typeof api.showWidget==='function')api.showWidget();
-                  if(typeof api.maximize==='function')api.maximize();
-                  else api.toggle();
-                }}
+                if(typeof api.start==='function')api.start({{showWidget:true}});
+                if(typeof api.showWidget==='function')api.showWidget();
+                if(typeof api.maximize==='function')api.maximize();
+                else api.toggle();
                 pending=false;
                 return true;
               }}catch(e){{return false;}}
@@ -159,7 +153,7 @@ jobs:
               hideNativeWidget();
               if(pending)window.setTimeout(openOfficialWidget,50);
             }};
-            window.Tawk_API.onChatMaximized=function(){{showLauncher();}};
+            window.Tawk_API.onChatMaximized=function(){{launcher.style.setProperty('visibility','hidden','important');launcher.style.setProperty('opacity','0','important');}};
             window.Tawk_API.onChatMinimized=function(){{hideNativeWidget();showLauncher();}};
             window.Tawk_API.onChatHidden=function(){{hideNativeWidget();showLauncher();}};
             window.Tawk_API.onStatusChange=function(){{if(!floating.checked)showLauncher();}};
