@@ -142,10 +142,10 @@
     launcher.style.setProperty("pointer-events", "auto", "important");
   }
 
-  // WDFOX_TAWK_RESTORED_STATE_FIX_V2
-  // Tawk can restore a maximized chat after refresh without firing onChatMaximized.
-  // Hide the FOX launcher until the real widget state is known.
-  hideFoxLauncher();
+  // WDFOX_TAWK_DETERMINISTIC_LAUNCHER_V3
+  // Every page load starts with ONLY the FOX launcher visible.
+  // The Tawk window is shown only after an explicit FOX click.
+  var userOpenedChat = false;
 
   var visibilityApi = window.Tawk_API = window.Tawk_API || {};
   var previousOnLoad = visibilityApi.onLoad;
@@ -154,55 +154,53 @@
   var previousChatHidden = visibilityApi.onChatHidden;
   var previousStatusChange = visibilityApi.onStatusChange;
 
-  function syncFoxLauncherToTawkState() {
+  function forceFoxOnlyState() {
+    if (userOpenedChat) return;
+    foxChatOpen = false;
     var api = window.Tawk_API || {};
-    try {
-      if (typeof api.isChatMaximized === "function" && api.isChatMaximized()) {
-        foxChatOpen = true;
-        hideFoxLauncher();
-        return;
-      }
-      if ((typeof api.isChatMinimized === "function" && api.isChatMinimized()) ||
-          (typeof api.isChatHidden === "function" && api.isChatHidden())) {
-        foxChatOpen = false;
-        showFoxLauncher();
-        return;
-      }
-    } catch (_) {}
-
-    // If the API cannot report the state, keep the known event-driven state.
-    if (foxChatOpen) hideFoxLauncher();
-    else showFoxLauncher();
+    try { if (typeof api.minimize === "function") api.minimize(); } catch (_) {}
+    try { if (typeof api.hideWidget === "function") api.hideWidget(); } catch (_) {}
+    showFoxLauncher();
   }
 
   visibilityApi.onLoad = function () {
     try {
       if (typeof previousOnLoad === "function") previousOnLoad.apply(this, arguments);
     } catch (_) {}
-    syncFoxLauncherToTawkState();
-    window.setTimeout(syncFoxLauncherToTawkState, 100);
-    window.setTimeout(syncFoxLauncherToTawkState, 300);
-    window.setTimeout(syncFoxLauncherToTawkState, 800);
-    window.setTimeout(syncFoxLauncherToTawkState, 1500);
+    userOpenedChat = false;
+    forceFoxOnlyState();
+    window.setTimeout(forceFoxOnlyState, 0);
+    window.setTimeout(forceFoxOnlyState, 150);
+    window.setTimeout(forceFoxOnlyState, 500);
+    window.setTimeout(forceFoxOnlyState, 1200);
   };
 
   visibilityApi.onChatMaximized = function () {
-    foxChatOpen = true;
     try {
       if (typeof previousChatMaximized === "function") previousChatMaximized.apply(this, arguments);
     } catch (_) {}
+    if (!userOpenedChat) {
+      forceFoxOnlyState();
+      return;
+    }
+    foxChatOpen = true;
     hideFoxLauncher();
   };
 
   visibilityApi.onChatMinimized = function () {
+    userOpenedChat = false;
     foxChatOpen = false;
     try {
       if (typeof previousChatMinimized === "function") previousChatMinimized.apply(this, arguments);
+    } catch (_) {}
+    try {
+      if (window.Tawk_API && typeof window.Tawk_API.hideWidget === "function") window.Tawk_API.hideWidget();
     } catch (_) {}
     showFoxLauncher();
   };
 
   visibilityApi.onChatHidden = function () {
+    userOpenedChat = false;
     foxChatOpen = false;
     try {
       if (typeof previousChatHidden === "function") previousChatHidden.apply(this, arguments);
@@ -214,7 +212,8 @@
     try {
       if (typeof previousStatusChange === "function") previousStatusChange.apply(this, arguments);
     } catch (_) {}
-    syncFoxLauncherToTawkState();
+    if (userOpenedChat) hideFoxLauncher();
+    else forceFoxOnlyState();
   };
 
   function foxLauncherPressed(event) {
@@ -222,8 +221,12 @@
     if (!launcher || !event || !event.target) return;
     var target = event.target.closest ? event.target.closest("#fox-tawk-launcher") : null;
     if (target !== launcher) return;
+    userOpenedChat = true;
     foxChatOpen = true;
     hideFoxLauncher();
+    var api = window.Tawk_API || {};
+    try { if (typeof api.showWidget === "function") api.showWidget(); } catch (_) {}
+    try { if (typeof api.maximize === "function") api.maximize(); } catch (_) {}
     window.setTimeout(hideFoxLauncher, 0);
     window.setTimeout(hideFoxLauncher, 120);
     window.setTimeout(hideFoxLauncher, 500);
