@@ -13,14 +13,6 @@
     document.head.appendChild(galleryStyle);
   }
 
-  // WDFOX_REMOVE_OBSOLETE_FLOATING_CHAT_OPTION_V1
-  // The old custom "Floating window" toggle is obsolete and must not be offered.
-  try { localStorage.removeItem("wdfox-chat-floating-v3"); } catch (_) {}
-  var obsoleteFloatingToggle = document.getElementById("fox-chat-floating");
-  if (obsoleteFloatingToggle) obsoleteFloatingToggle.checked = false;
-  var obsoleteChatSettings = document.getElementById("fox-chat-settings");
-  if (obsoleteChatSettings) obsoleteChatSettings.remove();
-
   var PROPERTY_ID = "6a951d52c3c46c344587662a";
   var widgets = {
     sk: "1k1b9121q",
@@ -70,43 +62,14 @@
   }
 
   var widgetId = widgets[language] || widgets.sk;
-  var CHAT_SESSION_SCHEMA = "20260921-de-clean-v1";
-  var previousChatLanguage = "";
-  var previousChatSessionSchema = "";
-  try {
-    previousChatLanguage = normalizeLanguage(localStorage.getItem("wdfox-chat-language"));
-    previousChatSessionSchema = localStorage.getItem("wdfox-chat-session-schema") || "";
-  } catch (_) {}
-  // Preserve the proven SK session behavior. The one-time schema cleanup is
-  // exclusively for the German widget, where stale English chat metadata leaked.
-  var requiresGermanSessionReset =
-    language === "de" &&
-    previousChatSessionSchema !== CHAT_SESSION_SCHEMA;
-  var hasStoredChatLanguage =
-    supported.indexOf(previousChatLanguage) !== -1;
-  var mustResetLanguageSession =
-    (hasStoredChatLanguage && previousChatLanguage !== language) ||
-    requiresGermanSessionReset;
-  var languageSessionReady = !mustResetLanguageSession;
-  var openChatAfterLanguageReset = false;
-
-  function rememberChatLanguage(value) {
-    try {
-      localStorage.setItem("wdfox-chat-language", value);
-      localStorage.setItem("wdfox-chat-session-schema", CHAT_SESSION_SCHEMA);
-    } catch (_) {}
-  }
 
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = new Date();
   window.WebDesignFOXChatLanguage = language;
   window.WebDesignFOXSwitchChatLanguage = function (nextLanguage, callback) {
-    nextLanguage = normalizeLanguage(nextLanguage);
     var nextWidget = widgets[nextLanguage];
-    var done = typeof callback === "function" ? callback : function () {};
-
     if (!nextWidget || typeof window.Tawk_API.switchWidget !== "function") {
-      done();
+      callback();
       return;
     }
 
@@ -122,37 +85,11 @@
       window.Tawk_API.switchWidget({
         propertyId: PROPERTY_ID,
         widgetId: nextWidget
-      }, function (error) {
-        if (!error) {
-          rememberChatLanguage(nextLanguage);
-          window.WebDesignFOXChatLanguage = nextLanguage;
-        }
-        done();
+      }, function () {
+        callback();
       });
-    }, 350);
+    }, 250);
   };
-
-  // WDFOX_TAWK_NO_FLASH_GUARD_V4
-  // Keep every Tawk iframe visually suppressed until the visitor explicitly
-  // opens chat through the FOX launcher. This prevents any blue-window flash
-  // while Tawk restores its previous UI state during page refresh.
-  var tawkGuardStyle = document.createElement("style");
-  tawkGuardStyle.id = "fox-tawk-no-flash-guard";
-  tawkGuardStyle.textContent =
-    'html.fox-tawk-concealed iframe[src*="tawk.to"],'+
-    'html.fox-tawk-concealed iframe[src*="tawk.link"],'+
-    'html.fox-tawk-concealed iframe[title*="chat widget" i]{'+
-    'visibility:hidden!important;opacity:0!important;pointer-events:none!important;}';
-  document.head.appendChild(tawkGuardStyle);
-  document.documentElement.classList.add("fox-tawk-concealed");
-
-  function concealTawkFrames() {
-    document.documentElement.classList.add("fox-tawk-concealed");
-  }
-
-  function revealTawkFrames() {
-    document.documentElement.classList.remove("fox-tawk-concealed");
-  }
 
   var script = document.createElement("script");
   script.id = "tawk-language-script";
@@ -170,189 +107,4 @@
       window.Tawk_API.maximize();
     }
   });
-
-  // WDFOX_CHAT_LAUNCHER_VISIBILITY_FIX_V1
-  // The custom FOX launcher must never overlap an open Tawk chat window.
-  var foxChatOpen = false;
-
-  function getFoxLauncher() {
-    return document.getElementById("fox-tawk-launcher");
-  }
-
-  function hideFoxLauncher() {
-    var launcher = getFoxLauncher();
-    if (!launcher) return;
-    launcher.style.setProperty("visibility", "hidden", "important");
-    launcher.style.setProperty("opacity", "0", "important");
-    launcher.style.setProperty("display", "none", "important");
-    launcher.style.setProperty("pointer-events", "none", "important");
-  }
-
-  function showFoxLauncher() {
-    var launcher = getFoxLauncher();
-    if (!launcher || foxChatOpen) return;
-    launcher.style.setProperty("visibility", "visible", "important");
-    launcher.style.setProperty("opacity", "1", "important");
-    launcher.style.setProperty("display", "block", "important");
-    launcher.style.setProperty("pointer-events", "auto", "important");
-  }
-
-  // WDFOX_TAWK_DETERMINISTIC_LAUNCHER_V3
-  // Every page load starts with ONLY the FOX launcher visible.
-  // The Tawk window is shown only after an explicit FOX click.
-  var userOpenedChat = false;
-  var languageResetStarted = false;
-
-  function finishLanguageSessionReset() {
-    rememberChatLanguage(language);
-    languageSessionReady = true;
-    forceFoxOnlyState();
-
-    if (openChatAfterLanguageReset) {
-      openChatAfterLanguageReset = false;
-      window.setTimeout(openTawkChat, 80);
-    }
-  }
-
-  function resetLanguageSessionIfNeeded() {
-    if (languageResetStarted) return;
-    languageResetStarted = true;
-
-    var api = window.Tawk_API || {};
-    if (!mustResetLanguageSession) {
-      finishLanguageSessionReset();
-      return;
-    }
-
-    // A Tawk visitor session is shared by widgets in the same property. Force a
-    // one-time schema reset as well as a language reset so conversations created
-    // before this fix cannot restore an English/SK title inside the DE widget.
-    mustResetLanguageSession = false;
-    try {
-      if (typeof api.endChat === "function") api.endChat();
-    } catch (_) {}
-
-    if (typeof api.switchWidget !== "function") {
-      finishLanguageSessionReset();
-      return;
-    }
-
-    window.setTimeout(function () {
-      try {
-        api.switchWidget({
-          propertyId: PROPERTY_ID,
-          widgetId: widgetId
-        }, function () {
-          finishLanguageSessionReset();
-        });
-      } catch (_) {
-        finishLanguageSessionReset();
-      }
-    }, 350);
-  }
-
-  var visibilityApi = window.Tawk_API = window.Tawk_API || {};
-  var previousOnLoad = visibilityApi.onLoad;
-  var previousChatMaximized = visibilityApi.onChatMaximized;
-  var previousChatMinimized = visibilityApi.onChatMinimized;
-  var previousChatHidden = visibilityApi.onChatHidden;
-  var previousStatusChange = visibilityApi.onStatusChange;
-
-  function forceFoxOnlyState() {
-    if (userOpenedChat) return;
-    foxChatOpen = false;
-    concealTawkFrames();
-    var api = window.Tawk_API || {};
-    try { if (typeof api.minimize === "function") api.minimize(); } catch (_) {}
-    try { if (typeof api.hideWidget === "function") api.hideWidget(); } catch (_) {}
-    showFoxLauncher();
-  }
-
-  visibilityApi.onLoad = function () {
-    try {
-      if (typeof previousOnLoad === "function") previousOnLoad.apply(this, arguments);
-    } catch (_) {}
-    userOpenedChat = false;
-    resetLanguageSessionIfNeeded();
-    forceFoxOnlyState();
-    window.setTimeout(forceFoxOnlyState, 0);
-    window.setTimeout(forceFoxOnlyState, 150);
-    window.setTimeout(forceFoxOnlyState, 500);
-    window.setTimeout(forceFoxOnlyState, 1200);
-  };
-
-  visibilityApi.onChatMaximized = function () {
-    try {
-      if (typeof previousChatMaximized === "function") previousChatMaximized.apply(this, arguments);
-    } catch (_) {}
-    if (!userOpenedChat) {
-      forceFoxOnlyState();
-      return;
-    }
-    foxChatOpen = true;
-    hideFoxLauncher();
-  };
-
-  visibilityApi.onChatMinimized = function () {
-    userOpenedChat = false;
-    foxChatOpen = false;
-    concealTawkFrames();
-    try {
-      if (typeof previousChatMinimized === "function") previousChatMinimized.apply(this, arguments);
-    } catch (_) {}
-    try {
-      if (window.Tawk_API && typeof window.Tawk_API.hideWidget === "function") window.Tawk_API.hideWidget();
-    } catch (_) {}
-    showFoxLauncher();
-  };
-
-  visibilityApi.onChatHidden = function () {
-    userOpenedChat = false;
-    foxChatOpen = false;
-    concealTawkFrames();
-    try {
-      if (typeof previousChatHidden === "function") previousChatHidden.apply(this, arguments);
-    } catch (_) {}
-    showFoxLauncher();
-  };
-
-  visibilityApi.onStatusChange = function () {
-    try {
-      if (typeof previousStatusChange === "function") previousStatusChange.apply(this, arguments);
-    } catch (_) {}
-    if (userOpenedChat) hideFoxLauncher();
-    else forceFoxOnlyState();
-  };
-
-  function openTawkChat() {
-    userOpenedChat = true;
-    foxChatOpen = true;
-    hideFoxLauncher();
-    revealTawkFrames();
-    var api = window.Tawk_API || {};
-    try { if (typeof api.showWidget === "function") api.showWidget(); } catch (_) {}
-    try { if (typeof api.maximize === "function") api.maximize(); } catch (_) {}
-    window.setTimeout(hideFoxLauncher, 0);
-    window.setTimeout(hideFoxLauncher, 120);
-    window.setTimeout(hideFoxLauncher, 500);
-  }
-
-  function foxLauncherPressed(event) {
-    var launcher = getFoxLauncher();
-    if (!launcher || !event || !event.target) return;
-    var target = event.target.closest ? event.target.closest("#fox-tawk-launcher") : null;
-    if (target !== launcher) return;
-
-    if (!languageSessionReady) {
-      openChatAfterLanguageReset = true;
-      hideFoxLauncher();
-      return;
-    }
-
-    openTawkChat();
-  }
-
-  document.addEventListener("pointerdown", foxLauncherPressed, true);
-  document.addEventListener("click", foxLauncherPressed, true);
-
 })();
