@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - 'scripts/patch_hide_fox_when_chat_open.py'
-      - '.github/workflows/patch-hide-fox-chat.yml'
 
 permissions:
   contents: write
@@ -22,10 +21,10 @@ jobs:
       - name: Apply FOX launcher patch
         run: python scripts/patch_hide_fox_when_chat_open.py
 
-      - name: Commit deploy workflow fix
+      - name: Commit launcher fix
         run: |
           git config user.name "WDFOX Tawk Bot"
           git config user.email "actions@github.com"
-          git add .github/workflows/deploy.yml
+          git add public/tawk-language-loader.js
           git commit -m "Hide FOX launcher while Tawk chat is open"
           git push origin main
