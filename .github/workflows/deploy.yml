@@ -78,6 +78,7 @@ jobs:
 
           def snippet(lang):
               copy = LAUNCHER_COPY[lang]
+              widget = WIDGETS[lang]
               return f'''<style id="fox-tawk-launcher-style">
           #fox-tawk-launcher{{position:fixed!important;top:auto!important;left:auto!important;right:18px!important;bottom:18px!important;margin:0!important;z-index:2147483647!important;width:250px;height:174px;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));transition:transform .18s ease;touch-action:manipulation;isolation:isolate}}
           #fox-tawk-launcher:hover{{transform:translateY(-3px) scale(1.025)}}
@@ -100,8 +101,10 @@ jobs:
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
             if(!launcher)return;
-            var pending=false,waiting=false,userOpened=false;
-            var RESET_KEY='wdfox-tawk-clean-baseline-20260921';
+            var pending=false,waiting=false,userOpened=false,resetting=false;
+            var propertyId='6a951d52c3c46c344587662a';
+            var widgetId='{widget}';
+            var RESET_KEY='wdfox-tawk-clean-baseline-20260921-reset3';
             var needsReset=true;
             try{{needsReset=localStorage.getItem(RESET_KEY)!=='1';}}catch(e){{}}
 
@@ -134,6 +137,12 @@ jobs:
                 return true;
               }}catch(e){{return false;}}
             }}
+            function finishReset(){{
+              resetting=false;
+              hideNative();
+              if(pending)window.setTimeout(function(){{if(!openChat())waitForChat();}},120);
+              else showLauncher();
+            }}
             function waitForChat(){{
               if(waiting)return;
               waiting=true;
@@ -158,14 +167,21 @@ jobs:
               try{{if(typeof previousOnLoad==='function')previousOnLoad.apply(this,arguments);}}catch(e){{}}
               var api=window.Tawk_API||{{}};
               if(needsReset&&typeof api.endChat==='function'){{
+                resetting=true;
                 userOpened=false;
+                hideNative();
                 try{{api.endChat();}}catch(e){{}}
                 needsReset=false;
                 try{{localStorage.setItem(RESET_KEY,'1');}}catch(e){{}}
+                if(typeof api.switchWidget==='function'){{
+                  window.setTimeout(function(){{
+                    try{{api.switchWidget({{propertyId:propertyId,widgetId:widgetId}},function(){{finishReset();}});}}
+                    catch(e){{finishReset();}}
+                  }},350);
+                }}else window.setTimeout(finishReset,500);
+                return;
               }}
-              hideNative();
-              if(pending)window.setTimeout(function(){{if(!openChat())waitForChat();}},250);
-              else window.setTimeout(function(){{hideNative();showLauncher();}},250);
+              finishReset();
             }};
             window.Tawk_API.onChatMaximized=function(){{
               try{{if(typeof previousMaximized==='function')previousMaximized.apply(this,arguments);}}catch(e){{}}
@@ -184,13 +200,14 @@ jobs:
               if(event){{event.preventDefault();event.stopPropagation();}}
               pending=true;
               userOpened=true;
+              if(resetting)return;
               if(!openChat())waitForChat();
             }}
             launcher.addEventListener('click',activate);
             showLauncher();
           }})();
           </script>
-          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v=20260910c-reset2"></script>'''
+          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v=20260910c-reset3"></script>'''
 
           for path in Path('dist').rglob('*.html'):
               text = clean(path.read_text(encoding='utf-8'))
