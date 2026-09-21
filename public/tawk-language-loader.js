@@ -70,17 +70,23 @@
   }
 
   var widgetId = widgets[language] || widgets.sk;
+  var CHAT_SESSION_SCHEMA = "20260921-de-clean-v1";
   var previousChatLanguage = "";
+  var previousChatSessionSchema = "";
   try {
     previousChatLanguage = normalizeLanguage(localStorage.getItem("wdfox-chat-language"));
+    previousChatSessionSchema = localStorage.getItem("wdfox-chat-session-schema") || "";
   } catch (_) {}
   var mustResetLanguageSession =
-    supported.indexOf(previousChatLanguage) !== -1 &&
-    previousChatLanguage !== language;
+    previousChatLanguage !== language ||
+    previousChatSessionSchema !== CHAT_SESSION_SCHEMA;
+  var languageSessionReady = !mustResetLanguageSession;
+  var openChatAfterLanguageReset = false;
 
   function rememberChatLanguage(value) {
     try {
       localStorage.setItem("wdfox-chat-language", value);
+      localStorage.setItem("wdfox-chat-session-schema", CHAT_SESSION_SCHEMA);
     } catch (_) {}
   }
 
@@ -190,26 +196,37 @@
   var userOpenedChat = false;
   var languageResetStarted = false;
 
+  function finishLanguageSessionReset() {
+    rememberChatLanguage(language);
+    languageSessionReady = true;
+    forceFoxOnlyState();
+
+    if (openChatAfterLanguageReset) {
+      openChatAfterLanguageReset = false;
+      window.setTimeout(openTawkChat, 80);
+    }
+  }
+
   function resetLanguageSessionIfNeeded() {
     if (languageResetStarted) return;
     languageResetStarted = true;
 
     var api = window.Tawk_API || {};
     if (!mustResetLanguageSession) {
-      rememberChatLanguage(language);
+      finishLanguageSessionReset();
       return;
     }
 
-    // A Tawk visitor session is shared by widgets in the same property. When a
-    // localized URL is opened directly, explicitly end the old-language chat
-    // before the visitor can reveal the new widget.
+    // A Tawk visitor session is shared by widgets in the same property. Force a
+    // one-time schema reset as well as a language reset so conversations created
+    // before this fix cannot restore an English/SK title inside the DE widget.
     mustResetLanguageSession = false;
     try {
       if (typeof api.endChat === "function") api.endChat();
     } catch (_) {}
 
     if (typeof api.switchWidget !== "function") {
-      rememberChatLanguage(language);
+      finishLanguageSessionReset();
       return;
     }
 
@@ -218,12 +235,11 @@
         api.switchWidget({
           propertyId: PROPERTY_ID,
           widgetId: widgetId
-        }, function (error) {
-          if (!error) rememberChatLanguage(language);
-          forceFoxOnlyState();
+        }, function () {
+          finishLanguageSessionReset();
         });
       } catch (_) {
-        rememberChatLanguage(language);
+        finishLanguageSessionReset();
       }
     }, 350);
   }
@@ -301,11 +317,7 @@
     else forceFoxOnlyState();
   };
 
-  function foxLauncherPressed(event) {
-    var launcher = getFoxLauncher();
-    if (!launcher || !event || !event.target) return;
-    var target = event.target.closest ? event.target.closest("#fox-tawk-launcher") : null;
-    if (target !== launcher) return;
+  function openTawkChat() {
     userOpenedChat = true;
     foxChatOpen = true;
     hideFoxLauncher();
@@ -316,6 +328,21 @@
     window.setTimeout(hideFoxLauncher, 0);
     window.setTimeout(hideFoxLauncher, 120);
     window.setTimeout(hideFoxLauncher, 500);
+  }
+
+  function foxLauncherPressed(event) {
+    var launcher = getFoxLauncher();
+    if (!launcher || !event || !event.target) return;
+    var target = event.target.closest ? event.target.closest("#fox-tawk-launcher") : null;
+    if (target !== launcher) return;
+
+    if (!languageSessionReady) {
+      openChatAfterLanguageReset = true;
+      hideFoxLauncher();
+      return;
+    }
+
+    openTawkChat();
   }
 
   document.addEventListener("pointerdown", foxLauncherPressed, true);
