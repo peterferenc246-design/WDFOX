@@ -13,6 +13,14 @@
     document.head.appendChild(galleryStyle);
   }
 
+  // WDFOX_REMOVE_OBSOLETE_FLOATING_CHAT_OPTION_V1
+  // The old custom "Floating window" toggle is obsolete and must not be offered.
+  try { localStorage.removeItem("wdfox-chat-floating-v3"); } catch (_) {}
+  var obsoleteFloatingToggle = document.getElementById("fox-chat-floating");
+  if (obsoleteFloatingToggle) obsoleteFloatingToggle.checked = false;
+  var obsoleteChatSettings = document.getElementById("fox-chat-settings");
+  if (obsoleteChatSettings) obsoleteChatSettings.remove();
+
   var PROPERTY_ID = "6a951d52c3c46c344587662a";
   var widgets = {
     sk: "1k1b9121q",
