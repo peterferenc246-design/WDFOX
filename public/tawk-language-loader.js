@@ -66,29 +66,27 @@
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = new Date();
   window.WebDesignFOXChatLanguage = language;
+  // WDFOX_HARD_LANGUAGE_WIDGET_ISOLATION_V1
+  // Never use Tawk switchWidget for language changes: it preserves the current
+  // conversation and can leak messages/cards/quick replies across languages.
+  // End the current chat, then let the language navigation perform a full page
+  // load so exactly one widget ID is booted from scratch for the target locale.
   window.WebDesignFOXSwitchChatLanguage = function (nextLanguage, callback) {
     var nextWidget = widgets[nextLanguage];
-    if (!nextWidget || typeof window.Tawk_API.switchWidget !== "function") {
+    if (!nextWidget) {
       callback();
       return;
     }
 
-    // Tawk's seamless widget switch deliberately keeps the current conversation.
-    // End it first so headers, welcome text and history cannot leak across languages.
-    if (typeof window.Tawk_API.endChat === "function") {
-      try {
+    try {
+      if (window.Tawk_API && typeof window.Tawk_API.endChat === "function") {
         window.Tawk_API.endChat();
-      } catch (_) {}
-    }
+      }
+    } catch (_) {}
 
     window.setTimeout(function () {
-      window.Tawk_API.switchWidget({
-        propertyId: PROPERTY_ID,
-        widgetId: nextWidget
-      }, function () {
-        callback();
-      });
-    }, 250);
+      callback();
+    }, 120);
   };
 
   var script = document.createElement("script");
