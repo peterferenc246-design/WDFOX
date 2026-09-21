@@ -96,7 +96,7 @@ jobs:
               <text x="207" y="110" text-anchor="middle" font-size="28" transform="rotate(5 207 110)">🤝</text>
             </svg>
           </button>
-          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v=20260921c"></script>'''
+          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v=20260921d"></script>'''
 
           for path in Path('dist').rglob('*.html'):
               text = clean(path.read_text(encoding='utf-8'))
