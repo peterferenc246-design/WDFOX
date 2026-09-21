@@ -15,6 +15,27 @@
   var chatOpenedByFox = false;
   var pendingOpen = false;
 
+  function installNoFlashGuard() {
+    if (!document.getElementById('fox-tawk-no-flash-guard')) {
+      var style = document.createElement('style');
+      style.id = 'fox-tawk-no-flash-guard';
+      style.textContent =
+        'html.fox-tawk-concealed iframe[src*="tawk.to"],'+
+        'html.fox-tawk-concealed iframe[src*="tawk.link"],'+
+        'html.fox-tawk-concealed iframe[title*="chat widget" i]{'+
+        'visibility:hidden!important;opacity:0!important;pointer-events:none!important;}';
+      (document.head || document.documentElement).appendChild(style);
+    }
+  }
+
+  function concealTawkFrames() {
+    document.documentElement.classList.add('fox-tawk-concealed');
+  }
+
+  function revealTawkFrames() {
+    document.documentElement.classList.remove('fox-tawk-concealed');
+  }
+
   function getLaunchers() {
     return document.querySelectorAll('#fox-tawk-launcher, .live-chat-bubble');
   }
@@ -43,6 +64,7 @@
 
   function hideTawkAndShowFox() {
     if (chatOpenedByFox || pendingOpen) return;
+    concealTawkFrames();
     var api = window.Tawk_API || {};
     try {
       if (typeof api.minimize === 'function') api.minimize();
@@ -76,6 +98,7 @@
     chatOpenedByFox = true;
     pendingOpen = false;
     hideFox();
+    revealTawkFrames();
     try {
       if (typeof api.showWidget === 'function') api.showWidget();
     } catch (_) {}
@@ -86,6 +109,9 @@
     window.setTimeout(hideFox, 150);
     window.setTimeout(hideFox, 500);
   }
+
+  installNoFlashGuard();
+  concealTawkFrames();
 
   var api = window.Tawk_API = window.Tawk_API || {};
   var previousOnLoad = api.onLoad;
@@ -123,6 +149,7 @@
       hideTawkAndShowFox();
       return;
     }
+    revealTawkFrames();
     hideFox();
   };
 
@@ -133,6 +160,7 @@
 
     pendingOpen = false;
     chatOpenedByFox = false;
+    concealTawkFrames();
     try {
       if (window.Tawk_API && typeof window.Tawk_API.hideWidget === 'function') {
         window.Tawk_API.hideWidget();
@@ -148,6 +176,7 @@
 
     pendingOpen = false;
     chatOpenedByFox = false;
+    concealTawkFrames();
     showFox();
   };
 
@@ -161,6 +190,7 @@
     pendingOpen = true;
     chatOpenedByFox = true;
     hideFox();
+    revealTawkFrames();
 
     var currentApi = window.Tawk_API || {};
     if (typeof currentApi.maximize === 'function') {
@@ -179,15 +209,17 @@
         window.clearInterval(retry);
         pendingOpen = false;
         chatOpenedByFox = false;
+        concealTawkFrames();
         showFox();
       }
     }, 250);
   }
 
-  // The loader runs before Tawk's async embed. Start in FOX-only state immediately,
-  // then enforce it again while Tawk restores any browser-persisted session.
+  // Start in FOX-only state immediately, then enforce it again while Tawk
+  // restores any browser-persisted UI/session state.
   chatOpenedByFox = false;
   pendingOpen = false;
+  concealTawkFrames();
   showFox();
   window.setTimeout(hideTawkAndShowFox, 0);
   window.setTimeout(hideTawkAndShowFox, 250);
