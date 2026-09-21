@@ -1,0 +1,29 @@
+name: One-time deterministic FOX Tawk launcher patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/patch_tawk_deterministic_launcher.py'
+      - '.github/workflows/patch-tawk-deterministic-launcher.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply patch
+        run: python scripts/patch_tawk_deterministic_launcher.py
+      - name: Commit loader fix
+        run: |
+          git config user.name "WDFOX Tawk Bot"
+          git config user.email "actions@github.com"
+          git add public/tawk-language-loader.js
+          git commit -m "Make FOX launcher deterministic after refresh"
+          git push origin main
