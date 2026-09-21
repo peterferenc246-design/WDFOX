@@ -77,9 +77,14 @@
     previousChatLanguage = normalizeLanguage(localStorage.getItem("wdfox-chat-language"));
     previousChatSessionSchema = localStorage.getItem("wdfox-chat-session-schema") || "";
   } catch (_) {}
+  // Preserve the proven SK session behavior. The one-time schema cleanup is
+  // exclusively for the German widget, where stale English chat metadata leaked.
+  var requiresGermanSessionReset =
+    language === "de" &&
+    previousChatSessionSchema !== CHAT_SESSION_SCHEMA;
   var mustResetLanguageSession =
     previousChatLanguage !== language ||
-    previousChatSessionSchema !== CHAT_SESSION_SCHEMA;
+    requiresGermanSessionReset;
   var languageSessionReady = !mustResetLanguageSession;
   var openChatAfterLanguageReset = false;
 
