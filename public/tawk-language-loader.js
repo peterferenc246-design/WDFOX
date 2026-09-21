@@ -99,6 +99,28 @@
     }, 250);
   };
 
+  // WDFOX_TAWK_NO_FLASH_GUARD_V4
+  // Keep every Tawk iframe visually suppressed until the visitor explicitly
+  // opens chat through the FOX launcher. This prevents any blue-window flash
+  // while Tawk restores its previous UI state during page refresh.
+  var tawkGuardStyle = document.createElement("style");
+  tawkGuardStyle.id = "fox-tawk-no-flash-guard";
+  tawkGuardStyle.textContent =
+    'html.fox-tawk-concealed iframe[src*="tawk.to"],'+
+    'html.fox-tawk-concealed iframe[src*="tawk.link"],'+
+    'html.fox-tawk-concealed iframe[title*="chat widget" i]{'+
+    'visibility:hidden!important;opacity:0!important;pointer-events:none!important;}';
+  document.head.appendChild(tawkGuardStyle);
+  document.documentElement.classList.add("fox-tawk-concealed");
+
+  function concealTawkFrames() {
+    document.documentElement.classList.add("fox-tawk-concealed");
+  }
+
+  function revealTawkFrames() {
+    document.documentElement.classList.remove("fox-tawk-concealed");
+  }
+
   var script = document.createElement("script");
   script.id = "tawk-language-script";
   script.async = true;
@@ -157,6 +179,7 @@
   function forceFoxOnlyState() {
     if (userOpenedChat) return;
     foxChatOpen = false;
+    concealTawkFrames();
     var api = window.Tawk_API || {};
     try { if (typeof api.minimize === "function") api.minimize(); } catch (_) {}
     try { if (typeof api.hideWidget === "function") api.hideWidget(); } catch (_) {}
@@ -190,6 +213,7 @@
   visibilityApi.onChatMinimized = function () {
     userOpenedChat = false;
     foxChatOpen = false;
+    concealTawkFrames();
     try {
       if (typeof previousChatMinimized === "function") previousChatMinimized.apply(this, arguments);
     } catch (_) {}
@@ -202,6 +226,7 @@
   visibilityApi.onChatHidden = function () {
     userOpenedChat = false;
     foxChatOpen = false;
+    concealTawkFrames();
     try {
       if (typeof previousChatHidden === "function") previousChatHidden.apply(this, arguments);
     } catch (_) {}
@@ -224,6 +249,7 @@
     userOpenedChat = true;
     foxChatOpen = true;
     hideFoxLauncher();
+    revealTawkFrames();
     var api = window.Tawk_API || {};
     try { if (typeof api.showWidget === "function") api.showWidget(); } catch (_) {}
     try { if (typeof api.maximize === "function") api.maximize(); } catch (_) {}
