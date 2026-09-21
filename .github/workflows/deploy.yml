@@ -100,7 +100,7 @@ jobs:
           (function(){{
             var launcher=document.getElementById('fox-tawk-launcher');
             if(!launcher)return;
-            var pending=false,waiting=false;
+            var pending=false,waiting=false,userOpened=false;
             var RESET_KEY='wdfox-tawk-clean-baseline-20260921';
             var needsReset=true;
             try{{needsReset=localStorage.getItem(RESET_KEY)!=='1';}}catch(e){{}}
@@ -129,6 +129,7 @@ jobs:
                 api.maximize();
                 pending=false;
                 waiting=false;
+                userOpened=true;
                 hideLauncher();
                 return true;
               }}catch(e){{return false;}}
@@ -157,36 +158,39 @@ jobs:
               try{{if(typeof previousOnLoad==='function')previousOnLoad.apply(this,arguments);}}catch(e){{}}
               var api=window.Tawk_API||{{}};
               if(needsReset&&typeof api.endChat==='function'){{
+                userOpened=false;
                 try{{api.endChat();}}catch(e){{}}
                 needsReset=false;
                 try{{localStorage.setItem(RESET_KEY,'1');}}catch(e){{}}
               }}
               hideNative();
-              if(pending)window.setTimeout(function(){{if(!openChat())waitForChat();}},needsReset?450:120);
-              else showLauncher();
+              if(pending)window.setTimeout(function(){{if(!openChat())waitForChat();}},250);
+              else window.setTimeout(function(){{hideNative();showLauncher();}},250);
             }};
             window.Tawk_API.onChatMaximized=function(){{
               try{{if(typeof previousMaximized==='function')previousMaximized.apply(this,arguments);}}catch(e){{}}
-              hideLauncher();
+              if(userOpened)hideLauncher();
+              else{{hideNative();showLauncher();}}
             }};
             window.Tawk_API.onChatMinimized=function(){{
               try{{if(typeof previousMinimized==='function')previousMinimized.apply(this,arguments);}}catch(e){{}}
-              pending=false;hideNative();showLauncher();
+              pending=false;userOpened=false;hideNative();showLauncher();
             }};
             window.Tawk_API.onChatHidden=function(){{
               try{{if(typeof previousHidden==='function')previousHidden.apply(this,arguments);}}catch(e){{}}
-              pending=false;hideNative();showLauncher();
+              pending=false;userOpened=false;hideNative();showLauncher();
             }};
             function activate(event){{
               if(event){{event.preventDefault();event.stopPropagation();}}
               pending=true;
+              userOpened=true;
               if(!openChat())waitForChat();
             }}
             launcher.addEventListener('click',activate);
             showLauncher();
           }})();
           </script>
-          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v=20260910c-reset1"></script>'''
+          <script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v=20260910c-reset2"></script>'''
 
           for path in Path('dist').rglob('*.html'):
               text = clean(path.read_text(encoding='utf-8'))
