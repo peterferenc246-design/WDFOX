@@ -82,8 +82,10 @@
   var requiresGermanSessionReset =
     language === "de" &&
     previousChatSessionSchema !== CHAT_SESSION_SCHEMA;
+  var hasStoredChatLanguage =
+    supported.indexOf(previousChatLanguage) !== -1;
   var mustResetLanguageSession =
-    previousChatLanguage !== language ||
+    (hasStoredChatLanguage && previousChatLanguage !== language) ||
     requiresGermanSessionReset;
   var languageSessionReady = !mustResetLanguageSession;
   var openChatAfterLanguageReset = false;
