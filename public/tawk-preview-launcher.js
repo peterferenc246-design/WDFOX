@@ -1,10 +1,12 @@
 /*
  * WDFOX Codespaces-only Tawk.to launcher.
  *
- * This file is referenced only from the localized Astro page. The production
- * GitHub Pages workflow already removes Tawk-related source scripts before it
- * installs the production launcher, so this helper cannot duplicate the live
- * production widget. It is intentionally active only on Codespaces/local hosts.
+ * Preview contract:
+ *   refresh -> FOX launcher only
+ *   FOX click -> external Tawk.to widget opens
+ *   minimize/hide -> FOX launcher returns
+ *
+ * This file is intentionally active only on localhost / GitHub Codespaces hosts.
  */
 (function () {
   "use strict";
@@ -18,6 +20,15 @@
 
   if (!isPreviewHost) return;
   if (document.getElementById("fox-tawk-preview-launcher")) return;
+
+  // Prevent the production launcher-state helper from taking over Codespaces.
+  // cunderlik-gallery-runtime.js checks this id before injecting tawk-native-force.js.
+  if (!document.getElementById("wdfox-tawk-state-fix")) {
+    var previewSentinel = document.createElement("meta");
+    previewSentinel.id = "wdfox-tawk-state-fix";
+    previewSentinel.setAttribute("data-preview-owner", "tawk-preview-launcher");
+    document.head.appendChild(previewSentinel);
+  }
 
   var PROPERTY_ID = "6a951d52c3c46c344587662a";
   var WIDGETS = {
@@ -57,6 +68,9 @@
   var fallbackUrl = "https://tawk.to/chat/" + PROPERTY_ID + "/" + widgetId + "?layout=modern";
   var mascotUrl = "https://webdizain-bbyygbqm.manus.space/manus-storage/webdizainfox-fox-hero_22939d0f.png";
 
+  // Keep the language contract visible to the shared WDFOX/Tawk code.
+  window.WebDesignFOXChatLanguage = language;
+
   var style = document.createElement("style");
   style.id = "fox-tawk-preview-launcher-style";
   style.textContent =
@@ -93,10 +107,19 @@
     launcher.style.setProperty("pointer-events", "none", "important");
   }
 
+  function concealNativeFrames() {
+    document.documentElement.classList.add("fox-tawk-concealed");
+  }
+
+  function revealNativeFrames() {
+    document.documentElement.classList.remove("fox-tawk-concealed");
+  }
+
   var userOpened = false;
 
   function hideNativeWidget() {
     if (userOpened) return;
+    concealNativeFrames();
     var api = window.Tawk_API;
     if (!api) return;
     try {
@@ -109,12 +132,14 @@
     if (!api || typeof api.maximize !== "function") return false;
     try {
       userOpened = true;
+      revealNativeFrames();
       if (typeof api.showWidget === "function") api.showWidget();
       api.maximize();
       hideLauncher();
       return true;
     } catch (_) {
       userOpened = false;
+      concealNativeFrames();
       return false;
     }
   }
@@ -134,6 +159,7 @@
   window.Tawk_API.onChatMaximized = function () {
     try { if (typeof previousOnMaximized === "function") previousOnMaximized.apply(this, arguments); } catch (_) {}
     userOpened = true;
+    revealNativeFrames();
     hideLauncher();
   };
   window.Tawk_API.onChatMinimized = function () {
@@ -149,11 +175,27 @@
     showLauncher();
   };
 
+  function ensureExternalTawk() {
+    if (document.getElementById("tawk-language-script")) return;
+    var existing = document.querySelector('script[src*="embed.tawk.to/' + PROPERTY_ID + '/"]');
+    if (existing) return;
+
+    var script = document.createElement("script");
+    script.id = "tawk-language-script";
+    script.async = true;
+    script.src = "https://embed.tawk.to/" + PROPERTY_ID + "/" + widgetId;
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
+    document.head.appendChild(script);
+  }
+
   launcher.addEventListener("click", function (event) {
     event.preventDefault();
     event.stopPropagation();
 
     if (openEmbeddedChat()) return;
+
+    ensureExternalTawk();
 
     var startedAt = Date.now();
     var timer = window.setInterval(function () {
@@ -161,7 +203,7 @@
         window.clearInterval(timer);
         return;
       }
-      if (Date.now() - startedAt > 3500) {
+      if (Date.now() - startedAt > 5000) {
         window.clearInterval(timer);
         window.open(fallbackUrl, "_blank", "noopener,noreferrer");
       }
@@ -170,8 +212,10 @@
 
   function mount() {
     if (!document.body.contains(launcher)) document.body.appendChild(launcher);
+    concealNativeFrames();
     showLauncher();
     hideNativeWidget();
+    ensureExternalTawk();
   }
 
   if (document.readyState === "loading") {
