@@ -108,8 +108,9 @@ Store these only in the runtime environment (for example Vercel):
 - `FOX_GITHUB_INSTALLATION_ID`
 - future credentials for notification, email, database and other connected services
 
-Known non-secret identifier:
+Known non-secret identifiers:
 - `FOX_GITHUB_APP_ID=5038390`
+- `FOX_GITHUB_INSTALLATION_ID=163889413`
 
 ## Agent identity versus control surface
 
