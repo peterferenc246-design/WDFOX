@@ -20,7 +20,7 @@ Both control surfaces must reach the same agent, client data, approval rules and
 
 ## Goal
 
-Create a dedicated GitHub App identity named `fox-agent` for the FOX AI Agent. The AI brain runs outside GitHub on the OpenAI-backed FOX Agent backend. GitHub is one controlled tool/workspace used for repository reads, TEST-branch changes, commits and pull requests.
+Use the dedicated GitHub App identity `TEST-fox-agent` as the GitHub identity of the FOX AI Agent. The AI brain runs outside GitHub on the OpenAI-backed FOX Agent backend. GitHub is one controlled tool/workspace used for repository reads, branch changes, commits and pull requests.
 
 GitHub is not the agent brain and is not the only capability of FOX Agent.
 
@@ -45,12 +45,16 @@ Planned ChatGPT-capable tools include:
 
 High-impact tools such as sending a real client message, publishing a production change, merging to `main`, sending email/push or changing client data must require explicit human approval.
 
-## Required GitHub App permissions
+## Current GitHub App permissions
 
-Repository permissions:
+The installed app currently has repository access to all current and future repositories owned by `peterferenc246-design`.
+
+Current visible permissions after installation:
 - Metadata: Read-only
-- Contents: Read and write
+- Repository code / Contents: Read and write
 - Pull requests: Read and write
+
+Recommended additional read-only permissions when we enable CI inspection:
 - Actions: Read-only
 - Checks: Read-only
 
@@ -60,29 +64,34 @@ Additional permissions may be added later only when a concrete tool requires the
 
 ## Installation scope
 
-Install only on repository:
-- `peterferenc246-design/WDFOX`
+Installed for:
+- all current repositories owned by `peterferenc246-design`
+- all future repositories owned by `peterferenc246-design`
+
+Repository-specific operating policies still apply. Broad installation access does not mean unrestricted production writes.
 
 ## Branch policy
 
-The agent may:
+For WDFOX development, the agent may:
 - read `main`
-- write only to `TEST`
-- create commits on `TEST`
-- create pull requests from `TEST` to `main`
-- read build/test results
+- write development changes only to `TEST` or another explicitly approved feature/test branch
+- create commits on approved non-production branches
+- create pull requests to `main`
+- read build/test results after the corresponding read permissions are enabled
 
 The agent must not:
-- push directly to `main`
+- push directly to `main` unless Peter explicitly changes this policy later
 - merge its own pull request
 - modify repository secrets
 - change branch protection or repository administration
+
+For other repositories, use the same default policy: work on a non-production branch and require human approval before production merge/publish.
 
 ## Approval rule
 
 Every production code change follows:
 
-`ChatGPT or WDFOX -> OpenAI FOX Agent -> TEST -> build/test -> Pull Request -> Peter approval -> main`
+`ChatGPT or WDFOX -> OpenAI FOX Agent -> test/feature branch -> build/test -> Pull Request -> Peter approval -> production branch`
 
 Every real client-facing or otherwise external side effect follows:
 
@@ -90,7 +99,7 @@ Every real client-facing or otherwise external side effect follows:
 
 ## Runtime secrets
 
-Never commit credentials to this repository.
+Never commit credentials to any repository.
 
 Store these only in the runtime environment (for example Vercel):
 - `OPENAI_API_KEY`
@@ -99,9 +108,12 @@ Store these only in the runtime environment (for example Vercel):
 - `FOX_GITHUB_INSTALLATION_ID`
 - future credentials for notification, email, database and other connected services
 
+Known non-secret identifier:
+- `FOX_GITHUB_APP_ID=5038390`
+
 ## Agent identity versus control surface
 
-`fox-agent` on GitHub is the bot identity used when FOX Agent works with GitHub.
+`TEST-fox-agent` on GitHub is the bot identity used when FOX Agent works with GitHub.
 
 ChatGPT is a control surface used by Peter to instruct the same FOX Agent conversationally.
 
