@@ -6,6 +6,7 @@ import FoxLiveTranslator from "../../components/FoxLiveTranslator.astro";
 import FoxAvailability from "../../components/FoxAvailability.astro";
 import FoxGeminiAudioBridge from "../../components/FoxGeminiAudioBridge.astro";
 import FoxHangupButton from "../../components/FoxHangupButton.astro";
+import FoxAiNotificationsPrototype from "../../components/FoxAiNotificationsPrototype.astro";
 import { getLandingContent } from "../../lib/sanity";
 import { locales, type Locale } from "../../data/content";
 
@@ -22,6 +23,7 @@ const content = await getLandingContent(lang);
     <a class="nav-link" href={`/${lang}/#kontakt`}>{content.nav.contact}</a>
   </Fragment>
   <Landing content={content} />
+  <FoxAiNotificationsPrototype />
   <FoxHangupButton />
   <script is:inline src="/fox-webrtc-hardening.js?v=20260920a"></script>
   <FoxLiveTranslator locale={lang} />
