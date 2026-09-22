@@ -1,0 +1,220 @@
+---
+// TEST-only prototype. No real client messages are sent from this component.
+---
+
+<div id="fox-ai-test-root" data-fox-ai-test>
+  <div class="fox-test-tools" aria-label="FOX AI TEST nástroje">
+    <span class="fox-test-badge">TEST</span>
+    <button class="fox-agent-trigger" type="button" data-agent-open aria-label="Otvoriť FOX AI Agent">
+      <span aria-hidden="true">✦</span><strong>FOX Agent</strong>
+    </button>
+    <button class="fox-bell-trigger" type="button" data-bell-open aria-label="Otvoriť oznámenia">
+      <span class="fox-bell-icon" aria-hidden="true">🔔</span>
+      <span class="fox-unread-count" data-unread-count>1</span>
+    </button>
+  </div>
+
+  <aside class="fox-notification-panel" data-notification-panel hidden aria-label="Oznámenia">
+    <div class="fox-panel-head">
+      <div>
+        <strong>Oznámenia</strong>
+        <small>FOX Notification Center · TEST</small>
+      </div>
+      <button type="button" class="fox-close" data-bell-close aria-label="Zavrieť">×</button>
+    </div>
+    <div class="fox-panel-actions">
+      <button type="button" data-tab="unread" class="is-active">Neprečítané</button>
+      <button type="button" data-tab="all">Všetky</button>
+      <button type="button" data-mark-all>Označiť všetko</button>
+    </div>
+    <div class="fox-notification-list" data-notification-list></div>
+  </aside>
+
+  <div class="fox-agent-backdrop" data-agent-modal hidden>
+    <section class="fox-agent-modal" role="dialog" aria-modal="true" aria-labelledby="fox-agent-title">
+      <header class="fox-agent-header">
+        <div class="fox-agent-identity">
+          <div class="fox-agent-avatar" aria-hidden="true">🦊</div>
+          <div>
+            <h2 id="fox-agent-title">FOX AI Agent</h2>
+            <p>Prototyp rozosielania oznámení klientom</p>
+            <span class="fox-test-label">TEST · NIČ SA REÁLNE NEODOSIELA</span>
+          </div>
+        </div>
+        <button type="button" class="fox-close" data-agent-close aria-label="Zavrieť">×</button>
+      </header>
+
+      <div class="fox-agent-body">
+        <label for="fox-agent-command">Povedz agentovi, čo má spraviť</label>
+        <textarea id="fox-agent-command" data-command>Pošli Petrovi Müllerovi správu: Návrh webu je pripravený.</textarea>
+
+        <div class="fox-quick-prompts" aria-label="Rýchle testovacie príkazy">
+          <button type="button" data-quick="Pošli Petrovi Müllerovi správu: Návrh webu je pripravený.">Peter Müller</button>
+          <button type="button" data-quick="Pošli všetkým klientom správu: Zajtra budem mimo kancelárie.">Všetci klienti</button>
+          <button type="button" data-quick="Pošli nemeckým klientom push správu: Máme pre vás novú aktualizáciu.">DE + push</button>
+          <button type="button" data-quick="Pošli Lucii Novákovej e-mail a správu: Prosím skontrolujte nový návrh.">SK + e-mail</button>
+        </div>
+
+        <div class="fox-agent-actions">
+          <button class="fox-primary" type="button" data-build-draft>Pripraviť náhľad</button>
+          <button class="fox-secondary" type="button" data-reset-demo>Reset demo</button>
+        </div>
+
+        <div class="fox-draft" data-draft hidden>
+          <div class="fox-draft-head">
+            <strong>Náhľad pred odoslaním</strong>
+            <span>Vyžaduje potvrdenie</span>
+          </div>
+          <div class="fox-draft-content">
+            <div><span>Príjemcovia</span><strong data-draft-recipients>—</strong></div>
+            <div><span>Jazyky</span><strong data-draft-languages>—</strong></div>
+            <div><span>Kanály</span><strong data-draft-channels>—</strong></div>
+            <div class="fox-draft-message"><span>Správa</span><p data-draft-message>—</p></div>
+            <p class="fox-draft-reason" data-draft-reason></p>
+            <div class="fox-confirm-row">
+              <span>⚠️ Ide iba o lokálnu TEST simuláciu.</span>
+              <button class="fox-primary" type="button" data-send-test disabled>Potvrdiť TEST odoslanie</button>
+            </div>
+            <label class="fox-confirm-check"><input type="checkbox" data-confirm-send /> Rozumiem, že ide o TEST simuláciu.</label>
+          </div>
+        </div>
+
+        <div class="fox-success" data-success hidden></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+  [data-fox-ai-test]{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  .fox-test-tools{position:fixed;top:92px;right:18px;z-index:2147482000;display:flex;align-items:center;gap:8px}
+  .fox-test-badge{height:26px;padding:0 9px;border-radius:999px;background:#171717;color:#fff;display:flex;align-items:center;font-size:10px;font-weight:900;letter-spacing:.12em;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+  .fox-agent-trigger,.fox-bell-trigger{border:1px solid #ececec;background:#fff;box-shadow:0 10px 30px rgba(23,23,23,.16);cursor:pointer;transition:.18s ease}
+  .fox-agent-trigger{height:44px;padding:0 14px;border-radius:14px;background:#f36a0a;color:#fff;border-color:#f36a0a;display:flex;align-items:center;gap:7px;font-size:12px}
+  .fox-agent-trigger:hover{transform:translateY(-2px);background:#dc5c05}.fox-bell-trigger{position:relative;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:19px}.fox-bell-trigger:hover{transform:translateY(-2px);border-color:#f36a0a}
+  .fox-unread-count{position:absolute;top:-6px;right:-6px;min-width:21px;height:21px;padding:0 5px;border-radius:11px;background:#e11d48;color:#fff;border:2px solid #fff;display:grid;place-items:center;font-size:10px;font-weight:900}
+  .fox-notification-panel{position:fixed;top:148px;right:18px;z-index:2147482001;width:min(410px,calc(100vw - 24px));max-height:72vh;background:#fff;border:1px solid #e9e9e9;border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.22);overflow:hidden;color:#171717}
+  .fox-panel-head{padding:16px 17px 12px;border-bottom:1px solid #eee;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.fox-panel-head strong{display:block;font-size:16px}.fox-panel-head small{display:block;color:#777;margin-top:2px;font-size:11px}.fox-close{width:32px;height:32px;border:0;border-radius:9px;background:#f4f4f4;font-size:22px;line-height:1;cursor:pointer;color:#333}
+  .fox-panel-actions{display:flex;align-items:center;gap:4px;padding:10px 12px;border-bottom:1px solid #eee}.fox-panel-actions button{border:0;background:transparent;padding:7px 9px;border-radius:8px;font-size:11px;font-weight:800;color:#777;cursor:pointer}.fox-panel-actions button.is-active{background:#fff1e7;color:#d95800}.fox-panel-actions [data-mark-all]{margin-left:auto;color:#d95800}
+  .fox-notification-list{overflow:auto;max-height:55vh}.fox-note{border:0;border-bottom:1px solid #f0f0f0;background:#fff;padding:14px 16px;text-align:left;display:grid;grid-template-columns:38px 1fr;gap:10px;width:100%;cursor:pointer}.fox-note.unread{background:#fff7f0}.fox-note:hover{background:#fffaf6}.fox-note-icon{width:36px;height:36px;border-radius:11px;background:#fff0e4;color:#ef6508;display:grid;place-items:center}.fox-note strong{font-size:12px}.fox-note p{font-size:12px;line-height:1.45;margin:4px 0 5px;color:#444}.fox-note-meta{font-size:10px;color:#888}.fox-empty{padding:36px 22px;text-align:center;color:#777;font-size:13px}
+  .fox-agent-backdrop{position:fixed;inset:0;z-index:2147483000;background:rgba(18,18,18,.5);backdrop-filter:blur(5px);display:grid;place-items:center;padding:18px}.fox-agent-modal{width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:24px;box-shadow:0 30px 100px rgba(0,0,0,.34);color:#171717}.fox-agent-header{padding:20px 22px 16px;display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #eee}.fox-agent-identity{display:flex;gap:12px;align-items:center}.fox-agent-avatar{width:46px;height:46px;border-radius:15px;background:#171717;display:grid;place-items:center;font-size:24px}.fox-agent-header h2{margin:0;font-size:20px}.fox-agent-header p{margin:3px 0 0;color:#777;font-size:12px}.fox-test-label{display:inline-flex;margin-top:7px;padding:4px 7px;border-radius:7px;background:#fff2e8;color:#c64f00;font-size:10px;font-weight:900;letter-spacing:.05em}
+  .fox-agent-body{padding:20px 22px 24px}.fox-agent-body>label{display:block;margin-bottom:8px;font-size:12px;font-weight:850}.fox-agent-body textarea{box-sizing:border-box;width:100%;min-height:104px;resize:vertical;border:1px solid #ddd;border-radius:15px;padding:13px 14px;font:inherit;font-size:14px;line-height:1.5;outline:none}.fox-agent-body textarea:focus{border-color:#f36a0a;box-shadow:0 0 0 3px rgba(243,106,10,.12)}
+  .fox-quick-prompts{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.fox-quick-prompts button{border:1px solid #e4e4e4;background:#fafafa;border-radius:999px;padding:7px 10px;font-size:10px;font-weight:750;cursor:pointer}.fox-agent-actions{display:flex;gap:8px;margin-top:13px}.fox-primary,.fox-secondary{min-height:42px;border-radius:12px;padding:0 14px;font-weight:850;font-size:12px;cursor:pointer}.fox-primary{border:0;background:#f36a0a;color:#fff}.fox-primary:disabled{opacity:.45;cursor:not-allowed}.fox-secondary{border:1px solid #ddd;background:#fff;color:#333}
+  .fox-draft{margin-top:18px;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden}.fox-draft-head{padding:12px 14px;background:#f8f8f8;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;gap:8px}.fox-draft-head strong{font-size:12px}.fox-draft-head span{font-size:10px;color:#9a5a00}.fox-draft-content{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.fox-draft-content>div>span,.fox-draft-message>span{display:block;color:#888;font-size:10px;margin-bottom:4px}.fox-draft-content strong{font-size:12px}.fox-draft-message{grid-column:1/-1;background:#fafafa;border-radius:12px;padding:12px}.fox-draft-message p{margin:0;font-size:13px;line-height:1.5}.fox-draft-reason{grid-column:1/-1;margin:0;color:#777;font-size:11px}.fox-confirm-row{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff8ee;border-radius:12px;padding:10px 12px}.fox-confirm-row span{font-size:10px;color:#8b5600}.fox-confirm-check{grid-column:1/-1;font-size:11px!important;margin:0!important;display:flex!important;align-items:center;gap:7px}.fox-success{margin-top:14px;background:#ecfdf3;border:1px solid #b7ebc9;color:#176b3a;padding:11px 13px;border-radius:12px;font-size:12px;font-weight:750}
+  [hidden]{display:none!important}
+  @media(max-width:700px){.fox-test-tools{top:76px;right:8px}.fox-test-badge{display:none}.fox-agent-trigger strong{display:none}.fox-agent-trigger{width:44px;padding:0;justify-content:center}.fox-notification-panel{top:130px;right:8px}.fox-agent-backdrop{padding:8px}.fox-agent-modal{border-radius:18px}.fox-draft-content{grid-template-columns:1fr}.fox-draft-message,.fox-draft-reason,.fox-confirm-row,.fox-confirm-check{grid-column:1}.fox-confirm-row{align-items:flex-start;flex-direction:column}}
+</style>
+
+<script is:inline>
+(() => {
+  const root = document.querySelector('[data-fox-ai-test]');
+  if (!root || root.dataset.ready === '1') return;
+  root.dataset.ready = '1';
+
+  const clients = [
+    { id:'c1', name:'Peter Müller', company:'Müller Bau', language:'DE' },
+    { id:'c2', name:'Lucia Nováková', company:'Nova Studio', language:'SK' },
+    { id:'c3', name:'Marco Rossi', company:'Rossi Design', language:'IT' },
+    { id:'c4', name:'Emma Johnson', company:'North Digital', language:'EN' }
+  ];
+  const seed = [{ id:'seed-1', clientId:'c1', clientName:'Peter Müller', language:'DE', title:'Demo oznámenie', message:'Návrh webu je pripravený na kontrolu.', createdAt:new Date().toISOString(), read:false, channel:'web' }];
+  let notifications = seed;
+  try { const saved = localStorage.getItem('fox-test-notifications-astro-v1'); if (saved) notifications = JSON.parse(saved); } catch (_) {}
+  let activeTab = 'unread';
+  let draft = null;
+
+  const $ = (sel) => root.querySelector(sel);
+  const panel = $('[data-notification-panel]');
+  const modal = $('[data-agent-modal]');
+  const command = $('[data-command]');
+  const draftBox = $('[data-draft]');
+  const confirm = $('[data-confirm-send]');
+  const sendButton = $('[data-send-test]');
+  const success = $('[data-success]');
+
+  const persist = () => { try { localStorage.setItem('fox-test-notifications-astro-v1', JSON.stringify(notifications)); } catch (_) {} };
+  const escapeHtml = (v) => String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const unreadCount = () => notifications.filter(n => !n.read).length;
+  const render = () => {
+    const count = unreadCount();
+    $('[data-unread-count]').textContent = String(count);
+    $('[data-unread-count]').hidden = count === 0;
+    const list = $('[data-notification-list]');
+    const visible = activeTab === 'unread' ? notifications.filter(n => !n.read) : notifications;
+    list.innerHTML = visible.length ? visible.map(n => `
+      <button class="fox-note ${n.read ? '' : 'unread'}" type="button" data-note-id="${escapeHtml(n.id)}">
+        <span class="fox-note-icon">${n.channel === 'email' ? '✉️' : n.channel === 'push' ? '📣' : '🔔'}</span>
+        <span><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><span class="fox-note-meta">${escapeHtml(n.clientName)} · ${escapeHtml(n.language)} · ${escapeHtml(n.channel.toUpperCase())}</span></span>
+      </button>`).join('') : '<div class="fox-empty">Žiadne oznámenia v tejto kategórii.</div>';
+    list.querySelectorAll('[data-note-id]').forEach(btn => btn.addEventListener('click', () => {
+      notifications = notifications.map(n => n.id === btn.dataset.noteId ? {...n, read:true} : n); persist(); render();
+    }));
+  };
+
+  const resolveRecipients = (text) => {
+    const lower = text.toLocaleLowerCase('sk');
+    const exact = clients.filter(c => {
+      const name = c.name.toLocaleLowerCase('sk');
+      const surname = name.split(' ').slice(-1)[0];
+      return lower.includes(name) || (surname.length > 3 && lower.includes(surname));
+    });
+    if (exact.length) return { recipients:exact, reason:'Agent rozpoznal konkrétne meno klienta.' };
+    if (/všetk|vsetk|all clients|všetkým klient/i.test(lower)) return { recipients:clients, reason:'Agent rozpoznal hromadné odoslanie všetkým klientom.' };
+    const rules = [ [/nemeck|german|\bde\b/i,'DE'], [/slovensk|slovak|\bsk\b/i,'SK'], [/talian|italian|\bit\b/i,'IT'], [/anglick|english|\ben\b/i,'EN'] ];
+    for (const [re, lang] of rules) if (re.test(lower)) return { recipients:clients.filter(c => c.language === lang), reason:`Agent rozpoznal skupinu ${lang}.` };
+    return { recipients:[], reason:'Agent nerozpoznal príjemcu. Doplň meno alebo skupinu klientov.' };
+  };
+  const extractMessage = (text) => {
+    const patterns = [/správu\s*:\s*(.+)$/i,/správu\s*,?\s*že\s+(.+)$/i,/oznámenie\s*:\s*(.+)$/i,/že\s+(.+)$/i];
+    for (const p of patterns) { const m = text.match(p); if (m?.[1]) return m[1].trim(); }
+    return text.trim();
+  };
+  const resolveChannels = (text) => {
+    const channels = ['web']; const lower = text.toLowerCase();
+    if (/push/.test(lower)) channels.push('push');
+    if (/e-?mail|mail/.test(lower)) channels.push('email');
+    return [...new Set(channels)];
+  };
+
+  $('[data-agent-open]').addEventListener('click', () => { modal.hidden = false; success.hidden = true; });
+  $('[data-agent-close]').addEventListener('click', () => { modal.hidden = true; });
+  modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
+  $('[data-bell-open]').addEventListener('click', () => { panel.hidden = !panel.hidden; });
+  $('[data-bell-close]').addEventListener('click', () => { panel.hidden = true; });
+  root.querySelectorAll('[data-quick]').forEach(btn => btn.addEventListener('click', () => { command.value = btn.dataset.quick || ''; }));
+  root.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => {
+    activeTab = btn.dataset.tab; root.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('is-active', x === btn)); render();
+  }));
+  $('[data-mark-all]').addEventListener('click', () => { notifications = notifications.map(n => ({...n, read:true})); persist(); render(); });
+  $('[data-reset-demo]').addEventListener('click', () => { notifications = seed; draft = null; draftBox.hidden = true; success.hidden = true; confirm.checked = false; sendButton.disabled = true; persist(); render(); });
+  confirm.addEventListener('change', () => { sendButton.disabled = !confirm.checked; });
+
+  $('[data-build-draft]').addEventListener('click', () => {
+    const text = command.value.trim();
+    const rr = resolveRecipients(text);
+    draft = { recipients:rr.recipients, message:extractMessage(text), channels:resolveChannels(text), reason:rr.reason };
+    $('[data-draft-recipients]').textContent = draft.recipients.length ? draft.recipients.map(c => `${c.name} (${c.company})`).join(', ') : 'Nerozpoznané';
+    $('[data-draft-languages]').textContent = draft.recipients.length ? [...new Set(draft.recipients.map(c => c.language))].join(', ') : '—';
+    $('[data-draft-channels]').textContent = draft.channels.map(c => c.toUpperCase()).join(' + ');
+    $('[data-draft-message]').textContent = draft.message || '—';
+    $('[data-draft-reason]').textContent = rr.reason;
+    draftBox.hidden = false; success.hidden = true; confirm.checked = false; sendButton.disabled = true;
+  });
+
+  sendButton.addEventListener('click', () => {
+    if (!draft || !draft.recipients.length || !draft.message || !confirm.checked) return;
+    const now = new Date().toISOString();
+    const next = [];
+    draft.recipients.forEach(c => draft.channels.forEach((channel, index) => next.push({
+      id:`${Date.now()}-${c.id}-${channel}-${index}`, clientId:c.id, clientName:c.name, language:c.language,
+      title:channel === 'web' ? 'Nová správa od WebDizainFOX' : channel === 'push' ? 'Push · TEST' : 'E-mail · TEST',
+      message:draft.message, createdAt:now, read:false, channel
+    })));
+    notifications = [...next, ...notifications]; persist(); render();
+    success.textContent = `TEST simulácia vytvorila ${next.length} oznámení pre ${draft.recipients.length} klientov.`;
+    success.hidden = false; panel.hidden = false;
+  });
+
+  render();
+})();
+</script>
