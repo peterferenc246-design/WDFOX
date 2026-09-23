@@ -1,6 +1,6 @@
 (() => {
   const ROOT_SELECTOR = '[data-fox-ai-test]';
-  const GEMINI_URL = 'https://wdfox-gemini-api.vercel.app/api/gemini-chat';
+  const FOX_AGENT_URL = 'https://wdfox-live-translat-api-git-test-peters-projects-db101134.vercel.app/api/fox-agent-plan';
   const STORAGE_KEY = 'fox-test-notifications-astro-v1';
   const OPEN_AFTER_RELOAD_KEY = 'fox-ai-v2-open-after-reload';
 
@@ -13,39 +13,6 @@
 
   const byId = new Map(clients.map((client) => [client.id, client]));
   let aiPlan = null;
-
-  const cleanJson = (value) => {
-    const text = String(value || '').trim();
-    const unfenced = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-    const first = unfenced.indexOf('{');
-    const last = unfenced.lastIndexOf('}');
-    if (first === -1 || last === -1 || last <= first) throw new Error('AI nevrátil platný JSON plán.');
-    return JSON.parse(unfenced.slice(first, last + 1));
-  };
-
-  const systemInstruction = `
-You are FOX AI Agent, an action-planning assistant for a web agency notification center.
-Your task is to interpret the owner's natural-language instruction and return ONLY valid JSON, no markdown.
-You may only select recipients from the provided client registry. Never invent a client.
-Translate the outgoing message naturally into each recipient's language.
-If the instruction is ambiguous, missing a recipient, or asks for someone not in the registry, return action "clarify" and a short clarificationQuestion in Slovak.
-Supported channels are: web, push, email. If no channel is specified, use ["web"].
-Never claim that anything was actually sent. You are only planning a TEST action that requires human confirmation.
-
-Return exactly this shape:
-{
-  "action": "send_notifications" | "clarify",
-  "summary": "short Slovak explanation of what you understood",
-  "clarificationQuestion": "string or empty string",
-  "channels": ["web" | "push" | "email"],
-  "recipients": [
-    {
-      "id": "client id from registry",
-      "message": "message translated for this client's language"
-    }
-  ]
-}
-`;
 
   function ensureStatus(root) {
     let status = root.querySelector('[data-ai-v2-status]');
@@ -72,6 +39,12 @@ Return exactly this shape:
     status.style.borderColor = border;
     status.style.color = color;
     status.textContent = message;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[char]));
   }
 
   function normalizePlan(raw) {
@@ -110,7 +83,7 @@ Return exactly this shape:
     };
   }
 
-  function renderPlan(root, plan) {
+  function renderPlan(root, plan, model) {
     const draftBox = root.querySelector('[data-draft]');
     const recipientsEl = root.querySelector('[data-draft-recipients]');
     const languagesEl = root.querySelector('[data-draft-languages]');
@@ -145,13 +118,7 @@ Return exactly this shape:
       .map((recipient) => `<strong>${recipient.language} · ${recipient.name}</strong><br>${escapeHtml(recipient.message)}`)
       .join('<br><br>');
     reasonEl.textContent = `FOX AI plán: ${plan.summary}`;
-    showStatus(root, 'FOX AI pripravil akčný plán pomocou Gemini. Skontroluj ho a až potom potvrď TEST vykonanie.', 'success');
-  }
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, (char) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[char]));
+    showStatus(root, `OpenAI pripravil akčný plán${model ? ` (${model})` : ''}. Skontroluj ho a až potom potvrď TEST vykonanie.`, 'success');
   }
 
   async function buildAiPlan(root) {
@@ -169,25 +136,19 @@ Return exactly this shape:
       buildButton.disabled = true;
       buildButton.textContent = 'FOX AI premýšľa…';
     }
-    showStatus(root, 'Gemini analyzuje príkaz, vyberá príjemcov, kanály a pripravuje jazykové verzie…', 'loading');
+    showStatus(root, 'OpenAI analyzuje príkaz, vyberá príjemcov, kanály a pripravuje jazykové verzie…', 'loading');
 
     try {
-      const registry = JSON.stringify(clients);
-      const response = await fetch(GEMINI_URL, {
+      const response = await fetch(FOX_AGENT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          message: `OWNER COMMAND:\n${text}\n\nCLIENT REGISTRY:\n${registry}`,
-          systemInstruction,
-          thinkingLevel: 'medium',
-        }),
+        body: JSON.stringify({ command: text, clients }),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.error || `Gemini HTTP ${response.status}`);
-      const rawPlan = cleanJson(data?.text);
-      aiPlan = normalizePlan(rawPlan);
+      if (!response.ok) throw new Error(data?.error || `OpenAI backend HTTP ${response.status}`);
+      aiPlan = normalizePlan(data?.plan || {});
       window.__foxAiPlanV2 = aiPlan;
-      renderPlan(root, aiPlan);
+      renderPlan(root, aiPlan, data?.model || '');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       showStatus(root, `FOX AI chyba: ${message}`, 'error');
@@ -224,7 +185,7 @@ Return exactly this shape:
     aiPlan.recipients.forEach((recipient) => {
       aiPlan.channels.forEach((channel, index) => {
         created.push({
-          id: `ai-v2-${Date.now()}-${recipient.id}-${channel}-${index}`,
+          id: `ai-v3-${Date.now()}-${recipient.id}-${channel}-${index}`,
           clientId: recipient.id,
           clientName: recipient.name,
           language: recipient.language,
@@ -233,7 +194,7 @@ Return exactly this shape:
           createdAt: now,
           read: false,
           channel,
-          source: 'gemini-ai-agent-v2',
+          source: 'openai-fox-agent-test',
         });
       });
     });
@@ -251,9 +212,9 @@ Return exactly this shape:
     root.dataset.aiV2 = '1';
 
     const subtitle = root.querySelector('.fox-agent-header p');
-    if (subtitle) subtitle.textContent = 'Gemini AI → akčný plán → tvoje potvrdenie → vykonanie';
+    if (subtitle) subtitle.textContent = 'OpenAI FOX Agent → akčný plán → tvoje potvrdenie → vykonanie';
     const testLabel = root.querySelector('.fox-test-label');
-    if (testLabel) testLabel.textContent = 'AI TEST · GEMINI · NIČ SA REÁLNE NEODOSIELA';
+    if (testLabel) testLabel.textContent = 'AI TEST · OPENAI · NIČ SA REÁLNE NEODOSIELA';
     const buildButton = root.querySelector('[data-build-draft]');
     if (buildButton) buildButton.textContent = 'AI pripraviť plán';
 
