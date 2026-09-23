@@ -1,4 +1,3 @@
-import "./scripts/fox-openai-build-test.mjs";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
