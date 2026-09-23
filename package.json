@@ -5,7 +5,6 @@
   "license": "MIT",
   "scripts": {
     "dev": "astro dev --host",
-    "prebuild": "node scripts/fox-openai-selftest.mjs",
     "build": "astro build",
     "start": "astro preview --host",
     "preview": "astro preview --host",
