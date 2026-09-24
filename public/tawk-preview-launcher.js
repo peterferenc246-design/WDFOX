@@ -55,7 +55,6 @@
   launcher.innerHTML =
     '<svg viewBox="0 0 270 188" role="img" aria-label="' + copy.attention.replace(/"/g, "&quot;") + ' — ' + copy.open.replace(/"/g, "&quot;") + '" xmlns="http://www.w3.org/2000/svg">' +
       '<defs><path id="fox-preview-arc" d="M 54 74 Q 146 8 248 74"/></defs>' +
-      '<text x="12" y="97" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#111">13</text>' +
       '<text font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="900" fill="#ff922d" stroke="#0664e8" stroke-width="2.6" paint-order="stroke" stroke-linejoin="round"><textPath href="#fox-preview-arc" startOffset="50%" text-anchor="middle" textLength="192" lengthAdjust="spacingAndGlyphs">' + copy.attention + '</textPath></text>' +
       '<text x="150" y="74" text-anchor="middle" font-size="31">❤️</text>' +
       '<text x="66" y="121" text-anchor="middle" font-size="31" transform="rotate(-10 66 121)">👋</text>' +
