@@ -11,6 +11,16 @@
 
   if (!isPreviewHost) return;
 
+  // Start concealed so Tawk cannot restore its native bubble/window before the FOX launcher owns the state.
+  document.documentElement.classList.add("fox-tawk-preview-concealed");
+  if (!document.getElementById("fox-tawk-preview-no-flash")) {
+    var guardStyle = document.createElement("style");
+    guardStyle.id = "fox-tawk-preview-no-flash";
+    guardStyle.textContent =
+      'html.fox-tawk-preview-concealed iframe[src*="tawk.to"],html.fox-tawk-preview-concealed iframe[src*="tawk.link"],html.fox-tawk-preview-concealed iframe[title*="chat widget" i]{visibility:hidden!important;opacity:0!important;pointer-events:none!important;}';
+    document.head.appendChild(guardStyle);
+  }
+
   var PROPERTY_ID = "6a951d52c3c46c344587662a";
   var WIDGETS = {
     sk: "1k1b9121q",
