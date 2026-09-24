@@ -60,7 +60,7 @@
       '<text x="150" y="74" text-anchor="middle" font-size="31">❤️</text>' +
       '<text x="66" y="121" text-anchor="middle" font-size="31" transform="rotate(-10 66 121)">👋</text>' +
       '<text x="67" y="158" text-anchor="middle" font-size="28" transform="rotate(-5 67 158)">✍️</text>' +
-      '<image x="91" y="73" width="118" height="116" preserveAspectRatio="xMidYMid meet" href="/images/tawk-fox-face.webp?v=20260924a"/>' +
+      '<image x="91" y="73" width="118" height="116" preserveAspectRatio="xMidYMid meet" href="/images/tawk-fox-face-transparent.png?v=20260924c"/>' +
       '<text x="238" y="122" text-anchor="middle" font-size="31" transform="rotate(6 238 122)">🤝</text>' +
     '</svg>';
 
