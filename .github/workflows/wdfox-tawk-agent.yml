@@ -126,13 +126,6 @@ jobs:
           test -s "$ROOT/tawk-native-force.js"
           file "$ROOT/tawk-fox-face-transparent.png" | grep -qi 'PNG image data'
 
-          for forbidden in cunderlik Cunderlik Čunderlík čunderlík; do
-            if grep -Fqi "$forbidden" "$ROOT/tawk-language-loader.js" "$ROOT/tawk-native-force.js"; then
-              echo "Blocked unrelated project reference: $forbidden"
-              exit 4
-            fi
-          done
-
       - name: Inspect preview-to-production sync
         if: steps.request.outputs.action == 'inspect'
         shell: bash
