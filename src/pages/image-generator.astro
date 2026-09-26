@@ -1,0 +1,137 @@
+---
+const title = 'WDFOX AI Image Generator';
+---
+
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content="WDFOX generovanie obrázkov cez Qwen Image 2512 a Qwen Image 3." />
+    <style>
+      :root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; }
+      body { margin: 0; min-height: 100vh; background: #0b1220; color: #eef4ff; }
+      main { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 64px; }
+      h1 { margin: 0 0 8px; font-size: clamp(30px, 5vw, 52px); }
+      .lead { margin: 0 0 28px; color: #aebbd0; }
+      .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
+      .card { background: #121c2e; border: 1px solid #26354d; border-radius: 18px; padding: 22px; box-shadow: 0 14px 40px rgba(0,0,0,.22); }
+      label { display: block; margin: 0 0 8px; color: #c7d3e6; font-size: 14px; }
+      textarea, select, input { width: 100%; box-sizing: border-box; border: 1px solid #33445f; background: #0d1728; color: #fff; border-radius: 10px; padding: 12px; font: inherit; }
+      textarea { min-height: 170px; resize: vertical; }
+      .field { margin-bottom: 18px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      button { width: 100%; border: 0; border-radius: 11px; padding: 13px 16px; font-weight: 700; cursor: pointer; background: #5da9ff; color: #07111f; }
+      button:disabled { opacity: .55; cursor: wait; }
+      #status { margin-top: 14px; min-height: 22px; color: #aebbd0; }
+      #result { min-height: 520px; display: grid; place-items: center; background: #0d1728; border-radius: 12px; overflow: hidden; }
+      #result img { display: block; max-width: 100%; max-height: 760px; width: auto; height: auto; }
+      .empty { color: #70819a; text-align: center; padding: 30px; }
+      .meta { margin-top: 12px; color: #8091aa; font-size: 13px; }
+      @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } #result { min-height: 340px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>WDFOX AI Image Generator</h1>
+      <p class="lead">Qwen Image 2512 + Qwen Image 3 cez server-side API na Verceli.</p>
+
+      <div class="grid">
+        <section class="card">
+          <div class="field">
+            <label for="model">Model</label>
+            <select id="model">
+              <option value="qwen-2512">Qwen Image 2512 — produkčný režim</option>
+              <option value="qwen-3">Qwen Image 3 — premium</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="prompt">Prompt</label>
+            <textarea id="prompt" placeholder="Napr. Profesionálny technologický banner pre WDFOX, modré svetlo, moderné AI centrum, realistická fotografia..."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="negative">Čo nechceš v obrázku</label>
+            <input id="negative" placeholder="low quality, blurry, distorted text" />
+          </div>
+
+          <div class="field">
+            <label for="size">Formát</label>
+            <select id="size">
+              <option value="landscape_4_3">Landscape 4:3</option>
+              <option value="landscape_16_9">Landscape 16:9</option>
+              <option value="square_hd">Square HD</option>
+              <option value="square">Square</option>
+              <option value="portrait_4_3">Portrait 4:3</option>
+              <option value="portrait_16_9">Portrait 16:9</option>
+            </select>
+          </div>
+
+          <button id="generate">Vygenerovať obrázok</button>
+          <div id="status"></div>
+        </section>
+
+        <section class="card">
+          <div id="result"><div class="empty">Výsledný obrázok sa zobrazí tu.</div></div>
+          <div id="meta" class="meta"></div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const model = document.querySelector('#model');
+      const prompt = document.querySelector('#prompt');
+      const negative = document.querySelector('#negative');
+      const size = document.querySelector('#size');
+      const button = document.querySelector('#generate');
+      const status = document.querySelector('#status');
+      const result = document.querySelector('#result');
+      const meta = document.querySelector('#meta');
+
+      button.addEventListener('click', async () => {
+        const value = prompt.value.trim();
+        if (!value) {
+          status.textContent = 'Zadaj prompt.';
+          return;
+        }
+
+        button.disabled = true;
+        status.textContent = 'Generujem…';
+        meta.textContent = '';
+        result.innerHTML = '<div class="empty">Čakám na výsledok modelu…</div>';
+
+        try {
+          const response = await fetch('/api/qwen-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: model.value,
+              prompt: value,
+              negativePrompt: negative.value.trim(),
+              imageSize: size.value,
+              outputFormat: 'png'
+            })
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data?.error || 'Generovanie zlyhalo.');
+
+          const img = document.createElement('img');
+          img.src = data.image.url;
+          img.alt = data.prompt || value;
+          img.loading = 'eager';
+          result.innerHTML = '';
+          result.appendChild(img);
+          meta.textContent = data.model + (data.seed ? ' · seed ' + data.seed : '');
+          status.textContent = 'Hotovo.';
+        } catch (error) {
+          status.textContent = error?.message || 'Generovanie zlyhalo.';
+          result.innerHTML = '<div class="empty">Obrázok sa nepodarilo vygenerovať.</div>';
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
