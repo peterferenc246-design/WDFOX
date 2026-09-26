@@ -2,6 +2,8 @@
 (function () {
   "use strict";
 
+
+  // Start concealed so Tawk cannot restore its native bubble/window before the FOX launcher owns the state.
   document.documentElement.classList.add("fox-tawk-concealed");
   if (!document.getElementById("fox-tawk-no-flash")) {
     var guardStyle = document.createElement("style");
