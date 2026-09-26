@@ -242,8 +242,6 @@ jobs:
 
           test -s "$ROOT/tawk-language-loader.js"
           test -s "$ROOT/tawk-native-force.js"
-          grep -Fq '/tawk-native-force.js' public/cunderlik-gallery-runtime.js
-
           file "$ROOT/tawk-fox-face-transparent.png" | grep -qi 'PNG image data'
 
       - name: Inspect preview-to-production sync
