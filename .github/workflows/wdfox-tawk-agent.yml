@@ -128,15 +128,15 @@ jobs:
           # production-only language-switch behavior and removing preview host guards.
           external = (root / 'tawk-preview-external.js').read_text(encoding='utf-8')
           host_block = '''
-            var host = String(window.location.hostname || "").toLowerCase();
-            var isPreviewHost =
-              host === "localhost" ||
-              host === "127.0.0.1" ||
-              host.endsWith(".app.github.dev") ||
-              host.endsWith(".github.dev");
+  var host = String(window.location.hostname || "").toLowerCase();
+  var isPreviewHost =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.endsWith(".app.github.dev") ||
+    host.endsWith(".github.dev");
 
-            if (!isPreviewHost) return;
-          '''
+  if (!isPreviewHost) return;
+'''
           require(external, host_block, 'preview external loader')
           external = external.replace(host_block, '', 1)
           external = external.replace(
@@ -161,39 +161,39 @@ jobs:
           )
 
           globals_marker = '''
-            window.WebDesignFOXTawkWidgetId = widgetId;
-          '''
+  window.WebDesignFOXTawkWidgetId = widgetId;
+'''
           require(external, globals_marker, 'preview external loader')
           switch_block = '''
 
-            window.WebDesignFOXSwitchChatLanguage = function (nextLanguage, done) {
-              var next = normalize(nextLanguage);
-              if (WIDGETS[next]) {
-                try { localStorage.setItem("wdfox-language", next); } catch (_) {}
-              }
-              var finish = function () {
-                if (typeof done === "function") done();
-              };
-              try {
-                if (window.Tawk_API && typeof window.Tawk_API.endChat === "function") {
-                  window.Tawk_API.endChat();
-                  window.setTimeout(finish, 120);
-                  return;
-                }
-              } catch (_) {}
-              finish();
-            };
-          '''
+  window.WebDesignFOXSwitchChatLanguage = function (nextLanguage, done) {
+    var next = normalize(nextLanguage);
+    if (WIDGETS[next]) {
+      try { localStorage.setItem("wdfox-language", next); } catch (_) {}
+    }
+    var finish = function () {
+      if (typeof done === "function") done();
+    };
+    try {
+      if (window.Tawk_API && typeof window.Tawk_API.endChat === "function") {
+        window.Tawk_API.endChat();
+        window.setTimeout(finish, 120);
+        return;
+      }
+    } catch (_) {}
+    finish();
+  };
+'''
           external = external.replace(globals_marker, globals_marker + switch_block, 1)
           (root / 'tawk-language-loader.js').write_text(external, encoding='utf-8')
 
           # Build production FOX launcher from the tested preview launcher.
           launcher = (root / 'tawk-preview-launcher.js').read_text(encoding='utf-8')
           launcher_host_block = '''
-            var host = String(window.location.hostname || "").toLowerCase();
-            var isPreviewHost = host === "localhost" || host === "127.0.0.1" || host.endsWith(".app.github.dev") || host.endsWith(".github.dev");
-            if (!isPreviewHost) return;
-          '''
+  var host = String(window.location.hostname || "").toLowerCase();
+  var isPreviewHost = host === "localhost" || host === "127.0.0.1" || host.endsWith(".app.github.dev") || host.endsWith(".github.dev");
+  if (!isPreviewHost) return;
+'''
           require(launcher, launcher_host_block, 'preview launcher')
           launcher = launcher.replace(launcher_host_block, '', 1)
           launcher = launcher.replace(
@@ -240,8 +240,9 @@ jobs:
             exit 4
           fi
 
-          grep -Fq '/tawk-language-loader.js' 'src/pages/[lang]/index.astro'
-          grep -Fq '/tawk-native-force.js' 'src/pages/[lang]/index.astro'
+          test -s "$ROOT/tawk-language-loader.js"
+          test -s "$ROOT/tawk-native-force.js"
+          grep -Fq '/tawk-native-force.js' public/cunderlik-gallery-runtime.js
 
           file "$ROOT/tawk-fox-face-transparent.png" | grep -qi 'PNG image data'
 
