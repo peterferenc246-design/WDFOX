@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "inspect or promote"
+        description: "inspect or sync"
         required: true
         default: "inspect"
         type: choice
         options:
           - inspect
-          - promote
+          - sync
       source_branch:
         description: "Source branch"
         required: true
@@ -19,12 +19,8 @@ on:
         description: "Target branch"
         required: true
         default: "main"
-      commit_shas:
-        description: "Comma/space separated preview commit SHAs to promote"
-        required: false
-        default: ""
       confirm:
-        description: "For production promotion enter DEPLOY_TAWK_TO_MAIN"
+        description: "For production sync enter DEPLOY_TAWK_TO_MAIN"
         required: false
         default: ""
   repository_dispatch:
@@ -56,12 +52,10 @@ jobs:
           WD_ACTION: ${{ inputs.action }}
           WD_SOURCE: ${{ inputs.source_branch }}
           WD_TARGET: ${{ inputs.target_branch }}
-          WD_COMMITS: ${{ inputs.commit_shas }}
           WD_CONFIRM: ${{ inputs.confirm }}
           RD_ACTION: ${{ github.event.client_payload.action }}
           RD_SOURCE: ${{ github.event.client_payload.source_branch }}
           RD_TARGET: ${{ github.event.client_payload.target_branch }}
-          RD_COMMITS: ${{ github.event.client_payload.commit_shas }}
           RD_CONFIRM: ${{ github.event.client_payload.confirm }}
           RD_REQUEST_ID: ${{ github.event.client_payload.request_id }}
         run: |
@@ -70,26 +64,23 @@ jobs:
             ACTION="${RD_ACTION:-inspect}"
             SOURCE="${RD_SOURCE:-$DEFAULT_SOURCE}"
             TARGET="${RD_TARGET:-$DEFAULT_TARGET}"
-            COMMITS="${RD_COMMITS:-}"
             CONFIRM="${RD_CONFIRM:-}"
             REQUEST_ID="${RD_REQUEST_ID:-n8n}"
           else
             ACTION="${WD_ACTION:-inspect}"
             SOURCE="${WD_SOURCE:-$DEFAULT_SOURCE}"
             TARGET="${WD_TARGET:-$DEFAULT_TARGET}"
-            COMMITS="${WD_COMMITS:-}"
             CONFIRM="${WD_CONFIRM:-}"
             REQUEST_ID="manual"
           fi
 
-          [[ "$ACTION" == "inspect" || "$ACTION" == "promote" ]] || { echo "Unsupported action: $ACTION"; exit 2; }
+          [[ "$ACTION" == "inspect" || "$ACTION" == "sync" ]] || { echo "Unsupported action: $ACTION"; exit 2; }
           [[ "$SOURCE" == "preview" ]] || { echo "Only source_branch=preview is allowed"; exit 2; }
           [[ "$TARGET" == "main" ]] || { echo "Only target_branch=main is allowed"; exit 2; }
 
           echo "action=$ACTION" >> "$GITHUB_OUTPUT"
           echo "source=$SOURCE" >> "$GITHUB_OUTPUT"
           echo "target=$TARGET" >> "$GITHUB_OUTPUT"
-          echo "commits=$COMMITS" >> "$GITHUB_OUTPUT"
           echo "confirm=$CONFIRM" >> "$GITHUB_OUTPUT"
           echo "request_id=$REQUEST_ID" >> "$GITHUB_OUTPUT"
 
@@ -99,7 +90,6 @@ jobs:
             echo "- Action: \`$ACTION\`"
             echo "- Source: \`$SOURCE\`"
             echo "- Target: \`$TARGET\`"
-            echo "- Commits: \`${COMMITS:-<none>}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Checkout production
@@ -108,123 +98,232 @@ jobs:
           ref: ${{ steps.request.outputs.target }}
           fetch-depth: 0
 
-      - name: Fetch preview
+      - name: Fetch tested preview
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin "${{ steps.request.outputs.source }}:${{ steps.request.outputs.source }}"
-          git fetch origin "${{ steps.request.outputs.target }}:${{ steps.request.outputs.target }}" || true
+          echo "source_sha=$(git rev-parse '${{ steps.request.outputs.source }}')" >> "$GITHUB_ENV"
+          echo "target_sha=$(git rev-parse '${{ steps.request.outputs.target }}')" >> "$GITHUB_ENV"
 
-      - name: Inspect preview versus production
+      - name: Generate production candidates from tested preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wdfox-tawk-sync
+          git show "${{ steps.request.outputs.source }}:public/tawk-preview-external.js" > /tmp/wdfox-tawk-sync/tawk-preview-external.js
+          git show "${{ steps.request.outputs.source }}:public/tawk-preview-launcher.js" > /tmp/wdfox-tawk-sync/tawk-preview-launcher.js
+          git show "${{ steps.request.outputs.source }}:public/images/tawk-fox-face-transparent.png" > /tmp/wdfox-tawk-sync/tawk-fox-face-transparent.png
+
+          python3 <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/wdfox-tawk-sync')
+
+          def require(text, needle, label):
+              if needle not in text:
+                  raise SystemExit(f"Expected marker missing in {label}: {needle!r}")
+
+          # Build production loader from the tested preview loader while preserving
+          # production-only language-switch behavior and removing preview host guards.
+          external = (root / 'tawk-preview-external.js').read_text(encoding='utf-8')
+          host_block = '''
+            var host = String(window.location.hostname || "").toLowerCase();
+            var isPreviewHost =
+              host === "localhost" ||
+              host === "127.0.0.1" ||
+              host.endsWith(".app.github.dev") ||
+              host.endsWith(".github.dev");
+
+            if (!isPreviewHost) return;
+          '''
+          require(external, host_block, 'preview external loader')
+          external = external.replace(host_block, '', 1)
+          external = external.replace(
+              '/* WDFOX preview: external Tawk.to connection only. */',
+              '/* WDFOX production: external Tawk.to connection mirrored from tested preview. */',
+              1,
+          )
+          external = external.replace('fox-tawk-preview-concealed', 'fox-tawk-concealed')
+          external = external.replace('fox-tawk-preview-no-flash', 'fox-tawk-no-flash')
+          external = external.replace(
+              'script.setAttribute("data-wdfox-preview", "external-tawk");',
+              'script.setAttribute("data-wdfox-production", "external-tawk");',
+              1,
+          )
+
+          widget_marker = '  var widgetId = WIDGETS[language];\n'
+          require(external, widget_marker, 'preview external loader')
+          external = external.replace(
+              widget_marker,
+              widget_marker + '\n  try { localStorage.setItem("wdfox-language", language); } catch (_) {}\n',
+              1,
+          )
+
+          globals_marker = '''
+            window.WebDesignFOXTawkWidgetId = widgetId;
+          '''
+          require(external, globals_marker, 'preview external loader')
+          switch_block = '''
+
+            window.WebDesignFOXSwitchChatLanguage = function (nextLanguage, done) {
+              var next = normalize(nextLanguage);
+              if (WIDGETS[next]) {
+                try { localStorage.setItem("wdfox-language", next); } catch (_) {}
+              }
+              var finish = function () {
+                if (typeof done === "function") done();
+              };
+              try {
+                if (window.Tawk_API && typeof window.Tawk_API.endChat === "function") {
+                  window.Tawk_API.endChat();
+                  window.setTimeout(finish, 120);
+                  return;
+                }
+              } catch (_) {}
+              finish();
+            };
+          '''
+          external = external.replace(globals_marker, globals_marker + switch_block, 1)
+          (root / 'tawk-language-loader.js').write_text(external, encoding='utf-8')
+
+          # Build production FOX launcher from the tested preview launcher.
+          launcher = (root / 'tawk-preview-launcher.js').read_text(encoding='utf-8')
+          launcher_host_block = '''
+            var host = String(window.location.hostname || "").toLowerCase();
+            var isPreviewHost = host === "localhost" || host === "127.0.0.1" || host.endsWith(".app.github.dev") || host.endsWith(".github.dev");
+            if (!isPreviewHost) return;
+          '''
+          require(launcher, launcher_host_block, 'preview launcher')
+          launcher = launcher.replace(launcher_host_block, '', 1)
+          launcher = launcher.replace(
+              '/* WDFOX Codespaces-only Tawk.to launcher — restored original FOX artwork. */',
+              '/* WDFOX production Tawk.to launcher — exact behavior mirrored from tested preview. */',
+              1,
+          )
+          launcher = launcher.replace('fox-tawk-preview-launcher', 'fox-tawk-launcher')
+          launcher = launcher.replace('fox-tawk-preview-concealed', 'fox-tawk-concealed')
+          launcher = launcher.replace('fox-preview-arc', 'fox-prod-arc')
+          launcher = launcher.replace('fox-tawk-launcher-style', 'fox-tawk-production-launcher-style', 1)
+
+          css_marker = '    "#fox-tawk-launcher svg *{pointer-events:none!important}" +\n'
+          require(launcher, css_marker, 'preview launcher')
+          launcher = launcher.replace(
+              css_marker,
+              css_marker + '    ".live-chat-bubble:not(#fox-tawk-launcher){display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}" +\n',
+              1,
+          )
+          (root / 'tawk-native-force.js').write_text(launcher, encoding='utf-8')
+          PY
+
+      - name: Validate generated production candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/wdfox-tawk-sync
+
+          for id in 1k1b9121q 1k1bb2aln 1k1bb9ast 1k1bjvbjq 1k1blk6o4 1k1bovo5t 1k1bp5qda 1k1bp6lk5 1k1bpdngj; do
+            grep -Fq "$id" "$ROOT/tawk-language-loader.js"
+            grep -Fq "$id" "$ROOT/tawk-native-force.js"
+          done
+
+          grep -Fq 'window.WebDesignFOXSwitchChatLanguage' "$ROOT/tawk-language-loader.js"
+          grep -Fq 'id = "fox-tawk-launcher"' "$ROOT/tawk-native-force.js"
+          grep -Fq '.live-chat-bubble:not(#fox-tawk-launcher)' "$ROOT/tawk-native-force.js"
+
+          if grep -Fq 'isPreviewHost' "$ROOT/tawk-language-loader.js" || grep -Fq 'isPreviewHost' "$ROOT/tawk-native-force.js"; then
+            echo "Blocked: preview host guard leaked into production candidate"
+            exit 4
+          fi
+          if grep -Fq 'fox-tawk-preview-' "$ROOT/tawk-language-loader.js" || grep -Fq 'fox-tawk-preview-' "$ROOT/tawk-native-force.js"; then
+            echo "Blocked: preview-only DOM identifiers leaked into production candidate"
+            exit 4
+          fi
+
+          grep -Fq '/tawk-language-loader.js' 'src/pages/[lang]/index.astro'
+          grep -Fq '/tawk-native-force.js' 'src/pages/[lang]/index.astro'
+
+          file "$ROOT/tawk-fox-face-transparent.png" | grep -qi 'PNG image data'
+
+      - name: Inspect preview-to-production sync
         if: steps.request.outputs.action == 'inspect'
         shell: bash
         run: |
           set -euo pipefail
-          SOURCE="${{ steps.request.outputs.source }}"
-          TARGET="${{ steps.request.outputs.target }}"
-          echo "### Tawk-scoped differences" >> "$GITHUB_STEP_SUMMARY"
-          git diff --name-status "$TARGET...$SOURCE" -- \
-            'public/tawk-*' \
-            'public/images/tawk-*' \
-            'public/cunderlik-gallery-runtime.js' \
-            'src/pages/[lang]/index.astro' | tee /tmp/tawk-diff.txt
-          if [[ ! -s /tmp/tawk-diff.txt ]]; then
-            echo "No Tawk-scoped differences found." | tee -a "$GITHUB_STEP_SUMMARY"
-          else
-            echo '```text' >> "$GITHUB_STEP_SUMMARY"
-            cat /tmp/tawk-diff.txt >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-          fi
+          ROOT=/tmp/wdfox-tawk-sync
+          {
+            echo "### Preview → production candidate status"
+            echo "- Preview SHA: \`$source_sha\`"
+            echo "- Production SHA: \`$target_sha\`"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Validate promotion request
-        if: steps.request.outputs.action == 'promote'
+          check_file() {
+            local current="$1"
+            local candidate="$2"
+            if cmp -s "$current" "$candidate"; then
+              echo "- ✅ \`$current\` already matches the generated production candidate" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- 🔄 \`$current\` would be updated" >> "$GITHUB_STEP_SUMMARY"
+              git diff --no-index --stat -- "$current" "$candidate" || true
+            fi
+          }
+
+          check_file public/tawk-language-loader.js "$ROOT/tawk-language-loader.js"
+          check_file public/tawk-native-force.js "$ROOT/tawk-native-force.js"
+          check_file public/images/tawk-fox-face-transparent.png "$ROOT/tawk-fox-face-transparent.png"
+
+      - name: Validate production sync confirmation
+        if: steps.request.outputs.action == 'sync'
         shell: bash
         run: |
           set -euo pipefail
           [[ "${{ steps.request.outputs.confirm }}" == "DEPLOY_TAWK_TO_MAIN" ]] || {
-            echo "Production confirmation missing. Expected DEPLOY_TAWK_TO_MAIN";
-            exit 3;
-          }
-          [[ -n "${{ steps.request.outputs.commits }}" ]] || {
-            echo "commit_shas is required for promotion";
-            exit 3;
+            echo "Production confirmation missing. Expected DEPLOY_TAWK_TO_MAIN"
+            exit 5
           }
 
-      - name: Validate requested commits are preview Tawk-only
-        if: steps.request.outputs.action == 'promote'
-        id: validate
+      - name: Apply generated Tawk production candidates
+        if: steps.request.outputs.action == 'sync'
         shell: bash
-        env:
-          RAW_COMMITS: ${{ steps.request.outputs.commits }}
         run: |
           set -euo pipefail
-          COMMITS=$(printf '%s' "$RAW_COMMITS" | tr ',\n\t' '    ')
-          : > /tmp/validated-commits.txt
+          ROOT=/tmp/wdfox-tawk-sync
+          cp "$ROOT/tawk-language-loader.js" public/tawk-language-loader.js
+          cp "$ROOT/tawk-native-force.js" public/tawk-native-force.js
+          cp "$ROOT/tawk-fox-face-transparent.png" public/images/tawk-fox-face-transparent.png
 
-          is_allowed_path() {
-            case "$1" in
-              public/tawk-*) return 0 ;;
-              public/images/tawk-*) return 0 ;;
-              public/cunderlik-gallery-runtime.js) return 0 ;;
-              'src/pages/[lang]/index.astro') return 0 ;;
-              *) return 1 ;;
+      - name: Enforce production change scope
+        if: steps.request.outputs.action == 'sync'
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git status --porcelain | sed -E 's/^.. //')
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No production changes are necessary." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          for path in "${changed[@]}"; do
+            case "$path" in
+              public/tawk-language-loader.js|public/tawk-native-force.js|public/images/tawk-fox-face-transparent.png) ;;
+              *)
+                echo "Blocked unexpected production path: $path"
+                exit 6
+                ;;
             esac
-          }
-
-          for sha in $COMMITS; do
-            full=$(git rev-parse "$sha^{commit}")
-            git merge-base --is-ancestor "$full" preview || {
-              echo "$sha is not an ancestor of preview";
-              exit 4;
-            }
-
-            echo "Validating $full"
-            while IFS= read -r path; do
-              [[ -z "$path" ]] && continue
-              if ! is_allowed_path "$path"; then
-                echo "Blocked non-Tawk path in $full: $path"
-                exit 5
-              fi
-            done < <(git diff-tree --no-commit-id --name-only -r "$full")
-
-            echo "$full" >> /tmp/validated-commits.txt
           done
 
-          echo "Validated commits:"
-          cat /tmp/validated-commits.txt
+          echo "changed=true" >> "$GITHUB_OUTPUT"
           {
-            echo "### Validated production commits"
-            sed 's/^/- `&`/' /tmp/validated-commits.txt
+            echo "### Production files approved for sync"
+            printf -- '- `%s`\n' "${changed[@]}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Configure Git identity
-        if: steps.request.outputs.action == 'promote'
-        shell: bash
-        run: |
-          git config user.name "WDFOX Tawk Deploy Agent"
-          git config user.email "wdfox-tawk-agent@users.noreply.github.com"
-
-      - name: Promote validated commits onto main
-        if: steps.request.outputs.action == 'promote'
-        shell: bash
-        run: |
-          set -euo pipefail
-          git checkout main
-          while IFS= read -r sha; do
-            [[ -z "$sha" ]] && continue
-            if git merge-base --is-ancestor "$sha" HEAD; then
-              echo "Already present on main: $sha"
-              continue
-            fi
-            git cherry-pick -x "$sha" || {
-              git cherry-pick --abort || true
-              echo "Cherry-pick conflict. Production was not pushed."
-              exit 6
-            }
-          done < /tmp/validated-commits.txt
-
       - name: Build production before push
-        if: steps.request.outputs.action == 'promote'
+        if: steps.request.outputs.action == 'sync' && steps.scope.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -240,18 +339,28 @@ jobs:
             npm run build
           fi
 
-      - name: Push production
-        if: steps.request.outputs.action == 'promote'
+      - name: Commit tested Tawk sync
+        if: steps.request.outputs.action == 'sync' && steps.scope.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet origin/main..HEAD; then
-            echo "Nothing new to push." | tee -a "$GITHUB_STEP_SUMMARY"
-          else
-            git push origin HEAD:main
-            NEW_SHA=$(git rev-parse HEAD)
-            echo "Production updated to $NEW_SHA" | tee -a "$GITHUB_STEP_SUMMARY"
-          fi
+          git config user.name "WDFOX Tawk Deploy Agent"
+          git config user.email "wdfox-tawk-agent@users.noreply.github.com"
+          git add public/tawk-language-loader.js public/tawk-native-force.js public/images/tawk-fox-face-transparent.png
+          git commit -m "Sync tested Tawk preview to production" -m "Source preview: $source_sha"
+
+      - name: Push production
+        if: steps.request.outputs.action == 'sync' && steps.scope.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin HEAD:main
+          NEW_SHA=$(git rev-parse HEAD)
+          {
+            echo "### Production updated"
+            echo "- Source preview: \`$source_sha\`"
+            echo "- New production SHA: \`$NEW_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Final summary
         if: always()
