@@ -11,7 +11,6 @@
 
   if (!isPreviewHost) return;
 
-  // Start concealed so Tawk cannot restore its native bubble/window before the FOX launcher owns the state.
   document.documentElement.classList.add("fox-tawk-preview-concealed");
   if (!document.getElementById("fox-tawk-preview-no-flash")) {
     var guardStyle = document.createElement("style");
@@ -38,12 +37,22 @@
     return String(value || "").toLowerCase().split(/[-_]/)[0];
   }
 
-  var urlLanguage = normalize(window.location.pathname.split("/")[1]);
-  var htmlLanguage = normalize(document.documentElement.lang);
-  var language = WIDGETS[urlLanguage] ? urlLanguage : htmlLanguage;
-  if (!WIDGETS[language]) language = "sk";
+  function resolveLanguage() {
+    var urlLanguage = normalize(window.location.pathname.split("/")[1]);
+    var htmlLanguage = normalize(document.documentElement.lang);
+    var browserLanguage = normalize(navigator.language || navigator.userLanguage);
+    if (WIDGETS[urlLanguage]) return urlLanguage;
+    if (WIDGETS[htmlLanguage]) return htmlLanguage;
+    if (WIDGETS[browserLanguage]) return browserLanguage;
+    return "sk";
+  }
 
+  var language = resolveLanguage();
   var widgetId = WIDGETS[language];
+
+  try { localStorage.setItem("wdfox-language", language); } catch (_) {}
+  document.documentElement.setAttribute("data-wdfox-tawk-language", language);
+  document.documentElement.setAttribute("data-wdfox-tawk-widget", widgetId);
 
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
@@ -51,15 +60,59 @@
   window.WebDesignFOXTawkPropertyId = PROPERTY_ID;
   window.WebDesignFOXTawkWidgetId = widgetId;
 
-  if (document.getElementById("tawk-language-script")) return;
-  if (document.querySelector('script[src*="embed.tawk.to/' + PROPERTY_ID + '/"]')) return;
+  function expectedSrc(id) {
+    return "https://embed.tawk.to/" + PROPERTY_ID + "/" + id;
+  }
 
-  var script = document.createElement("script");
-  script.id = "tawk-language-script";
-  script.async = true;
-  script.src = "https://embed.tawk.to/" + PROPERTY_ID + "/" + widgetId;
-  script.charset = "UTF-8";
-  script.setAttribute("crossorigin", "*");
-  script.setAttribute("data-wdfox-preview", "external-tawk");
-  document.head.appendChild(script);
+  function injectWidget(id) {
+    var expected = expectedSrc(id);
+    var existingById = document.getElementById("tawk-language-script");
+    if (existingById && String(existingById.src || "").indexOf("/" + id) !== -1) return;
+
+    var existing = document.querySelector('script[src*="embed.tawk.to/' + PROPERTY_ID + '/"]');
+    if (existing && String(existing.src || "").indexOf("/" + id) !== -1) return;
+
+    if (existingById && existingById.parentNode) existingById.parentNode.removeChild(existingById);
+    if (existing && existing !== existingById && existing.parentNode) existing.parentNode.removeChild(existing);
+
+    var script = document.createElement("script");
+    script.id = "tawk-language-script";
+    script.async = true;
+    script.src = expected;
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
+    script.setAttribute("data-wdfox-preview", "external-tawk");
+    script.setAttribute("data-wdfox-language", language);
+    document.head.appendChild(script);
+  }
+
+  window.WebDesignFOXSwitchPreviewChatLanguage = function (nextLanguage, done) {
+    var next = normalize(nextLanguage);
+    if (!WIDGETS[next]) next = "sk";
+    var nextWidget = WIDGETS[next];
+
+    language = next;
+    widgetId = nextWidget;
+    window.WebDesignFOXChatLanguage = next;
+    window.WebDesignFOXTawkWidgetId = nextWidget;
+    document.documentElement.setAttribute("data-wdfox-tawk-language", next);
+    document.documentElement.setAttribute("data-wdfox-tawk-widget", nextWidget);
+    try { localStorage.setItem("wdfox-language", next); } catch (_) {}
+
+    var finish = function () {
+      if (typeof done === "function") done();
+    };
+
+    try {
+      if (window.Tawk_API && typeof window.Tawk_API.switchWidget === "function") {
+        window.Tawk_API.switchWidget(PROPERTY_ID + "/" + nextWidget, finish);
+        return;
+      }
+    } catch (_) {}
+
+    injectWidget(nextWidget);
+    finish();
+  };
+
+  injectWidget(widgetId);
 })();
