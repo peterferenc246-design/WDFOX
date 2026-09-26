@@ -43,7 +43,8 @@
   style.textContent =
     "#fox-tawk-preview-launcher{position:fixed!important;right:14px!important;bottom:12px!important;z-index:2147483647!important;width:270px!important;height:188px!important;border:0!important;padding:0!important;margin:0!important;background:transparent!important;cursor:pointer!important;filter:drop-shadow(0 7px 11px rgba(0,0,0,.16))!important;transition:transform .18s ease!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}" +
     "#fox-tawk-preview-launcher:hover{transform:translateY(-3px) scale(1.02)!important}#fox-tawk-preview-launcher:active{transform:scale(.97)!important}#fox-tawk-preview-launcher:focus-visible{outline:3px solid #0664e8!important;outline-offset:3px!important;border-radius:18px!important}" +
-    "#fox-tawk-preview-launcher svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none!important}#fox-tawk-preview-launcher svg *{pointer-events:none!important}" +
+    "#fox-tawk-preview-launcher svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none!important}" +
+    "#fox-tawk-preview-launcher svg *{pointer-events:none!important}" +
     "html.fox-tawk-preview-concealed iframe[src*=\"tawk.to\"],html.fox-tawk-preview-concealed iframe[src*=\"tawk.link\"],html.fox-tawk-preview-concealed iframe[title*=\"chat widget\" i]{visibility:hidden!important;opacity:0!important;pointer-events:none!important}" +
     "@media(max-width:700px){#fox-tawk-preview-launcher{right:2px!important;bottom:6px!important;width:225px!important;height:157px!important}}";
   document.head.appendChild(style);
