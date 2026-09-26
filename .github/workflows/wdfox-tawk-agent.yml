@@ -1,0 +1,265 @@
+name: WDFOX Tawk Deploy Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "inspect or promote"
+        required: true
+        default: "inspect"
+        type: choice
+        options:
+          - inspect
+          - promote
+      source_branch:
+        description: "Source branch"
+        required: true
+        default: "preview"
+      target_branch:
+        description: "Target branch"
+        required: true
+        default: "main"
+      commit_shas:
+        description: "Comma/space separated preview commit SHAs to promote"
+        required: false
+        default: ""
+      confirm:
+        description: "For production promotion enter DEPLOY_TAWK_TO_MAIN"
+        required: false
+        default: ""
+  repository_dispatch:
+    types: [wdfox_tawk_agent]
+
+permissions:
+  contents: write
+
+env:
+  DEFAULT_SOURCE: preview
+  DEFAULT_TARGET: main
+
+concurrency:
+  group: wdfox-tawk-production
+  cancel-in-progress: false
+
+jobs:
+  agent:
+    name: WDFOX Tawk Agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Resolve request
+        id: request
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WD_ACTION: ${{ inputs.action }}
+          WD_SOURCE: ${{ inputs.source_branch }}
+          WD_TARGET: ${{ inputs.target_branch }}
+          WD_COMMITS: ${{ inputs.commit_shas }}
+          WD_CONFIRM: ${{ inputs.confirm }}
+          RD_ACTION: ${{ github.event.client_payload.action }}
+          RD_SOURCE: ${{ github.event.client_payload.source_branch }}
+          RD_TARGET: ${{ github.event.client_payload.target_branch }}
+          RD_COMMITS: ${{ github.event.client_payload.commit_shas }}
+          RD_CONFIRM: ${{ github.event.client_payload.confirm }}
+          RD_REQUEST_ID: ${{ github.event.client_payload.request_id }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "repository_dispatch" ]]; then
+            ACTION="${RD_ACTION:-inspect}"
+            SOURCE="${RD_SOURCE:-$DEFAULT_SOURCE}"
+            TARGET="${RD_TARGET:-$DEFAULT_TARGET}"
+            COMMITS="${RD_COMMITS:-}"
+            CONFIRM="${RD_CONFIRM:-}"
+            REQUEST_ID="${RD_REQUEST_ID:-n8n}"
+          else
+            ACTION="${WD_ACTION:-inspect}"
+            SOURCE="${WD_SOURCE:-$DEFAULT_SOURCE}"
+            TARGET="${WD_TARGET:-$DEFAULT_TARGET}"
+            COMMITS="${WD_COMMITS:-}"
+            CONFIRM="${WD_CONFIRM:-}"
+            REQUEST_ID="manual"
+          fi
+
+          [[ "$ACTION" == "inspect" || "$ACTION" == "promote" ]] || { echo "Unsupported action: $ACTION"; exit 2; }
+          [[ "$SOURCE" == "preview" ]] || { echo "Only source_branch=preview is allowed"; exit 2; }
+          [[ "$TARGET" == "main" ]] || { echo "Only target_branch=main is allowed"; exit 2; }
+
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+          echo "source=$SOURCE" >> "$GITHUB_OUTPUT"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "commits=$COMMITS" >> "$GITHUB_OUTPUT"
+          echo "confirm=$CONFIRM" >> "$GITHUB_OUTPUT"
+          echo "request_id=$REQUEST_ID" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## WDFOX Tawk Agent request"
+            echo "- Request ID: \`$REQUEST_ID\`"
+            echo "- Action: \`$ACTION\`"
+            echo "- Source: \`$SOURCE\`"
+            echo "- Target: \`$TARGET\`"
+            echo "- Commits: \`${COMMITS:-<none>}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout production
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.request.outputs.target }}
+          fetch-depth: 0
+
+      - name: Fetch preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ steps.request.outputs.source }}:${{ steps.request.outputs.source }}"
+          git fetch origin "${{ steps.request.outputs.target }}:${{ steps.request.outputs.target }}" || true
+
+      - name: Inspect preview versus production
+        if: steps.request.outputs.action == 'inspect'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE="${{ steps.request.outputs.source }}"
+          TARGET="${{ steps.request.outputs.target }}"
+          echo "### Tawk-scoped differences" >> "$GITHUB_STEP_SUMMARY"
+          git diff --name-status "$TARGET...$SOURCE" -- \
+            'public/tawk-*' \
+            'public/images/tawk-*' \
+            'public/cunderlik-gallery-runtime.js' \
+            'src/pages/[lang]/index.astro' | tee /tmp/tawk-diff.txt
+          if [[ ! -s /tmp/tawk-diff.txt ]]; then
+            echo "No Tawk-scoped differences found." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo '```text' >> "$GITHUB_STEP_SUMMARY"
+            cat /tmp/tawk-diff.txt >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Validate promotion request
+        if: steps.request.outputs.action == 'promote'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "${{ steps.request.outputs.confirm }}" == "DEPLOY_TAWK_TO_MAIN" ]] || {
+            echo "Production confirmation missing. Expected DEPLOY_TAWK_TO_MAIN";
+            exit 3;
+          }
+          [[ -n "${{ steps.request.outputs.commits }}" ]] || {
+            echo "commit_shas is required for promotion";
+            exit 3;
+          }
+
+      - name: Validate requested commits are preview Tawk-only
+        if: steps.request.outputs.action == 'promote'
+        id: validate
+        shell: bash
+        env:
+          RAW_COMMITS: ${{ steps.request.outputs.commits }}
+        run: |
+          set -euo pipefail
+          COMMITS=$(printf '%s' "$RAW_COMMITS" | tr ',\n\t' '    ')
+          : > /tmp/validated-commits.txt
+
+          is_allowed_path() {
+            case "$1" in
+              public/tawk-*) return 0 ;;
+              public/images/tawk-*) return 0 ;;
+              public/cunderlik-gallery-runtime.js) return 0 ;;
+              'src/pages/[lang]/index.astro') return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+
+          for sha in $COMMITS; do
+            full=$(git rev-parse "$sha^{commit}")
+            git merge-base --is-ancestor "$full" preview || {
+              echo "$sha is not an ancestor of preview";
+              exit 4;
+            }
+
+            echo "Validating $full"
+            while IFS= read -r path; do
+              [[ -z "$path" ]] && continue
+              if ! is_allowed_path "$path"; then
+                echo "Blocked non-Tawk path in $full: $path"
+                exit 5
+              fi
+            done < <(git diff-tree --no-commit-id --name-only -r "$full")
+
+            echo "$full" >> /tmp/validated-commits.txt
+          done
+
+          echo "Validated commits:"
+          cat /tmp/validated-commits.txt
+          {
+            echo "### Validated production commits"
+            sed 's/^/- `&`/' /tmp/validated-commits.txt
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure Git identity
+        if: steps.request.outputs.action == 'promote'
+        shell: bash
+        run: |
+          git config user.name "WDFOX Tawk Deploy Agent"
+          git config user.email "wdfox-tawk-agent@users.noreply.github.com"
+
+      - name: Promote validated commits onto main
+        if: steps.request.outputs.action == 'promote'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout main
+          while IFS= read -r sha; do
+            [[ -z "$sha" ]] && continue
+            if git merge-base --is-ancestor "$sha" HEAD; then
+              echo "Already present on main: $sha"
+              continue
+            fi
+            git cherry-pick -x "$sha" || {
+              git cherry-pick --abort || true
+              echo "Cherry-pick conflict. Production was not pushed."
+              exit 6
+            }
+          done < /tmp/validated-commits.txt
+
+      - name: Build production before push
+        if: steps.request.outputs.action == 'promote'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f pnpm-lock.yaml ]]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+            pnpm build
+          elif [[ -f package-lock.json ]]; then
+            npm ci
+            npm run build
+          else
+            npm install
+            npm run build
+          fi
+
+      - name: Push production
+        if: steps.request.outputs.action == 'promote'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet origin/main..HEAD; then
+            echo "Nothing new to push." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            git push origin HEAD:main
+            NEW_SHA=$(git rev-parse HEAD)
+            echo "Production updated to $NEW_SHA" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Final summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo
+            echo "### Agent result"
+            echo "- Workflow run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- Final job status is shown by GitHub Actions."
+          } >> "$GITHUB_STEP_SUMMARY"
