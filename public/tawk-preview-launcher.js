@@ -1,9 +1,17 @@
-/* WDFOX Codespaces-only Tawk.to launcher — restored original FOX artwork. */
+/* WDFOX preview Tawk.to launcher — restored original FOX artwork. */
 (function () {
   "use strict";
 
   var host = String(window.location.hostname || "").toLowerCase();
-  var isPreviewHost = host === "localhost" || host === "127.0.0.1" || host.endsWith(".app.github.dev") || host.endsWith(".github.dev");
+  var isVercelPreviewHost =
+    host === "wdfox-preview.vercel.app" ||
+    (host.startsWith("wdfox-preview-") && host.endsWith(".vercel.app"));
+  var isPreviewHost =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.endsWith(".app.github.dev") ||
+    host.endsWith(".github.dev") ||
+    isVercelPreviewHost;
   if (!isPreviewHost) return;
   if (document.getElementById("fox-tawk-preview-launcher")) return;
 
