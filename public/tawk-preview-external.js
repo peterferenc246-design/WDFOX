@@ -1,4 +1,4 @@
-/* WDFOX preview: external Tawk.to connection only — deployed via dedicated wdfox-preview project. */
+/* WDFOX preview: external Tawk.to connection only — dedicated wdfox-preview project. */
 (function () {
   "use strict";
 
@@ -14,15 +14,6 @@
     isVercelPreviewHost;
 
   if (!isPreviewHost) return;
-
-  document.documentElement.classList.add("fox-tawk-preview-concealed");
-  if (!document.getElementById("fox-tawk-preview-no-flash")) {
-    var guardStyle = document.createElement("style");
-    guardStyle.id = "fox-tawk-preview-no-flash";
-    guardStyle.textContent =
-      'html.fox-tawk-preview-concealed iframe[src*="tawk.to"],html.fox-tawk-preview-concealed iframe[src*="tawk.link"],html.fox-tawk-preview-concealed iframe[title*="chat widget" i]{visibility:hidden!important;opacity:0!important;pointer-events:none!important;}';
-    document.head.appendChild(guardStyle);
-  }
 
   var PROPERTY_ID = "6a951d52c3c46c344587662a";
   var WIDGETS = {
@@ -103,19 +94,25 @@
     document.documentElement.setAttribute("data-wdfox-tawk-widget", nextWidget);
     try { localStorage.setItem("wdfox-language", next); } catch (_) {}
 
-    var finish = function () {
-      if (typeof done === "function") done();
+    var finish = function (error) {
+      if (typeof done === "function") done(error || null);
     };
 
     try {
       if (window.Tawk_API && typeof window.Tawk_API.switchWidget === "function") {
-        window.Tawk_API.switchWidget(PROPERTY_ID + "/" + nextWidget, finish);
+        window.Tawk_API.switchWidget({
+          propertyId: PROPERTY_ID,
+          widgetId: nextWidget
+        }, finish);
         return;
       }
-    } catch (_) {}
+    } catch (error) {
+      finish(error);
+      return;
+    }
 
     injectWidget(nextWidget);
-    finish();
+    finish(null);
   };
 
   injectWidget(widgetId);
