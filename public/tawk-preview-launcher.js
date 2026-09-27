@@ -15,11 +15,11 @@
   if (!isPreviewHost) return;
   if (document.getElementById("fox-tawk-preview-launcher")) return;
 
-  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || "6a951d52c3c46c344587662a";
+  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || "6ab9114a68e784344596dba1";
   var WIDGETS = {
-    sk: "1k1b9121q", de: "1k1bb2aln", en: "1k1bb9ast",
-    hr: "1k1bjvbjq", fr: "1k1blk6o4", it: "1k1bovo5t",
-    pl: "1k1bp5qda", es: "1k1bp6lk5", sv: "1k1bpdngj"
+    sk: "1k3hen3nv", de: "1k3heqb3l", en: "1k3heseio",
+    hr: "1k3heuj83", fr: "1k3hf0d3c", it: "1k3hf0l1g",
+    pl: "1k3hf0sve", es: "1k3hf1avt", sv: "1k3hf1fu7"
   };
   var COPY = {
     sk: { attention: "Som tu pre vás!", open: "Otvoriť živý chat" },
