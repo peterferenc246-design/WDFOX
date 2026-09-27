@@ -6,6 +6,13 @@
 (function () {
   "use strict";
 
+  // Preview has its own isolated Tawk property and launcher.
+  var host = String(window.location.hostname || "").toLowerCase();
+  if (host === "localhost" || host === "127.0.0.1" ||
+      host.endsWith(".app.github.dev") || host.endsWith(".github.dev") ||
+      host === "wdfox-preview.vercel.app" ||
+      (host.startsWith("wdfox-preview-") && host.endsWith(".vercel.app"))) return;
+
   if (document.querySelector(".window-honda")) {
     var galleryStyle = document.createElement("link");
     galleryStyle.rel = "stylesheet";
