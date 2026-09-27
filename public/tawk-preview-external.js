@@ -1,4 +1,4 @@
-/* WDFOX preview: external Tawk.to connection only. */
+/* WDFOX preview: external Tawk.to connection only — deployed via dedicated wdfox-preview project. */
 (function () {
   "use strict";
 
