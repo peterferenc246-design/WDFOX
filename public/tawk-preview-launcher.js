@@ -45,7 +45,6 @@
 
   var widgetId = window.WebDesignFOXTawkWidgetId || WIDGETS[language];
   var copy = COPY[language] || COPY.sk;
-  var fallbackUrl = "https://tawk.to/chat/" + PROPERTY_ID + "/" + widgetId + "?layout=modern";
 
   var style = document.createElement("style");
   style.id = "fox-tawk-preview-launcher-style";
@@ -74,12 +73,17 @@
       '<text x="238" y="122" text-anchor="middle" font-size="31" transform="rotate(6 238 122)">🤝</text>' +
     '</svg>';
 
-  var ready = false;
   var pendingOpen = false;
-  var fallbackTimer = null;
+  var opening = false;
+  var confirmTimer = null;
+  var confirmPoll = null;
 
   function api() {
     return window.Tawk_API || {};
+  }
+
+  function setState(value) {
+    document.documentElement.setAttribute("data-wdfox-tawk-open-state", value);
   }
 
   function showLauncher() {
@@ -96,11 +100,31 @@
     launcher.style.setProperty("pointer-events", "none", "important");
   }
 
-  function clearFallback() {
-    if (fallbackTimer) {
-      window.clearTimeout(fallbackTimer);
-      fallbackTimer = null;
+  function clearConfirmers() {
+    if (confirmTimer) {
+      window.clearTimeout(confirmTimer);
+      confirmTimer = null;
     }
+    if (confirmPoll) {
+      window.clearInterval(confirmPoll);
+      confirmPoll = null;
+    }
+  }
+
+  function isMaximized() {
+    var tawk = api();
+    try {
+      return typeof tawk.isChatMaximized === "function" && tawk.isChatMaximized() === true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function hideNativeWidget() {
+    var tawk = api();
+    try {
+      if (typeof tawk.hideWidget === "function") tawk.hideWidget();
+    } catch (_) {}
   }
 
   function ensureExternalTawk() {
@@ -115,45 +139,87 @@
     script.charset = "UTF-8";
     script.setAttribute("crossorigin", "*");
     script.setAttribute("data-wdfox-preview", "launcher-fallback");
+    script.onerror = function () {
+      pendingOpen = false;
+      opening = false;
+      clearConfirmers();
+      setState("script-error");
+      showLauncher();
+    };
     document.head.appendChild(script);
   }
 
-  function hideNativeWidget() {
-    var tawk = api();
-    try {
-      if (typeof tawk.hideWidget === "function") tawk.hideWidget();
-    } catch (_) {}
+  function confirmOpen() {
+    clearConfirmers();
+
+    confirmPoll = window.setInterval(function () {
+      if (isMaximized()) {
+        pendingOpen = false;
+        opening = false;
+        clearConfirmers();
+        setState("open");
+        hideLauncher();
+      }
+    }, 120);
+
+    confirmTimer = window.setTimeout(function () {
+      if (isMaximized()) {
+        pendingOpen = false;
+        opening = false;
+        clearConfirmers();
+        setState("open");
+        hideLauncher();
+        return;
+      }
+
+      pendingOpen = false;
+      opening = false;
+      clearConfirmers();
+      setState("open-timeout");
+      hideNativeWidget();
+      showLauncher();
+    }, 5000);
   }
 
-  function openChatNow() {
+  function startOpenSequence() {
+    if (!pendingOpen || opening) return;
+
     var tawk = api();
-    if (typeof tawk.maximize !== "function") return false;
+    if (typeof tawk.maximize !== "function") {
+      setState("waiting-api");
+      ensureExternalTawk();
+      return;
+    }
+
+    opening = true;
+    setState("opening");
 
     try {
-      pendingOpen = false;
-      clearFallback();
       if (typeof tawk.showWidget === "function") tawk.showWidget();
-      tawk.maximize();
-      hideLauncher();
-      return true;
-    } catch (_) {
-      return false;
-    }
+    } catch (_) {}
+
+    window.setTimeout(function () {
+      try {
+        tawk.maximize();
+      } catch (_) {
+        pendingOpen = false;
+        opening = false;
+        setState("maximize-error");
+        showLauncher();
+        return;
+      }
+      confirmOpen();
+    }, 220);
   }
 
   function requestOpen() {
+    if (pendingOpen || opening) return;
+
     pendingOpen = true;
-    hideLauncher();
+    setState("requested");
+    showLauncher();
     ensureExternalTawk();
-
-    if (openChatNow()) return;
-
-    fallbackTimer = window.setTimeout(function () {
-      if (!pendingOpen) return;
-      pendingOpen = false;
-      showLauncher();
-      window.open(fallbackUrl, "_blank", "noopener,noreferrer");
-    }, 12000);
+    startOpenSequence();
   }
 
   window.Tawk_API = window.Tawk_API || {};
@@ -163,29 +229,33 @@
   var previousOnHidden = window.Tawk_API.onChatHidden;
 
   window.Tawk_API.onLoad = function () {
-    ready = true;
     document.documentElement.setAttribute("data-wdfox-tawk-ready", "true");
     try { if (typeof previousOnLoad === "function") previousOnLoad.apply(this, arguments); } catch (_) {}
 
     if (pendingOpen) {
-      window.setTimeout(openChatNow, 0);
+      window.setTimeout(startOpenSequence, 250);
       return;
     }
 
+    setState("ready");
     hideNativeWidget();
     showLauncher();
   };
 
   window.Tawk_API.onChatMaximized = function () {
     pendingOpen = false;
-    clearFallback();
+    opening = false;
+    clearConfirmers();
+    setState("open");
     try { if (typeof previousOnMaximized === "function") previousOnMaximized.apply(this, arguments); } catch (_) {}
     hideLauncher();
   };
 
   window.Tawk_API.onChatMinimized = function () {
     pendingOpen = false;
-    clearFallback();
+    opening = false;
+    clearConfirmers();
+    setState("minimized");
     try { if (typeof previousOnMinimized === "function") previousOnMinimized.apply(this, arguments); } catch (_) {}
     hideNativeWidget();
     showLauncher();
@@ -193,7 +263,9 @@
 
   window.Tawk_API.onChatHidden = function () {
     pendingOpen = false;
-    clearFallback();
+    opening = false;
+    clearConfirmers();
+    setState("hidden");
     try { if (typeof previousOnHidden === "function") previousOnHidden.apply(this, arguments); } catch (_) {}
     showLauncher();
   };
@@ -206,13 +278,14 @@
 
   function mount() {
     if (!document.body.contains(launcher)) document.body.appendChild(launcher);
+    setState("mounted");
     showLauncher();
     ensureExternalTawk();
 
     var tawk = api();
     if (typeof tawk.maximize === "function") {
-      ready = true;
       document.documentElement.setAttribute("data-wdfox-tawk-ready", "true");
+      setState("ready");
       hideNativeWidget();
     }
   }
