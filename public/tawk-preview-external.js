@@ -3,11 +3,15 @@
   "use strict";
 
   var host = String(window.location.hostname || "").toLowerCase();
+  var isVercelPreviewHost =
+    host === "wdfox-preview.vercel.app" ||
+    (host.startsWith("wdfox-preview-") && host.endsWith(".vercel.app"));
   var isPreviewHost =
     host === "localhost" ||
     host === "127.0.0.1" ||
     host.endsWith(".app.github.dev") ||
-    host.endsWith(".github.dev");
+    host.endsWith(".github.dev") ||
+    isVercelPreviewHost;
 
   if (!isPreviewHost) return;
 
