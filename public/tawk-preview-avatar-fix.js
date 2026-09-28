@@ -1,5 +1,5 @@
 /* WDFOX preview: visual workaround for Tawk.to trigger avatar rendering in Widget 4.x.
-   Scope: PREVIEW only. Validated for DE, EN, SK and FR; enabled for HR test. */
+   Scope: PREVIEW only. Validated for DE, EN, SK, FR and HR; enabled for PL test. */
 (function () {
   "use strict";
 
@@ -17,7 +17,7 @@
   if (!isPreviewHost) return;
 
   var language = String(window.location.pathname.split("/")[1] || "").toLowerCase();
-  if (language !== "de" && language !== "en" && language !== "sk" && language !== "fr" && language !== "hr") return;
+  if (language !== "de" && language !== "en" && language !== "sk" && language !== "fr" && language !== "hr" && language !== "pl") return;
 
   var AVATAR_ID = "wdfox-tawk-trigger-avatar-fix";
   var AVATAR_SRC = "/images/peter-ferenc.jpg?v=20260928-avatar2";
