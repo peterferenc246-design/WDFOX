@@ -15,11 +15,28 @@
   if (!isPreviewHost) return;
   if (document.getElementById("fox-tawk-preview-launcher")) return;
 
-  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || (window.location.pathname.split("/")[1].toLowerCase() === "de" ? "6aba2d3f1300d43446c8b761" : "6ab9114a68e784344596dba1");
+  var PROPERTY_IDS = {
+    sk: "6aba373f25498e3445ceb5b6",
+    de: "6aba2d3f1300d43446c8b761",
+    en: "6aba3791c601f934456dfe2b",
+    hr: "6aba37adc601f934456dfe2e",
+    fr: "6aba37b7783d543456da149d",
+    it: "6aba37d1497bdf3441c94df7",
+    pl: "6aba37dbd338ef344337ab6c",
+    es: "6aba37f98673653447134cc1",
+    sv: "6aba3803dff27f343f63f6c9"
+  };
+  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || PROPERTY_IDS[String(window.location.pathname.split("/")[1] || "").toLowerCase()] || "6ab9114a68e784344596dba1";
   var WIDGETS = {
-    sk: "1k3hen3nv", de: "1k3jk1ga8", en: "1k3heseio",
-    hr: "1k3heuj83", fr: "1k3hf0d3c", it: "1k3hf0l1g",
-    pl: "1k3hf0sve", es: "1k3hf1avt", sv: "1k3hf1fu7"
+    sk: "1k3jmfkjq",
+    de: "1k3jk1ga8",
+    en: "1k3jmi4o8",
+    hr: "1k3jmj0gp",
+    fr: "1k3jmj9u6",
+    it: "1k3jmk3i0",
+    pl: "1k3jmkd5l",
+    es: "1k3jmlaaq",
+    sv: "1k3jmljpb"
   };
   var COPY = {
     sk: { attention: "Som tu pre vás!", open: "Otvoriť živý chat" },
