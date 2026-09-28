@@ -1,4 +1,4 @@
-/* WDFOX preview: external Tawk.to connection only — exact GitHub preview behavior plus Vercel host. */
+/* WDFOX preview: isolated Tawk.to property + language widget routing. */
 (function () {
   "use strict";
 
@@ -90,7 +90,7 @@
     document.head.appendChild(script);
   }
 
-  window.WebDesignFOXSwitchPreviewChatLanguage = function (nextLanguage, done) {
+  function switchPreviewChatLanguage(nextLanguage, done) {
     var next = normalize(nextLanguage);
     if (!WIDGETS[next]) next = "sk";
     var nextWidget = WIDGETS[next];
@@ -103,20 +103,36 @@
     document.documentElement.setAttribute("data-wdfox-tawk-widget", nextWidget);
     try { localStorage.setItem("wdfox-language", next); } catch (_) {}
 
+    var finished = false;
     var finish = function () {
+      if (finished) return;
+      finished = true;
       if (typeof done === "function") done();
     };
 
     try {
       if (window.Tawk_API && typeof window.Tawk_API.switchWidget === "function") {
-        window.Tawk_API.switchWidget(PROPERTY_ID + "/" + nextWidget, finish);
+        window.Tawk_API.switchWidget({
+          propertyId: PROPERTY_ID,
+          widgetId: nextWidget
+        }, function () {
+          finish();
+        });
+        window.setTimeout(finish, 1200);
         return;
       }
     } catch (_) {}
 
-    injectWidget(nextWidget);
+    /* If Tawk is not ready yet, navigate normally. The destination page will
+       load exactly the widget that belongs to its language URL. */
     finish();
-  };
+  }
+
+  /* BaseLayout calls WebDesignFOXSwitchChatLanguage when a language flag is
+     clicked. Expose the preview switcher under both names so PREVIEW never
+     falls back to a stale widget from another language. */
+  window.WebDesignFOXSwitchPreviewChatLanguage = switchPreviewChatLanguage;
+  window.WebDesignFOXSwitchChatLanguage = switchPreviewChatLanguage;
 
   injectWidget(widgetId);
 })();
