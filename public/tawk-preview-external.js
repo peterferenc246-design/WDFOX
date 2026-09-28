@@ -25,9 +25,10 @@
   }
 
   var PROPERTY_ID = "6ab9114a68e784344596dba1";
+  var DE_PROPERTY_ID = "6aba2d3f1300d43446c8b761";
   var WIDGETS = {
     sk: "1k3hen3nv",
-    de: "1k3heqb3l",
+    de: "1k3jk1ga8",
     en: "1k3heseio",
     hr: "1k3heuj83",
     fr: "1k3hf0d3c",
@@ -53,6 +54,7 @@
 
   var language = resolveLanguage();
   var widgetId = WIDGETS[language];
+  var propertyId = language === "de" ? DE_PROPERTY_ID : PROPERTY_ID;
 
   try { localStorage.setItem("wdfox-language", language); } catch (_) {}
   document.documentElement.setAttribute("data-wdfox-tawk-language", language);
@@ -61,11 +63,11 @@
   window.Tawk_API = window.Tawk_API || {};
   window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
   window.WebDesignFOXChatLanguage = language;
-  window.WebDesignFOXTawkPropertyId = PROPERTY_ID;
+  window.WebDesignFOXTawkPropertyId = propertyId;
   window.WebDesignFOXTawkWidgetId = widgetId;
 
   function expectedSrc(id) {
-    return "https://embed.tawk.to/" + PROPERTY_ID + "/" + id;
+    return "https://embed.tawk.to/" + propertyId + "/" + id;
   }
 
   function injectWidget(id) {
@@ -73,7 +75,7 @@
     var existingById = document.getElementById("tawk-language-script");
     if (existingById && String(existingById.src || "").indexOf("/" + id) !== -1) return;
 
-    var existing = document.querySelector('script[src*="embed.tawk.to/' + PROPERTY_ID + '/"]');
+    var existing = document.querySelector('script[src*="embed.tawk.to/' + propertyId + '/"]');
     if (existing && String(existing.src || "").indexOf("/" + id) !== -1) return;
 
     if (existingById && existingById.parentNode) existingById.parentNode.removeChild(existingById);
@@ -94,9 +96,12 @@
     var next = normalize(nextLanguage);
     if (!WIDGETS[next]) next = "sk";
     var nextWidget = WIDGETS[next];
+    var nextProperty = next === "de" ? DE_PROPERTY_ID : PROPERTY_ID;
 
     language = next;
     widgetId = nextWidget;
+    propertyId = nextProperty;
+    window.WebDesignFOXTawkPropertyId = nextProperty;
     window.WebDesignFOXChatLanguage = next;
     window.WebDesignFOXTawkWidgetId = nextWidget;
     document.documentElement.setAttribute("data-wdfox-tawk-language", next);
@@ -113,7 +118,7 @@
     try {
       if (window.Tawk_API && typeof window.Tawk_API.switchWidget === "function") {
         window.Tawk_API.switchWidget({
-          propertyId: PROPERTY_ID,
+          propertyId: nextProperty,
           widgetId: nextWidget
         }, function () {
           finish();
