@@ -15,9 +15,9 @@
   if (!isPreviewHost) return;
   if (document.getElementById("fox-tawk-preview-launcher")) return;
 
-  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || "6ab9114a68e784344596dba1";
+  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || (window.location.pathname.split("/")[1].toLowerCase() === "de" ? "6aba2d3f1300d43446c8b761" : "6ab9114a68e784344596dba1");
   var WIDGETS = {
-    sk: "1k3hen3nv", de: "1k3heqb3l", en: "1k3heseio",
+    sk: "1k3hen3nv", de: "1k3jk1ga8", en: "1k3heseio",
     hr: "1k3heuj83", fr: "1k3hf0d3c", it: "1k3hf0l1g",
     pl: "1k3hf0sve", es: "1k3hf1avt", sv: "1k3hf1fu7"
   };
