@@ -107,6 +107,7 @@
     if (!WIDGETS[next]) next = "sk";
     var nextWidget = WIDGETS[next];
     var nextProperty = PROPERTY_IDS[next] || PROPERTY_ID;
+    var propertyChanged = nextProperty !== propertyId;
 
     language = next;
     widgetId = nextWidget;
@@ -124,6 +125,13 @@
       finished = true;
       if (typeof done === "function") done();
     };
+
+    /* Each language has its own property. Navigate immediately so the next
+       document loads only that property and cannot retain the old chat. */
+    if (propertyChanged) {
+      finish();
+      return;
+    }
 
     try {
       if (window.Tawk_API && typeof window.Tawk_API.switchWidget === "function") {
