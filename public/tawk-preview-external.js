@@ -28,7 +28,7 @@
   var PROPERTY_IDS = {
     sk: "6aba373f25498e3445ceb5b6",
     de: "6aba2d3f1300d43446c8b761",
-    en: "6ab9114a68e784344596dba1",
+    en: "6aba3791c601f934456dfe2b",
     hr: "6aba37adc601f934456dfe2e",
     fr: "6aba37b7783d543456da149d",
     it: "6aba37d1497bdf3441c94df7",
@@ -39,7 +39,7 @@
   var WIDGETS = {
     sk: "1k3jmfkjq",
     de: "1k3jk1ga8",
-    en: "1k3heseio",
+    en: "1k3jmi4o8",
     hr: "1k3jmj0gp",
     fr: "1k3jmj9u6",
     it: "1k3jmk3i0",
@@ -126,8 +126,6 @@
       if (typeof done === "function") done();
     };
 
-    /* Each language has its own property. Navigate immediately so the next
-       document loads only that property and cannot retain the old chat. */
     if (propertyChanged) {
       finish();
       return;
@@ -146,14 +144,9 @@
       }
     } catch (_) {}
 
-    /* If Tawk is not ready yet, navigate normally. The destination page will
-       load exactly the widget that belongs to its language URL. */
     finish();
   }
 
-  /* BaseLayout calls WebDesignFOXSwitchChatLanguage when a language flag is
-     clicked. Expose the preview switcher under both names so PREVIEW never
-     falls back to a stale widget from another language. */
   window.WebDesignFOXSwitchPreviewChatLanguage = switchPreviewChatLanguage;
   window.WebDesignFOXSwitchChatLanguage = switchPreviewChatLanguage;
 
