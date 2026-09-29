@@ -4,11 +4,28 @@
 
   if (document.getElementById("fox-tawk-launcher")) return;
 
-  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || "6a951d52c3c46c344587662a";
+  var PROPERTY_IDS = {
+    sk: "6a951d52c3c46c344587662a",
+    de: "6a951d52c3c46c344587662a",
+    en: "6a951d52c3c46c344587662a",
+    hr: "6a951d52c3c46c344587662a",
+    fr: "6a951d52c3c46c344587662a",
+    it: "6a951d52c3c46c344587662a",
+    pl: "6a951d52c3c46c344587662a",
+    es: "6a951d52c3c46c344587662a",
+    sv: "6a951d52c3c46c344587662a"
+  };
+  var PROPERTY_ID = window.WebDesignFOXTawkPropertyId || PROPERTY_IDS[String(window.location.pathname.split("/")[1] || "").toLowerCase()] || "6a951d52c3c46c344587662a";
   var WIDGETS = {
-    sk: "1k1b9121q", de: "1k1bb2aln", en: "1k1bb9ast",
-    hr: "1k1bjvbjq", fr: "1k1blk6o4", it: "1k1bovo5t",
-    pl: "1k1bp5qda", es: "1k1bp6lk5", sv: "1k1bpdngj"
+    sk: "1k1b9121q",
+    de: "1k1bb2aln",
+    en: "1k1bb9ast",
+    hr: "1k1bjvbjq",
+    fr: "1k1blk6o4",
+    it: "1k1bovo5t",
+    pl: "1k1bp5qda",
+    es: "1k1bp6lk5",
+    sv: "1k1bpdngj"
   };
   var COPY = {
     sk: { attention: "Som tu pre vás!", open: "Otvoriť živý chat" },
@@ -58,11 +75,16 @@
       '<text x="150" y="74" text-anchor="middle" font-size="31">❤️</text>' +
       '<text x="66" y="121" text-anchor="middle" font-size="31" transform="rotate(-10 66 121)">👋</text>' +
       '<text x="67" y="158" text-anchor="middle" font-size="28" transform="rotate(-5 67 158)">✍️</text>' +
-      '<image x="91" y="73" width="118" height="116" preserveAspectRatio="xMidYMid meet" href="/images/tawk-fox-face-transparent.png?v=20260924c"/>' +
+      '<image x="91" y="73" width="118" height="116" preserveAspectRatio="xMidYMid meet" href="/images/tawk-fox-face-transparent.png?v=20260926a"/>' +
       '<text x="238" y="122" text-anchor="middle" font-size="31" transform="rotate(6 238 122)">🤝</text>' +
     '</svg>';
 
-  var userOpened = false;
+  var chatOpen = false;
+  var openingUntil = 0;
+
+  function api() {
+    return window.Tawk_API || {};
+  }
 
   function showLauncher() {
     launcher.style.setProperty("display", "block", "important");
@@ -86,12 +108,54 @@
     document.documentElement.classList.remove("fox-tawk-concealed");
   }
 
+  function isMaximized() {
+    var tawk = api();
+    try { return typeof tawk.isChatMaximized === "function" && tawk.isChatMaximized(); } catch (_) { return false; }
+  }
+
+  function isMinimizedOrHidden() {
+    var tawk = api();
+    try {
+      if (typeof tawk.isChatMinimized === "function" && tawk.isChatMinimized()) return true;
+      if (typeof tawk.isChatHidden === "function" && tawk.isChatHidden()) return true;
+    } catch (_) {}
+    return false;
+  }
+
   function hideNativeWidget() {
-    if (userOpened) return;
+    if (chatOpen || Date.now() < openingUntil) return;
     concealTawk();
-    var api = window.Tawk_API || {};
-    try { if (typeof api.minimize === "function") api.minimize(); } catch (_) {}
-    try { if (typeof api.hideWidget === "function") api.hideWidget(); } catch (_) {}
+    var tawk = api();
+    try { if (typeof tawk.hideWidget === "function") tawk.hideWidget(); } catch (_) {}
+  }
+
+  function reconcileState() {
+    if (isMaximized()) {
+      chatOpen = true;
+      openingUntil = 0;
+      revealTawk();
+      hideLauncher();
+      return;
+    }
+
+    if (Date.now() < openingUntil) {
+      chatOpen = true;
+      revealTawk();
+      hideLauncher();
+      return;
+    }
+
+    if (isMinimizedOrHidden() || chatOpen) {
+      chatOpen = false;
+      concealTawk();
+      hideNativeWidget();
+      showLauncher();
+      return;
+    }
+
+    concealTawk();
+    hideNativeWidget();
+    showLauncher();
   }
 
   function ensureExternalTawk() {
@@ -104,21 +168,28 @@
     script.src = "https://embed.tawk.to/" + PROPERTY_ID + "/" + widgetId;
     script.charset = "UTF-8";
     script.setAttribute("crossorigin", "*");
+    script.setAttribute("data-wdfox-production", "launcher-fallback");
     document.head.appendChild(script);
   }
 
   function openChat() {
-    var api = window.Tawk_API || {};
-    if (typeof api.maximize !== "function") return false;
+    var tawk = api();
+    if (typeof tawk.maximize !== "function") return false;
     try {
-      userOpened = true;
-      revealTawk();
-      if (typeof api.showWidget === "function") api.showWidget();
-      api.maximize();
+      openingUntil = Date.now() + 2500;
+      chatOpen = true;
       hideLauncher();
+      revealTawk();
+      if (typeof tawk.showWidget === "function") tawk.showWidget();
+      tawk.maximize();
+      window.setTimeout(reconcileState, 120);
+      window.setTimeout(reconcileState, 450);
+      window.setTimeout(reconcileState, 1000);
+      window.setTimeout(reconcileState, 2200);
       return true;
     } catch (_) {
-      userOpened = false;
+      openingUntil = 0;
+      chatOpen = false;
       concealTawk();
       showLauncher();
       return false;
@@ -133,33 +204,37 @@
 
   window.Tawk_API.onLoad = function () {
     try { if (typeof previousOnLoad === "function") previousOnLoad.apply(this, arguments); } catch (_) {}
-    if (!userOpened) {
-      hideNativeWidget();
-      showLauncher();
-    }
+    reconcileState();
   };
 
   window.Tawk_API.onChatMaximized = function () {
     try { if (typeof previousOnMaximized === "function") previousOnMaximized.apply(this, arguments); } catch (_) {}
-    if (!userOpened) {
-      hideNativeWidget();
-      showLauncher();
-      return;
-    }
+    chatOpen = true;
+    openingUntil = 0;
     revealTawk();
     hideLauncher();
   };
 
   window.Tawk_API.onChatMinimized = function () {
     try { if (typeof previousOnMinimized === "function") previousOnMinimized.apply(this, arguments); } catch (_) {}
-    userOpened = false;
+    if (Date.now() < openingUntil) {
+      window.setTimeout(reconcileState, 180);
+      return;
+    }
+    chatOpen = false;
+    concealTawk();
     hideNativeWidget();
     showLauncher();
   };
 
   window.Tawk_API.onChatHidden = function () {
     try { if (typeof previousOnHidden === "function") previousOnHidden.apply(this, arguments); } catch (_) {}
-    userOpened = false;
+    if (Date.now() < openingUntil) {
+      window.setTimeout(reconcileState, 180);
+      return;
+    }
+    chatOpen = false;
+    concealTawk();
     hideNativeWidget();
     showLauncher();
   };
@@ -167,8 +242,10 @@
   launcher.addEventListener("click", function (event) {
     event.preventDefault();
     event.stopPropagation();
+    hideLauncher();
     if (openChat()) return;
     ensureExternalTawk();
+    openingUntil = Date.now() + 5000;
     var startedAt = Date.now();
     var timer = window.setInterval(function () {
       if (openChat()) {
@@ -177,6 +254,9 @@
       }
       if (Date.now() - startedAt > 5000) {
         window.clearInterval(timer);
+        openingUntil = 0;
+        chatOpen = false;
+        showLauncher();
         window.open(fallbackUrl, "_blank", "noopener,noreferrer");
       }
     }, 150);
@@ -184,7 +264,8 @@
 
   function mount() {
     if (!document.body.contains(launcher)) document.body.appendChild(launcher);
-    userOpened = false;
+    chatOpen = false;
+    openingUntil = 0;
     concealTawk();
     showLauncher();
     hideNativeWidget();
@@ -197,10 +278,12 @@
   var guardRuns = 0;
   var guard = window.setInterval(function () {
     guardRuns += 1;
-    if (!userOpened) {
-      hideNativeWidget();
-      showLauncher();
-    }
-    if (guardRuns >= 120) window.clearInterval(guard);
-  }, 500);
+    reconcileState();
+    if (guardRuns >= 400) window.clearInterval(guard);
+  }, 300);
+
+  window.addEventListener("focus", reconcileState);
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) reconcileState();
+  });
 })();
