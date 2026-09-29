@@ -2,7 +2,6 @@
 (function () {
   "use strict";
 
-
   document.documentElement.classList.add("fox-tawk-concealed");
   if (!document.getElementById("fox-tawk-no-flash")) {
     var guardStyle = document.createElement("style");
@@ -90,23 +89,7 @@
     document.head.appendChild(script);
   }
 
-  function switchProductionChatLanguage(nextLanguage, done) {
-    var next = normalize(nextLanguage);
-    if (!WIDGETS[next]) next = "sk";
-    var nextWidget = WIDGETS[next];
-    var nextProperty = PROPERTY_IDS[next] || PROPERTY_ID;
-    var propertyChanged = nextProperty !== propertyId;
-
-    language = next;
-    widgetId = nextWidget;
-    propertyId = nextProperty;
-    window.WebDesignFOXTawkPropertyId = nextProperty;
-    window.WebDesignFOXChatLanguage = next;
-    window.WebDesignFOXTawkWidgetId = nextWidget;
-    document.documentElement.setAttribute("data-wdfox-tawk-language", next);
-    document.documentElement.setAttribute("data-wdfox-tawk-widget", nextWidget);
-    try { localStorage.setItem("wdfox-language", next); } catch (_) {}
-
+  function endCurrentChat(done) {
     var finished = false;
     var finish = function () {
       if (finished) return;
@@ -114,20 +97,12 @@
       if (typeof done === "function") done();
     };
 
-    if (propertyChanged) {
-      finish();
-      return;
-    }
-
     try {
-      if (window.Tawk_API && typeof window.Tawk_API.switchWidget === "function") {
-        window.Tawk_API.switchWidget({
-          propertyId: nextProperty,
-          widgetId: nextWidget
-        }, function () {
+      if (window.Tawk_API && typeof window.Tawk_API.endChat === "function") {
+        window.Tawk_API.endChat(function () {
           finish();
         });
-        window.setTimeout(finish, 1200);
+        window.setTimeout(finish, 900);
         return;
       }
     } catch (_) {}
@@ -135,7 +110,50 @@
     finish();
   }
 
+  function switchProductionChatLanguage(nextLanguage, done) {
+    var next = normalize(nextLanguage);
+    if (!WIDGETS[next]) next = "sk";
+
+    try { localStorage.setItem("wdfox-language", next); } catch (_) {}
+    window.WebDesignFOXChatLanguage = next;
+    window.WebDesignFOXTawkPropertyId = PROPERTY_ID;
+    window.WebDesignFOXTawkWidgetId = WIDGETS[next];
+    document.documentElement.setAttribute("data-wdfox-tawk-language", next);
+    document.documentElement.setAttribute("data-wdfox-tawk-widget", WIDGETS[next]);
+
+    // Production uses one Tawk property for all language widgets.
+    // End the current conversation before the full page navigation so
+    // messages from the previous language cannot leak into the next widget.
+    endCurrentChat(done);
+  }
+
   window.WebDesignFOXSwitchChatLanguage = switchProductionChatLanguage;
 
+  function installLanguageNavigationGuard() {
+    document.addEventListener("click", function (event) {
+      if (event.defaultPrevented || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      var target = event.target;
+      var link = target && target.closest ? target.closest("#fixed-lang-layer a.language-flag[data-language]") : null;
+      if (!link) return;
+
+      var next = normalize(link.getAttribute("data-language"));
+      if (!WIDGETS[next] || next === language) return;
+
+      event.preventDefault();
+      var href = link.href;
+      var navigated = false;
+      var navigate = function () {
+        if (navigated) return;
+        navigated = true;
+        window.location.assign(href);
+      };
+
+      switchProductionChatLanguage(next, navigate);
+      window.setTimeout(navigate, 1100);
+    }, true);
+  }
+
+  installLanguageNavigationGuard();
   injectWidget(widgetId);
 })();
