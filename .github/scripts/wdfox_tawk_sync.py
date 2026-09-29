@@ -67,3 +67,5 @@ def main():
     shutil.copyfile(src/"tawk-fox-face-transparent.png",out/"tawk-fox-face-transparent.png")
 
 if __name__ == "__main__": main()
+
+# Deployment trigger after approved Tawk preview-to-production sync.
