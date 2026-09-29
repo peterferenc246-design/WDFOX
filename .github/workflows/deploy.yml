@@ -106,6 +106,12 @@ jobs:
           test -s dist/tawk-native-force.js
           grep -R -q 'id="fox-tawk-language-loader"' dist --include='*.html'
           grep -R -q 'id="fox-tawk-native-force"' dist --include='*.html'
+          grep -q 'Tawk_API.endChat' dist/tawk-language-loader.js
+          grep -F -q '#fixed-lang-layer a.language-flag[data-language]' dist/tawk-language-loader.js
+          if grep -q 'Tawk_API.switchWidget' dist/tawk-language-loader.js; then
+            echo 'Blocked same-session Tawk widget switching in production build'
+            exit 1
+          fi
           if grep -R -q 'id="fox-tawk-button"' dist --include='*.html'; then
             echo 'Legacy fox-tawk-button still present in production build'
             exit 1
@@ -139,17 +145,22 @@ jobs:
         run: |
           set -euo pipefail
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
+          loader_url="https://www.foxprof.club/tawk-language-loader.js?v=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5 6; do
-            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/2.0' "$url" || true)"
+            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/3.0' "$url" || true)"
+            loader="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/3.0' "$loader_url" || true)"
             if grep -q 'id="fox-tawk-language-loader"' <<<"$html" \
               && grep -q '/tawk-language-loader.js' <<<"$html" \
               && grep -q 'id="fox-tawk-native-force"' <<<"$html" \
               && grep -q '/tawk-native-force.js' <<<"$html" \
-              && ! grep -q 'id="fox-tawk-button"' <<<"$html"; then
-              echo 'LIVE_TAWK_WIRING=OK'
+              && ! grep -q 'id="fox-tawk-button"' <<<"$html" \
+              && grep -q 'Tawk_API.endChat' <<<"$loader" \
+              && grep -F -q '#fixed-lang-layer a.language-flag[data-language]' <<<"$loader" \
+              && ! grep -q 'Tawk_API.switchWidget' <<<"$loader"; then
+              echo 'LIVE_TAWK_WIRING_AND_LANGUAGE_ISOLATION=OK'
               exit 0
             fi
             sleep 8
           done
-          echo 'LIVE_TAWK_WIRING=FAIL'
+          echo 'LIVE_TAWK_WIRING_AND_LANGUAGE_ISOLATION=FAIL'
           exit 1
