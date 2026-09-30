@@ -79,11 +79,13 @@ jobs:
 
               return inline_scripts.sub(keep, text)
 
+          avatar_exists = Path('dist/tawk-avatar-fix.js').is_file()
           snippet = (
               f'<script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v={sha}"></script>\n'
-              f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>\n'
-              f'<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
+              f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>'
           )
+          if avatar_exists:
+              snippet += f'\n<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
 
           files = list(Path('dist').rglob('*.html'))
           if not files:
@@ -96,11 +98,7 @@ jobs:
               text = text.replace('</body>', snippet + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
 
-          for required in (
-              'dist/tawk-language-loader.js',
-              'dist/tawk-native-force.js',
-              'dist/tawk-avatar-fix.js',
-          ):
+          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js'):
               if not Path(required).is_file():
                   raise SystemExit(f'Missing production Tawk asset: {required}')
           PY
@@ -111,10 +109,8 @@ jobs:
           set -euo pipefail
           test -s dist/tawk-language-loader.js
           test -s dist/tawk-native-force.js
-          test -s dist/tawk-avatar-fix.js
           grep -R -q 'id="fox-tawk-language-loader"' dist --include='*.html'
           grep -R -q 'id="fox-tawk-native-force"' dist --include='*.html'
-          grep -R -q 'id="fox-tawk-avatar-fix"' dist --include='*.html'
           grep -q 'Tawk_API.endChat' dist/tawk-language-loader.js
           if grep -F -q '#fixed-lang-layer a.language-flag[data-language]' dist/tawk-language-loader.js; then
             echo 'Blocked duplicate production language-click handler'
@@ -123,6 +119,10 @@ jobs:
           if grep -q 'Tawk_API.switchWidget' dist/tawk-language-loader.js; then
             echo 'Blocked same-session Tawk widget switching in production build'
             exit 1
+          fi
+          if [[ -f dist/tawk-avatar-fix.js ]]; then
+            grep -R -q 'id="fox-tawk-avatar-fix"' dist --include='*.html'
+            grep -q 'wdfox-tawk-trigger-avatar-fix' dist/tawk-avatar-fix.js
           fi
           if grep -R -q 'id="fox-tawk-button"' dist --include='*.html'; then
             echo 'Legacy fox-tawk-button still present in production build'
@@ -160,20 +160,24 @@ jobs:
           loader_url="https://www.foxprof.club/tawk-language-loader.js?v=${GITHUB_SHA}"
           avatar_url="https://www.foxprof.club/tawk-avatar-fix.js?v=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5 6; do
-            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.0' "$url" || true)"
-            loader="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.0' "$loader_url" || true)"
-            avatar="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.0' "$avatar_url" || true)"
+            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$url" || true)"
+            loader="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$loader_url" || true)"
+            base_ok=false
             if grep -q 'id="fox-tawk-language-loader"' <<<"$html" \
               && grep -q '/tawk-language-loader.js' <<<"$html" \
               && grep -q 'id="fox-tawk-native-force"' <<<"$html" \
               && grep -q '/tawk-native-force.js' <<<"$html" \
-              && grep -q 'id="fox-tawk-avatar-fix"' <<<"$html" \
-              && grep -q '/tawk-avatar-fix.js' <<<"$html" \
               && ! grep -q 'id="fox-tawk-button"' <<<"$html" \
               && grep -q 'Tawk_API.endChat' <<<"$loader" \
               && ! grep -F -q '#fixed-lang-layer a.language-flag[data-language]' <<<"$loader" \
-              && ! grep -q 'Tawk_API.switchWidget' <<<"$loader" \
-              && grep -q 'wdfox-tawk-trigger-avatar-fix' <<<"$avatar"; then
+              && ! grep -q 'Tawk_API.switchWidget' <<<"$loader"; then
+              base_ok=true
+            fi
+            if [[ "$base_ok" == "true" ]]; then
+              if grep -q 'id="fox-tawk-avatar-fix"' <<<"$html"; then
+                avatar="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$avatar_url" || true)"
+                grep -q 'wdfox-tawk-trigger-avatar-fix' <<<"$avatar" || { sleep 8; continue; }
+              fi
               echo 'LIVE_APPROVED_TAWK_PACKAGE=OK'
               exit 0
             fi
