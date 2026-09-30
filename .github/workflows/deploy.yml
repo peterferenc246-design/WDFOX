@@ -36,7 +36,7 @@ jobs:
       - name: Build Astro site
         run: pnpm run build
 
-      - name: Install tested production Tawk scripts
+      - name: Install approved production Tawk package
         shell: bash
         run: |
           set -euo pipefail
@@ -54,7 +54,7 @@ jobs:
               re.I | re.S,
           )
           external_tawk = re.compile(
-              r'<script\b[^>]*src=["\'][^"\']*(?:embed\.tawk\.to|tawk-language-loader\.js|tawk-native-force\.js)[^"\']*["\'][^>]*>\s*</script\s*>',
+              r'<script\b[^>]*src=["\'][^"\']*(?:embed\.tawk\.to|tawk-language-loader\.js|tawk-native-force\.js|tawk-avatar-fix\.js|tawk-preview-[^"\']+\.js)[^"\']*["\'][^>]*>\s*</script\s*>',
               re.I | re.S,
           )
           inline_scripts = re.compile(r'<script\b[^>]*>.*?</script\s*>', re.I | re.S)
@@ -72,6 +72,8 @@ jobs:
                       'fox-tawk-button',
                       'tawk-language-loader',
                       'tawk-native-force',
+                      'tawk-avatar-fix',
+                      'tawk-preview-',
                   )
                   return '' if any(marker in block for marker in markers) else block
 
@@ -79,7 +81,8 @@ jobs:
 
           snippet = (
               f'<script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v={sha}"></script>\n'
-              f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>'
+              f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>\n'
+              f'<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
           )
 
           files = list(Path('dist').rglob('*.html'))
@@ -93,7 +96,11 @@ jobs:
               text = text.replace('</body>', snippet + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
 
-          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js'):
+          for required in (
+              'dist/tawk-language-loader.js',
+              'dist/tawk-native-force.js',
+              'dist/tawk-avatar-fix.js',
+          ):
               if not Path(required).is_file():
                   raise SystemExit(f'Missing production Tawk asset: {required}')
           PY
@@ -104,10 +111,15 @@ jobs:
           set -euo pipefail
           test -s dist/tawk-language-loader.js
           test -s dist/tawk-native-force.js
+          test -s dist/tawk-avatar-fix.js
           grep -R -q 'id="fox-tawk-language-loader"' dist --include='*.html'
           grep -R -q 'id="fox-tawk-native-force"' dist --include='*.html'
+          grep -R -q 'id="fox-tawk-avatar-fix"' dist --include='*.html'
           grep -q 'Tawk_API.endChat' dist/tawk-language-loader.js
-          grep -F -q '#fixed-lang-layer a.language-flag[data-language]' dist/tawk-language-loader.js
+          if grep -F -q '#fixed-lang-layer a.language-flag[data-language]' dist/tawk-language-loader.js; then
+            echo 'Blocked duplicate production language-click handler'
+            exit 1
+          fi
           if grep -q 'Tawk_API.switchWidget' dist/tawk-language-loader.js; then
             echo 'Blocked same-session Tawk widget switching in production build'
             exit 1
@@ -140,27 +152,32 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live tested Tawk loader and launcher
+      - name: Verify live approved Tawk package
         shell: bash
         run: |
           set -euo pipefail
           url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
           loader_url="https://www.foxprof.club/tawk-language-loader.js?v=${GITHUB_SHA}"
+          avatar_url="https://www.foxprof.club/tawk-avatar-fix.js?v=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5 6; do
-            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/3.0' "$url" || true)"
-            loader="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/3.0' "$loader_url" || true)"
+            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.0' "$url" || true)"
+            loader="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.0' "$loader_url" || true)"
+            avatar="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.0' "$avatar_url" || true)"
             if grep -q 'id="fox-tawk-language-loader"' <<<"$html" \
               && grep -q '/tawk-language-loader.js' <<<"$html" \
               && grep -q 'id="fox-tawk-native-force"' <<<"$html" \
               && grep -q '/tawk-native-force.js' <<<"$html" \
+              && grep -q 'id="fox-tawk-avatar-fix"' <<<"$html" \
+              && grep -q '/tawk-avatar-fix.js' <<<"$html" \
               && ! grep -q 'id="fox-tawk-button"' <<<"$html" \
               && grep -q 'Tawk_API.endChat' <<<"$loader" \
-              && grep -F -q '#fixed-lang-layer a.language-flag[data-language]' <<<"$loader" \
-              && ! grep -q 'Tawk_API.switchWidget' <<<"$loader"; then
-              echo 'LIVE_TAWK_WIRING_AND_LANGUAGE_ISOLATION=OK'
+              && ! grep -F -q '#fixed-lang-layer a.language-flag[data-language]' <<<"$loader" \
+              && ! grep -q 'Tawk_API.switchWidget' <<<"$loader" \
+              && grep -q 'wdfox-tawk-trigger-avatar-fix' <<<"$avatar"; then
+              echo 'LIVE_APPROVED_TAWK_PACKAGE=OK'
               exit 0
             fi
             sleep 8
           done
-          echo 'LIVE_TAWK_WIRING_AND_LANGUAGE_ISOLATION=FAIL'
+          echo 'LIVE_APPROVED_TAWK_PACKAGE=FAIL'
           exit 1
