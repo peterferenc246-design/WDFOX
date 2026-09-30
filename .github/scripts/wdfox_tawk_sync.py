@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import argparse, shutil
+import argparse
+import shutil
 
 PROD_PROPERTY = "6a951d52c3c46c344587662a"
 WIDGETS = {
@@ -15,6 +16,9 @@ PREVIEW_PROPERTIES = [
     "6aba3803dff27f343f63f6c9",
 ]
 
+# Keep exactly one language-navigation owner: BaseLayout.astro.
+# The generated production loader only ends the current Tawk chat and invokes the
+# callback supplied by BaseLayout, preventing the double-handler freeze seen in PROD.
 PRODUCTION_LANGUAGE_SWITCH = r'''
   function endCurrentChat(done) {
     var finished = false;
@@ -29,7 +33,7 @@ PRODUCTION_LANGUAGE_SWITCH = r'''
         window.Tawk_API.endChat(function () {
           finish();
         });
-        window.setTimeout(finish, 900);
+        window.setTimeout(finish, 700);
         return;
       }
     } catch (_) {}
@@ -48,40 +52,10 @@ PRODUCTION_LANGUAGE_SWITCH = r'''
     document.documentElement.setAttribute("data-wdfox-tawk-language", next);
     document.documentElement.setAttribute("data-wdfox-tawk-widget", WIDGETS[next]);
 
-    // Production keeps all language widgets under one Tawk property.
-    // Finish the old chat before navigating to the next language so
-    // previous-language greetings/messages do not remain in the session.
     endCurrentChat(done);
   }
 
   window.WebDesignFOXSwitchChatLanguage = switchProductionChatLanguage;
-
-  function installLanguageNavigationGuard() {
-    document.addEventListener("click", function (event) {
-      if (event.defaultPrevented || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
-      var target = event.target;
-      var link = target && target.closest ? target.closest("#fixed-lang-layer a.language-flag[data-language]") : null;
-      if (!link) return;
-
-      var next = normalize(link.getAttribute("data-language"));
-      if (!WIDGETS[next] || next === language) return;
-
-      event.preventDefault();
-      var href = link.href;
-      var navigated = false;
-      var navigate = function () {
-        if (navigated) return;
-        navigated = true;
-        window.location.assign(href);
-      };
-
-      switchProductionChatLanguage(next, navigate);
-      window.setTimeout(navigate, 1100);
-    }, true);
-  }
-
-  installLanguageNavigationGuard();
 '''
 
 def require(text, needle, label):
@@ -90,27 +64,27 @@ def require(text, needle, label):
 
 def strip_host_guard(text, label):
     lines = text.splitlines(keepends=True)
-    start = next((i for i,x in enumerate(lines) if "var host = String(window.location.hostname" in x), None)
+    start = next((i for i, x in enumerate(lines) if "var host = String(window.location.hostname" in x), None)
     if start is None:
         raise SystemExit(f"Preview host guard start missing in {label}")
-    end = next((i for i in range(start,len(lines)) if "if (!isPreviewHost) return;" in lines[i]), None)
+    end = next((i for i in range(start, len(lines)) if "if (!isPreviewHost) return;" in lines[i]), None)
     if end is None:
         raise SystemExit(f"Preview host guard end missing in {label}")
-    return "".join(lines[:start] + lines[end+1:])
+    return "".join(lines[:start] + lines[end + 1:])
 
 def map_backend(text):
-    for x in PREVIEW_PROPERTIES:
-        text = text.replace(x, PROD_PROPERTY)
-    for old,new in WIDGETS.items():
-        text = text.replace(old,new)
+    for preview_property in PREVIEW_PROPERTIES:
+        text = text.replace(preview_property, PROD_PROPERTY)
+    for old, new in WIDGETS.items():
+        text = text.replace(old, new)
     return (
-        text.replace("data-wdfox-preview","data-wdfox-production")
-            .replace("fox-tawk-preview-","fox-tawk-")
-            .replace("fox-preview-arc","fox-prod-arc")
+        text.replace("data-wdfox-preview", "data-wdfox-production")
+            .replace("fox-tawk-preview-", "fox-tawk-")
+            .replace("fox-preview-arc", "fox-prod-arc")
     )
 
 def transform_external(text):
-    text = map_backend(strip_host_guard(text,"preview external loader"))
+    text = map_backend(strip_host_guard(text, "preview external loader"))
     text = text.replace(
         "/* WDFOX preview: isolated Tawk.to property + language widget routing. */",
         "/* WDFOX production: tested preview behavior mapped to production Tawk widgets. */",
@@ -126,15 +100,16 @@ def transform_external(text):
     end += len(end_marker)
     text = text[:start] + PRODUCTION_LANGUAGE_SWITCH + text[end:]
 
-    require(text,"window.WebDesignFOXSwitchChatLanguage","generated production loader")
-    require(text,"#fixed-lang-layer a.language-flag[data-language]","generated production loader")
-    require(text,"Tawk_API.endChat","generated production loader")
+    require(text, "window.WebDesignFOXSwitchChatLanguage", "generated production loader")
+    require(text, "Tawk_API.endChat", "generated production loader")
+    if "#fixed-lang-layer a.language-flag[data-language]" in text:
+        raise SystemExit("Generated production loader must not install a second language-click handler")
     if "Tawk_API.switchWidget" in text:
         raise SystemExit("Production loader must not switch widgets inside one live Tawk session")
     return text
 
 def transform_launcher(text):
-    text = map_backend(strip_host_guard(text,"preview launcher"))
+    text = map_backend(strip_host_guard(text, "preview launcher"))
     text = text.replace(
         "/* WDFOX preview Tawk.to launcher — exact GitHub preview behavior plus Vercel host. */",
         "/* WDFOX production Tawk.to launcher — exact behavior mirrored from tested preview. */",
@@ -146,7 +121,7 @@ def transform_launcher(text):
         1,
     )
     marker = '    "#fox-tawk-launcher svg *{pointer-events:none!important}" +\n'
-    require(text,marker,"preview launcher")
+    require(text, marker, "preview launcher")
     if ".live-chat-bubble:not(#fox-tawk-launcher)" not in text:
         text = text.replace(
             marker,
@@ -155,33 +130,60 @@ def transform_launcher(text):
         )
     return text
 
-def validate(loader, launcher):
+def transform_avatar(text):
+    text = strip_host_guard(text, "preview avatar fix")
+    text = text.replace(
+        "/* WDFOX preview: visual workaround for Tawk.to trigger avatar rendering in Widget 4.x.\n   Scope: PREVIEW only. Validated for DE, EN, SK, FR, HR, PL, IT and ES; enabled for SV test. */",
+        "/* WDFOX production: visual workaround promoted from the tested PREVIEW avatar fix for Widget 4.x. */",
+        1,
+    )
+    return text
+
+def validate(loader, launcher, avatar):
     for widget in WIDGETS.values():
-        require(loader,widget,"generated production loader")
-        require(launcher,widget,"generated production launcher")
-    require(loader,PROD_PROPERTY,"generated production loader")
-    require(launcher,PROD_PROPERTY,"generated production launcher")
-    require(loader,"Tawk_API.endChat","generated production loader")
-    require(loader,"#fixed-lang-layer a.language-flag[data-language]","generated production loader")
+        require(loader, widget, "generated production loader")
+        require(launcher, widget, "generated production launcher")
+    require(loader, PROD_PROPERTY, "generated production loader")
+    require(launcher, PROD_PROPERTY, "generated production launcher")
+    require(loader, "Tawk_API.endChat", "generated production loader")
+    require(avatar, 'var AVATAR_ID = "wdfox-tawk-trigger-avatar-fix";', "generated production avatar fix")
+
+    if "#fixed-lang-layer a.language-flag[data-language]" in loader:
+        raise SystemExit("Blocked duplicate production language-click handler")
     if "Tawk_API.switchWidget" in loader:
         raise SystemExit("Blocked same-session widget switching in production loader")
-    for bad in PREVIEW_PROPERTIES + list(WIDGETS) + ["isPreviewHost","isVercelPreviewHost","fox-tawk-preview-","data-wdfox-preview"]:
-        if bad in loader or bad in launcher:
+
+    blocked = PREVIEW_PROPERTIES + list(WIDGETS) + [
+        "isPreviewHost",
+        "isVercelPreviewHost",
+        "fox-tawk-preview-",
+        "data-wdfox-preview",
+        "Scope: PREVIEW only",
+    ]
+    for bad in blocked:
+        if bad in loader or bad in launcher or bad in avatar:
             raise SystemExit(f"Blocked preview marker in production candidate: {bad}")
 
 def main():
-    p=argparse.ArgumentParser()
-    p.add_argument("--input-dir",required=True)
-    p.add_argument("--output-dir",required=True)
-    a=p.parse_args()
-    src,out=Path(a.input_dir),Path(a.output_dir)
-    out.mkdir(parents=True,exist_ok=True)
-    loader=transform_external((src/"tawk-preview-external.js").read_text(encoding="utf-8"))
-    launcher=transform_launcher((src/"tawk-preview-launcher.js").read_text(encoding="utf-8"))
-    validate(loader,launcher)
-    (out/"tawk-language-loader.js").write_text(loader,encoding="utf-8")
-    (out/"tawk-native-force.js").write_text(launcher,encoding="utf-8")
-    shutil.copyfile(src/"tawk-fox-face-transparent.png",out/"tawk-fox-face-transparent.png")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input-dir", required=True)
+    parser.add_argument("--output-dir", required=True)
+    args = parser.parse_args()
+
+    src = Path(args.input_dir)
+    out = Path(args.output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+
+    loader = transform_external((src / "tawk-preview-external.js").read_text(encoding="utf-8"))
+    launcher = transform_launcher((src / "tawk-preview-launcher.js").read_text(encoding="utf-8"))
+    avatar = transform_avatar((src / "tawk-preview-avatar-fix.js").read_text(encoding="utf-8"))
+
+    validate(loader, launcher, avatar)
+
+    (out / "tawk-language-loader.js").write_text(loader, encoding="utf-8")
+    (out / "tawk-native-force.js").write_text(launcher, encoding="utf-8")
+    (out / "tawk-avatar-fix.js").write_text(avatar, encoding="utf-8")
+    shutil.copyfile(src / "tawk-fox-face-transparent.png", out / "tawk-fox-face-transparent.png")
 
 if __name__ == "__main__":
     main()
