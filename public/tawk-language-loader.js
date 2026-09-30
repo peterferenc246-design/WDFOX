@@ -2,6 +2,7 @@
 (function () {
   "use strict";
 
+
   document.documentElement.classList.add("fox-tawk-concealed");
   if (!document.getElementById("fox-tawk-no-flash")) {
     var guardStyle = document.createElement("style");
@@ -89,6 +90,7 @@
     document.head.appendChild(script);
   }
 
+
   function endCurrentChat(done) {
     var finished = false;
     var finish = function () {
@@ -102,7 +104,7 @@
         window.Tawk_API.endChat(function () {
           finish();
         });
-        window.setTimeout(finish, 900);
+        window.setTimeout(finish, 700);
         return;
       }
     } catch (_) {}
@@ -121,39 +123,10 @@
     document.documentElement.setAttribute("data-wdfox-tawk-language", next);
     document.documentElement.setAttribute("data-wdfox-tawk-widget", WIDGETS[next]);
 
-    // Production uses one Tawk property for all language widgets.
-    // End the current conversation before the full page navigation so
-    // messages from the previous language cannot leak into the next widget.
     endCurrentChat(done);
   }
 
   window.WebDesignFOXSwitchChatLanguage = switchProductionChatLanguage;
 
-  function installLanguageNavigationGuard() {
-    document.addEventListener("click", function (event) {
-      if (event.defaultPrevented || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
-      var target = event.target;
-      var link = target && target.closest ? target.closest("#fixed-lang-layer a.language-flag[data-language]") : null;
-      if (!link) return;
-
-      var next = normalize(link.getAttribute("data-language"));
-      if (!WIDGETS[next] || next === language) return;
-
-      event.preventDefault();
-      var href = link.href;
-      var navigated = false;
-      var navigate = function () {
-        if (navigated) return;
-        navigated = true;
-        window.location.assign(href);
-      };
-
-      switchProductionChatLanguage(next, navigate);
-      window.setTimeout(navigate, 1100);
-    }, true);
-  }
-
-  installLanguageNavigationGuard();
   injectWidget(widgetId);
 })();
