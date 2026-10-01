@@ -94,10 +94,17 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Playwright Chromium
+      - name: Install isolated Playwright Chromium runtime
         shell: bash
         run: |
-          npm install --no-save playwright
+          set -euo pipefail
+          RUNTIME=/tmp/wdfox-browser-qa-runtime
+          rm -rf "$RUNTIME"
+          mkdir -p "$RUNTIME"
+          cp .github/scripts/wdfox_browser_qa.mjs "$RUNTIME/wdfox_browser_qa.mjs"
+          cd "$RUNTIME"
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund playwright
           npx playwright install --with-deps chromium
 
       - name: Run browser QA
@@ -108,14 +115,15 @@ jobs:
           TARGET_URL: ${{ steps.request.outputs.target_url }}
           APPROVED_PREVIEW_COMMIT: ${{ steps.request.outputs.approved }}
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
-          QA_OUT_DIR: qa-artifacts
         run: |
           set +e
-          node .github/scripts/wdfox_browser_qa.mjs
+          mkdir -p "$GITHUB_WORKSPACE/qa-artifacts"
+          cd /tmp/wdfox-browser-qa-runtime
+          QA_OUT_DIR="$GITHUB_WORKSPACE/qa-artifacts" node ./wdfox_browser_qa.mjs
           code=$?
+          cd "$GITHUB_WORKSPACE"
           echo "runner_exit=$code" >> "$GITHUB_ENV"
           test -s qa-artifacts/report.json || {
-            mkdir -p qa-artifacts
             jq -n \
               --arg request_id "$REQUEST_ID" \
               --arg qa_type "$QA_TYPE" \
