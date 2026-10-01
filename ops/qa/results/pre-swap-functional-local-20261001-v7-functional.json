@@ -1,0 +1,452 @@
+{
+  "schema": "wdfox-browser-qa/v2",
+  "request_id": "pre-swap-functional-local-20261001-v7",
+  "qa_type": "functional",
+  "stage": "preview",
+  "target_url": "http://127.0.0.1:4321/",
+  "approved_preview_commit": "e2485556358540d068778625933803190a9c172f",
+  "started_at": "2026-10-01T12:06:36.828Z",
+  "verdict": "FAIL",
+  "failures": [
+    "sk: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "de: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "en: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "hr: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "fr: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "it: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "pl: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "es: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "sv: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]"
+  ],
+  "results": [
+    {
+      "language": "sk",
+      "sequence_from_url": "http://127.0.0.1:4321/sk/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/sk/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvoriť živý chat\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvoriť živý chat\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvoriť živý chat\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvoriť živý chat\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-sk.png"
+    },
+    {
+      "language": "de",
+      "sequence_from_url": "http://127.0.0.1:4321/sk/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/de/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" aria-label=\"Live-Chat öffnen\" id=\"fox-tawk-preview-launcher\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" aria-label=\"Live-Chat öffnen\" id=\"fox-tawk-preview-launcher\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" aria-label=\"Live-Chat öffnen\" id=\"fox-tawk-preview-launcher\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" aria-label=\"Live-Chat öffnen\" id=\"fox-tawk-preview-launcher\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-de.png"
+    },
+    {
+      "language": "en",
+      "sequence_from_url": "http://127.0.0.1:4321/de/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/en/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" aria-label=\"Open live chat\" id=\"fox-tawk-preview-launcher\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" aria-label=\"Open live chat\" id=\"fox-tawk-preview-launcher\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" aria-label=\"Open live chat\" id=\"fox-tawk-preview-launcher\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" aria-label=\"Open live chat\" id=\"fox-tawk-preview-launcher\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-en.png"
+    },
+    {
+      "language": "hr",
+      "sequence_from_url": "http://127.0.0.1:4321/en/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/hr/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvori razgovor uživo\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvori razgovor uživo\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvori razgovor uživo\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otvori razgovor uživo\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-hr.png"
+    },
+    {
+      "language": "fr",
+      "sequence_from_url": "http://127.0.0.1:4321/hr/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/fr/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Ouvrir le chat en direct\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Ouvrir le chat en direct\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Ouvrir le chat en direct\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Ouvrir le chat en direct\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-fr.png"
+    },
+    {
+      "language": "it",
+      "sequence_from_url": "http://127.0.0.1:4321/fr/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/it/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Apri la chat dal vivo\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Apri la chat dal vivo\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Apri la chat dal vivo\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Apri la chat dal vivo\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-it.png"
+    },
+    {
+      "language": "pl",
+      "sequence_from_url": "http://127.0.0.1:4321/it/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/pl/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otwórz czat na żywo\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otwórz czat na żywo\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otwórz czat na żywo\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Otwórz czat na żywo\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-pl.png"
+    },
+    {
+      "language": "es",
+      "sequence_from_url": "http://127.0.0.1:4321/pl/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/es/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Abrir chat en vivo\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Abrir chat en vivo\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Abrir chat en vivo\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Abrir chat en vivo\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-es.png"
+    },
+    {
+      "language": "sv",
+      "sequence_from_url": "http://127.0.0.1:4321/es/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/sv/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb"
+      ],
+      "no_freeze": true,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#fox-tawk-preview-launcher').first()\n    - locator resolved to <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Öppna livechatten\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Öppna livechatten\">…</button> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Öppna livechatten\">…</button> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <button type=\"button\" id=\"fox-tawk-preview-launcher\" aria-label=\"Öppna livechatten\">…</button> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n",
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-sv.png"
+    }
+  ],
+  "finished_at": "2026-10-01T12:18:38.856Z",
+  "summary": {
+    "total": 9,
+    "passed": 0,
+    "failed": 9
+  }
+}
