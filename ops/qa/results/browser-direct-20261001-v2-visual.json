@@ -1,0 +1,217 @@
+{
+  "schema": "wdfox-browser-qa/v1",
+  "request_id": "browser-direct-20261001-v2",
+  "qa_type": "visual",
+  "stage": "live",
+  "target_url": "https://www.foxprof.club/",
+  "approved_preview_commit": "90742b3135863c77bc2aacadb982bd6340d2a304",
+  "started_at": "2026-10-01T05:14:24.324Z",
+  "verdict": "PASS",
+  "failures": [],
+  "results": [
+    {
+      "profile": "desktop",
+      "language": "sk",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-sk.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "de",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-de.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "en",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-en.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "hr",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-hr.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "fr",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-fr.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "it",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-it.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "pl",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-pl.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "es",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-es.png",
+      "pass": true
+    },
+    {
+      "profile": "desktop",
+      "language": "sv",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/desktop-sv.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "sk",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-sk.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "de",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-de.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "en",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-en.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "hr",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-hr.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "fr",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-fr.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "it",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-it.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "pl",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-pl.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "es",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-es.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "language": "sv",
+      "language_switch": true,
+      "correct_widget": true,
+      "viewport_ok": true,
+      "document_ok": true,
+      "page_errors": [],
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/mobile-sv.png",
+      "pass": true
+    }
+  ],
+  "finished_at": "2026-10-01T05:16:09.476Z",
+  "summary": {
+    "total": 18,
+    "passed": 18,
+    "failed": 0
+  }
+}
