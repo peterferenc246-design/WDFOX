@@ -1,0 +1,13 @@
+{
+  "schema": "wdfox-browser-qa/v2",
+  "request_id": "pre-swap-functional-vercel-preview-20261001-v11",
+  "qa_type": "functional",
+  "stage": "preview",
+  "target_url": "https://wdfox-live-translat-lp1yptayn-peters-projects-db101134.vercel.app/?_vercel_share=30CoRzHcwG0Vr0dZMxb35sbshuMIoPzU",
+  "approved_preview_commit": "2a68aea585a171d16e5418e164323a16b9b5b372",
+  "verdict": "FAIL",
+  "failures": [
+    "runner did not produce report"
+  ],
+  "results": []
+}
