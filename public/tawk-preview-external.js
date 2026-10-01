@@ -5,7 +5,11 @@
   var host = String(window.location.hostname || "").toLowerCase();
   var isVercelPreviewHost =
     host === "wdfox-preview.vercel.app" ||
-    (host.startsWith("wdfox-preview-") && host.endsWith(".vercel.app"));
+    (host.endsWith(".vercel.app") && (
+      host.startsWith("wdfox-preview-") ||
+      host.startsWith("wdfox-live-translat-api-git-preview-") ||
+      host.indexOf("-git-preview-") !== -1
+    ));
   var isPreviewHost =
     host === "localhost" ||
     host === "127.0.0.1" ||
