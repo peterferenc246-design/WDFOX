@@ -1,0 +1,13 @@
+{
+  "schema": "wdfox-browser-qa/v2",
+  "request_id": "pre-swap-functional-branch-alias-20261001-v8",
+  "qa_type": "functional",
+  "stage": "preview",
+  "target_url": "https://wdfox-preview-git-preview-peters-projects-db101134.vercel.app/",
+  "approved_preview_commit": "e2485556358540d068778625933803190a9c172f",
+  "verdict": "FAIL",
+  "failures": [
+    "runner did not produce report"
+  ],
+  "results": []
+}
