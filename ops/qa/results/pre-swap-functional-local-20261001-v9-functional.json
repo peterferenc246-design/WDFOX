@@ -1,0 +1,533 @@
+{
+  "schema": "wdfox-browser-qa/v2",
+  "request_id": "pre-swap-functional-local-20261001-v9",
+  "qa_type": "functional",
+  "stage": "preview",
+  "target_url": "http://127.0.0.1:4321/",
+  "approved_preview_commit": "e2648b55e4260432b948177af3df0d82b191461d",
+  "started_at": "2026-10-01T12:22:49.198Z",
+  "verdict": "FAIL",
+  "failures": [
+    "sk: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "de: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "en: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "hr: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "fr: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "it: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "pl: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "es: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]",
+    "sv: functional regression [open_close_reopen, refresh, clean_session, correct_widget, texts_buttons, sequence_transition]"
+  ],
+  "results": [
+    {
+      "language": "sk",
+      "sequence_from_url": "http://127.0.0.1:4321/sk/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/sk/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba373f25498e3445ceb5b6/1k3jmfkjq :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-sk.png"
+    },
+    {
+      "language": "de",
+      "sequence_from_url": "http://127.0.0.1:4321/sk/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/de/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba2d3f1300d43446c8b761/1k3jk1ga8 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-de.png"
+    },
+    {
+      "language": "en",
+      "sequence_from_url": "http://127.0.0.1:4321/de/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/en/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba3791c601f934456dfe2b/1k3jmi4o8 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-en.png"
+    },
+    {
+      "language": "hr",
+      "sequence_from_url": "http://127.0.0.1:4321/en/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/hr/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37adc601f934456dfe2e/1k3jmj0gp :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-hr.png"
+    },
+    {
+      "language": "fr",
+      "sequence_from_url": "http://127.0.0.1:4321/hr/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/fr/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37b7783d543456da149d/1k3jmj9u6 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-fr.png"
+    },
+    {
+      "language": "it",
+      "sequence_from_url": "http://127.0.0.1:4321/fr/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/it/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37d1497bdf3441c94df7/1k3jmk3i0 :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-it.png"
+    },
+    {
+      "language": "pl",
+      "sequence_from_url": "http://127.0.0.1:4321/it/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/pl/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37dbd338ef344337ab6c/1k3jmkd5l :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-pl.png"
+    },
+    {
+      "language": "es",
+      "sequence_from_url": "http://127.0.0.1:4321/pl/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/es/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba37f98673653447134cc1/1k3jmlaaq :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-es.png"
+    },
+    {
+      "language": "sv",
+      "sequence_from_url": "http://127.0.0.1:4321/es/",
+      "language_switch": true,
+      "sequence_to_url": "http://127.0.0.1:4321/sv/",
+      "correct_widget": false,
+      "tawk_api_ready": false,
+      "launcher_present": true,
+      "widget_urls": [
+        "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb"
+      ],
+      "no_freeze": true,
+      "open_close_reopen": false,
+      "chat_surface": {
+        "textLength": 0,
+        "buttonCount": 0,
+        "url": null
+      },
+      "texts_buttons": false,
+      "refresh": false,
+      "sequence_transition": false,
+      "page_errors": [],
+      "tawk_request_failures": [
+        "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED",
+        "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED"
+      ],
+      "tawk_http_errors": [],
+      "clean_session": false,
+      "clean_session_error": null,
+      "clean_session_diagnostics": {
+        "pageErrors": [],
+        "consoleErrors": [
+          "Access to script at 'https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to script at 'https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED",
+          "Access to fetch at 'https://wdfox.vercel.app/api/availability' from origin 'http://127.0.0.1:4321' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+          "Failed to load resource: net::ERR_FAILED"
+        ],
+        "tawkRequestFailures": [
+          "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED",
+          "https://embed.tawk.to/6aba3803dff27f343f63f6c9/1k3jmljpb :: net::ERR_FAILED"
+        ],
+        "tawkHttpErrors": []
+      },
+      "pass": false,
+      "failure_screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/functional-fail-sv.png"
+    }
+  ],
+  "finished_at": "2026-10-01T12:39:39.644Z",
+  "summary": {
+    "total": 9,
+    "passed": 0,
+    "failed": 9
+  }
+}
