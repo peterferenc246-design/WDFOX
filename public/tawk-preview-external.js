@@ -3,12 +3,16 @@
   "use strict";
 
   var host = String(window.location.hostname || "").toLowerCase();
+  var isManagedPreviewDeployment =
+    host.startsWith("wdfox-live-translat-") &&
+    host.endsWith("-peters-projects-db101134.vercel.app");
   var isVercelPreviewHost =
     host === "wdfox-preview.vercel.app" ||
     (host.endsWith(".vercel.app") && (
       host.startsWith("wdfox-preview-") ||
       host.startsWith("wdfox-live-translat-api-git-preview-") ||
-      host.indexOf("-git-preview-") !== -1
+      host.indexOf("-git-preview-") !== -1 ||
+      isManagedPreviewDeployment
     ));
   var isPreviewHost =
     host === "localhost" ||
