@@ -15,7 +15,7 @@ on:
         required: true
         default: preview
       target_url:
-        description: "URL to test"
+        description: "URL to test (preview stage is rebuilt locally from approved SHA)"
         required: true
       approved_preview_commit:
         description: "Approved PREVIEW SHA"
@@ -35,7 +35,7 @@ jobs:
   browser-qa:
     name: Playwright Browser QA
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout request revision
@@ -89,10 +89,28 @@ jobs:
         with:
           ref: main
 
+      - name: Checkout exact approved PREVIEW commit
+        if: steps.request.outputs.stage == 'preview'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.request.outputs.approved }}
+          path: preview-under-test
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Build exact approved PREVIEW commit
+        if: steps.request.outputs.stage == 'preview'
+        shell: bash
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare pnpm@10.4.1 --activate
+          cd preview-under-test
+          pnpm install --frozen-lockfile
+          pnpm build
 
       - name: Install isolated Playwright Chromium runtime
         shell: bash
@@ -112,14 +130,37 @@ jobs:
         env:
           QA_TYPE: ${{ steps.request.outputs.qa_type }}
           STAGE: ${{ steps.request.outputs.stage }}
-          TARGET_URL: ${{ steps.request.outputs.target_url }}
+          REQUEST_TARGET_URL: ${{ steps.request.outputs.target_url }}
           APPROVED_PREVIEW_COMMIT: ${{ steps.request.outputs.approved }}
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
         run: |
           set +e
           mkdir -p "$GITHUB_WORKSPACE/qa-artifacts"
+          RUN_TARGET="$REQUEST_TARGET_URL"
+
+          if [[ "$STAGE" == "preview" ]]; then
+            cd "$GITHUB_WORKSPACE/preview-under-test"
+            nohup pnpm exec astro preview --host 127.0.0.1 --port 4321 > "$GITHUB_WORKSPACE/qa-artifacts/preview-server.log" 2>&1 &
+            preview_pid=$!
+            echo "$preview_pid" > "$GITHUB_WORKSPACE/qa-artifacts/preview-server.pid"
+            RUN_TARGET="http://127.0.0.1:4321/"
+            ready=0
+            for i in $(seq 1 45); do
+              if curl --silent --fail "$RUN_TARGET" >/dev/null; then
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+            if [[ "$ready" != "1" ]]; then
+              echo "Exact PREVIEW build did not become reachable" >&2
+              cat "$GITHUB_WORKSPACE/qa-artifacts/preview-server.log" || true
+              exit 2
+            fi
+          fi
+
           cd /tmp/wdfox-browser-qa-runtime
-          QA_OUT_DIR="$GITHUB_WORKSPACE/qa-artifacts" node ./wdfox_browser_qa.mjs
+          TARGET_URL="$RUN_TARGET" QA_OUT_DIR="$GITHUB_WORKSPACE/qa-artifacts" node ./wdfox_browser_qa.mjs
           code=$?
           cd "$GITHUB_WORKSPACE"
           echo "runner_exit=$code" >> "$GITHUB_ENV"
@@ -128,7 +169,7 @@ jobs:
               --arg request_id "$REQUEST_ID" \
               --arg qa_type "$QA_TYPE" \
               --arg stage "$STAGE" \
-              --arg target_url "$TARGET_URL" \
+              --arg target_url "$RUN_TARGET" \
               --arg approved "$APPROVED_PREVIEW_COMMIT" \
               '{schema:"wdfox-browser-qa/v1",request_id:$request_id,qa_type:$qa_type,stage:$stage,target_url:$target_url,approved_preview_commit:$approved,verdict:"FAIL",failures:["runner did not produce report"],results:[]}' \
               > qa-artifacts/report.json
