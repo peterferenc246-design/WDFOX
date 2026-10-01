@@ -1,0 +1,9 @@
+{
+  "schema": "wdfox-browser-qa-request/v2",
+  "qa_type": "functional",
+  "stage": "preview",
+  "target_url": "https://wdfox-preview-git-preview-peters-projects-db101134.vercel.app/",
+  "approved_preview_commit": "e2648b55e4260432b948177af3df0d82b191461d",
+  "request_id": "pre-swap-functional-branch-alias-20261001-v10",
+  "external_preview": true
+}
