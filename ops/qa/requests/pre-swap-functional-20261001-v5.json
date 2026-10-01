@@ -1,0 +1,9 @@
+{
+  "schema": "wdfox-browser-qa-request/v2",
+  "qa_type": "functional",
+  "stage": "preview",
+  "target_url": "https://wdfox-preview.vercel.app/",
+  "approved_preview_commit": "347282609047b6feed179590c9e97ece10abfbea",
+  "request_id": "pre-swap-functional-20261001-v5",
+  "external_preview": true
+}
