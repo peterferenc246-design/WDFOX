@@ -15,7 +15,7 @@ on:
         required: true
         default: preview
       target_url:
-        description: "URL to test (preview stage is rebuilt locally from approved SHA)"
+        description: "URL to test"
         required: true
       approved_preview_commit:
         description: "Approved PREVIEW SHA"
@@ -23,6 +23,11 @@ on:
       request_id:
         description: "Unique request id"
         required: true
+      external_preview:
+        description: "For preview, test target_url instead of localhost exact build"
+        required: false
+        default: false
+        type: boolean
   push:
     branches: [qa-requests]
     paths:
@@ -54,6 +59,7 @@ jobs:
           WD_TARGET_URL: ${{ inputs.target_url }}
           WD_APPROVED: ${{ inputs.approved_preview_commit }}
           WD_REQUEST_ID: ${{ inputs.request_id }}
+          WD_EXTERNAL_PREVIEW: ${{ inputs.external_preview }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "push" ]]; then
@@ -64,12 +70,14 @@ jobs:
             TARGET_URL="$(jq -r '.target_url // empty' "$request_path")"
             APPROVED="$(jq -r '.approved_preview_commit // empty' "$request_path")"
             REQUEST_ID="$(jq -r '.request_id // empty' "$request_path")"
+            EXTERNAL_PREVIEW="$(jq -r '.external_preview // false' "$request_path")"
           else
             QA_TYPE="$WD_QA_TYPE"
             STAGE="$WD_STAGE"
             TARGET_URL="$WD_TARGET_URL"
             APPROVED="$WD_APPROVED"
             REQUEST_ID="$WD_REQUEST_ID"
+            EXTERNAL_PREVIEW="${WD_EXTERNAL_PREVIEW:-false}"
           fi
 
           [[ "$QA_TYPE" == "visual" || "$QA_TYPE" == "functional" ]] || { echo "Invalid qa_type"; exit 2; }
@@ -77,12 +85,14 @@ jobs:
           [[ "$APPROVED" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "Invalid approved preview SHA"; exit 2; }
           [[ "$REQUEST_ID" =~ ^[A-Za-z0-9._-]{3,120}$ ]] || { echo "Invalid request_id"; exit 2; }
           [[ "$TARGET_URL" =~ ^https:// ]] || { echo "target_url must use https"; exit 2; }
+          [[ "$EXTERNAL_PREVIEW" == "true" || "$EXTERNAL_PREVIEW" == "false" ]] || { echo "external_preview must be boolean"; exit 2; }
 
           echo "qa_type=$QA_TYPE" >> "$GITHUB_OUTPUT"
           echo "stage=$STAGE" >> "$GITHUB_OUTPUT"
           echo "target_url=$TARGET_URL" >> "$GITHUB_OUTPUT"
           echo "approved=$APPROVED" >> "$GITHUB_OUTPUT"
           echo "request_id=$REQUEST_ID" >> "$GITHUB_OUTPUT"
+          echo "external_preview=$EXTERNAL_PREVIEW" >> "$GITHUB_OUTPUT"
 
       - name: Checkout runner code from main
         uses: actions/checkout@v4
@@ -119,7 +129,7 @@ jobs:
           RUNTIME=/tmp/wdfox-browser-qa-runtime
           rm -rf "$RUNTIME"
           mkdir -p "$RUNTIME"
-          cp .github/scripts/wdfox_browser_qa.mjs "$RUNTIME/wdfox_browser_qa.mjs"
+          cp .github/scripts/wdfox_browser_qa_v2.mjs "$RUNTIME/wdfox_browser_qa_v2.mjs"
           cd "$RUNTIME"
           npm init -y >/dev/null 2>&1
           npm install --no-audit --no-fund playwright
@@ -133,12 +143,13 @@ jobs:
           REQUEST_TARGET_URL: ${{ steps.request.outputs.target_url }}
           APPROVED_PREVIEW_COMMIT: ${{ steps.request.outputs.approved }}
           REQUEST_ID: ${{ steps.request.outputs.request_id }}
+          EXTERNAL_PREVIEW: ${{ steps.request.outputs.external_preview }}
         run: |
           set +e
           mkdir -p "$GITHUB_WORKSPACE/qa-artifacts"
           RUN_TARGET="$REQUEST_TARGET_URL"
 
-          if [[ "$STAGE" == "preview" ]]; then
+          if [[ "$STAGE" == "preview" && "$EXTERNAL_PREVIEW" != "true" ]]; then
             cd "$GITHUB_WORKSPACE/preview-under-test"
             nohup pnpm exec astro preview --host 127.0.0.1 --port 4321 > "$GITHUB_WORKSPACE/qa-artifacts/preview-server.log" 2>&1 &
             preview_pid=$!
@@ -160,7 +171,7 @@ jobs:
           fi
 
           cd /tmp/wdfox-browser-qa-runtime
-          TARGET_URL="$RUN_TARGET" QA_OUT_DIR="$GITHUB_WORKSPACE/qa-artifacts" node ./wdfox_browser_qa.mjs
+          TARGET_URL="$RUN_TARGET" QA_OUT_DIR="$GITHUB_WORKSPACE/qa-artifacts" node ./wdfox_browser_qa_v2.mjs
           code=$?
           cd "$GITHUB_WORKSPACE"
           echo "runner_exit=$code" >> "$GITHUB_ENV"
@@ -171,7 +182,7 @@ jobs:
               --arg stage "$STAGE" \
               --arg target_url "$RUN_TARGET" \
               --arg approved "$APPROVED_PREVIEW_COMMIT" \
-              '{schema:"wdfox-browser-qa/v1",request_id:$request_id,qa_type:$qa_type,stage:$stage,target_url:$target_url,approved_preview_commit:$approved,verdict:"FAIL",failures:["runner did not produce report"],results:[]}' \
+              '{schema:"wdfox-browser-qa/v2",request_id:$request_id,qa_type:$qa_type,stage:$stage,target_url:$target_url,approved_preview_commit:$approved,verdict:"FAIL",failures:["runner did not produce report"],results:[]}' \
               > qa-artifacts/report.json
           }
           exit 0
