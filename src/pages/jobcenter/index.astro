@@ -7,12 +7,12 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-1905">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-1945">'
 );
 
 html = html.replace(
   '</style>',
-  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-actions{display:flex;gap:12px;flex-wrap:wrap}.outlook-action{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;text-decoration:none;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer}.outlook-action:hover{background:#f0f0f0}.outlook-help{font-size:.92em;color:#555;margin-top:10px}</style>`
+  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-actions{display:flex;gap:12px;flex-wrap:wrap}.outlook-action{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;text-decoration:none;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer}.outlook-action:hover{background:#f0f0f0}.outlook-view{display:none;margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view.is-open{display:block}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px;line-height:1.6;white-space:pre-wrap}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.outlook-error{padding:16px;color:#8a1c1c}</style>`
 );
 
 const portalOutageBlock = `
@@ -31,26 +31,105 @@ const outlookMsgUrl = 'https://raw.githubusercontent.com/peterferenc246-design/W
 
 const originalOutlookCard = `<div class="outlook-card">
   <div class="outlook-card-title">✉️ Original-Outlook-Nachricht (.msg) – JC-10.00 Tr. Ihre Mahnung vom 25.09.2026</div>
-  <div class="outlook-card-note">Originale Microsoft-Outlook-Nachricht einschließlich der in der Nachricht enthaltenen PDF-Anlage.</div>
-  <div class="outlook-actions" aria-label="Outlook-Nachricht öffnen oder speichern">
-    <a class="outlook-action" href="${outlookMsgUrl}" target="_blank" rel="noopener">✉️ Original-MSG öffnen</a>
-    <a class="outlook-action" href="${outlookMsgUrl}" download="JC-10.00 Tr. Ihre Mahnung vom 25.09.2026.msg">⬇️ MSG speichern</a>
+  <div class="outlook-card-note">Die Originalnachricht wird direkt im Browser aus der .msg-Datei gelesen. Das unveränderte Original bleibt zusätzlich zum Herunterladen verfügbar.</div>
+  <div class="outlook-actions">
+    <button class="outlook-action" type="button" id="wdfox-msg-open">✉️ Nachricht im Browser anzeigen</button>
+    <a class="outlook-action" href="${outlookMsgUrl}" download="JC-10.00 Tr. Ihre Mahnung vom 25.09.2026.msg">⬇️ Original-MSG speichern</a>
   </div>
-  <div class="outlook-help">Hinweis: Windows öffnet eine lokale .msg-Datei per Doppelklick direkt mit der für .msg registrierten Outlook-App. Ein Webbrowser darf eine lokale Desktop-Anwendung nicht ohne einen auf dem jeweiligen PC registrierten Protokoll-Handler erzwingen.</div>
+  <div class="outlook-view" id="wdfox-msg-view" aria-live="polite">
+    <div class="outlook-view-head">
+      <div class="outlook-view-subject" id="wdfox-msg-subject">Nachricht wird geladen …</div>
+      <div class="outlook-view-meta" id="wdfox-msg-meta"></div>
+    </div>
+    <div class="outlook-view-body" id="wdfox-msg-body"></div>
+    <div class="outlook-attachments" id="wdfox-msg-attachments"></div>
+  </div>
 </div>`;
+
+const msgViewerScript = `<script type="module">
+const openButton = document.getElementById('wdfox-msg-open');
+const view = document.getElementById('wdfox-msg-view');
+const subjectEl = document.getElementById('wdfox-msg-subject');
+const metaEl = document.getElementById('wdfox-msg-meta');
+const bodyEl = document.getElementById('wdfox-msg-body');
+const attachmentsEl = document.getElementById('wdfox-msg-attachments');
+const msgUrl = ${JSON.stringify(outlookMsgUrl)};
+let loaded = false;
+
+function esc(value='') {
+  return String(value).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+}
+
+openButton?.addEventListener('click', async () => {
+  view?.classList.toggle('is-open');
+  if (loaded || !view?.classList.contains('is-open')) return;
+  try {
+    openButton.disabled = true;
+    openButton.textContent = '⏳ Nachricht wird geladen …';
+    const [{ default: MsgReader }, response] = await Promise.all([
+      import('https://esm.sh/@kenjiuno/msgreader@1.28.0'),
+      fetch(msgUrl, { cache: 'no-store' })
+    ]);
+    if (!response.ok) throw new Error('MSG-Datei konnte nicht geladen werden (' + response.status + ')');
+    const buffer = await response.arrayBuffer();
+    const reader = new MsgReader(buffer);
+    const data = reader.getFileData();
+    subjectEl.textContent = data.subject || 'Ohne Betreff';
+    const sender = [data.senderName, data.senderEmail].filter(Boolean).join(' <') + (data.senderName && data.senderEmail ? '>' : '');
+    const recipients = (data.recipients || []).map(r => r.name || r.email).filter(Boolean).join(', ');
+    metaEl.innerHTML = '<strong>Von:</strong> ' + esc(sender || '—') + '<br><strong>An:</strong> ' + esc(recipients || '—') + (data.clientSubmitTime ? '<br><strong>Gesendet:</strong> ' + esc(new Date(data.clientSubmitTime).toLocaleString('de-DE')) : '');
+    bodyEl.textContent = data.body || data.bodyHtml || 'Kein Nachrichtentext vorhanden.';
+    attachmentsEl.innerHTML = '';
+    const attachments = data.attachments || [];
+    if (attachments.length) {
+      const title = document.createElement('strong');
+      title.textContent = 'Anhänge';
+      attachmentsEl.appendChild(title);
+      attachments.forEach((att, index) => {
+        const row = document.createElement('div');
+        row.className = 'outlook-attachment';
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = '📎 ' + (att.fileName || ('Anlage ' + (index + 1)));
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const extracted = reader.getAttachment(att);
+          const bytes = extracted.content instanceof Uint8Array ? extracted.content : new Uint8Array(extracted.content);
+          const blob = new Blob([bytes], { type: 'application/octet-stream' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = att.fileName || ('Anlage-' + (index + 1));
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        });
+        row.appendChild(link);
+        attachmentsEl.appendChild(row);
+      });
+    }
+    loaded = true;
+    openButton.textContent = '✉️ Nachricht im Browser anzeigen / schließen';
+  } catch (error) {
+    subjectEl.textContent = 'Nachricht konnte nicht angezeigt werden';
+    bodyEl.innerHTML = '<div class="outlook-error">' + esc(error?.message || error) + '</div>';
+    openButton.textContent = '✉️ Erneut versuchen';
+  } finally {
+    openButton.disabled = false;
+  }
+});
+</script>`;
 
 const evidenceHeading = '<h2>Dokumente des Jobcenters / Nachweise</h2>';
 const existingCard = /<div class="outlook-card">[\s\S]*?<\/div>\s*<\/div>/;
-const legacyBlock = /<div class="outlook-actions"[\s\S]*?<\/div>\s*<a class="pdf-link" href="https:\/\/raw\.githubusercontent\.com\/peterferenc246-design\/WDFOX\/main\/privat\/JC-10\.00%20Tr\.%20Ihre%20Mahnung%20vom%2025\.09\.2026\.msg"[\s\S]*?<\/a>/;
 const plainLink = /<a class="pdf-link" href="https:\/\/raw\.githubusercontent\.com\/peterferenc246-design\/WDFOX\/main\/privat\/JC-10\.00%20Tr\.%20Ihre%20Mahnung%20vom%2025\.09\.2026\.msg"[\s\S]*?<\/a>/;
 
 if (existingCard.test(html)) {
   html = html.replace(existingCard, originalOutlookCard);
-} else if (legacyBlock.test(html)) {
-  html = html.replace(legacyBlock, originalOutlookCard);
 } else if (plainLink.test(html)) {
   html = html.replace(plainLink, originalOutlookCard);
-} else if (!html.includes('outlook-card-title')) {
+} else if (!html.includes('wdfox-msg-open')) {
   html = html.replace(evidenceHeading, `${evidenceHeading}${originalOutlookCard}`);
 }
 
@@ -58,9 +137,6 @@ if (!html.includes('id="portal-ausfall-2026-10-02"')) {
   html = html.replace('</body>', `${portalOutageBlock}\n</body>`);
 }
 
-html = html.replace(
-  '</body>',
-  '<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-1905 --></body>'
-);
+html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-1945 --></body>`);
 ---
 <Fragment set:html={html} />
