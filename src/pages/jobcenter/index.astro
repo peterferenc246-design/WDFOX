@@ -7,7 +7,12 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-1749">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-1755">'
+);
+
+html = html.replace(
+  '</style>',
+  `.outlook-actions{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 10px}.outlook-action{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:10px;border:1px solid #cfcfcf;background:#fff;color:#111;text-decoration:none;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}.outlook-action:hover{background:#f3f3f3}.outlook-action-primary{background:#f7f7f7}.outlook-action-save{background:#fff}</style>`
 );
 
 const portalOutageBlock = `
@@ -22,14 +27,23 @@ const portalOutageBlock = `
   <p class="caption">Dokumentierter Nachweis vom 02.10.2026: Das Anmelde- beziehungsweise Online-Portal war nicht erreichbar; eine Verbindung über den vorgesehenen Online-Weg war nicht möglich.</p>
 </section>`;
 
-const originalOutlookLink = `<a class="pdf-link" href="https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/JC-10.00%20Tr.%20Ihre%20Mahnung%20vom%2025.09.2026.msg" target="_blank" rel="noopener">
+const outlookMsgUrl = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/JC-10.00%20Tr.%20Ihre%20Mahnung%20vom%2025.09.2026.msg';
+const outlookButtons = `<div class="outlook-actions" aria-label="Outlook-Nachricht öffnen oder speichern">
+  <a class="outlook-action outlook-action-primary" href="${outlookMsgUrl}" target="_blank" rel="noopener">✉️ Outlook-Nachricht öffnen</a>
+  <a class="outlook-action outlook-action-save" href="${outlookMsgUrl}" download="JC-10.00 Tr. Ihre Mahnung vom 25.09.2026.msg">⬇️ Outlook-Nachricht speichern</a>
+</div>`;
+
+const originalOutlookLink = `${outlookButtons}<a class="pdf-link" href="${outlookMsgUrl}" target="_blank" rel="noopener">
   ✉️ Original-Outlook-Nachricht (.msg) – JC-10.00 Tr. Ihre Mahnung vom 25.09.2026
-  <span class="pdf-note">Originale Microsoft-Outlook-Nachricht einschließlich der in der Nachricht enthaltenen PDF-Anlage. Klicken Sie hier, um die .msg-Datei mit Microsoft Outlook zu öffnen beziehungsweise herunterzuladen.</span>
+  <span class="pdf-note">Originale Microsoft-Outlook-Nachricht einschließlich der in der Nachricht enthaltenen PDF-Anlage.</span>
 </a>`;
 
 const evidenceHeading = '<h2>Dokumente des Jobcenters / Nachweise</h2>';
 if (!html.includes('JC-10.00%20Tr.%20Ihre%20Mahnung%20vom%2025.09.2026.msg')) {
   html = html.replace(evidenceHeading, `${evidenceHeading}${originalOutlookLink}`);
+} else if (!html.includes('outlook-actions')) {
+  const oldOutlookLink = /<a class="pdf-link" href="https:\/\/raw\.githubusercontent\.com\/peterferenc246-design\/WDFOX\/main\/privat\/JC-10\.00%20Tr\.%20Ihre%20Mahnung%20vom%2025\.09\.2026\.msg"[\s\S]*?<\/a>/;
+  html = html.replace(oldOutlookLink, originalOutlookLink);
 }
 
 if (!html.includes('id="portal-ausfall-2026-10-02"')) {
@@ -38,7 +52,7 @@ if (!html.includes('id="portal-ausfall-2026-10-02"')) {
 
 html = html.replace(
   '</body>',
-  '<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-1749 --></body>'
+  '<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-1755 --></body>'
 );
 ---
 <Fragment set:html={html} />
