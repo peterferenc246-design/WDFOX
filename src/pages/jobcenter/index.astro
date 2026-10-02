@@ -7,12 +7,12 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-1810">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-1820">'
 );
 
 html = html.replace(
   '</style>',
-  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-actions{display:flex;gap:12px;flex-wrap:wrap}.outlook-action{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;text-decoration:none;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06)}.outlook-action:hover{background:#f0f0f0}</style>`
+  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-actions{display:flex;gap:12px;flex-wrap:wrap}.outlook-action{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;text-decoration:none;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer}.outlook-action:hover{background:#f0f0f0}</style>`
 );
 
 const portalOutageBlock = `
@@ -27,23 +27,26 @@ const portalOutageBlock = `
   <p class="caption">Dokumentierter Nachweis vom 02.10.2026: Das Anmelde- beziehungsweise Online-Portal war nicht erreichbar; eine Verbindung über den vorgesehenen Online-Weg war nicht möglich.</p>
 </section>`;
 
-const outlookOpenUrl = 'https://github.com/peterferenc246-design/WDFOX/blob/main/privat/JC-10.00%20Tr.%20Ihre%20Mahnung%20vom%2025.09.2026.msg';
-const outlookSaveUrl = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/JC-10.00%20Tr.%20Ihre%20Mahnung%20vom%2025.09.2026.msg';
+const outlookMsgUrl = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/JC-10.00%20Tr.%20Ihre%20Mahnung%20vom%2025.09.2026.msg';
+const outlookProtocolUrl = `outlook:${outlookMsgUrl}`;
 
 const originalOutlookCard = `<div class="outlook-card">
   <div class="outlook-card-title">✉️ Original-Outlook-Nachricht (.msg) – JC-10.00 Tr. Ihre Mahnung vom 25.09.2026</div>
   <div class="outlook-card-note">Originale Microsoft-Outlook-Nachricht einschließlich der in der Nachricht enthaltenen PDF-Anlage.</div>
   <div class="outlook-actions" aria-label="Outlook-Nachricht öffnen oder speichern">
-    <a class="outlook-action" href="${outlookOpenUrl}" target="_blank" rel="noopener">✉️ Outlook-Nachricht öffnen</a>
-    <a class="outlook-action" href="${outlookSaveUrl}" download="JC-10.00 Tr. Ihre Mahnung vom 25.09.2026.msg">⬇️ Outlook-Nachricht speichern</a>
+    <a class="outlook-action" href="${outlookProtocolUrl}">✉️ In Outlook öffnen</a>
+    <a class="outlook-action" href="${outlookMsgUrl}" download="JC-10.00 Tr. Ihre Mahnung vom 25.09.2026.msg">⬇️ MSG speichern</a>
   </div>
 </div>`;
 
 const evidenceHeading = '<h2>Dokumente des Jobcenters / Nachweise</h2>';
+const existingCard = /<div class="outlook-card">[\s\S]*?<\/div>\s*<\/div>/;
 const legacyBlock = /<div class="outlook-actions"[\s\S]*?<\/div>\s*<a class="pdf-link" href="https:\/\/raw\.githubusercontent\.com\/peterferenc246-design\/WDFOX\/main\/privat\/JC-10\.00%20Tr\.%20Ihre%20Mahnung%20vom%2025\.09\.2026\.msg"[\s\S]*?<\/a>/;
 const plainLink = /<a class="pdf-link" href="https:\/\/raw\.githubusercontent\.com\/peterferenc246-design\/WDFOX\/main\/privat\/JC-10\.00%20Tr\.%20Ihre%20Mahnung%20vom%2025\.09\.2026\.msg"[\s\S]*?<\/a>/;
 
-if (legacyBlock.test(html)) {
+if (existingCard.test(html)) {
+  html = html.replace(existingCard, originalOutlookCard);
+} else if (legacyBlock.test(html)) {
   html = html.replace(legacyBlock, originalOutlookCard);
 } else if (plainLink.test(html)) {
   html = html.replace(plainLink, originalOutlookCard);
@@ -57,7 +60,7 @@ if (!html.includes('id="portal-ausfall-2026-10-02"')) {
 
 html = html.replace(
   '</body>',
-  '<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-1810 --></body>'
+  '<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-1820 --></body>'
 );
 ---
 <Fragment set:html={html} />
