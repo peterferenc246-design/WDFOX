@@ -7,7 +7,7 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-2058">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-2110">'
 );
 
 html = html.replace(
@@ -55,21 +55,36 @@ const attachmentsEl = document.getElementById('wdfox-msg-attachments');
 const msgUrl = ${JSON.stringify(outlookMsgUrl)};
 let loaded = false;
 
-const hiddenRecipientNames = new Set([
-  'andrej ferenc',
-  'tomáš zdechovsky',
-  'tomas zdechovsky',
-  'freund daniel',
-  'daniel freund'
-]);
+const hiddenNames = ['andrej ferenc','tomáš zdechovsky','tomas zdechovsky','freund daniel','daniel freund'];
+const hiddenEmails = ['ferencandrej97@gmail.com','tomas.zdechovsky@europarl.europa.eu','daniel.freund@europarl.europa.eu'];
 
 function esc(value='') {
   return String(value).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
 }
-
+function norm(value='') { return String(value).trim().toLowerCase(); }
+function isHidden(name='', email='') {
+  return hiddenNames.includes(norm(name)) || hiddenEmails.includes(norm(email));
+}
 function formatPerson(name, email) {
   if (name && email) return name + ' <' + email + '>';
   return name || email || '';
+}
+function splitHeaderAddresses(value='') {
+  return String(value).split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(v => v.trim()).filter(Boolean);
+}
+function parseHeaderPerson(value='') {
+  const m = String(value).match(/^\s*\"?([^\"<]*)\"?\s*<([^>]+)>\s*$/);
+  if (m) return { name: m[1].trim(), email: m[2].trim() };
+  const plain = String(value).trim();
+  return plain.includes('@') ? { name: '', email: plain } : { name: plain, email: '' };
+}
+function getHeaderValues(headers='', key='') {
+  const unfolded = String(headers).replace(/\r?\n[\t ]+/g, ' ');
+  const re = new RegExp('^' + key + ':\\s*(.+)$', 'gmi');
+  const out = [];
+  let m;
+  while ((m = re.exec(unfolded))) out.push(m[1]);
+  return out;
 }
 
 openButton?.addEventListener('click', async () => {
@@ -89,14 +104,39 @@ openButton?.addEventListener('click', async () => {
     subjectEl.textContent = data.subject || 'Ohne Betreff';
 
     const sender = formatPerson(data.senderName || 'Peter Ferenc', data.senderEmail);
-    const recipients = (data.recipients || [])
-      .filter(r => !hiddenRecipientNames.has(String(r.name || '').trim().toLowerCase()))
-      .map(r => formatPerson(r.name, r.email))
-      .filter(Boolean)
-      .join(', ');
+    const buckets = { to: [], cc: [], bcc: [], other: [] };
+    const seen = new Set();
+    const addRecipient = (type, name, email) => {
+      if (isHidden(name, email)) return;
+      const text = formatPerson(name, email);
+      if (!text) return;
+      const key = norm(text);
+      if (seen.has(key)) return;
+      seen.add(key);
+      const t = norm(type);
+      if (t === 'to') buckets.to.push(text);
+      else if (t === 'cc') buckets.cc.push(text);
+      else if (t === 'bcc') buckets.bcc.push(text);
+      else buckets.other.push(text);
+    };
+
+    (data.recipients || []).forEach(r => addRecipient(r.recipType || r.recipientType || r.type, r.name || r.displayName || '', r.email || r.emailAddress || ''));
+
+    const headers = data.headers || data.transportMessageHeaders || '';
+    [['To','to'],['Cc','cc'],['Bcc','bcc']].forEach(([headerName,type]) => {
+      getHeaderValues(headers, headerName).forEach(value => {
+        splitHeaderAddresses(value).forEach(raw => {
+          const p = parseHeaderPerson(raw);
+          addRecipient(type, p.name, p.email);
+        });
+      });
+    });
 
     let meta = '<strong>Von:</strong> ' + esc(sender || '—');
-    if (recipients) meta += '<br><strong>An:</strong> ' + esc(recipients);
+    if (buckets.to.length) meta += '<br><strong>An:</strong> ' + esc(buckets.to.join(', '));
+    if (buckets.cc.length) meta += '<br><strong>CC:</strong> ' + esc(buckets.cc.join(', '));
+    if (buckets.bcc.length) meta += '<br><strong>BCC:</strong> ' + esc(buckets.bcc.join(', '));
+    if (buckets.other.length) meta += '<br><strong>Empfänger:</strong> ' + esc(buckets.other.join(', '));
     if (data.clientSubmitTime) meta += '<br><strong>Gesendet:</strong> ' + esc(new Date(data.clientSubmitTime).toLocaleString('de-DE'));
     metaEl.innerHTML = meta;
 
@@ -159,6 +199,6 @@ if (!html.includes('id="portal-ausfall-2026-10-02"')) {
   html = html.replace('</body>', `${portalOutageBlock}\n</body>`);
 }
 
-html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-2058 --></body>`);
+html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-2110 --></body>`);
 ---
 <Fragment set:html={html} />
