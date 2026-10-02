@@ -2,6 +2,32 @@
 (function () {
   "use strict";
 
+  function injectJobcenterPortalEvidence() {
+    if (window.location.pathname !== "/jobcenter/" && window.location.pathname !== "/jobcenter") return;
+    if (document.getElementById("portal-ausfall-2026-10-02")) return;
+
+    var mount = function () {
+      if (!document.body || document.getElementById("portal-ausfall-2026-10-02")) return;
+      var section = document.createElement("section");
+      section.className = "attachment evidence-section";
+      section.id = "portal-ausfall-2026-10-02";
+      section.innerHTML =
+        '<hr class="evidence-divider">' +
+        '<p class="update-date">Aktualisiert am: 02.10.2026</p>' +
+        '<h2>Nachweis der Nichtverfügbarkeit des „ONLINE“-Portals</h2>' +
+        '<p>Am 02.10.2026 war das Online-Portal der Bundesagentur für Arbeit beziehungsweise des Jobcenters erneut nicht erreichbar. Dadurch war es mir nicht möglich, die vorgesehenen Online-Dienste zuverlässig zu nutzen.</p>' +
+        '<p>Besonders problematisch ist, dass damit zugleich auch der Zugang zur vorgesehenen Online-Unterstützung beziehungsweise zur Kontaktaufnahme mit dem Portal-Support beeinträchtigt war. Ein funktionsfähiger alternativer Kommunikationsweg wurde mir trotz der bestehenden technischen Störung nicht zur Verfügung gestellt.</p>' +
+        '<p class="emph">Damit war aus meiner Sicht eine rechtzeitige elektronische Kommunikation mit dem Jobcenter erneut erheblich erschwert. Dies ist besonders kritisch, weil das Jobcenter diesen Kommunikationsweg selbst als „ONLINE“-Service bezeichnet und gleichzeitig Fristen sowie Mitwirkungspflichten an die Nutzung dieses Systems knüpft.</p>' +
+        '<img src="https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Diese%20Website%20ist%20nicht%20erreichbar.png" alt="Nachweis der Nichtverfügbarkeit des Online-Portals der Bundesagentur für Arbeit / des Jobcenters am 2. Oktober 2026">' +
+        '<p class="caption">Dokumentierter Nachweis vom 02.10.2026: Das Anmelde- beziehungsweise Online-Portal war nicht erreichbar; eine Verbindung über den vorgesehenen Online-Weg war nicht möglich.</p>';
+      document.body.appendChild(section);
+    };
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
+    else mount();
+  }
+
+  injectJobcenterPortalEvidence();
 
   var language = String(window.location.pathname.split("/")[1] || "").toLowerCase();
   if (language !== "de" && language !== "en" && language !== "sk" && language !== "fr" && language !== "hr" && language !== "pl" && language !== "it" && language !== "es" && language !== "sv") return;
