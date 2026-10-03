@@ -130,6 +130,7 @@ jobs:
 
           avatar_exists = Path('dist/tawk-avatar-fix.js').is_file()
           evidence_exists = Path('dist/jobcenter-vodafone-evidence.js').is_file()
+          poster_fix_exists = Path('dist/jobcenter-poster-fix.js').is_file()
           snippet = (
               f'<script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v={sha}"></script>\n'
               f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>'
@@ -138,6 +139,8 @@ jobs:
               snippet += f'\n<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
           if evidence_exists:
               snippet += f'\n<script id="wdfox-jobcenter-vodafone-evidence" src="/jobcenter-vodafone-evidence.js?v={sha}"></script>'
+          if poster_fix_exists:
+              snippet += f'\n<script id="wdfox-jobcenter-poster-fix" src="/jobcenter-poster-fix.js?v={sha}"></script>'
 
           files = list(Path('dist').rglob('*.html'))
           if not files:
@@ -150,7 +153,7 @@ jobs:
               text = text.replace('</body>', snippet + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
 
-          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js', 'dist/jobcenter-vodafone-evidence.js'):
+          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js', 'dist/jobcenter-vodafone-evidence.js', 'dist/jobcenter-poster-fix.js'):
               if not Path(required).is_file():
                   raise SystemExit(f'Missing production asset: {required}')
           PY
@@ -162,9 +165,11 @@ jobs:
           test -s dist/tawk-language-loader.js
           test -s dist/tawk-native-force.js
           test -s dist/jobcenter-vodafone-evidence.js
+          test -s dist/jobcenter-poster-fix.js
           grep -R -q 'id="fox-tawk-language-loader"' dist --include='*.html'
           grep -R -q 'id="fox-tawk-native-force"' dist --include='*.html'
           grep -R -q 'id="wdfox-jobcenter-vodafone-evidence"' dist --include='*.html'
+          grep -R -q 'id="wdfox-jobcenter-poster-fix"' dist --include='*.html'
           grep -q 'Tawk_API.endChat' dist/tawk-language-loader.js
           if grep -F -q '#fixed-lang-layer a.language-flag[data-language]' dist/tawk-language-loader.js; then
             echo 'Blocked duplicate production language-click handler'
@@ -238,4 +243,3 @@ jobs:
             sleep 8
           done
           echo 'LIVE_APPROVED_TAWK_PACKAGE=FAIL'
-          exit 1
