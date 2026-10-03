@@ -1,4 +1,4 @@
-/* WDFOX Jobcenter poster exact-image fix */
+/* WDFOX Jobcenter poster and evidence fix */
 (function(){
   'use strict';
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
@@ -51,56 +51,79 @@
 
   function addPostfachPdfCard(){
     if (document.getElementById('postfach-2026-10-03-1222')) return true;
-    var anchor = document.getElementById('aok-postfach-2026-10-03');
-    if (!anchor) {
-      anchor = Array.from(document.querySelectorAll('h2')).find(function(el){
-        return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise';
-      });
-    }
-    if (!anchor || !anchor.parentNode) return false;
 
-    var card = document.createElement('div');
+    var card = document.createElement('section');
     card.id = 'postfach-2026-10-03-1222';
-    card.className = 'outlook-card';
+    card.setAttribute('aria-label', 'Postfachnachricht vom 03.10.2026 um 12:22');
+    card.style.display = 'block';
+    card.style.boxSizing = 'border-box';
+    card.style.width = '100%';
+    card.style.margin = '16px 0';
+    card.style.padding = '16px';
+    card.style.border = '2px solid #1877F2';
+    card.style.borderRadius = '10px';
+    card.style.background = '#f7fbff';
+    card.style.color = '#111';
+    card.style.boxShadow = '0 2px 8px rgba(0,0,0,.08)';
 
     var title = document.createElement('div');
-    title.className = 'outlook-card-title';
-    title.textContent = '📨 Postfachnachricht vom 03.10.2026 | 12:22';
+    title.style.fontWeight = '700';
+    title.style.fontSize = '1.05rem';
+    title.style.marginBottom = '8px';
+    title.textContent = '📨 NEU - Postfachnachricht vom 03.10.2026 | 12:22';
 
     var note = document.createElement('div');
-    note.className = 'outlook-card-note';
-    note.textContent = 'Original-PDF der am 03.10.2026 um 12:22 Uhr übermittelten Postfachnachricht.';
+    note.style.marginBottom = '12px';
+    note.textContent = 'Original-PDF der am 03.10.2026 um 12:22 Uhr an das Jobcenter übermittelten Postfachnachricht.';
 
     var details = document.createElement('details');
-    details.className = 'outlook-details';
     var summary = document.createElement('summary');
-    summary.className = 'outlook-summary';
+    summary.style.cursor = 'pointer';
+    summary.style.fontWeight = '700';
+    summary.style.padding = '10px 12px';
+    summary.style.border = '1px solid #cfcfcf';
+    summary.style.borderRadius = '8px';
+    summary.style.background = '#fff';
     summary.textContent = '📨 Nachricht / PDF anzeigen';
 
-    var view = document.createElement('div');
-    view.className = 'outlook-view';
-    var head = document.createElement('div');
-    head.className = 'outlook-view-head';
-    head.innerHTML = '<div class="outlook-view-subject">Postfachnachricht vom 03.10.2026 | 12:22</div><div class="outlook-view-meta"><strong>Datum:</strong> 03.10.2026 | 12:22<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut</div>';
     var body = document.createElement('div');
-    body.className = 'outlook-view-body';
-    body.style.whiteSpace = 'normal';
+    body.style.padding = '14px 0 2px';
+
+    var meta = document.createElement('div');
+    meta.style.marginBottom = '14px';
+    meta.innerHTML = '<strong>Datum:</strong> 03.10.2026 | 12:22<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut';
+
     var link = document.createElement('a');
     link.href = POSTFACH_PDF_URL;
     link.target = '_blank';
-    link.rel = 'noopener';
+    link.rel = 'noopener noreferrer';
+    link.style.display = 'inline-block';
+    link.style.padding = '12px 16px';
+    link.style.borderRadius = '8px';
+    link.style.background = '#111';
+    link.style.color = '#fff';
+    link.style.textDecoration = 'none';
     link.style.fontWeight = '700';
     link.textContent = '📄 Original-PDF öffnen - postfachnachricht-03.10.2026 12_22.pdf';
+
+    body.appendChild(meta);
     body.appendChild(link);
-    view.appendChild(head);
-    view.appendChild(body);
     details.appendChild(summary);
-    details.appendChild(view);
+    details.appendChild(body);
     card.appendChild(title);
     card.appendChild(note);
     card.appendChild(details);
 
-    anchor.insertAdjacentElement('afterend', card);
+    var heading = Array.from(document.querySelectorAll('h2')).find(function(el){
+      return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise';
+    });
+    if (heading && heading.parentNode) {
+      heading.insertAdjacentElement('afterend', card);
+    } else {
+      var poster = document.getElementById('jobcenter-social-poster-2026-10-03');
+      if (poster && poster.parentNode) poster.insertAdjacentElement('beforebegin', card);
+      else document.body.appendChild(card);
+    }
     return true;
   }
 
@@ -124,6 +147,7 @@
     img.style.border = '0';
     img.style.borderRadius = '10px';
     img.style.boxShadow = '0 3px 16px rgba(0,0,0,.2)';
+
     var linkWrap = document.createElement('div');
     linkWrap.style.display = 'flex';
     linkWrap.style.justifyContent = 'center';
