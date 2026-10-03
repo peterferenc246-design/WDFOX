@@ -7,12 +7,12 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-02-2145">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-03-0930">'
 );
 
 html = html.replace(
   '</style>',
-  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-details{margin-top:10px}.outlook-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.outlook-summary::-webkit-details-marker{display:none}.outlook-summary:hover{background:#f0f0f0}.outlook-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px;line-height:1.6;white-space:pre-wrap}.outlook-highlight{background:#fff200;color:#d40000;font-weight:800;padding:0 2px}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.outlook-error{padding:16px;color:#8a1c1c}</style>`
+  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-details{margin-top:10px}.outlook-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.outlook-summary::-webkit-details-marker{display:none}.outlook-summary:hover{background:#f0f0f0}.outlook-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px;line-height:1.6;white-space:pre-wrap}.outlook-view-body p{white-space:normal}.outlook-highlight{background:#fff200;color:#d40000;font-weight:800;padding:0 2px}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.outlook-error{padding:16px;color:#8a1c1c}</style>`
 );
 
 const portalOutageBlock = `
@@ -41,6 +41,46 @@ const originalOutlookCard = `<div class="outlook-card">
       </div>
       <div class="outlook-view-body" id="wdfox-msg-body">Nachricht wird geladen …</div>
       <div class="outlook-attachments" id="wdfox-msg-attachments"></div>
+    </div>
+  </details>
+</div>`;
+
+const aokPostfachCard = `<div class="outlook-card" id="aok-postfach-2026-10-03">
+  <div class="outlook-card-title">📨 Postfachnachricht vom 03.10.2026 – Krankenversicherung / AOK Bayern</div>
+  <div class="outlook-card-note">Die am 03.10.2026 an das Jobcenter übermittelte Nachricht. Das zugehörige PDF enthält am Ende zusätzlich den Gutschein für Lebensmittel und Hygieneartikel als Nachweis.</div>
+  <details class="outlook-details">
+    <summary class="outlook-summary">📨 Text der Postfachnachricht anzeigen</summary>
+    <div class="outlook-view">
+      <div class="outlook-view-head">
+        <div class="outlook-view-subject">Dringende Aufforderung zur unverzüglichen Klärung meines Krankenversicherungsschutzes und zur Mitteilung der Rechtsgrundlage für die bislang unterbliebene Anmeldung bei der AOK seit dem 02.09.2026</div>
+        <div class="outlook-view-meta"><strong>Datum:</strong> 03.10.2026 | 09:30<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut</div>
+      </div>
+      <div class="outlook-view-body">
+        <p>Sehr geehrte Damen und Herren,</p>
+        <p>am 02.09.2026 habe ich beim Jobcenter Landkreis Landshut ordnungsgemäß Leistungen zur Sicherung des Lebensunterhalts nach dem SGB II beantragt. Diesen Tag führt das Jobcenter selbst in seinen Unterlagen als „Tag der Antragstellung 02.09.2026“.</p>
+        <p>Am selben Tag wurde mir aufgrund meiner akuten finanziellen Notlage außerdem ein Gutschein für Lebensmittel und Hygieneartikel gewährt.</p>
+        <p>Trotzdem bin ich nach meinem derzeitigen Kenntnisstand bis heute nicht bei der AOK Bayern angemeldet und verfüge über keinen bestätigten aktiven Krankenversicherungsschutz.</p>
+        <p>Ich halte diese Situation für äußerst ernst, da ich seit längerer Zeit unter erheblichen gesundheitlichen Problemen im Bereich meiner Zähne und meines Zahnfleisches leide, insbesondere unter wiederkehrenden Entzündungen, Schmerzen, lockeren Zähnen und Schwellungen. Eine weitere zahnärztliche Behandlung ist dringend erforderlich. Ohne bestätigten Krankenversicherungsschutz besteht für mich das Risiko einer weiteren Verschlechterung meines Gesundheitszustandes.</p>
+        <p>Auf die Notwendigkeit eines unverzüglichen Krankenversicherungsschutzes habe ich das Jobcenter bereits in meiner Nachricht vom 24.09.2026 ausdrücklich hingewiesen und um meine sofortige Anmeldung bei der AOK Bayern gebeten.</p>
+        <p>Daher stelle ich Ihnen nun ausdrücklich folgende Frage:</p>
+        <p><strong>Wie ist es möglich, dass ich trotz meines bereits am 02.09.2026 gestellten Antrags auf Leistungen nach dem SGB II, trotz des mir am selben Tag gewährten Gutscheins zur Sicherung grundlegender Lebensbedürfnisse und trotz der dem Jobcenter bekannten gesundheitlichen Situation bis heute nicht bei der AOK Bayern angemeldet worden bin?</strong></p>
+        <p>Zugleich fordere ich Sie auf, mir konkret die Rechtsgrundlage mitzuteilen, auf deren Grundlage meine Anmeldung zur gesetzlichen Krankenversicherung bei der AOK Bayern seit dem 02.09.2026 bis heute unterblieben ist.</p>
+        <p>Ich bitte nicht um eine allgemeine Erklärung oder einen bloßen Hinweis auf interne Abläufe. Ich fordere vielmehr:</p>
+        <p>1. die Benennung der konkreten gesetzlichen Vorschrift, aufgrund derer das Jobcenter die bislang unterbliebene Anmeldung bei der AOK für rechtlich zulässig hält,</p>
+        <p>2. die Erklärung, wie diese Rechtsgrundlage auf meinen konkreten Einzelfall angewendet wird,</p>
+        <p>3. die Mitteilung, ab welchem Datum das Jobcenter meinen Anspruch auf Krankenversicherung als entstanden oder als nicht entstanden ansieht,</p>
+        <p>4. die Erklärung, welche rechtliche Bedeutung in diesem Zusammenhang dem am 02.09.2026 durch das Jobcenter gewährten Gutschein für Lebensmittel und Hygieneartikel zukommt,</p>
+        <p>5. die unverzügliche Mitteilung, spätestens bis Montag, den 05.10.2026, ob und wann meine Anmeldung bei der AOK Bayern vorgenommen wird.</p>
+        <p>Mein Antrag wurde bereits am 02.09.2026 gestellt. Nach meiner Auffassung hatte das Jobcenter seit diesem Zeitpunkt ausreichend Gelegenheit, die erforderlichen administrativen und organisatorischen Schritte zur Klärung meines Krankenversicherungsstatus und gegebenenfalls zu meiner Anmeldung bei der gesetzlichen Krankenversicherung AOK Bayern vorzunehmen.</p>
+        <p>Da seit meiner Antragstellung bereits mehr als ein Monat vergangen ist und ich das Jobcenter zusätzlich ausdrücklich auf meine akute gesundheitliche Situation und die Notwendigkeit eines Krankenversicherungsschutzes hingewiesen habe, fordere ich nun eine konkrete und unverzügliche Stellungnahme und keinen weiteren allgemeinen Aufschub.</p>
+        <p>Sollte das Jobcenter der Auffassung sein, dass meine Anmeldung bei der AOK Bayern bislang weder möglich noch rechtlich erforderlich gewesen sei, fordere ich Sie auf, mir konkret mitzuteilen, aus welchem rechtlichen Grund und aufgrund welcher gesetzlichen Vorschrift dies der Fall sein soll.</p>
+        <p>Sollte das Jobcenter weiterhin der Auffassung sein, dass trotz meines gestellten Antrags und der bereits gewährten Unterstützung nach dem SGB II bislang keine Rechtsgrundlage für meine Anmeldung bei der AOK besteht, fordere ich, dass mir diese Rechtsauffassung elektronisch in mein Postfach im Jobcenter-Portal übermittelt wird, begründet und unter Angabe der konkreten Rechtsgrundlage.</p>
+        <p>Aufgrund meiner akuten gesundheitlichen Beschwerden bitte ich um unverzügliche Bearbeitung.</p>
+        <p>Mit freundlichen Grüßen<br>Peter Ferenc</p>
+      </div>
+      <div class="outlook-attachments">
+        <div class="outlook-attachment"><a href="/jobcenter/postfachnachricht-03.10.2026%2009_30.pdf" target="_blank" rel="noopener">📄 PDF öffnen – Postfachnachricht inklusive Gutschein</a></div>
+      </div>
     </div>
   </details>
 </div>`;
@@ -170,8 +210,11 @@ const msgViewerScript = `<script>
 </script>`;
 
 const evidenceHeading = '<h2>Dokumente des Jobcenters / Nachweise</h2>';
+const evidenceDateAndHeading = '<p class="update-date">Aktualisiert am: 02.10.2026</p><h2>Dokumente des Jobcenters / Nachweise</h2>';
 const existingCard = /<div class="outlook-card">[\s\S]*?<\/div>\s*<\/div>/;
 const plainLink = /<a class="pdf-link" href="https:\/\/raw\.githubusercontent\.com\/peterferenc246-design\/WDFOX\/main\/privat\/JC-10\.00%20Tr\.%20Ihre%20Mahnung%20vom%2025\.09\.2026\.msg"[\s\S]*?<\/a>/;
+
+html = html.replace(evidenceDateAndHeading, '<p class="update-date">Aktualisiert am: 03.10.2026</p>' + evidenceHeading);
 
 if (existingCard.test(html)) {
   html = html.replace(existingCard, originalOutlookCard);
@@ -181,10 +224,14 @@ if (existingCard.test(html)) {
   html = html.replace(evidenceHeading, `${evidenceHeading}${originalOutlookCard}`);
 }
 
+if (!html.includes('id="aok-postfach-2026-10-03"')) {
+  html = html.replace(evidenceHeading, `${evidenceHeading}${aokPostfachCard}`);
+}
+
 if (!html.includes('id="portal-ausfall-2026-10-02"')) {
   html = html.replace('</body>', `${portalOutageBlock}\n</body>`);
 }
 
-html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-02-2145 --></body>`);
+html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-03-0930 --></body>`);
 ---
 <Fragment set:html={html} />
