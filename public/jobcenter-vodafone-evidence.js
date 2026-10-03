@@ -1,73 +1,26 @@
-/* WDFOX Jobcenter Vodafone evidence — deploy trigger 2026-10-03 */
+/* WDFOX Jobcenter Vodafone evidence — poster direct embed fix 2026-10-03 */
 (function(){
   'use strict';
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
 
-  function mount(){
-    var heading = Array.from(document.querySelectorAll('h2')).find(function(el){
-      return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise';
-    });
-    if (!heading) return;
+  var POSTER = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAGRFS1hLP2RYUVhxamR3lvqjloqKlv/b57X6////////////////////////////////////////////////////2wBDAWpxcZaDlv+jo///////////////////////////////////////////////////////////////////////////wgARCADKAWgDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAECA//EABYBAQEBAAAAAAAAAAAAAAAAAAABAv/aAAwDAQACEAMQAAAByssrKLOkMN7OLrV4usOVdji3s4ugxNwzd6OU6jm2OIK6suTtk5ukMOg5t7OToOc2Ml1IorGlSyOrErpeQ6XmNSUx355OlxDWuYqQ6XlTdxDUZM2DqzMOmcq1INXA3ecjpeYhNNFsjQ5NRZrI2moqyVLizo5yu2c2NZzo3OdGsjeZDoxDdwNa5i6506OY1cZrrjIW0zdRFkNSVagis7zLbEmkzbs56Uy0uc2pc2jNtXF0MToMzcJnfNNzI0g1IC2lmU3M0jVMaomdRayOlzrFmdxcTeNS6wN1LKzSsjVqWUC4NAhYzz3jUKSWC565XFsNAt5w6ZyLAAIN2QrNIousWN5KKiJS7zpVzEmMq7zGpZULm4s1NRM7xtaklpCQssuQA0JUNMDTOoWWkBWTSUayhc6VZC51kyWy9efXNZ1kznWdRAazTUSWb57STWKtlEoSgCAms6AFgssAGsdIxUXVzS0jkts6FlZ1DGNZ1IADWbAAC2aWNRIuS3IKM6zoXNBRAVAUSoSxdJYzSzoZzbMtTIpKJQW9DnaGaOepSyiFGdZKgus6lmdZTa0i5KirYjUgS5CCbzV3kjJNTWVIuTe+e5Z05k0Kiw53I2xTTFNJCsjWsalk1E2gFE0MW0xWa3z6c40lKuDTOlym7MzcBCULJDcyLAAFNNDLUIokSOkFlkTUUELUDOTeQ1cDpiC6zoTNq3A6OY3nItyCiAAWUSgADU1uXEQgTohcwTc1lcykAAAus0yKAAgAFg1GjMA0MgWUA//EACEQAAIBBAMAAwEAAAAAAAAAAAARARAgIUECMDESQEIy/9oACAEBAAEFArMye0UikUikU0U0UimRSKaqRSKRSKaoQhUQhUQhCv0cfOPnIn39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';
 
-    if (!document.getElementById('vodafone-evidence-style')) {
-      var style = document.createElement('style');
-      style.id = 'vodafone-evidence-style';
-      style.textContent = '.vodafone-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.vodafone-title{font-weight:700;margin-bottom:6px}.vodafone-note{margin-bottom:12px}.vodafone-details{margin-top:10px}.vodafone-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.vodafone-summary::-webkit-details-marker{display:none}.vodafone-summary:hover{background:#f0f0f0}.vodafone-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.vodafone-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.vodafone-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.vodafone-meta{font-size:.92rem;color:#555;line-height:1.5}.vodafone-body{padding:18px;line-height:1.6}.vodafone-body p{margin:0 0 12px}.vodafone-privacy{font-size:.9rem;color:#666;margin-top:14px}.jobcenter-social-poster{display:block;max-width:1280px;margin:48px auto 24px;padding:0 18px;box-sizing:border-box}.jobcenter-social-poster img{display:block;width:100%;height:auto;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)}@media print{.jobcenter-social-poster{page-break-before:always;max-width:none;padding:0;margin:18mm 0 0}.jobcenter-social-poster img{border-radius:0;box-shadow:none}}';
-      document.head.appendChild(style);
-    }
-
-    if (!document.getElementById('vodafone-outlook-2026-10-02')) {
-      var card = document.createElement('div');
-      card.className = 'vodafone-card';
-      card.id = 'vodafone-outlook-2026-10-02';
-      card.innerHTML = `
-        <div class="vodafone-title">✉️ Outlook-Nachricht vom 02.10.2026 – Vodafone-Rechnung / Zahlungsaufschub</div>
-        <div class="vodafone-note">Dokumentation meiner Mitteilung an Vodafone über die weiterhin ausstehende Bürgergeld-Entscheidung und meine vorübergehende finanzielle Notlage.</div>
-        <details class="vodafone-details">
-          <summary class="vodafone-summary">✉️ Nachricht im Browser anzeigen</summary>
-          <div class="vodafone-view">
-            <div class="vodafone-head">
-              <div class="vodafone-subject">FW: Mobilfunkanfrage zur Vodafone-Rechnung -Id:0FA26C3AK0EU3BX7_JC-09.00 Tr.Numer</div>
-              <div class="vodafone-meta"><strong>Datum:</strong> 02.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Kundenservice Vodafone</div>
-            </div>
-            <div class="vodafone-body">
-              <p><strong>Sehr geehrte Damen und Herren, Vodafone</strong></p>
-              <p>ich wende mich mit einer dringenden Bitte bezüglich meiner noch offenen Vodafone-Rechnung an Sie:</p>
-              <p>Kundennummer: 122006926<br>Rechnungsnummer: 122573899939<br>Aktuell offener Gesamtbetrag: 132,98 Euro</p>
-              <p>Vielen Dank für den bereits gewährten Zahlungsaufschub bis zum 2. Oktober 2026. Das Jobcenter hat über meinen Antrag auf Bürgergeld jedoch noch nicht entschieden. Abgesehen von Lebensmittelgutscheinen im Wert von 80 Euro habe ich bislang keine Geldleistung erhalten.</p>
-              <p>Da die Lebensmittelgutscheine nicht zur Begleichung meiner Vodafone-Rechnung verwendet werden können, verfüge ich derzeit objektiv nicht über die finanziellen Mittel, um den offenen Betrag zu bezahlen. Ich habe das Jobcenter bereits dringend um die Auszahlung eines Vorschusses beziehungsweise um die unmittelbare Begleichung der Vodafone-Rechnung gebeten.</p>
-              <p>Meine aktuelle Situation und die laufende Kommunikation mit dem Jobcenter dokumentiere ich außerdem auf folgender Webseite:</p>
-              <p><a href="https://www.foxprof.club/jobcenter/" target="_blank" rel="noopener">https://www.foxprof.club/jobcenter/</a></p>
-              <p>Auf dieser Seite sind Informationen und Unterlagen verfügbar, die belegen, dass ich meinen Antrag auf Bürgergeld und meine derzeitige finanzielle Notlage aktiv mit dem Jobcenter kläre.</p>
-              <p>Gemäß § 61 Absatz 4 des Telekommunikationsgesetzes (TKG) darf ein Anbieter Telekommunikationsleistungen wegen Zahlungsverzugs eines Verbrauchers nur bei Erfüllung der gesetzlichen Voraussetzungen sperren. Die beabsichtigte Sperre muss dem Verbraucher mindestens zwei Wochen vorher schriftlich angedroht werden. Dabei muss der Verbraucher auch auf die Möglichkeit hingewiesen werden, Rechtsschutz vor den Gerichten zu suchen.</p>
-              <p>Ich fordere Sie daher auf, meine Mobilfunk- und Internetdienste nicht zu sperren, ohne das gesetzlich vorgeschriebene Verfahren und die gesetzliche Zweiwochenfrist nachweislich einzuhalten.</p>
-              <p>Falls mir bereits eine formelle schriftliche Sperrandrohung gemäß § 61 Absatz 4 TKG zugesandt wurde, bitte ich um Mitteilung des Datums und der Art der Zustellung sowie um Übersendung einer Kopie dieses Schreibens.</p>
-              <p>Unabhängig von diesem gesetzlichen Schutz bitte ich Sie angesichts meiner nachgewiesenen vorübergehenden finanziellen Notlage:</p>
-              <p>1. den Zahlungsaufschub mindestens bis zum 16. Oktober 2026 zu verlängern,<br>2. meine Mobilfunk- und Internetdienste bis zu diesem Zeitpunkt nicht zu sperren,<br>3. weitere Mahnmaßnahmen auszusetzen und keine zusätzlichen Kosten zu verursachen,<br>4. mir die Verlängerung des Zahlungsaufschubs schriftlich zu bestätigen,<br>5. zu bestätigen, dass Sie bei einer gegebenenfalls beabsichtigten Sperre das Verfahren und die Zweiwochenfrist gemäß § 61 Absatz 4 TKG einhalten werden,<br>6. mir mitzuteilen, ob und wann mir bereits eine formelle schriftliche Sperrandrohung zugestellt wurde, und mir gegebenenfalls eine Kopie davon zu übersenden.</p>
-              <p>Meine Mobilfunk- und Internetverbindung ist in meiner derzeitigen Situation von besonderer Bedeutung. Ich benötige sie für die Kommunikation mit dem Jobcenter, der AOK, der Agentur für Arbeit und weiteren staatlichen Stellen sowie zur elektronischen Übermittlung angeforderter Unterlagen.</p>
-              <p>Ich bestreite meine Verpflichtung zur Begleichung der Rechnung nicht. Es handelt sich um eine vorübergehende finanzielle Notlage, die dadurch entstanden ist, dass ich weiterhin auf die Entscheidung und die erste Geldleistung des Jobcenters warte. Sobald mir die erforderlichen finanziellen Mittel zur Verfügung stehen, werde ich den offenen Betrag begleichen.</p>
-              <p>Gleichzeitig habe ich dem Jobcenter ausdrücklich gestattet, den Betrag von 132,98 Euro unmittelbar an Vodafone zu überweisen.</p>
-              <p>Da der bisherige Zahlungsaufschub heute, am 2. Oktober 2026, endet, bitte ich um eine dringende Prüfung meines Anliegens und eine unverzügliche schriftliche Antwort.</p>
-              <p>Vielen Dank im Voraus für Ihr Entgegenkommen.</p>
-              <p>Mit freundlichen Grüßen<br>Peter Ferenc</p>
-              <p class="vodafone-privacy">E-Mail-Adressen und nicht für die öffentliche Dokumentation erforderliche Adressdaten werden hier nicht veröffentlicht.</p>
-            </div>
-          </div>
-        </details>`;
-
-      heading.insertAdjacentElement('afterend', card);
-    }
-
-    if (!document.getElementById('jobcenter-social-poster-2026-10-03')) {
-      var poster = document.createElement('section');
-      poster.id = 'jobcenter-social-poster-2026-10-03';
-      poster.className = 'jobcenter-social-poster';
-      poster.setAttribute('aria-label', 'Jahrelange Arbeit und die dokumentierte Situation beim Jobcenter');
-      poster.innerHTML = '<img src="/jobcenter/jobcenter-social-poster.svg?v=20261003" alt="Jahrelange Arbeit - und dann? Steuern gezahlt, das System mitfinanziert und in der Not allein gelassen?">';
-      document.body.appendChild(poster);
-    }
+  function ensurePoster(){
+    var old = document.getElementById('jobcenter-social-poster-2026-10-03') || document.getElementById('jobcenter-social-poster-bottom');
+    if (old) old.remove();
+    var style = document.createElement('style');
+    style.textContent = '.jobcenter-social-poster{display:block;max-width:1280px;margin:48px auto 24px;padding:0 18px;box-sizing:border-box}.jobcenter-social-poster img{display:block;width:100%;height:auto;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)}';
+    document.head.appendChild(style);
+    var poster = document.createElement('section');
+    poster.id = 'jobcenter-social-poster-2026-10-03';
+    poster.className = 'jobcenter-social-poster';
+    var img = document.createElement('img');
+    img.alt = 'Jahrelange Arbeit - und dann? Steuern gezahlt, das System mitfinanziert und in der Not allein gelassen?';
+    img.src = POSTER;
+    poster.appendChild(img);
+    document.body.appendChild(poster);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, {once:true});
-  else mount();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensurePoster, {once:true});
+  else ensurePoster();
 })();
