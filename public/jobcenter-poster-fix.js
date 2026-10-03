@@ -49,69 +49,6 @@
     return true;
   }
 
-  function splitVodafoneHeader(){
-    var card = document.getElementById('vodafone-outlook-2026-10-02');
-    if (!card) return false;
-    if (card.getAttribute('data-split-header') === '1') return true;
-
-    var title = card.querySelector('.vodafone-title');
-    var details = card.querySelector('.vodafone-details');
-    var oldSummary = details ? details.querySelector('.vodafone-summary') : null;
-    if (!title || !details) return false;
-
-    var row = document.createElement('div');
-    row.id = 'vodafone-split-header';
-    row.style.display = 'flex';
-    row.style.width = '100%';
-    row.style.margin = '0 0 10px';
-    row.style.border = '1px solid #cfcfcf';
-    row.style.borderRadius = '8px';
-    row.style.overflow = 'hidden';
-    row.style.background = '#fafafa';
-    row.style.boxSizing = 'border-box';
-
-    var left = document.createElement('div');
-    left.style.flex = '1 1 50%';
-    left.style.display = 'flex';
-    left.style.alignItems = 'center';
-    left.style.padding = '13px 16px';
-    left.style.fontWeight = '700';
-    left.style.boxSizing = 'border-box';
-    left.textContent = title.textContent || '✉️ Outlook-Nachricht vom 02.10.2026 – Vodafone-Rechnung / Zahlungsaufschub';
-
-    var right = document.createElement('button');
-    right.type = 'button';
-    right.style.flex = '1 1 50%';
-    right.style.display = 'flex';
-    right.style.alignItems = 'center';
-    right.style.justifyContent = 'center';
-    right.style.padding = '13px 16px';
-    right.style.border = '0';
-    right.style.borderLeft = '1px solid #cfcfcf';
-    right.style.background = '#fff';
-    right.style.color = '#111';
-    right.style.font = 'inherit';
-    right.style.fontWeight = '700';
-    right.style.cursor = 'pointer';
-    right.style.boxSizing = 'border-box';
-    right.textContent = 'Nachricht im Browser anzeigen';
-    right.setAttribute('aria-controls', 'vodafone-outlook-2026-10-02-details');
-    right.setAttribute('aria-expanded', details.open ? 'true' : 'false');
-
-    details.id = 'vodafone-outlook-2026-10-02-details';
-    right.addEventListener('click', function(){
-      details.open = !details.open;
-      right.setAttribute('aria-expanded', details.open ? 'true' : 'false');
-    });
-
-    if (oldSummary) oldSummary.style.display = 'none';
-    title.replaceWith(row);
-    row.appendChild(left);
-    row.appendChild(right);
-    card.setAttribute('data-split-header', '1');
-    return true;
-  }
-
   function addPostfachPdfCard(){
     if (document.getElementById('postfach-2026-10-03-1222')) return true;
 
@@ -139,43 +76,90 @@
     note.style.marginBottom = '12px';
     note.textContent = 'Original-PDF der am 03.10.2026 um 12:22 Uhr an das Jobcenter übermittelten Postfachnachricht.';
 
-    var details = document.createElement('details');
-    var summary = document.createElement('summary');
-    summary.style.cursor = 'pointer';
-    summary.style.fontWeight = '700';
-    summary.style.padding = '10px 12px';
-    summary.style.border = '1px solid #cfcfcf';
-    summary.style.borderRadius = '8px';
-    summary.style.background = '#fff';
-    summary.textContent = '📨 Nachricht / PDF anzeigen';
+    var controls = document.createElement('div');
+    controls.style.display = 'flex';
+    controls.style.width = '100%';
+    controls.style.border = '1px solid #cfcfcf';
+    controls.style.borderRadius = '8px';
+    controls.style.overflow = 'hidden';
+    controls.style.background = '#fff';
+    controls.style.boxSizing = 'border-box';
 
-    var body = document.createElement('div');
-    body.style.padding = '14px 0 2px';
+    var pdfButton = document.createElement('a');
+    pdfButton.href = POSTFACH_PDF_URL;
+    pdfButton.target = '_blank';
+    pdfButton.rel = 'noopener noreferrer';
+    pdfButton.style.flex = '1 1 50%';
+    pdfButton.style.display = 'flex';
+    pdfButton.style.alignItems = 'center';
+    pdfButton.style.justifyContent = 'center';
+    pdfButton.style.padding = '12px 14px';
+    pdfButton.style.boxSizing = 'border-box';
+    pdfButton.style.fontWeight = '700';
+    pdfButton.style.color = '#111';
+    pdfButton.style.textDecoration = 'none';
+    pdfButton.style.background = '#fff';
+    pdfButton.textContent = '📄 Original-PDF öffnen';
+
+    var browserButton = document.createElement('button');
+    browserButton.type = 'button';
+    browserButton.style.flex = '1 1 50%';
+    browserButton.style.display = 'flex';
+    browserButton.style.alignItems = 'center';
+    browserButton.style.justifyContent = 'center';
+    browserButton.style.padding = '12px 14px';
+    browserButton.style.boxSizing = 'border-box';
+    browserButton.style.border = '0';
+    browserButton.style.borderLeft = '1px solid #cfcfcf';
+    browserButton.style.background = '#fff';
+    browserButton.style.color = '#111';
+    browserButton.style.font = 'inherit';
+    browserButton.style.fontWeight = '700';
+    browserButton.style.cursor = 'pointer';
+    browserButton.textContent = 'Nachricht im Browser anzeigen';
+    browserButton.setAttribute('aria-expanded', 'false');
+    browserButton.setAttribute('aria-controls', 'postfach-2026-10-03-1222-browser');
+
+    var browserView = document.createElement('div');
+    browserView.id = 'postfach-2026-10-03-1222-browser';
+    browserView.style.display = 'none';
+    browserView.style.marginTop = '14px';
+    browserView.style.background = '#fff';
+    browserView.style.border = '1px solid #d9d9d9';
+    browserView.style.borderRadius = '8px';
+    browserView.style.overflow = 'hidden';
 
     var meta = document.createElement('div');
-    meta.style.marginBottom = '14px';
+    meta.style.padding = '14px 16px';
+    meta.style.borderBottom = '1px solid #e4e4e4';
+    meta.style.background = '#f5f7fa';
     meta.innerHTML = '<strong>Datum:</strong> 03.10.2026 | 12:22<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut';
 
-    var link = document.createElement('a');
-    link.href = POSTFACH_PDF_URL;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.style.display = 'inline-block';
-    link.style.padding = '12px 16px';
-    link.style.borderRadius = '8px';
-    link.style.background = '#111';
-    link.style.color = '#fff';
-    link.style.textDecoration = 'none';
-    link.style.fontWeight = '700';
-    link.textContent = '📄 Original-PDF öffnen - postfachnachricht-03.10.2026 12_22.pdf';
+    var frame = document.createElement('iframe');
+    frame.src = POSTFACH_PDF_URL + '#view=FitH';
+    frame.title = 'Postfachnachricht vom 03.10.2026 um 12:22';
+    frame.style.display = 'block';
+    frame.style.width = '100%';
+    frame.style.height = '78vh';
+    frame.style.minHeight = '620px';
+    frame.style.border = '0';
+    frame.loading = 'lazy';
 
-    body.appendChild(meta);
-    body.appendChild(link);
-    details.appendChild(summary);
-    details.appendChild(body);
+    browserButton.addEventListener('click', function(){
+      var open = browserView.style.display !== 'none';
+      browserView.style.display = open ? 'none' : 'block';
+      browserButton.setAttribute('aria-expanded', open ? 'false' : 'true');
+      browserButton.textContent = open ? 'Nachricht im Browser anzeigen' : 'Nachricht im Browser ausblenden';
+    });
+
+    controls.appendChild(pdfButton);
+    controls.appendChild(browserButton);
+    browserView.appendChild(meta);
+    browserView.appendChild(frame);
     card.appendChild(title);
     card.appendChild(note);
-    card.appendChild(details);
+    card.appendChild(controls);
+    card.appendChild(browserView);
 
     var heading = Array.from(document.querySelectorAll('h2')).find(function(el){
       return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise';
@@ -227,12 +211,10 @@
   function run(){
     addTopFacebookIcon();
     addPostfachPdfCard();
-    splitVodafoneHeader();
     replacePoster();
     setTimeout(function(){
       addTopFacebookIcon();
       addPostfachPdfCard();
-      splitVodafoneHeader();
       replacePoster();
     }, 1200);
   }
