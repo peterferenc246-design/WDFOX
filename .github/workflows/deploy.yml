@@ -33,6 +33,55 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Jobcenter AOK evidence PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet pypdf pillow
+          python - <<'PY'
+          from io import BytesIO
+          from pathlib import Path
+          from PIL import Image, ImageOps
+          from pypdf import PdfReader, PdfWriter
+
+          source = Path('privat/postfachnachricht-03.10.2026 09_30.pdf')
+          image_path = Path('privat/Gutschein.jpg')
+          output = Path('public/jobcenter/postfachnachricht-03.10.2026 09_30.pdf')
+
+          if not source.is_file():
+              raise SystemExit(f'Missing source PDF: {source}')
+          if not image_path.is_file():
+              raise SystemExit(f'Missing Gutschein image: {image_path}')
+
+          output.parent.mkdir(parents=True, exist_ok=True)
+
+          with Image.open(image_path) as img:
+              img = ImageOps.exif_transpose(img).convert('RGB')
+              image_pdf = BytesIO()
+              img.save(image_pdf, format='PDF', resolution=150.0)
+              image_pdf.seek(0)
+
+              source_reader = PdfReader(str(source))
+              image_reader = PdfReader(image_pdf)
+              writer = PdfWriter()
+              for page in source_reader.pages:
+                  writer.add_page(page)
+              for page in image_reader.pages:
+                  writer.add_page(page)
+
+              with output.open('wb') as fh:
+                  writer.write(fh)
+
+          merged = PdfReader(str(output))
+          expected_pages = len(PdfReader(str(source)).pages) + 1
+          if len(merged.pages) != expected_pages:
+              raise SystemExit(f'Unexpected page count: {len(merged.pages)} != {expected_pages}')
+          if output.stat().st_size <= source.stat().st_size:
+              raise SystemExit('Generated PDF is unexpectedly not larger than the source PDF')
+
+          print(f'Generated {output} with {len(merged.pages)} pages')
+          PY
+
       - name: Build Astro site
         run: pnpm run build
 
