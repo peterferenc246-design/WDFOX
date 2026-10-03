@@ -49,6 +49,69 @@
     return true;
   }
 
+  function splitVodafoneHeader(){
+    var card = document.getElementById('vodafone-outlook-2026-10-02');
+    if (!card) return false;
+    if (card.getAttribute('data-split-header') === '1') return true;
+
+    var title = card.querySelector('.vodafone-title');
+    var details = card.querySelector('.vodafone-details');
+    var oldSummary = details ? details.querySelector('.vodafone-summary') : null;
+    if (!title || !details) return false;
+
+    var row = document.createElement('div');
+    row.id = 'vodafone-split-header';
+    row.style.display = 'flex';
+    row.style.width = '100%';
+    row.style.margin = '0 0 10px';
+    row.style.border = '1px solid #cfcfcf';
+    row.style.borderRadius = '8px';
+    row.style.overflow = 'hidden';
+    row.style.background = '#fafafa';
+    row.style.boxSizing = 'border-box';
+
+    var left = document.createElement('div');
+    left.style.flex = '1 1 50%';
+    left.style.display = 'flex';
+    left.style.alignItems = 'center';
+    left.style.padding = '13px 16px';
+    left.style.fontWeight = '700';
+    left.style.boxSizing = 'border-box';
+    left.textContent = title.textContent || '✉️ Outlook-Nachricht vom 02.10.2026 – Vodafone-Rechnung / Zahlungsaufschub';
+
+    var right = document.createElement('button');
+    right.type = 'button';
+    right.style.flex = '1 1 50%';
+    right.style.display = 'flex';
+    right.style.alignItems = 'center';
+    right.style.justifyContent = 'center';
+    right.style.padding = '13px 16px';
+    right.style.border = '0';
+    right.style.borderLeft = '1px solid #cfcfcf';
+    right.style.background = '#fff';
+    right.style.color = '#111';
+    right.style.font = 'inherit';
+    right.style.fontWeight = '700';
+    right.style.cursor = 'pointer';
+    right.style.boxSizing = 'border-box';
+    right.textContent = 'Nachricht im Browser anzeigen';
+    right.setAttribute('aria-controls', 'vodafone-outlook-2026-10-02-details');
+    right.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+
+    details.id = 'vodafone-outlook-2026-10-02-details';
+    right.addEventListener('click', function(){
+      details.open = !details.open;
+      right.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+    });
+
+    if (oldSummary) oldSummary.style.display = 'none';
+    title.replaceWith(row);
+    row.appendChild(left);
+    row.appendChild(right);
+    card.setAttribute('data-split-header', '1');
+    return true;
+  }
+
   function addPostfachPdfCard(){
     if (document.getElementById('postfach-2026-10-03-1222')) return true;
 
@@ -164,10 +227,12 @@
   function run(){
     addTopFacebookIcon();
     addPostfachPdfCard();
+    splitVodafoneHeader();
     replacePoster();
     setTimeout(function(){
       addTopFacebookIcon();
       addPostfachPdfCard();
+      splitVodafoneHeader();
       replacePoster();
     }, 1200);
   }
