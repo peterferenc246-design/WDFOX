@@ -1,32 +1,46 @@
-/* WDFOX Jobcenter poster quality fix */
+/* WDFOX Jobcenter poster exact-image fix */
 (function(){
   'use strict';
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
 
-  var POSTER_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Jahrelange%20Arbeit%20%E2%80%93%20und%20dann_de.png?v=20261003-1415';
+  var POSTER_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Jahrelange%20Arbeit%20%E2%80%93%20und%20dann_de.png';
 
-  function applyPosterFix(){
-    var poster = document.getElementById('jobcenter-social-poster-2026-10-03');
-    if (!poster) return false;
-    var img = poster.querySelector('img');
-    if (!img) return false;
+  function replacePoster(){
+    var existing = document.getElementById('jobcenter-social-poster-2026-10-03');
+    if (existing) existing.remove();
+
+    var poster = document.createElement('section');
+    poster.id = 'jobcenter-social-poster-2026-10-03';
+    poster.className = 'jobcenter-social-poster';
+    poster.setAttribute('aria-label', 'Jahrelange Arbeit - und dann');
+
+    var img = document.createElement('img');
     img.src = POSTER_URL;
-    img.removeAttribute('srcset');
-    img.removeAttribute('sizes');
+    img.alt = 'Jahrelange Arbeit - und dann';
+    img.decoding = 'async';
+    img.loading = 'eager';
     img.style.display = 'block';
     img.style.width = '100%';
     img.style.height = 'auto';
     img.style.maxWidth = '1672px';
     img.style.margin = '0 auto';
-    img.style.imageRendering = 'auto';
+    img.style.border = '0';
+    img.style.borderRadius = '10px';
+    img.style.boxShadow = '0 3px 16px rgba(0,0,0,.2)';
+
+    poster.appendChild(img);
+    document.body.appendChild(poster);
     return true;
   }
 
-  if (applyPosterFix()) return;
+  function run(){
+    replacePoster();
+    setTimeout(replacePoster, 1200);
+  }
 
-  var observer = new MutationObserver(function(){
-    if (applyPosterFix()) observer.disconnect();
-  });
-  observer.observe(document.documentElement, {childList:true, subtree:true});
-  setTimeout(function(){ observer.disconnect(); applyPosterFix(); }, 5000);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, {once:true});
+  } else {
+    run();
+  }
 })();
