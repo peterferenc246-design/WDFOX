@@ -1,3 +1,4 @@
+/* WDFOX Jobcenter Vodafone evidence — deploy trigger 2026-10-03 */
 (function(){
   'use strict';
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
