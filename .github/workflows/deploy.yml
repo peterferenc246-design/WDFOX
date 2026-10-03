@@ -129,12 +129,15 @@ jobs:
               return inline_scripts.sub(keep, text)
 
           avatar_exists = Path('dist/tawk-avatar-fix.js').is_file()
+          evidence_exists = Path('dist/jobcenter-vodafone-evidence.js').is_file()
           snippet = (
               f'<script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v={sha}"></script>\n'
               f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>'
           )
           if avatar_exists:
               snippet += f'\n<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
+          if evidence_exists:
+              snippet += f'\n<script id="wdfox-jobcenter-vodafone-evidence" src="/jobcenter-vodafone-evidence.js?v={sha}"></script>'
 
           files = list(Path('dist').rglob('*.html'))
           if not files:
@@ -147,9 +150,9 @@ jobs:
               text = text.replace('</body>', snippet + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
 
-          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js'):
+          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js', 'dist/jobcenter-vodafone-evidence.js'):
               if not Path(required).is_file():
-                  raise SystemExit(f'Missing production Tawk asset: {required}')
+                  raise SystemExit(f'Missing production asset: {required}')
           PY
 
       - name: Validate production Tawk wiring
@@ -158,8 +161,10 @@ jobs:
           set -euo pipefail
           test -s dist/tawk-language-loader.js
           test -s dist/tawk-native-force.js
+          test -s dist/jobcenter-vodafone-evidence.js
           grep -R -q 'id="fox-tawk-language-loader"' dist --include='*.html'
           grep -R -q 'id="fox-tawk-native-force"' dist --include='*.html'
+          grep -R -q 'id="wdfox-jobcenter-vodafone-evidence"' dist --include='*.html'
           grep -q 'Tawk_API.endChat' dist/tawk-language-loader.js
           if grep -F -q '#fixed-lang-layer a.language-flag[data-language]' dist/tawk-language-loader.js; then
             echo 'Blocked duplicate production language-click handler'
