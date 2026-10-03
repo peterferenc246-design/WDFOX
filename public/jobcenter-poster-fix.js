@@ -8,10 +8,12 @@
     if (!poster) return false;
     var img = poster.querySelector('img');
     if (!img) return false;
-    img.src = '/jobcenter/jobcenter-social-poster.svg?v=20261003-1401';
+    img.src = '/jobcenter/jobcenter-social-poster.svg?v=20261003-1408';
     img.removeAttribute('srcset');
+    img.removeAttribute('sizes');
     img.style.width = '100%';
     img.style.height = 'auto';
+    img.style.maxWidth = '1280px';
     img.style.imageRendering = 'auto';
     return true;
   }
