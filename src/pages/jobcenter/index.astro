@@ -7,12 +7,12 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-03-0930">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-03-1000">'
 );
 
 html = html.replace(
   '</style>',
-  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-details{margin-top:10px}.outlook-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.outlook-summary::-webkit-details-marker{display:none}.outlook-summary:hover{background:#f0f0f0}.outlook-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px;line-height:1.6;white-space:pre-wrap}.outlook-view-body p{white-space:normal}.outlook-highlight{background:#fff200;color:#d40000;font-weight:800;padding:0 2px}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.outlook-error{padding:16px;color:#8a1c1c}</style>`
+  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-details{margin-top:10px}.outlook-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.outlook-summary::-webkit-details-marker{display:none}.outlook-summary:hover{background:#f0f0f0}.outlook-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px;line-height:1.6;white-space:pre-wrap}.outlook-view-body p{white-space:normal}.outlook-highlight{background:#fff200;color:#d40000;font-weight:800;padding:0 2px}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.aok-gutschein-image{display:block;width:100%;height:auto;margin:24px auto 0;border:1px solid #ddd;border-radius:8px}.outlook-error{padding:16px;color:#8a1c1c}</style>`
 );
 
 const portalOutageBlock = `
@@ -47,7 +47,7 @@ const originalOutlookCard = `<div class="outlook-card">
 
 const aokPostfachCard = `<div class="outlook-card" id="aok-postfach-2026-10-03">
   <div class="outlook-card-title">📨 Postfachnachricht vom 03.10.2026 – Krankenversicherung / AOK Bayern</div>
-  <div class="outlook-card-note">Die am 03.10.2026 an das Jobcenter übermittelte Nachricht. Das zugehörige PDF enthält am Ende zusätzlich den Gutschein für Lebensmittel und Hygieneartikel als Nachweis.</div>
+  <div class="outlook-card-note">Die am 03.10.2026 an das Jobcenter übermittelte Nachricht. Der Gutschein für Lebensmittel und Hygieneartikel wird als Nachweis direkt unter dem Nachrichtentext angezeigt.</div>
   <details class="outlook-details">
     <summary class="outlook-summary">📨 Text der Postfachnachricht anzeigen</summary>
     <div class="outlook-view">
@@ -77,9 +77,7 @@ const aokPostfachCard = `<div class="outlook-card" id="aok-postfach-2026-10-03">
         <p>Sollte das Jobcenter weiterhin der Auffassung sein, dass trotz meines gestellten Antrags und der bereits gewährten Unterstützung nach dem SGB II bislang keine Rechtsgrundlage für meine Anmeldung bei der AOK besteht, fordere ich, dass mir diese Rechtsauffassung elektronisch in mein Postfach im Jobcenter-Portal übermittelt wird, begründet und unter Angabe der konkreten Rechtsgrundlage.</p>
         <p>Aufgrund meiner akuten gesundheitlichen Beschwerden bitte ich um unverzügliche Bearbeitung.</p>
         <p>Mit freundlichen Grüßen<br>Peter Ferenc</p>
-      </div>
-      <div class="outlook-attachments">
-        <div class="outlook-attachment"><a href="/jobcenter/postfachnachricht-03.10.2026%2009_30.pdf" target="_blank" rel="noopener">📄 PDF öffnen – Postfachnachricht inklusive Gutschein</a></div>
+        <img class="aok-gutschein-image" src="https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Gutschein.jpg" alt="Gutschein für Lebensmittel und Hygieneartikel des Jobcenter Landkreis Landshut vom 02.09.2026">
       </div>
     </div>
   </details>
@@ -232,6 +230,6 @@ if (!html.includes('id="portal-ausfall-2026-10-02"')) {
   html = html.replace('</body>', `${portalOutageBlock}\n</body>`);
 }
 
-html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-03-0930 --></body>`);
+html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-03-1000 --></body>`);
 ---
 <Fragment set:html={html} />
