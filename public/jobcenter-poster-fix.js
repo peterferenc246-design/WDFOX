@@ -49,6 +49,42 @@
     return true;
   }
 
+  async function loadPdfText(target){
+    if (target.getAttribute('data-loaded') === '1') return;
+    target.textContent = 'Nachricht wird geladen ...';
+    try {
+      var pdfjs = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+      var response = await fetch(POSTFACH_PDF_URL, { cache: 'no-store' });
+      if (!response.ok) throw new Error('PDF konnte nicht geladen werden (' + response.status + ')');
+      var buffer = await response.arrayBuffer();
+      var pdf = await pdfjs.getDocument({ data: buffer }).promise;
+      var pages = [];
+      for (var pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+        var page = await pdf.getPage(pageNo);
+        var content = await page.getTextContent();
+        var lines = [];
+        var current = [];
+        var lastY = null;
+        content.items.forEach(function(item){
+          var y = item.transform && item.transform[5];
+          if (lastY !== null && Math.abs(y - lastY) > 3 && current.length) {
+            lines.push(current.join(' ').replace(/\s+/g, ' ').trim());
+            current = [];
+          }
+          if (item.str) current.push(item.str);
+          lastY = y;
+        });
+        if (current.length) lines.push(current.join(' ').replace(/\s+/g, ' ').trim());
+        pages.push(lines.filter(Boolean).join('\n'));
+      }
+      target.textContent = pages.filter(Boolean).join('\n\n');
+      target.setAttribute('data-loaded', '1');
+    } catch (error) {
+      target.textContent = 'Die Nachricht konnte im Browser nicht automatisch aus dem PDF gelesen werden. Bitte öffnen Sie das Original-PDF über die linke Schaltfläche.\n\nTechnischer Hinweis: ' + (error && error.message ? error.message : String(error));
+    }
+  }
+
   function addPostfachPdfCard(){
     if (document.getElementById('postfach-2026-10-03-1222')) return true;
 
@@ -135,27 +171,26 @@
     meta.style.background = '#f5f7fa';
     meta.innerHTML = '<strong>Datum:</strong> 03.10.2026 | 12:22<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut';
 
-    var frame = document.createElement('iframe');
-    frame.src = POSTFACH_PDF_URL + '#view=FitH';
-    frame.title = 'Postfachnachricht vom 03.10.2026 um 12:22';
-    frame.style.display = 'block';
-    frame.style.width = '100%';
-    frame.style.height = '78vh';
-    frame.style.minHeight = '620px';
-    frame.style.border = '0';
-    frame.loading = 'lazy';
+    var textView = document.createElement('div');
+    textView.id = 'postfach-2026-10-03-1222-text';
+    textView.style.padding = '18px';
+    textView.style.whiteSpace = 'pre-wrap';
+    textView.style.lineHeight = '1.6';
+    textView.style.minHeight = '220px';
+    textView.style.background = '#fff';
 
     browserButton.addEventListener('click', function(){
       var open = browserView.style.display !== 'none';
       browserView.style.display = open ? 'none' : 'block';
       browserButton.setAttribute('aria-expanded', open ? 'false' : 'true');
       browserButton.textContent = open ? 'Nachricht im Browser anzeigen' : 'Nachricht im Browser ausblenden';
+      if (!open) loadPdfText(textView);
     });
 
     controls.appendChild(pdfButton);
     controls.appendChild(browserButton);
     browserView.appendChild(meta);
-    browserView.appendChild(frame);
+    browserView.appendChild(textView);
     card.appendChild(title);
     card.appendChild(note);
     card.appendChild(controls);
