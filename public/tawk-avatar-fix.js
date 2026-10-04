@@ -45,6 +45,25 @@
       var extraLinks = section.querySelector('[data-wdfox-email-links="1"]');
       if (extraLinks) extraLinks.remove();
 
+      section.querySelectorAll('a').forEach(function (a) {
+        var label = String(a.textContent || "").replace(/\s+/g, " ").trim();
+        if (label.indexOf("postfachnachricht-04.10.2026 15_21_existenz.pdf") !== -1) a.remove();
+      });
+
+      var extracted = section.querySelector('#existenz-postfach-pdf-text');
+      if (extracted) {
+        extracted.querySelectorAll('p').forEach(function (p) {
+          var text = String(p.textContent || "").replace(/\s+/g, " ").trim();
+          if (
+            text.indexOf("fbid=981014231708856") !== -1 ||
+            text.indexOf("Anhang:") !== -1 ||
+            text.indexOf("Unverz_gliche finanzielle Sicherung meiner Existenz_DE.pdf") !== -1 ||
+            text.indexOf("Unverzügliche finanzielle Sicherung meiner Existenz_DE.pdf") !== -1 ||
+            /\b1 von 1\b/i.test(text)
+          ) p.remove();
+        });
+      }
+
       var body = section.querySelector(".outlook-view-body");
       if (body) {
         body.style.lineHeight = "1.45";
@@ -76,6 +95,7 @@
 
     window.setTimeout(apply, 250);
     window.setTimeout(apply, 1300);
+    window.setTimeout(apply, 2500);
   }
 
   normalizeJobcenterExistenzMessage();
