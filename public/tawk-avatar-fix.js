@@ -42,6 +42,9 @@
         details.setAttribute("data-wdfox-initialized", "1");
       }
 
+      var extraLinks = section.querySelector('[data-wdfox-email-links="1"]');
+      if (extraLinks) extraLinks.remove();
+
       var body = section.querySelector(".outlook-view-body");
       if (body) {
         body.style.lineHeight = "1.45";
