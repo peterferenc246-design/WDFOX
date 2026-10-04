@@ -5,7 +5,8 @@
 
   var POSTER_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Jahrelange%20Arbeit%20%E2%80%93%20und%20dann_de.png';
   var FACEBOOK_URL = 'https://www.facebook.com/photo?fbid=980105415133071&set=a.858080437335570';
-  var POSTFACH_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2012_22.pdf';
+  var POSTFACH_1222_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2012_22.pdf';
+  var POSTFACH_1430_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2014_30.1.pdf';
 
   function styleFacebookIcon(fb, size){
     fb.href = FACEBOOK_URL;
@@ -49,48 +50,76 @@
     return true;
   }
 
-  async function loadPdfText(target){
+  async function loadPdfText(target, pdfUrl){
     if (target.getAttribute('data-loaded') === '1') return;
     target.textContent = 'Nachricht wird geladen ...';
     try {
       var pdfjs = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');
       pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
-      var response = await fetch(POSTFACH_PDF_URL, { cache: 'no-store' });
+      var response = await fetch(pdfUrl, { cache: 'no-store' });
       if (!response.ok) throw new Error('PDF konnte nicht geladen werden (' + response.status + ')');
       var buffer = await response.arrayBuffer();
       var pdf = await pdfjs.getDocument({ data: buffer }).promise;
-      var pages = [];
+      var allLines = [];
       for (var pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
         var page = await pdf.getPage(pageNo);
         var content = await page.getTextContent();
-        var lines = [];
-        var current = [];
-        var lastY = null;
+        var grouped = [];
         content.items.forEach(function(item){
-          var y = item.transform && item.transform[5];
-          if (lastY !== null && Math.abs(y - lastY) > 3 && current.length) {
-            lines.push(current.join(' ').replace(/\s+/g, ' ').trim());
-            current = [];
+          var y = item.transform && item.transform[5] || 0;
+          var x = item.transform && item.transform[4] || 0;
+          var line = grouped.find(function(candidate){ return Math.abs(candidate.y - y) < 2.5; });
+          if (!line) {
+            line = { y: y, items: [] };
+            grouped.push(line);
           }
-          if (item.str) current.push(item.str);
-          lastY = y;
+          line.items.push({ x: x, text: item.str || '' });
         });
-        if (current.length) lines.push(current.join(' ').replace(/\s+/g, ' ').trim());
-        pages.push(lines.filter(Boolean).join('\n'));
+        grouped.sort(function(a,b){ return b.y - a.y; });
+        grouped.forEach(function(line){
+          var text = line.items.sort(function(a,b){ return a.x - b.x; }).map(function(item){ return item.text; }).join(' ').replace(/\s+/g, ' ').trim();
+          if (text) allLines.push(text);
+        });
       }
-      target.textContent = pages.filter(Boolean).join('\n\n');
+
+      var start = allLines.findIndex(function(line){ return /^Sehr geehrte Damen und Herren/i.test(line); });
+      var lines = start >= 0 ? allLines.slice(start) : allLines;
+      target.textContent = '';
+      var bufferLines = [];
+
+      function flush(){
+        var text = bufferLines.join(' ').replace(/\s+/g, ' ').trim();
+        bufferLines = [];
+        if (!text) return;
+        var p = document.createElement('p');
+        p.textContent = text;
+        p.style.margin = '0 0 14px';
+        p.style.textAlign = 'justify';
+        p.style.textJustify = 'inter-word';
+        p.style.hyphens = 'auto';
+        target.appendChild(p);
+      }
+
+      lines.forEach(function(line){
+        var text = String(line || '').replace(/\s+/g, ' ').trim();
+        if (!text) { flush(); return; }
+        if (/^Mit freundlichen Grüßen/i.test(text) && bufferLines.length) flush();
+        bufferLines.push(text);
+        if (/[.!?:]$/.test(text) || /^Mit freundlichen Grüßen/i.test(text) || /^Peter Ferenc$/i.test(text)) flush();
+      });
+      flush();
       target.setAttribute('data-loaded', '1');
     } catch (error) {
       target.textContent = 'Die Nachricht konnte im Browser nicht automatisch aus dem PDF gelesen werden. Bitte öffnen Sie das Original-PDF über die linke Schaltfläche.\n\nTechnischer Hinweis: ' + (error && error.message ? error.message : String(error));
     }
   }
 
-  function addPostfachPdfCard(){
-    if (document.getElementById('postfach-2026-10-03-1222')) return true;
+  function addPostfachPdfCard(config){
+    if (document.getElementById(config.id)) return true;
 
     var card = document.createElement('section');
-    card.id = 'postfach-2026-10-03-1222';
-    card.setAttribute('aria-label', 'Postfachnachricht vom 03.10.2026 um 12:22');
+    card.id = config.id;
+    card.setAttribute('aria-label', 'Postfachnachricht vom ' + config.date + ' um ' + config.time);
     card.style.display = 'block';
     card.style.boxSizing = 'border-box';
     card.style.width = '100%';
@@ -106,11 +135,11 @@
     title.style.fontWeight = '700';
     title.style.fontSize = '1.05rem';
     title.style.marginBottom = '8px';
-    title.textContent = '📨 NEU - Postfachnachricht vom 03.10.2026 | 12:22';
+    title.textContent = '📨 NEU - Postfachnachricht vom ' + config.date + ' | ' + config.time;
 
     var note = document.createElement('div');
     note.style.marginBottom = '12px';
-    note.textContent = 'Original-PDF der am 03.10.2026 um 12:22 Uhr an das Jobcenter übermittelten Postfachnachricht.';
+    note.textContent = 'Original-PDF der am ' + config.date + ' um ' + config.time + ' Uhr an das Jobcenter übermittelten Postfachnachricht.';
 
     var controls = document.createElement('div');
     controls.style.display = 'flex';
@@ -122,7 +151,7 @@
     controls.style.boxSizing = 'border-box';
 
     var pdfButton = document.createElement('a');
-    pdfButton.href = POSTFACH_PDF_URL;
+    pdfButton.href = config.pdfUrl;
     pdfButton.target = '_blank';
     pdfButton.rel = 'noopener noreferrer';
     pdfButton.style.flex = '1 1 50%';
@@ -154,10 +183,10 @@
     browserButton.style.cursor = 'pointer';
     browserButton.textContent = 'Nachricht im Browser anzeigen';
     browserButton.setAttribute('aria-expanded', 'false');
-    browserButton.setAttribute('aria-controls', 'postfach-2026-10-03-1222-browser');
+    browserButton.setAttribute('aria-controls', config.id + '-browser');
 
     var browserView = document.createElement('div');
-    browserView.id = 'postfach-2026-10-03-1222-browser';
+    browserView.id = config.id + '-browser';
     browserView.style.display = 'none';
     browserView.style.marginTop = '14px';
     browserView.style.background = '#fff';
@@ -169,22 +198,23 @@
     meta.style.padding = '14px 16px';
     meta.style.borderBottom = '1px solid #e4e4e4';
     meta.style.background = '#f5f7fa';
-    meta.innerHTML = '<strong>Datum:</strong> 03.10.2026 | 12:22<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut';
+    meta.innerHTML = '<strong>Datum:</strong> ' + config.date + ' | ' + config.time + '<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut';
 
     var textView = document.createElement('div');
-    textView.id = 'postfach-2026-10-03-1222-text';
-    textView.style.padding = '18px';
-    textView.style.whiteSpace = 'pre-wrap';
+    textView.id = config.id + '-text';
+    textView.style.padding = '18px 6px';
     textView.style.lineHeight = '1.6';
     textView.style.minHeight = '220px';
     textView.style.background = '#fff';
+    textView.style.textAlign = 'justify';
+    textView.style.textJustify = 'inter-word';
 
     browserButton.addEventListener('click', function(){
       var open = browserView.style.display !== 'none';
       browserView.style.display = open ? 'none' : 'block';
       browserButton.setAttribute('aria-expanded', open ? 'false' : 'true');
       browserButton.textContent = open ? 'Nachricht im Browser anzeigen' : 'Nachricht im Browser ausblenden';
-      if (!open) loadPdfText(textView);
+      if (!open) loadPdfText(textView, config.pdfUrl);
     });
 
     controls.appendChild(pdfButton);
@@ -207,6 +237,21 @@
       else document.body.appendChild(card);
     }
     return true;
+  }
+
+  function addPostfachCards(){
+    addPostfachPdfCard({
+      id: 'postfach-2026-10-03-1222',
+      date: '03.10.2026',
+      time: '12:22',
+      pdfUrl: POSTFACH_1222_PDF_URL
+    });
+    addPostfachPdfCard({
+      id: 'postfach-2026-10-03-1430',
+      date: '03.10.2026',
+      time: '14:30',
+      pdfUrl: POSTFACH_1430_PDF_URL
+    });
   }
 
   function replacePoster(){
@@ -245,11 +290,11 @@
 
   function run(){
     addTopFacebookIcon();
-    addPostfachPdfCard();
+    addPostfachCards();
     replacePoster();
     setTimeout(function(){
       addTopFacebookIcon();
-      addPostfachPdfCard();
+      addPostfachCards();
       replacePoster();
     }, 1200);
   }
