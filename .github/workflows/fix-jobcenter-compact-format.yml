@@ -14,31 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply compact 04.10 Jobcenter message layout
+      - name: Finalize compact 04.10 Jobcenter message layout
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('public/jobcenter-poster-fix.js')
           s = p.read_text(encoding='utf-8')
-          title = 'postfachnachricht-04.10.2026 15_21'
-          pos = s.find(title)
-          if pos < 0:
-              raise SystemExit('title not found')
-          seg_end = s.find('meine Situation ist inzwischen keine Frage weiteren Wartens', pos)
-          if seg_end < 0:
-              raise SystemExit('main body marker not found')
-          seg = s[pos:seg_end]
-          seg = seg.replace('font-weight:700;margin:0 0 4px', 'font-weight:700;margin:0', 1)
-          seg = seg.replace('<p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>', '<p style="margin:0">Sehr geehrte Damen und Herren,</p>', 1)
-          seg = seg.replace('data-wdfox-reference-links="1" style="display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:0;line-height:1.2"', 'data-wdfox-reference-links="1" style="margin:0;line-height:1.2;white-space:normal"', 1)
-          first_link_end = seg.find('</a>')
-          second_link_start = seg.find('<a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}"', first_link_end)
-          if first_link_end >= 0 and second_link_start >= 0:
-              between = seg[first_link_end+4:second_link_start]
-              seg = seg[:first_link_end+4] + '<span> </span>' + seg[second_link_start:]
-          seg = seg.replace('pdf Beilage:', 'pdf Anhang:', 1)
-          seg = seg.replace('<p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>', '<p style="margin:0">Sehr geehrte Damen und Herren,</p>', 1)
-          s = s[:pos] + seg + s[seg_end:]
+          s = s.replace('<div style="font-weight:700;margin:0 0 4px">postfachnachricht-04.10.2026 15_21</div>', '<div style="font-weight:700;margin:0">postfachnachricht-04.10.2026 15_21</div>', 1)
+          s = s.replace('<p style="margin:0 0 4px">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr.', '<p style="margin:0">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr.', 1)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit compact format
@@ -47,5 +30,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/jobcenter-poster-fix.js
           git diff --cached --quiet && exit 0
-          git commit -m 'Match Jobcenter message spacing and Anhang label'
+          git commit -m 'Finalize Jobcenter compact spacing'
           git push
