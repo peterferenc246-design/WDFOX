@@ -1,0 +1,55 @@
+name: Fix exact Jobcenter spacing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-jobcenter-spacing-exact.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply exact spacing
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('public/jobcenter-poster-fix.js')
+          s = p.read_text(encoding='utf-8')
+          title = 'postfachnachricht-04.10.2026 15_21'
+          pos = s.find(title)
+          if pos < 0:
+              raise SystemExit('title not found')
+          end = s.find('Daher erwarte ich vom Jobcenter', pos)
+          if end < 0:
+              raise SystemExit('body marker not found')
+          seg = s[pos:end]
+
+          seg = seg.replace('font-weight:700;margin:0">postfachnachricht-04.10.2026 15_21', 'font-weight:700;margin:0 0 2px">postfachnachricht-04.10.2026 15_21', 1)
+          seg = seg.replace('<p style="margin:0">Sehr geehrte Damen und Herren,</p>', '<p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>', 1)
+          seg = seg.replace('<p style="margin:0">anbei übersende ich Ihnen mein Schreiben zur unverzüglichen finanziellen Sicherung meiner Existenz sowie zur Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit. Ich bitte um sofortige Bearbeitung und um eine schriftliche Bestätigung der darin genannten Maßnahmen und Fristen.</p>', '<p style="margin:0">anbei übersende ich Ihnen mein Schreiben zur unverzüglichen finanziellen Sicherung meiner Existenz sowie zur Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit. Ich bitte um sofortige Bearbeitung und um eine schriftliche Bestätigung der darin genannten Maßnahmen und Fristen.</p>', 1)
+          seg = seg.replace('<p style="margin:0">Mit freundlichen Grüßen<br>Peter Ferenc</p>', '<p style="margin:0">Mit freundlichen Grüßen</p><p style="margin:0 0 10px">Peter Ferenc</p>', 1)
+          seg = seg.replace('data-wdfox-reference-links="1" style="margin:0;line-height:1.2;white-space:normal"', 'data-wdfox-reference-links="1" style="display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:0;line-height:1.2;white-space:normal"', 1)
+          seg = seg.replace('</a><span> </span><a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}"', '</a><a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}"', 1)
+          seg = seg.replace('font-family:monospace;color:#666;overflow:hidden;white-space:nowrap;margin:0">======================================================', 'font-family:monospace;color:#666;overflow:hidden;white-space:nowrap;margin:0">======================================================', 1)
+          seg = seg.replace('font-weight:700;margin:0">pdf Anhang:', 'font-weight:700;margin:0">pdf Anhang:', 1)
+          first_pdf_greeting = seg.find('<p style="margin:0">Sehr geehrte Damen und Herren,</p>')
+          if first_pdf_greeting >= 0:
+              seg = seg[:first_pdf_greeting] + seg[first_pdf_greeting:].replace('<p style="margin:0">Sehr geehrte Damen und Herren,</p>', '<p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>', 1)
+          seg = seg.replace('<p style="margin:0">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr.', '<p style="margin:0">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr.', 1)
+
+          s = s[:pos] + seg + s[end:]
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/jobcenter-poster-fix.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Match Jobcenter message spacing exactly'
+          git push
