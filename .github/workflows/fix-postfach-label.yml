@@ -1,0 +1,42 @@
+name: Fix Jobcenter Postfach label
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-postfach-label.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Correct visible Postfach label
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('public/jobcenter-poster-fix.js')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('📄 postfachnachricht-04.10.2026 15_21_existenz.pdf öffnen', '📄 postfachnachricht-04.10.2026 15_21 öffnen')
+          text = text.replace('Text aus dem Original-PDF „postfachnachricht-04.10.2026 15_21_existenz.pdf“', 'Text aus dem Original-PDF „postfachnachricht-04.10.2026 15_21“')
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit label correction
+        shell: bash
+        run: |
+          if git diff --quiet -- public/jobcenter-poster-fix.js; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/jobcenter-poster-fix.js
+          git commit -m 'Correct 04.10.2026 15_21 Postfach label'
+          git push
