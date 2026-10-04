@@ -1,4 +1,4 @@
-/* WDFOX Jobcenter poster and evidence fix */
+/* WDFOX Jobcenter poster, evidence and Daniel Freund letter */
 (function(){
   'use strict';
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
@@ -69,10 +69,7 @@
           var y = item.transform && item.transform[5] || 0;
           var x = item.transform && item.transform[4] || 0;
           var line = grouped.find(function(candidate){ return Math.abs(candidate.y - y) < 2.5; });
-          if (!line) {
-            line = { y: y, items: [] };
-            grouped.push(line);
-          }
+          if (!line) { line = { y: y, items: [] }; grouped.push(line); }
           line.items.push({ x: x, text: item.str || '' });
         });
         grouped.sort(function(a,b){ return b.y - a.y; });
@@ -81,12 +78,10 @@
           if (text) allLines.push(text);
         });
       }
-
       var start = allLines.findIndex(function(line){ return /^Sehr geehrte Damen und Herren/i.test(line); });
       var lines = start >= 0 ? allLines.slice(start) : allLines;
       target.textContent = '';
       var bufferLines = [];
-
       function flush(){
         var text = bufferLines.join(' ').replace(/\s+/g, ' ').trim();
         bufferLines = [];
@@ -99,7 +94,6 @@
         p.style.hyphens = 'auto';
         target.appendChild(p);
       }
-
       lines.forEach(function(line){
         var text = String(line || '').replace(/\s+/g, ' ').trim();
         if (!text) { flush(); return; }
@@ -110,148 +104,104 @@
       flush();
       target.setAttribute('data-loaded', '1');
     } catch (error) {
-      target.textContent = 'Die Nachricht konnte im Browser nicht automatisch aus dem PDF gelesen werden. Bitte öffnen Sie das Original-PDF über die linke Schaltfläche.\n\nTechnischer Hinweis: ' + (error && error.message ? error.message : String(error));
+      target.textContent = 'Die Nachricht konnte im Browser nicht automatisch aus dem PDF gelesen werden. Bitte öffnen Sie das Original-PDF. Technischer Hinweis: ' + (error && error.message ? error.message : String(error));
     }
   }
 
   function addPostfachPdfCard(config){
     if (document.getElementById(config.id)) return true;
-
     var card = document.createElement('section');
     card.id = config.id;
-    card.setAttribute('aria-label', 'Postfachnachricht vom ' + config.date + ' um ' + config.time);
-    card.style.display = 'block';
-    card.style.boxSizing = 'border-box';
-    card.style.width = '100%';
-    card.style.margin = '16px 0';
-    card.style.padding = '16px';
-    card.style.border = '2px solid #1877F2';
-    card.style.borderRadius = '10px';
-    card.style.background = '#f7fbff';
-    card.style.color = '#111';
-    card.style.boxShadow = '0 2px 8px rgba(0,0,0,.08)';
-
+    card.style.cssText = 'display:block;box-sizing:border-box;width:100%;margin:16px 0;padding:16px;border:2px solid #1877F2;border-radius:10px;background:#f7fbff;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.08)';
     var title = document.createElement('div');
-    title.style.fontWeight = '700';
-    title.style.fontSize = '1.05rem';
-    title.style.marginBottom = '8px';
+    title.style.cssText = 'font-weight:700;font-size:1.05rem;margin-bottom:8px';
     title.textContent = '📨 NEU - Postfachnachricht vom ' + config.date + ' | ' + config.time;
-
     var note = document.createElement('div');
     note.style.marginBottom = '12px';
     note.textContent = 'Original-PDF der am ' + config.date + ' um ' + config.time + ' Uhr an das Jobcenter übermittelten Postfachnachricht.';
-
     var controls = document.createElement('div');
-    controls.style.display = 'flex';
-    controls.style.width = '100%';
-    controls.style.border = '1px solid #cfcfcf';
-    controls.style.borderRadius = '8px';
-    controls.style.overflow = 'hidden';
-    controls.style.background = '#fff';
-    controls.style.boxSizing = 'border-box';
-
+    controls.style.cssText = 'display:flex;width:100%;border:1px solid #cfcfcf;border-radius:8px;overflow:hidden;background:#fff;box-sizing:border-box';
     var pdfButton = document.createElement('a');
-    pdfButton.href = config.pdfUrl;
-    pdfButton.target = '_blank';
-    pdfButton.rel = 'noopener noreferrer';
-    pdfButton.style.flex = '1 1 50%';
-    pdfButton.style.display = 'flex';
-    pdfButton.style.alignItems = 'center';
-    pdfButton.style.justifyContent = 'center';
-    pdfButton.style.padding = '12px 14px';
-    pdfButton.style.boxSizing = 'border-box';
-    pdfButton.style.fontWeight = '700';
-    pdfButton.style.color = '#111';
-    pdfButton.style.textDecoration = 'none';
-    pdfButton.style.background = '#fff';
+    pdfButton.href = config.pdfUrl; pdfButton.target = '_blank'; pdfButton.rel = 'noopener noreferrer';
+    pdfButton.style.cssText = 'flex:1 1 50%;display:flex;align-items:center;justify-content:center;padding:12px 14px;box-sizing:border-box;font-weight:700;color:#111;text-decoration:none;background:#fff';
     pdfButton.textContent = '📄 Original-PDF öffnen';
-
     var browserButton = document.createElement('button');
     browserButton.type = 'button';
-    browserButton.style.flex = '1 1 50%';
-    browserButton.style.display = 'flex';
-    browserButton.style.alignItems = 'center';
-    browserButton.style.justifyContent = 'center';
-    browserButton.style.padding = '12px 14px';
-    browserButton.style.boxSizing = 'border-box';
-    browserButton.style.border = '0';
-    browserButton.style.borderLeft = '1px solid #cfcfcf';
-    browserButton.style.background = '#fff';
-    browserButton.style.color = '#111';
-    browserButton.style.font = 'inherit';
-    browserButton.style.fontWeight = '700';
-    browserButton.style.cursor = 'pointer';
+    browserButton.style.cssText = 'flex:1 1 50%;display:flex;align-items:center;justify-content:center;padding:12px 14px;box-sizing:border-box;border:0;border-left:1px solid #cfcfcf;background:#fff;color:#111;font:inherit;font-weight:700;cursor:pointer';
     browserButton.textContent = 'Nachricht im Browser anzeigen';
-    browserButton.setAttribute('aria-expanded', 'false');
-    browserButton.setAttribute('aria-controls', config.id + '-browser');
-
     var browserView = document.createElement('div');
-    browserView.id = config.id + '-browser';
-    browserView.style.display = 'none';
-    browserView.style.marginTop = '14px';
-    browserView.style.background = '#fff';
-    browserView.style.border = '1px solid #d9d9d9';
-    browserView.style.borderRadius = '8px';
-    browserView.style.overflow = 'hidden';
-
+    browserView.style.cssText = 'display:none;margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:8px;overflow:hidden';
     var meta = document.createElement('div');
-    meta.style.padding = '14px 16px';
-    meta.style.borderBottom = '1px solid #e4e4e4';
-    meta.style.background = '#f5f7fa';
+    meta.style.cssText = 'padding:14px 16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa';
     meta.innerHTML = '<strong>Datum:</strong> ' + config.date + ' | ' + config.time + '<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut';
-
     var textView = document.createElement('div');
-    textView.id = config.id + '-text';
-    textView.style.padding = '18px 6px';
-    textView.style.lineHeight = '1.6';
-    textView.style.minHeight = '220px';
-    textView.style.background = '#fff';
-    textView.style.textAlign = 'justify';
-    textView.style.textJustify = 'inter-word';
-
+    textView.style.cssText = 'padding:18px 6px;line-height:1.6;min-height:220px;background:#fff;text-align:justify;text-justify:inter-word';
     browserButton.addEventListener('click', function(){
       var open = browserView.style.display !== 'none';
       browserView.style.display = open ? 'none' : 'block';
-      browserButton.setAttribute('aria-expanded', open ? 'false' : 'true');
       browserButton.textContent = open ? 'Nachricht im Browser anzeigen' : 'Nachricht im Browser ausblenden';
       if (!open) loadPdfText(textView, config.pdfUrl);
     });
-
-    controls.appendChild(pdfButton);
-    controls.appendChild(browserButton);
-    browserView.appendChild(meta);
-    browserView.appendChild(textView);
-    card.appendChild(title);
-    card.appendChild(note);
-    card.appendChild(controls);
-    card.appendChild(browserView);
-
-    var heading = Array.from(document.querySelectorAll('h2')).find(function(el){
-      return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise';
-    });
-    if (heading && heading.parentNode) {
-      heading.insertAdjacentElement('afterend', card);
-    } else {
-      var poster = document.getElementById('jobcenter-social-poster-2026-10-03');
-      if (poster && poster.parentNode) poster.insertAdjacentElement('beforebegin', card);
-      else document.body.appendChild(card);
-    }
+    controls.appendChild(pdfButton); controls.appendChild(browserButton);
+    browserView.appendChild(meta); browserView.appendChild(textView);
+    card.appendChild(title); card.appendChild(note); card.appendChild(controls); card.appendChild(browserView);
+    var heading = Array.from(document.querySelectorAll('h2')).find(function(el){ return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise'; });
+    if (heading && heading.parentNode) heading.insertAdjacentElement('afterend', card); else document.body.appendChild(card);
     return true;
   }
 
   function addPostfachCards(){
-    addPostfachPdfCard({
-      id: 'postfach-2026-10-03-1222',
-      date: '03.10.2026',
-      time: '12:22',
-      pdfUrl: POSTFACH_1222_PDF_URL
-    });
-    addPostfachPdfCard({
-      id: 'postfach-2026-10-03-1430',
-      date: '03.10.2026',
-      time: '14:30',
-      pdfUrl: POSTFACH_1430_PDF_URL
-    });
+    addPostfachPdfCard({ id:'postfach-2026-10-03-1222', date:'03.10.2026', time:'12:22', pdfUrl:POSTFACH_1222_PDF_URL });
+    addPostfachPdfCard({ id:'postfach-2026-10-03-1430', date:'03.10.2026', time:'14:30', pdfUrl:POSTFACH_1430_PDF_URL });
+  }
+
+  function addDanielFreundLetter(){
+    if (document.getElementById('daniel-freund-letter-2026-10-04')) return true;
+    var section = document.createElement('section');
+    section.id = 'daniel-freund-letter-2026-10-04';
+    section.className = 'attachment evidence-section';
+    section.style.marginTop = '34px';
+    section.innerHTML = `
+      <hr class="evidence-divider">
+      <p class="update-date">Aktualisiert am: 04.10.2026</p>
+      <h2>Schreiben an Daniel Freund, Mitglied des Europäischen Parlaments</h2>
+      <div class="outlook-card" style="border:2px solid #ff5a00;background:#fffaf6">
+        <div class="outlook-card-title">📨 Antrag auf Einschreiten und Prüfung einer möglichen Verletzung der Rechte eines EU-Bürgers in Deutschland nach Meldung eines Verdachts auf Kartellbetrug</div>
+        <div class="outlook-card-note">Dokumentation meines Schreibens an den Europaabgeordneten Daniel Freund vom 04.10.2026.</div>
+        <details class="outlook-details">
+          <summary class="outlook-summary">📄 Schreiben im Browser anzeigen</summary>
+          <div class="outlook-view">
+            <div class="outlook-view-head"><div class="outlook-view-meta"><strong>Datum:</strong> 04.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Adressat:</strong> Daniel Freund, MdEP</div></div>
+            <div class="outlook-view-body" style="padding:18px;line-height:1.65;text-align:justify;text-justify:inter-word;hyphens:auto">
+              <p><strong>Betreff: Antrag auf Einschreiten und Prüfung einer möglichen Verletzung der Rechte eines EU-Bürgers in Deutschland nach Meldung eines Verdachts auf Kartellbetrug</strong></p>
+              <p>Sehr geehrter Herr Abgeordneter Freund,</p>
+              <p>ich wende mich an Sie als Bürger der Europäischen Union mit Wohnsitz in Deutschland und zugleich an Sie als Mitglied des Europäischen Parlaments, das sich seit Jahren mit Korruptionsbekämpfung, Rechtsstaatlichkeit, Transparenz staatlichen Handelns und dem Schutz der finanziellen Interessen der Europäischen Union befasst.</p>
+              <p>Ich möchte Sie über eine Situation informieren, die bei mir die ernsthafte Sorge auslöst, dass ich nach der Meldung eines Verdachts auf einen Kartellbetrug im Telekommunikationssektor und nach Hinweisen auf ein mögliches Versagen oder eine mögliche Beteiligung deutscher öffentlicher Stellen mit Maßnahmen und Abläufen konfrontiert bin, die meinen Zugang zur Justiz, zu grundlegenden öffentlichen Leistungen und inzwischen auch zu einer ordnungsgemäßen Gesundheitsversorgung erheblich erschweren. In meinem Fall besteht aktuell ein dringender zahnmedizinischer Behandlungsbedarf.</p>
+              <p>Zur Untermauerung meiner Angaben verfüge ich über umfangreiche Unterlagen und Beweismittel, die ich Ihnen für eine unabhängige Prüfung zur Verfügung stellen kann. Einen Teil der Dokumentation veröffentliche ich fortlaufend unter <a href="https://www.foxprof.club/jobcenter/" target="_blank" rel="noopener">https://www.foxprof.club/jobcenter/</a>. Ergänzend dokumentiere ich den Fall auch in einem <a href="${FACEBOOK_URL}" target="_blank" rel="noopener">Facebook-Beitrag</a>.</p>
+              <p>Die Tatsache, dass in der Sache bislang keine rechtskräftige Entscheidung vorliegt, kann aus meiner Sicht nicht als Beweis dafür angesehen werden, dass meine Hinweise unbegründet wären, insbesondere dann nicht, wenn gerade das Verhalten öffentlicher Stellen Gegenstand meiner Beanstandung ist und nach meiner Auffassung eine wirksame Untersuchung sowie den Zugang zur Justiz erschwert.</p>
+              <p>Wenn eine Person oder Institution, die öffentlich den Kampf gegen Korruption, den Schutz der Rechtsstaatlichkeit und die Kontrolle staatlicher Macht vertritt, sich weigern würde, konkrete Beweismittel eines EU-Bürgers überhaupt sachlich zu prüfen, würde dies für mich einen erheblichen Widerspruch zwischen dem öffentlich erklärten Anspruch und dem praktischen Umgang mit einem konkreten Fall darstellen.</p>
+              <p>Ich verlange nicht, dass Sie meine Angaben ungeprüft übernehmen. Ich bitte Sie jedoch, sie angesichts ihrer Schwere zu prüfen und zu beurteilen, ob das Vorgehen deutscher Stellen mir gegenüber mit den Grundsätzen der Rechtsstaatlichkeit, Gleichbehandlung und dem Schutz der Grundrechte eines Unionsbürgers vereinbar ist.</p>
+              <p>Ich habe in Deutschland fünf Jahre gearbeitet und nach meinen Unterlagen mehr als 130.000 EUR an Steuern und Sozialabgaben gezahlt. Nun befinde ich mich in einer existenziellen Notlage. Seit mehr als einem Monat erhalte ich vom Jobcenter im Wesentlichen Gutscheine im Wert von 25 EUR für Lebensmittel, ohne dass bislang eine reguläre finanzielle Leistung zur Deckung meiner übrigen grundlegenden Lebenshaltungskosten erfolgt ist.</p>
+              <p>Am 02.09.2026 habe ich Leistungen zur Sicherung des Lebensunterhalts beantragt. Das Jobcenter Landkreis Landshut hat selbst bestätigt, dass mein Antrag an diesem Tag begonnen wurde und geprüft wird, ob und in welcher Höhe ein Leistungsanspruch besteht.</p>
+              <p>In meinem Antrag habe ich erklärt, dass ich derzeit ohne Beschäftigung und ohne Einkommen bin, meine eigenen Ersparnisse aufgebraucht sind und ich meine grundlegenden Lebensbedürfnisse nicht mehr aus eigenen Mitteln decken kann. Gleichzeitig habe ich um Prüfung einer Unterstützung nach dem SGB II sowie um Unterstützung beim geplanten Aufbau einer selbständigen Tätigkeit gebeten.</p>
+              <p>Das Jobcenter hat später selbst festgehalten, dass ich nach meinen Angaben derzeit kein Einkommen habe und lediglich um Klärung gebeten, ob mein früher angemeldetes Gewerbe tatsächlich aktiv ausgeübt wird. Für den Fall, dass keine aktive Ausübung vorliegt, heißt es in dem Schreiben des Jobcenters, dass keine weiteren Unterlagen erforderlich seien.</p>
+              <p>Trotzdem liegt auch nach mehr als einem Monat noch keine abschließende Entscheidung über eine angemessene finanzielle Unterstützung vor. Auf meine existenzielle Situation habe ich das Jobcenter wiederholt hingewiesen und um eine ordnungsgemäße, faire und unverzügliche Entscheidung gebeten.</p>
+              <p>Die Situation wirkt sich inzwischen unmittelbar auf meine Gesundheit aus. Bereits am 24.09.2026 habe ich das Jobcenter dringend aufgefordert, meinen Krankenversicherungsschutz bei der AOK Bayern zu klären, da ich erhebliche Zahn- und Zahnfleischprobleme, Schmerzen und weiteren Behandlungsbedarf habe.</p>
+              <p>Meine Situation ist damit nicht mehr nur eine Frage einer verspäteten Sozialleistung. Es geht um das Zusammentreffen mehrerer Umstände, die meine grundlegenden Rechte berühren können: Zugang zur Existenzsicherung, Zugang zur Gesundheitsversorgung, die Möglichkeit, eine eigene Einkommensgrundlage aufzubauen, und vor allem die Möglichkeit, meine Rechte wirksam geltend zu machen.</p>
+              <p>Ich bin der Auffassung, dass das Verhalten öffentlicher Stellen mir gegenüber auch im Zusammenhang mit meinen früheren Meldungen über den Verdacht eines Kartellbetrugs und über ein mögliches Versagen öffentlicher Stellen bei dessen Aufklärung geprüft werden sollte.</p>
+              <p>Ich verlange keine Sonderprivilegien. Ich verlange, dass ich als Bürger der Europäischen Union nach Recht und Gesetz behandelt werde, ohne nachteilige Folgen wegen der Meldung eines möglichen rechtswidrigen Verhaltens und ohne administrative Hindernisse, die mir den Zugang zu grundlegenden öffentlichen Leistungen oder zu meinen Grundrechten faktisch nehmen.</p>
+              <p>Ich bitte Sie daher, meinen Fall unter dem Gesichtspunkt des Schutzes der Rechte eines Unionsbürgers, der Rechtsstaatlichkeit und eines möglichen vergeltenden oder diskriminierenden Vorgehens öffentlicher Stellen zu prüfen; zu erwägen, ob eine Befassung der zuständigen deutschen Stellen, der Europäischen Kommission oder anderer einschlägiger europäischer Institutionen angezeigt ist; nach Möglichkeit eine Erklärung dazu einzuholen, warum trotz dokumentierter existenzieller Not auch nach mehr als einem Monat noch nicht abschließend über meine grundlegende soziale Absicherung entschieden wurde; zu prüfen, ob mir dadurch faktisch auch der Zugang zur Gesundheitsversorgung erschwert wird; und zu prüfen, ob ein Zusammenhang zwischen dem Vorgehen öffentlicher Stellen mir gegenüber und meinen früheren Meldungen über mögliche Kartell- oder Korruptionsvorgänge besteht.</p>
+              <p>Ich bin bereit, Ihnen die vollständige Chronologie des Falls, meine Korrespondenz mit deutschen Behörden, die Unterlagen des Jobcenters, Nachweise zu meiner finanziellen Situation sowie weitere Beweismittel zur Verfügung zu stellen.</p>
+              <p>Mein Ziel ist kein politischer Konflikt mit Deutschland. Mein Ziel ist, dass meine Rechte als Bürger der Europäischen Union respektiert werden und staatliche Stellen rechtmäßig, transparent und ohne sachwidrige Behinderungen handeln.</p>
+              <p>Bitte teilen Sie mir mit, ob Sie sich mit meinem Fall befassen werden und auf welchem Weg ich Ihnen die vollständige Dokumentation übermitteln soll.</p>
+              <p>Mit freundlichen Grüßen<br>Peter Ferenc<br>Kumhausen, Deutschland</p>
+            </div>
+          </div>
+        </details>
+      </div>`;
+    var firstEvidence = document.querySelector('section.attachment.evidence-section');
+    if (firstEvidence && firstEvidence.parentNode) firstEvidence.insertAdjacentElement('beforebegin', section); else document.body.appendChild(section);
+    return true;
   }
 
   function replacePoster(){
@@ -262,43 +212,22 @@
     poster.className = 'jobcenter-social-poster';
     poster.setAttribute('aria-label', 'Jahrelange Arbeit - und dann');
     var img = document.createElement('img');
-    img.src = POSTER_URL;
-    img.alt = 'Jahrelange Arbeit - und dann';
-    img.decoding = 'async';
-    img.loading = 'eager';
-    img.style.display = 'block';
-    img.style.width = '100%';
-    img.style.height = 'auto';
-    img.style.maxWidth = '1672px';
-    img.style.margin = '0 auto';
-    img.style.border = '0';
-    img.style.borderRadius = '10px';
-    img.style.boxShadow = '0 3px 16px rgba(0,0,0,.2)';
-
+    img.src = POSTER_URL; img.alt = 'Jahrelange Arbeit - und dann'; img.decoding = 'async'; img.loading = 'eager';
+    img.style.cssText = 'display:block;width:100%;height:auto;max-width:1672px;margin:0 auto;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)';
     var linkWrap = document.createElement('div');
-    linkWrap.style.display = 'flex';
-    linkWrap.style.justifyContent = 'center';
-    linkWrap.style.margin = '18px 0 0';
-    var fb = document.createElement('a');
-    styleFacebookIcon(fb, 52);
-    linkWrap.appendChild(fb);
-    poster.appendChild(img);
-    poster.appendChild(linkWrap);
-    document.body.appendChild(poster);
+    linkWrap.style.cssText = 'display:flex;justify-content:center;margin:18px 0 0';
+    var fb = document.createElement('a'); styleFacebookIcon(fb, 52); linkWrap.appendChild(fb);
+    poster.appendChild(img); poster.appendChild(linkWrap); document.body.appendChild(poster);
     return true;
   }
 
   function run(){
     addTopFacebookIcon();
+    addDanielFreundLetter();
     addPostfachCards();
     replacePoster();
-    setTimeout(function(){
-      addTopFacebookIcon();
-      addPostfachCards();
-      replacePoster();
-    }, 1200);
+    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addPostfachCards(); replacePoster(); }, 1200);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true});
-  else run();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
 })();
