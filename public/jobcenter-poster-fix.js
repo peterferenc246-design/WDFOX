@@ -4,7 +4,8 @@
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
 
   var POSTER_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Jahrelange%20Arbeit%20DEUTSCHLAND%E2%80%93%20und%20dann_.png';
-  var FACEBOOK_URL = 'https://www.facebook.com/photo?fbid=980105415133071&set=a.858080437335570';
+  var FACEBOOK_POST_URL = 'https://www.facebook.com/photo?fbid=980105415133071&set=a.858080437335570';
+  var FACEBOOK_SHARE_URL = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://www.foxprof.club/jobcenter/');
   var POSTFACH_1222_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2012_22.pdf';
   var POSTFACH_1430_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2014_30.1.pdf';
   var GUTSCHEIN_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Gutschein.jpg';
@@ -33,11 +34,11 @@
   window.FREUND_SK_PDF_URL = FREUND_SK_PDF_URL;
 
   function styleFacebookIcon(fb, size){
-    fb.href = FACEBOOK_URL;
+    fb.href = FACEBOOK_SHARE_URL;
     fb.target = '_blank';
     fb.rel = 'noopener noreferrer';
-    fb.setAttribute('aria-label', 'Facebook-Beitrag öffnen');
-    fb.title = 'Facebook-Beitrag öffnen';
+    fb.setAttribute('aria-label', 'Jobcenter-Seite auf Facebook teilen');
+    fb.title = 'Jobcenter-Seite auf Facebook teilen';
     fb.style.display = 'inline-flex';
     fb.style.alignItems = 'center';
     fb.style.justifyContent = 'center';
@@ -201,7 +202,7 @@
               <p>Sehr geehrter Herr Abgeordneter Freund,</p>
               <p>ich wende mich an Sie als Bürger der Europäischen Union mit Wohnsitz in Deutschland und zugleich an Sie als Mitglied des Europäischen Parlaments, das sich seit Jahren mit Korruptionsbekämpfung, Rechtsstaatlichkeit, Transparenz staatlichen Handelns und dem Schutz der finanziellen Interessen der Europäischen Union befasst.</p>
               <p>Ich möchte Sie über eine Situation informieren, die bei mir die ernsthafte Sorge auslöst, dass ich nach der Meldung eines Verdachts auf einen Kartellbetrug im Telekommunikationssektor und nach Hinweisen auf ein mögliches Versagen oder eine mögliche Beteiligung deutscher öffentlicher Stellen mit Maßnahmen und Abläufen konfrontiert bin, die meinen Zugang zur Justiz, zu grundlegenden öffentlichen Leistungen und inzwischen auch zu einer ordnungsgemäßen Gesundheitsversorgung erheblich erschweren. In meinem Fall besteht aktuell ein dringender zahnmedizinischer Behandlungsbedarf.</p>
-              <p>Zur Untermauerung meiner Angaben verfüge ich über umfangreiche Unterlagen und Beweismittel, die ich Ihnen für eine unabhängige Prüfung zur Verfügung stellen kann. Einen Teil der Dokumentation veröffentliche ich fortlaufend unter <a href="https://www.foxprof.club/jobcenter/" target="_blank" rel="noopener">https://www.foxprof.club/jobcenter/</a>. Ergänzend dokumentiere ich den Fall auch in einem <a href="${FACEBOOK_URL}" target="_blank" rel="noopener">Facebook-Beitrag</a>.</p>
+              <p>Zur Untermauerung meiner Angaben verfüge ich über umfangreiche Unterlagen und Beweismittel, die ich Ihnen für eine unabhängige Prüfung zur Verfügung stellen kann. Einen Teil der Dokumentation veröffentliche ich fortlaufend unter <a href="https://www.foxprof.club/jobcenter/" target="_blank" rel="noopener">https://www.foxprof.club/jobcenter/</a>. Ergänzend dokumentiere ich den Fall auch in einem <a href="${FACEBOOK_POST_URL}" target="_blank" rel="noopener">Facebook-Beitrag</a>.</p>
               <p>Die Tatsache, dass in der Sache bislang keine rechtskräftige Entscheidung vorliegt, kann aus meiner Sicht nicht als Beweis dafür angesehen werden, dass meine Hinweise unbegründet wären, insbesondere dann nicht, wenn gerade das Verhalten öffentlicher Stellen Gegenstand meiner Beanstandung ist und nach meiner Auffassung eine wirksame Untersuchung sowie den Zugang zur Justiz erschwert.</p>
               <p>Wenn eine Person oder Institution, die öffentlich den Kampf gegen Korruption, den Schutz der Rechtsstaatlichkeit und die Kontrolle staatlicher Macht vertritt, sich weigern würde, konkrete Beweismittel eines EU-Bürgers überhaupt sachlich zu prüfen, würde dies für mich einen erheblichen Widerspruch zwischen dem öffentlich erklärten Anspruch und dem praktischen Umgang mit einem konkreten Fall darstellen.</p>
               <p>Ich verlange nicht, dass Sie meine Angaben ungeprüft übernehmen. Ich bitte Sie jedoch, sie angesichts ihrer Schwere zu prüfen und zu beurteilen, ob das Vorgehen deutscher Stellen mir gegenüber mit den Grundsätzen der Rechtsstaatlichkeit, Gleichbehandlung und dem Schutz der Grundrechte eines Unionsbürgers vereinbar ist.</p>
