@@ -29,6 +29,54 @@
 
   injectJobcenterPortalEvidence();
 
+  function normalizeJobcenterExistenzMessage() {
+    if (window.location.pathname !== "/jobcenter/" && window.location.pathname !== "/jobcenter") return;
+
+    function apply() {
+      var section = document.getElementById("jobcenter-existenz-message-2026-10-04");
+      if (!section) return false;
+
+      var details = section.querySelector("details.outlook-details");
+      if (details && !details.hasAttribute("data-wdfox-initialized")) {
+        details.removeAttribute("open");
+        details.setAttribute("data-wdfox-initialized", "1");
+      }
+
+      var body = section.querySelector(".outlook-view-body");
+      if (body) {
+        body.style.lineHeight = "1.45";
+        body.style.padding = "16px 18px";
+        body.querySelectorAll("p").forEach(function (p) {
+          p.style.margin = "0 0 10px";
+        });
+        body.querySelectorAll("ul,ol").forEach(function (list) {
+          list.style.marginTop = "4px";
+          list.style.marginBottom = "12px";
+        });
+        body.querySelectorAll("li").forEach(function (li) {
+          li.style.marginBottom = "6px";
+        });
+      }
+
+      var summary = section.querySelector("summary.outlook-summary");
+      if (summary) summary.style.cursor = "pointer";
+      return true;
+    }
+
+    if (!apply()) {
+      var observer = new MutationObserver(function () {
+        if (apply()) observer.disconnect();
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      window.setTimeout(function () { apply(); observer.disconnect(); }, 4000);
+    }
+
+    window.setTimeout(apply, 250);
+    window.setTimeout(apply, 1300);
+  }
+
+  normalizeJobcenterExistenzMessage();
+
   var language = String(window.location.pathname.split("/")[1] || "").toLowerCase();
   if (language !== "de" && language !== "en" && language !== "sk" && language !== "fr" && language !== "hr" && language !== "pl" && language !== "it" && language !== "es" && language !== "sv") return;
 
