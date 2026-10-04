@@ -66,6 +66,15 @@
 
       var body = section.querySelector(".outlook-view-body");
       if (body) {
+        if (extracted && extracted.parentElement) {
+          var extractedBlock = extracted.parentElement;
+          if (body.firstElementChild !== extractedBlock) body.insertBefore(extractedBlock, body.firstElementChild);
+          extractedBlock.style.borderTop = "0";
+          extractedBlock.style.paddingTop = "0";
+          extractedBlock.style.marginTop = "0";
+          extractedBlock.style.marginBottom = "16px";
+        }
+
         body.style.lineHeight = "1.45";
         body.style.padding = "16px 18px";
         body.querySelectorAll("p").forEach(function (p) {
