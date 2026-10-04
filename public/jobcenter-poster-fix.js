@@ -246,11 +246,11 @@
 
               <div style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px">
                 <a href="${EXISTENZ_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 Unverzügliche finanzielle Sicherung meiner Existenz_DE.pdf öffnen</a>
-                <a href="${EXISTENZ_POSTFACH_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 postfachnachricht-04.10.2026 15_21_existenz.pdf öffnen</a>
+                <a href="${EXISTENZ_POSTFACH_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 postfachnachricht-04.10.2026 15_21 öffnen</a>
               </div>
 
               <div style="border-top:1px solid #d9d9d9;padding-top:12px;margin-top:4px">
-                <div style="font-weight:700;margin:0 0 10px">Text aus dem Original-PDF „postfachnachricht-04.10.2026 15_21_existenz.pdf“</div>
+                <div style="font-weight:700;margin:0 0 10px">Text aus dem Original-PDF „postfachnachricht-04.10.2026 15_21“</div>
                 <div id="existenz-postfach-pdf-text" style="line-height:1.45;text-align:justify;text-justify:inter-word;hyphens:auto">Text aus dem Original-PDF wird geladen ...</div>
               </div>
             </div>
