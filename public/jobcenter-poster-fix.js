@@ -8,6 +8,8 @@
   var FACEBOOK_SHARE_URL = FACEBOOK_POST_URL;
   var POSTFACH_1222_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2012_22.pdf';
   var POSTFACH_1430_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2014_30.1.pdf';
+  var EXISTENZ_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Unverz%C3%BCgliche%20finanzielle%20Sicherung%20meiner%20Existenz_DE.pdf';
+  var EXISTENZ_POSTFACH_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-04.10.2026%2015_21_existenz.pdf';
   var GUTSCHEIN_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Gutschein.jpg';
   var FREUND_SK_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Freund%20Daniel_list_SK.pdf';
 
@@ -180,6 +182,60 @@
     addPostfachPdfCard({ id:'postfach-2026-10-03-1430', date:'03.10.2026', time:'14:30', pdfUrl:POSTFACH_1430_PDF_URL });
   }
 
+  function addExistenzMessage(){
+    if (document.getElementById('jobcenter-existenz-message-2026-10-04')) return true;
+    var section = document.createElement('section');
+    section.id = 'jobcenter-existenz-message-2026-10-04';
+    section.className = 'attachment evidence-section';
+    section.style.marginTop = '34px';
+    section.innerHTML = `
+      <hr class="evidence-divider">
+      <p class="update-date">Aktualisiert am: 04.10.2026 | 15:21</p>
+      <h2>Sofortiger Schutz meiner Existenz – Schreiben an das Jobcenter</h2>
+      <div class="outlook-card" style="border:2px solid #1877F2;background:#f7fbff">
+        <div class="outlook-card-title">📨 Unverzügliche finanzielle Sicherung meiner Existenz und Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit</div>
+        <div class="outlook-card-note">Am 04.10.2026 an das Jobcenter Landkreis Landshut übermittelt.</div>
+        <div class="outlook-view" style="display:block;margin-top:14px">
+          <div class="outlook-view-head"><div class="outlook-view-meta"><strong>Datum:</strong> 04.10.2026 | 15:21<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut<br><strong>Betreff:</strong> Sofortiger Schutz meiner Existenz</div></div>
+          <div class="outlook-view-body" style="padding:18px;line-height:1.65;text-align:justify;text-justify:inter-word;hyphens:auto">
+            <p>Sehr geehrte Damen und Herren,</p>
+            <p>meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr. Ich benötige <strong>eine tatsächliche finanzielle Absicherung meiner grundlegenden Lebensbedürfnisse</strong> und zugleich die Mittel, die es mir ermöglichen, so schnell wie möglich durch die geplante selbständige Tätigkeit ein eigenes Einkommen aufzubauen.</p>
+            <p>Daher erwarte ich vom Jobcenter eine konkrete finanzielle Lösung innerhalb der folgenden Fristen:</p>
+            <ul style="padding-left:24px;margin:0 0 18px">
+              <li><strong>am Montag, den 05.10.2026</strong>, fordere ich die Überweisung von <strong>200 € auf mein Konto zur Begleichung aufgelaufener und überfälliger notwendiger Zahlungen</strong>, zusätzlich die <strong>Erstattung der bereits eingereichten Vodafone-Rechnung</strong>, sowie <strong>150 € zur Sicherstellung meiner Ernährung für den Monat Oktober 2026</strong>;</li>
+              <li><strong>spätestens am Montag, den 05.10.2026</strong>, erwarte ich außerdem, dass mein Krankenversicherungsschutz bei der <strong>AOK Bayern</strong> ordnungsgemäß sichergestellt ist, damit ich aufgrund meiner derzeitigen Zahn- und Gesundheitsprobleme ohne weitere Verzögerung die notwendige medizinische und zahnärztliche Versorgung in Anspruch nehmen kann;</li>
+              <li><strong>spätestens am Mittwoch, den 07.10.2026</strong>, fordere ich die Auszahlung von <strong>1.000 € für September 2026</strong>, also für den Zeitraum, in dem ich ohne Einkommen war und auf eine tatsächliche Sicherung meiner grundlegenden Lebensbedürfnisse gewartet habe;</li>
+              <li><strong>spätestens bis Freitag, den 09.10.2026</strong>, fordere ich die Bereitstellung von <strong>5.000 € für den Aufbau meiner geplanten selbständigen Tätigkeit, die ich auf Grundlage von § 16c Abs. 1 SGB II beantrage und auf die ich Anspruch erhebe</strong>, damit ich so schnell wie möglich ein eigenes Einkommen erzielen, meine Situation stabilisieren und nicht länger auf weitere Unterstützung des Jobcenters angewiesen sein muss.</li>
+            </ul>
+            <p>Diese Beträge fordere ich nicht als abstrakte Zahlen, sondern als konkrete Mittel zur Lösung meiner derzeitigen Situation, denn ohne diese finanziellen Mindestmittel wird es mir nicht möglich sein, meine Tätigkeit tatsächlich aufzubauen.</p>
+            <p>Ich muss überfällige notwendige Zahlungen begleichen, meine Ernährung und grundlegenden Lebensbedürfnisse sichern und zugleich eine reale Möglichkeit erhalten, meine wirtschaftliche Selbständigkeit aufzubauen.</p>
+            <p>Ebenso unverzichtbar ist für mich die ordnungsgemäße Sicherstellung meines Krankenversicherungsschutzes bei der AOK Bayern. Aufgrund meiner aktuellen Zahnprobleme und des weiteren Behandlungsbedarfs kann die Frage meines Krankenversicherungsschutzes nicht länger ungeklärt bleiben. Ich erwarte daher, dass ich <strong>am Montag, den 05.10.2026, ordnungsgemäß bei der AOK Bayern versichert bzw. gemeldet bin</strong> und ohne weitere administrative Hindernisse die notwendige medizinische und zahnärztliche Behandlung in Anspruch nehmen kann.</p>
+            <p>Gerade die Unterstützung bei der Aufnahme einer selbständigen Tätigkeit hat dann einen Sinn, wenn sie einem Menschen ermöglicht, sich aus der Abhängigkeit von Sozialleistungen zu lösen und ein eigenes Einkommen zu schaffen. Genau das ist mein Ziel.</p>
+            <p>Die bisherige Ausgabe einzelner Gutscheine im Wert von jeweils 25 € löst meine Situation nicht. Sie ermöglicht lediglich ein vorübergehendes Überleben von Tag zu Tag, ohne die Möglichkeit, Verbindlichkeiten zu begleichen, finanzielle Stabilität herzustellen oder meine selbständige Tätigkeit tatsächlich aufzubauen.</p>
+            <p>Daher erwarte ich von Ihnen jetzt <strong>eine konkrete finanzielle und existenzsichernde Lösung und keine weiteren Verzögerungen</strong>.</p>
+            <p>Ich fordere Sie auf, mir unverzüglich schriftlich zu bestätigen, welche der oben genannten Zahlungen Sie leisten werden, in welcher Höhe und an welchem Tag diese meinem Konto gutgeschrieben werden. Gleichzeitig erwarte ich die Bestätigung, dass mein Krankenversicherungsschutz bei der AOK Bayern spätestens am Montag, den 05.10.2026, ordnungsgemäß sichergestellt ist.</p>
+            <p>Sollten Sie eine der genannten Zahlungen ablehnen oder meinen Krankenversicherungsschutz nicht innerhalb der genannten Frist sicherstellen, fordere ich Sie auf, mir diese Ablehnung schriftlich und eindeutig mitzuteilen, damit klar ersichtlich ist, welche konkrete Lösung meiner existenziellen Situation Sie mir stattdessen anbieten.</p>
+            <p>Sollten die genannten Zahlungen nicht innerhalb der gesetzten Fristen erfolgen und mein Krankenversicherungsschutz nicht ordnungsgemäß sichergestellt werden, werde ich sämtliche verfügbaren rechtlichen Mittel ausschöpfen. Dazu gehören die Einreichung entsprechender Anträge und Klagen bei den zuständigen Gerichten einschließlich des Sozialgerichts sowie die Geltendmachung von Schadensersatz- und Entschädigungsansprüchen, soweit mir infolge weiteren untätigen oder rechtswidrigen Handelns finanzielle, gesundheitliche oder sonstige nachweisbare Schäden entstehen.</p>
+            <p>Mein Ziel ist es nicht, dauerhaft auf Leistungen des Jobcenters angewiesen zu bleiben.</p>
+            <p>Mein Ziel ist es, <strong>jetzt meine grundlegenden Lebensbedingungen und die notwendige gesundheitliche Versorgung zu sichern und zugleich eine reale Möglichkeit zu erhalten, so schnell wie möglich durch meine eigene Tätigkeit Einkommen zu erzielen</strong>.</p>
+            <p>Mein Ziel ist weiterhin, diese Situation ohne weiteren gerichtlichen Streit zu lösen. Sollte das Jobcenter jedoch nicht handeln, werde ich meine Rechte in vollem Umfang gerichtlich durchsetzen, <strong>einschließlich der Herbeiführung entsprechender strafrechtlicher Konsequenzen, sofern die gesetzlichen Voraussetzungen hierfür erfüllt sind</strong>.</p>
+            <p>Mit freundlichen Grüßen<br><strong>Peter Ferenc</strong><br>Kumhausen, Deutschland</p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:22px">
+              <a href="${EXISTENZ_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 15px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 Unverzügliche finanzielle Sicherung meiner Existenz_DE.pdf öffnen</a>
+              <a href="${EXISTENZ_POSTFACH_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 15px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 postfachnachricht-04.10.2026 15_21_existenz.pdf öffnen</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    var daniel = document.getElementById('daniel-freund-letter-2026-10-04');
+    if (daniel && daniel.parentNode) daniel.insertAdjacentElement('beforebegin', section);
+    else {
+      var firstEvidence = document.querySelector('section.attachment.evidence-section');
+      if (firstEvidence && firstEvidence.parentNode) firstEvidence.insertAdjacentElement('beforebegin', section); else document.body.appendChild(section);
+    }
+    return true;
+  }
+
   function addDanielFreundLetter(){
     if (document.getElementById('daniel-freund-letter-2026-10-04')) return true;
     var section = document.createElement('section');
@@ -261,9 +317,10 @@
   function run(){
     addTopFacebookIcon();
     addDanielFreundLetter();
+    addExistenzMessage();
     addPostfachCards();
     addStandalonePoster();
-    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addPostfachCards(); addStandalonePoster(); }, 1200);
+    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); }, 1200);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
