@@ -233,9 +233,27 @@
     return true;
   }
 
-  function removeStandalonePoster(){
+  function addStandalonePoster(){
     var existing = document.getElementById('jobcenter-social-poster-2026-10-03');
     if (existing) existing.remove();
+    var poster = document.createElement('section');
+    poster.id = 'jobcenter-social-poster-2026-10-03';
+    poster.className = 'jobcenter-social-poster';
+    poster.setAttribute('aria-label', 'Jahrelange Arbeit - und dann');
+    var img = document.createElement('img');
+    img.src = POSTER_URL;
+    img.alt = 'Jahrelange Arbeit - und dann';
+    img.decoding = 'async';
+    img.loading = 'eager';
+    img.style.cssText = 'display:block;width:100%;height:auto;max-width:1672px;margin:0 auto;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)';
+    var linkWrap = document.createElement('div');
+    linkWrap.style.cssText = 'display:flex;justify-content:center;margin:18px 0 0';
+    var fb = document.createElement('a');
+    styleFacebookIcon(fb, 52);
+    linkWrap.appendChild(fb);
+    poster.appendChild(img);
+    poster.appendChild(linkWrap);
+    document.body.appendChild(poster);
     return true;
   }
 
@@ -243,8 +261,8 @@
     addTopFacebookIcon();
     addDanielFreundLetter();
     addPostfachCards();
-    removeStandalonePoster();
-    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addPostfachCards(); removeStandalonePoster(); }, 1200);
+    addStandalonePoster();
+    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addPostfachCards(); addStandalonePoster(); }, 1200);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
