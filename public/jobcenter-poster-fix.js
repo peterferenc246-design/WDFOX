@@ -7,8 +7,27 @@
   var FACEBOOK_URL = 'https://www.facebook.com/photo?fbid=980105415133071&set=a.858080437335570';
   var POSTFACH_1222_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2012_22.pdf';
   var POSTFACH_1430_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2014_30.1.pdf';
-  var GUTSCHEIN_URL = 'https://github.com/peterferenc246-design/WDFOX/blob/main/privat/Gutschein.jpg';
-  var FREUND_SK_PDF_URL = 'https://github.com/peterferenc246-design/WDFOX/blob/main/privat/Freund%20Daniel_list_SK.pdf';
+  var GUTSCHEIN_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Gutschein.jpg';
+  var FREUND_SK_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Freund%20Daniel_list_SK.pdf';
+
+  async function downloadFile(url, filename){
+    try {
+      var response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Download fehlgeschlagen (' + response.status + ')');
+      var blob = await response.blob();
+      var objectUrl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(objectUrl); }, 1500);
+    } catch (error) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }
 
   function styleFacebookIcon(fb, size){
     fb.href = FACEBOOK_URL;
@@ -199,8 +218,8 @@
               <p>Mit freundlichen Grüßen<br>Peter Ferenc<br>Kumhausen, Deutschland</p>
               <img src="${POSTER_URL}" alt="Jahrelange Arbeit – und dann?" style="display:block;width:100%;height:auto;margin:26px auto 0;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)">
               <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px">
-                <a href="${GUTSCHEIN_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #cfcfcf;border-radius:8px;background:#fff;color:#111;font-weight:700;text-decoration:none">🖼 Gutschein.jpg öffnen</a>
-                <a href="${FREUND_SK_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #cfcfcf;border-radius:8px;background:#fff;color:#111;font-weight:700;text-decoration:none">📄 Freund Daniel_list_SK.pdf öffnen</a>
+                <a href="${GUTSCHEIN_URL}" onclick="event.preventDefault();downloadFile(GUTSCHEIN_URL,'Gutschein.jpg')" style="display:inline-block;padding:10px 14px;border:1px solid #cfcfcf;border-radius:8px;background:#fff;color:#111;font-weight:700;text-decoration:none;cursor:pointer">⬇️ Gutschein.jpg herunterladen</a>
+                <a href="${FREUND_SK_PDF_URL}" onclick="event.preventDefault();downloadFile(FREUND_SK_PDF_URL,'Freund Daniel_list_SK.pdf')" style="display:inline-block;padding:10px 14px;border:1px solid #cfcfcf;border-radius:8px;background:#fff;color:#111;font-weight:700;text-decoration:none;cursor:pointer">⬇️ Freund Daniel_list_SK.pdf herunterladen</a>
               </div>
             </div>
           </div>
