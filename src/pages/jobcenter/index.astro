@@ -7,12 +7,12 @@ let html = fs.readFileSync(sourcePath, 'utf8');
 
 html = html.replace(
   '<head>',
-  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-04-0745">'
+  '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-04-0805">'
 );
 
 html = html.replace(
   '</style>',
-  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-details{margin-top:10px}.outlook-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.outlook-summary::-webkit-details-marker{display:none}.outlook-summary:hover{background:#f0f0f0}.outlook-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px;line-height:1.6;white-space:pre-wrap}.outlook-view-body p{white-space:normal}.outlook-highlight{background:#fff200;color:#d40000;font-weight:800;padding:0 2px}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.aok-gutschein-image{display:block;width:100%;height:auto;margin:24px auto 0;border:1px solid #ddd;border-radius:8px}.outlook-error{padding:16px}#aok-postfach-2026-10-03 .outlook-view-body{padding-left:6px;padding-right:18px}</style>`
+  `.outlook-card{display:block;padding:14px 16px;margin:12px 0;border:1px solid #d0d0d0;border-radius:10px;color:#111;background:#fafafa}.outlook-card-title{font-weight:700;margin-bottom:6px}.outlook-card-note{margin-bottom:12px}.outlook-details{margin-top:10px}.outlook-summary{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:8px;border:1px solid #cfcfcf;background:#fff;color:#111;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;list-style:none}.outlook-summary::-webkit-details-marker{display:none}.outlook-summary:hover{background:#f0f0f0}.outlook-view{margin-top:14px;background:#fff;border:1px solid #d9d9d9;border-radius:10px;overflow:hidden}.outlook-view-head{padding:16px;border-bottom:1px solid #e4e4e4;background:#f5f7fa}.outlook-view-subject{font-weight:700;font-size:1.08rem;margin-bottom:8px}.outlook-view-meta{font-size:.92rem;color:#555;line-height:1.5}.outlook-view-body{padding:18px 6px;line-height:1.6;white-space:pre-wrap}.outlook-view-body p{white-space:normal;text-align:justify;text-justify:inter-word}.outlook-highlight{background:#fff200;color:#d40000;font-weight:800;padding:0 2px}.outlook-attachments{padding:0 18px 18px}.outlook-attachment{display:flex;gap:8px;align-items:center;margin-top:8px}.outlook-attachment a{font-weight:700}.aok-gutschein-image{display:block;width:100%;height:auto;margin:24px auto 0;border:1px solid #ddd;border-radius:8px}.outlook-error{padding:16px}</style>`
 );
 
 const portalOutageBlock = `
@@ -230,6 +230,6 @@ if (!html.includes('id="portal-ausfall-2026-10-02"')) {
   html = html.replace('</body>', `${portalOutageBlock}\n</body>`);
 }
 
-html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-04-0745 --></body>`);
+html = html.replace('</body>', `${msgViewerScript}\n<!-- WDFOX JOBCENTER FORCE-ROUTE 2026-10-04-0805 --></body>`);
 ---
 <Fragment set:html={html} />
