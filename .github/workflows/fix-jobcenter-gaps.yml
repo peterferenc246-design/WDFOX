@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/fix-jobcenter-gaps.yml'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,38 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Tighten 04.10 Jobcenter message
-        shell: bash
+      - name: Patch Jobcenter spacing
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('public/jobcenter-poster-fix.js')
-          s = p.read_text(encoding='utf-8')
-          marker = "    section.style.marginTop = '34px';\n    section.innerHTML = `\n"
-          insert = """    section.style.marginTop = '34px';
-    section.innerHTML = `
-      <style>
-        #jobcenter-existenz-message-2026-10-04 .outlook-view-body{padding-top:0!important;display:block!important}
-        #jobcenter-existenz-message-2026-10-04 .outlook-view-body>div:first-child{margin-top:0!important;padding-top:0!important;margin-bottom:2px!important}
-        #jobcenter-existenz-message-2026-10-04 [data-wdfox-reference-links=\"1\"]{margin:0 0 2px!important;gap:0!important;line-height:1.2!important}
-        #jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text{margin:0 0 2px!important;padding:0!important;line-height:1.25!important}
-        #jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text p{margin:0 0 2px!important;padding:0!important;min-height:0!important}
-        #jobcenter-existenz-message-2026-10-04 .outlook-view-body>p{margin:0 0 4px!important;padding:0!important;min-height:0!important;line-height:1.28!important}
-        #jobcenter-existenz-message-2026-10-04 .outlook-view-body>ul{margin:0 0 5px!important;padding-top:0!important;padding-bottom:0!important;gap:0!important;min-height:0!important}
-        #jobcenter-existenz-message-2026-10-04 .outlook-view-body>ul>li{margin:0 0 2px!important;padding-top:0!important;padding-bottom:0!important;min-height:0!important;line-height:1.28!important}
-      </style>
-"""
-          if marker not in s:
-              raise SystemExit('marker not found')
-          s = s.replace(marker, insert, 1)
-          p.write_text(s, encoding='utf-8')
-          PY
-      - name: Commit gap fix
-        shell: bash
+          echo 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCnA9UGF0aCgicHVibGljL2pvYmNlbnRlci1wb3N0ZXItZml4LmpzIikKcz1wLnJlYWRfdGV4dChlbmNvZGluZz0idXRmLTgiKQptYXJrZXI9IiAgICBzZWN0aW9uLnN0eWxlLm1hcmdpblRvcCA9ICczNHB4JztcbiAgICBzZWN0aW9uLmlubmVySFRNTCA9IGBcbiIKaW5zZXJ0PSIiIiAgICBzZWN0aW9uLnN0eWxlLm1hcmdpblRvcCA9ICczNHB4JzsKICAgIHNlY3Rpb24uaW5uZXJIVE1MID0gYAogICAgICA8c3R5bGU+CiAgICAgICAgI2pvYmNlbnRlci1leGlzdGVuei1tZXNzYWdlLTIwMjYtMTAtMDQgLm91dGxvb2stdmlldy1ib2R5e3BhZGRpbmctdG9wOjAhaW1wb3J0YW50O2Rpc3BsYXk6YmxvY2shaW1wb3J0YW50fQogICAgICAgICNqb2JjZW50ZXItZXhpc3RlbnotbWVzc2FnZS0yMDI2LTEwLTA0IC5vdXRsb29rLXZpZXctYm9keT5kaXY6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowIWltcG9ydGFudDtwYWRkaW5nLXRvcDowIWltcG9ydGFudDttYXJnaW4tYm90dG9tOjJweCFpbXBvcnRhbnR9CiAgICAgICAgI2pvYmNlbnRlci1leGlzdGVuei1tZXNzYWdlLTIwMjYtMTAtMDQgW2RhdGEtd2Rmb3gtcmVmZXJlbmNlLWxpbmtzPSIxIl17bWFyZ2luOjAgMCAycHghaW1wb3J0YW50O2dhcDowIWltcG9ydGFudDtsaW5lLWhlaWdodDoxLjIhaW1wb3J0YW50fQogICAgICAgICNqb2JjZW50ZXItZXhpc3RlbnotbWVzc2FnZS0yMDI2LTEwLTA0ICNleGlzdGVuei1wb3N0ZmFjaC1wZGYtdGV4dHttYXJnaW46MCAwIDJweCFpbXBvcnRhbnQ7cGFkZGluZzowIWltcG9ydGFudDtsaW5lLWhlaWdodDoxLjI1IWltcG9ydGFudH0KICAgICAgICAjam9iY2VudGVyLWV4aXN0ZW56LW1lc3NhZ2UtMjAyNi0xMC0wNCAjZXhpc3RlbnotcG9zdGZhY2gtcGRmLXRleHQgcHttYXJnaW46MCAwIDJweCFpbXBvcnRhbnQ7cGFkZGluZzowIWltcG9ydGFudDttaW4taGVpZ2h0OjAhaW1wb3J0YW50fQogICAgICAgICNqb2JjZW50ZXItZXhpc3RlbnotbWVzc2FnZS0yMDI2LTEwLTA0ICNleGlzdGVuei1wb3N0ZmFjaC1wZGYtdGV4dCBwOmxhc3QtY2hpbGR7bWFyZ2luLWJvdHRvbToycHghaW1wb3J0YW50fQogICAgICAgICNqb2JjZW50ZXItZXhpc3RlbnotbWVzc2FnZS0yMDI2LTEwLTA0IC5vdXRsb29rLXZpZXctYm9keT5we21hcmdpbjowIDAgNHB4IWltcG9ydGFudDtwYWRkaW5nOjAhaW1wb3J0YW50O21pbi1oZWlnaHQ6MCFpbXBvcnRhbnQ7bGluZS1oZWlnaHQ6MS4yOCFpbXBvcnRhbnR9CiAgICAgICAgI2pvYmNlbnRlci1leGlzdGVuei1tZXNzYWdlLTIwMjYtMTAtMDQgLm91dGxvb2stdmlldy1ib2R5PnVse21hcmdpbjowIDAgNXB4IWltcG9ydGFudDtwYWRkaW5nLXRvcDowIWltcG9ydGFudDtwYWRkaW5nLWJvdHRvbTowIWltcG9ydGFudDtnYXA6MCFpbXBvcnRhbnQ7bWluLWhlaWdodDowIWltcG9ydGFudH0KICAgICAgICAjam9iY2VudGVyLWV4aXN0ZW56LW1lc3NhZ2UtMjAyNi0xMC0wNCAub3V0bG9vay12aWV3LWJvZHk+dWw+bGl7bWFyZ2luOjAgMCAycHghaW1wb3J0YW50O3BhZGRpbmctdG9wOjAhaW1wb3J0YW50O3BhZGRpbmctYm90dG9tOjAhaW1wb3J0YW50O21pbi1oZWlnaHQ6MCFpbXBvcnRhbnQ7bGluZS1oZWlnaHQ6MS4yOCFpbXBvcnRhbnR9CiAgICAgIDwvc3R5bGU+CiIiIgppZiBtYXJrZXIgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCJtYXJrZXIgbm90IGZvdW5kIikKcz1zLnJlcGxhY2UobWFya2VyLGluc2VydCwxKQpwLndyaXRlX3RleHQocyxlbmNvZGluZz0idXRmLTgiKQo=' | base64 -d > /tmp/fix.py
+          python3 /tmp/fix.py
+      - name: Commit change
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/jobcenter-poster-fix.js
           git diff --cached --quiet && exit 0
-          git commit -m 'Remove excess gaps in 04.10 Jobcenter message'
+          git commit -m 'Remove remaining excess gaps in Jobcenter message'
           git push
