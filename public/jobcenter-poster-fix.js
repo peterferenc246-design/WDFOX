@@ -171,7 +171,7 @@
         <details class="outlook-details">
           <summary class="outlook-summary">📄 Schreiben im Browser anzeigen</summary>
           <div class="outlook-view">
-            <div class="outlook-view-head"><div class="outlook-view-meta"><strong>Datum:</strong> 04.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Adressat:</strong> Daniel Freund, MdEP</div></div>
+            <div class="outlook-view-head"><div class="outlook-view-meta"><strong>Datum:</strong> 04.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Adressat:</strong> Daniel Freund, MdEP<br><strong>Kopie (CC):</strong> Tomáš Zdechovský (tomas.zdechovsky@europarl.europa.eu); Amtsgericht Landshut (poststelle@ag-la.bayern.de); Sozialgericht Landshut (poststelle@sg-landshut.justiz.bayern.de); Bundesamt für Justiz (hinweisgeberstelle@bfj.bund.de)</div></div>
             <div class="outlook-view-body" style="padding:18px;line-height:1.65;text-align:justify;text-justify:inter-word;hyphens:auto">
               <p><strong>Betreff: Antrag auf Einschreiten und Prüfung einer möglichen Verletzung der Rechte eines EU-Bürgers in Deutschland nach Meldung eines Verdachts auf Kartellbetrug</strong></p>
               <p>Sehr geehrter Herr Abgeordneter Freund,</p>
