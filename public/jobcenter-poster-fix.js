@@ -206,7 +206,7 @@
     section.style.marginTop = '34px';
     section.innerHTML = `
       <style>
-        #jobcenter-existenz-message-2026-10-04 .outlook-view-body{padding-top:0!important;display:block!important}
+        #jobcenter-existenz-message-2026-10-04 .outlook-view-body{padding-top:0!important;display:block!important;white-space:normal!important}
         #jobcenter-existenz-message-2026-10-04 .outlook-view-body>div:first-child{margin-top:0!important;padding-top:0!important;margin-bottom:2px!important}
         #jobcenter-existenz-message-2026-10-04 [data-wdfox-reference-links="1"]{margin:0 0 2px!important;gap:0!important;line-height:1.2!important}
         #jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text{margin:0 0 2px!important;padding:0!important;line-height:1.25!important}
