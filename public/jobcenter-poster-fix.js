@@ -195,6 +195,7 @@
               <p>Mein Ziel ist kein politischer Konflikt mit Deutschland. Mein Ziel ist, dass meine Rechte als Bürger der Europäischen Union respektiert werden und staatliche Stellen rechtmäßig, transparent und ohne sachwidrige Behinderungen handeln.</p>
               <p>Bitte teilen Sie mir mit, ob Sie sich mit meinem Fall befassen werden und auf welchem Weg ich Ihnen die vollständige Dokumentation übermitteln soll.</p>
               <p>Mit freundlichen Grüßen<br>Peter Ferenc<br>Kumhausen, Deutschland</p>
+              <img src="${POSTER_URL}" alt="Jahrelange Arbeit – und dann?" style="display:block;width:100%;height:auto;margin:26px auto 0;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)">
             </div>
           </div>
         </details>
@@ -204,20 +205,9 @@
     return true;
   }
 
-  function replacePoster(){
+  function removeStandalonePoster(){
     var existing = document.getElementById('jobcenter-social-poster-2026-10-03');
     if (existing) existing.remove();
-    var poster = document.createElement('section');
-    poster.id = 'jobcenter-social-poster-2026-10-03';
-    poster.className = 'jobcenter-social-poster';
-    poster.setAttribute('aria-label', 'Jahrelange Arbeit - und dann');
-    var img = document.createElement('img');
-    img.src = POSTER_URL; img.alt = 'Jahrelange Arbeit - und dann'; img.decoding = 'async'; img.loading = 'eager';
-    img.style.cssText = 'display:block;width:100%;height:auto;max-width:1672px;margin:0 auto;border:0;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.2)';
-    var linkWrap = document.createElement('div');
-    linkWrap.style.cssText = 'display:flex;justify-content:center;margin:18px 0 0';
-    var fb = document.createElement('a'); styleFacebookIcon(fb, 52); linkWrap.appendChild(fb);
-    poster.appendChild(img); poster.appendChild(linkWrap); document.body.appendChild(poster);
     return true;
   }
 
@@ -225,8 +215,8 @@
     addTopFacebookIcon();
     addDanielFreundLetter();
     addPostfachCards();
-    replacePoster();
-    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addPostfachCards(); replacePoster(); }, 1200);
+    removeStandalonePoster();
+    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundLetter(); addPostfachCards(); removeStandalonePoster(); }, 1200);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
