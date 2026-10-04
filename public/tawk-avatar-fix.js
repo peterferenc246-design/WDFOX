@@ -77,80 +77,6 @@
 
   normalizeJobcenterExistenzMessage();
 
-  function normalizeJobcenterPdfLinks() {
-    if (window.location.pathname !== "/jobcenter/" && window.location.pathname !== "/jobcenter") return;
-
-    var facebookUrl = "https://www.facebook.com/photo?fbid=980105415133071&set=a.858080437335570";
-    var jobcenterUrl = "https://www.foxprof.club/jobcenter/";
-
-    function clean() {
-      document.querySelectorAll(".outlook-view-body").forEach(function (body) {
-        if (body.querySelector('[data-wdfox-clean-links="1"]')) return;
-
-        var paragraphs = Array.prototype.slice.call(body.querySelectorAll("p"));
-        var matched = [];
-        paragraphs.forEach(function (p) {
-          var text = String(p.textContent || "").replace(/\s+/g, " ").trim();
-          if (
-            text.indexOf("https://www.facebook.com/photo?") !== -1 ||
-            text.indexOf("fbid=980105415133071") !== -1 ||
-            text.indexOf("https://www.foxprof.club/jobcenter/") !== -1 ||
-            /^1 von 1$/i.test(text)
-          ) matched.push(p);
-        });
-
-        if (!matched.length) return;
-
-        var anchorPoint = matched[0];
-        var keepSignature = matched.some(function (p) {
-          return /Peter Ferenc/i.test(String(p.textContent || ""));
-        });
-
-        matched.forEach(function (p) { p.remove(); });
-
-        var wrap = document.createElement("div");
-        wrap.setAttribute("data-wdfox-clean-links", "1");
-        wrap.style.cssText = "display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 6px";
-
-        var fb = document.createElement("a");
-        fb.href = facebookUrl;
-        fb.target = "_blank";
-        fb.rel = "noopener noreferrer";
-        fb.textContent = "Facebook-Beitrag öffnen";
-        fb.style.cssText = "display:inline-block;padding:9px 12px;border:1px solid #1877F2;border-radius:8px;text-decoration:none;font-weight:700;color:#0b57d0;background:#fff";
-
-        var site = document.createElement("a");
-        site.href = jobcenterUrl;
-        site.target = "_blank";
-        site.rel = "noopener noreferrer";
-        site.textContent = "Jobcenter-Dokumentation öffnen";
-        site.style.cssText = fb.style.cssText;
-
-        wrap.appendChild(fb);
-        wrap.appendChild(site);
-
-        if (anchorPoint.parentNode) anchorPoint.parentNode.insertBefore(wrap, anchorPoint);
-        else body.appendChild(wrap);
-
-        if (keepSignature) {
-          var sig = document.createElement("p");
-          sig.textContent = "Peter Ferenc";
-          sig.style.margin = "0 0 10px";
-          wrap.insertAdjacentElement("afterend", sig);
-        }
-      });
-    }
-
-    clean();
-    var observer = new MutationObserver(clean);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    window.setTimeout(clean, 500);
-    window.setTimeout(clean, 1500);
-    window.setTimeout(function () { clean(); observer.disconnect(); }, 5000);
-  }
-
-  normalizeJobcenterPdfLinks();
-
   var language = String(window.location.pathname.split("/")[1] || "").toLowerCase();
   if (language !== "de" && language !== "en" && language !== "sk" && language !== "fr" && language !== "hr" && language !== "pl" && language !== "it" && language !== "es" && language !== "sv") return;
 
@@ -255,8 +181,6 @@
     var avatar = ensureAvatar();
     var size = Math.max(36, Math.min(42, Math.round(rect.width * 0.112)));
 
-    /* Widget 4.x welcome-trigger avatar position, measured against the
-       visible chat iframe. The overlay is outside the cross-origin iframe. */
     var left = Math.round(rect.left + rect.width * 0.055);
     var top = Math.round(rect.top + rect.height * 0.526);
 
@@ -265,9 +189,6 @@
     avatar.style.left = left + "px";
     avatar.style.top = top + "px";
     avatar.style.display = "block";
-
-    /* Move to the end of <body> on every pass so it stays above Tawk's
-       own iframe when Tawk recreates its DOM. */
     document.body.appendChild(avatar);
   }
 
