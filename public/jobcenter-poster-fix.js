@@ -239,18 +239,13 @@
               <p style="margin:0 0 10px">Mein Ziel ist weiterhin, diese Situation ohne weiteren gerichtlichen Streit zu lösen. Sollte das Jobcenter jedoch nicht handeln, werde ich meine Rechte in vollem Umfang gerichtlich durchsetzen, <strong>einschließlich der Herbeiführung entsprechender strafrechtlicher Konsequenzen, sofern die gesetzlichen Voraussetzungen hierfür erfüllt sind</strong>.</p>
               <p style="margin:0 0 12px">Mit freundlichen Grüßen<br><strong>Peter Ferenc</strong><br>Kumhausen, Deutschland</p>
 
-              <div data-wdfox-email-links="1" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 12px">
-                <a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:9px 12px;border:1px solid #1877F2;border-radius:8px;text-decoration:none;font-weight:700;color:#0b57d0;background:#fff">Facebook-Beitrag öffnen</a>
-                <a href="${JOBCENTER_PAGE_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:9px 12px;border:1px solid #1877F2;border-radius:8px;text-decoration:none;font-weight:700;color:#0b57d0;background:#fff">Jobcenter-Dokumentation öffnen</a>
-              </div>
 
               <div style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px">
                 <a href="${EXISTENZ_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 Unverzügliche finanzielle Sicherung meiner Existenz_DE.pdf öffnen</a>
-                <a href="${EXISTENZ_POSTFACH_PDF_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 14px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 postfachnachricht-04.10.2026 15_21 öffnen</a>
               </div>
 
               <div style="border-top:1px solid #d9d9d9;padding-top:12px;margin-top:4px">
-                <div style="font-weight:700;margin:0 0 10px">Text aus dem Original-PDF „postfachnachricht-04.10.2026 15_21“</div>
+                <div style="font-weight:700;margin:0 0 10px">postfachnachricht-04.10.2026 15_21</div>
                 <div id="existenz-postfach-pdf-text" style="line-height:1.45;text-align:justify;text-justify:inter-word;hyphens:auto">Text aus dem Original-PDF wird geladen ...</div>
               </div>
             </div>
