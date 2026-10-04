@@ -4,8 +4,8 @@
   if (!/^\/jobcenter\/?$/.test(window.location.pathname)) return;
 
   var POSTER_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Jahrelange%20Arbeit%20DEUTSCHLAND%E2%80%93%20und%20dann_.png';
-  var FACEBOOK_POST_URL = 'https://www.facebook.com/photo?fbid=980105415133071&set=a.858080437335570';
-  var FACEBOOK_SHARE_URL = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://www.foxprof.club/jobcenter/');
+  var FACEBOOK_POST_URL = 'https://www.facebook.com/photo?fbid=981014231708856&set=a.858080437335570';
+  var FACEBOOK_SHARE_URL = FACEBOOK_POST_URL;
   var POSTFACH_1222_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2012_22.pdf';
   var POSTFACH_1430_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-03.10.2026%2014_30.1.pdf';
   var GUTSCHEIN_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Gutschein.jpg';
@@ -37,8 +37,8 @@
     fb.href = FACEBOOK_SHARE_URL;
     fb.target = '_blank';
     fb.rel = 'noopener noreferrer';
-    fb.setAttribute('aria-label', 'Jobcenter-Seite auf Facebook teilen');
-    fb.title = 'Jobcenter-Seite auf Facebook teilen';
+    fb.setAttribute('aria-label', 'Facebook-Beitrag öffnen');
+    fb.title = 'Facebook-Beitrag öffnen';
     fb.style.display = 'inline-flex';
     fb.style.alignItems = 'center';
     fb.style.justifyContent = 'center';
