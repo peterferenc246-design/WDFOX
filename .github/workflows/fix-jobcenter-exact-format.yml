@@ -18,17 +18,25 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
           p = Path('public/jobcenter-poster-fix.js')
           s = p.read_text(encoding='utf-8')
 
-          pattern = re.compile(
-              r'''              <div style="border-top:1px solid #d9d9d9;.*?</div>\n              <p style="margin:0 0 4px">Sehr geehrte Damen und Herren,</p>''',
-              re.S
-          )
+          old = '''              <div style="margin:0;padding:0">
+                <div style="font-weight:700;margin:0 0 12px">postfachnachricht-04.10.2026 15_21</div>
+                <p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>
+                <p style="margin:0 0 10px">anbei übersende ich Ihnen mein Schreiben zur unverzüglichen finanziellen Sicherung meiner Existenz sowie zur Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit. Ich bitte um sofortige Bearbeitung und um eine schriftliche Bestätigung der darin genannten Maßnahmen und Fristen.</p>
+                <p style="margin:0 0 10px">Mit freundlichen Grüßen</p>
+                <p style="margin:0 0 4px">Peter Ferenc</p>
+                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin:0 0 6px;line-height:1.25">
+                  <a href="${JOBCENTER_PAGE_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.foxprof.club/jobcenter/</a>
+                  <a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.facebook.com/photo?fbid=980105415133071&amp;set=a.858080437335570</a>
+                </div>
+                <div style="font-family:monospace;color:#666;overflow:hidden;white-space:nowrap;margin:4px 0 10px">======================================================</div>
+              </div>
+              <p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>'''
 
-          replacement = '''              <div class="existenz-email-intro" style="margin:0;padding:0;line-height:1.28;white-space:normal">
+          new = '''              <div class="existenz-email-intro" style="margin:0;padding:0;line-height:1.28;white-space:normal">
                 <div style="font-weight:700;margin:0 0 4px">postfachnachricht-04.10.2026 15_21</div>
                 <p style="margin:0 0 3px">Sehr geehrte Damen und Herren,</p>
                 <p style="margin:0 0 3px">anbei übersende ich Ihnen mein Schreiben zur unverzüglichen finanziellen Sicherung meiner Existenz sowie zur Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit. Ich bitte um sofortige Bearbeitung und um eine schriftliche Bestätigung der darin genannten Maßnahmen und Fristen.</p>
@@ -37,24 +45,15 @@ jobs:
                   <a href="${JOBCENTER_PAGE_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.foxprof.club/jobcenter/</a>
                   <a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.facebook.com/photo?fbid=980105415133071&amp;set=a.858080437335570</a>
                 </div>
-                <hr style="border:0;border-top:1px solid #9aa0a6;margin:5px 0 4px">
-                <div style="font-weight:700;margin:0 0 3px">pdf Beilage:</div>
+                <div style="font-family:monospace;color:#666;overflow:hidden;white-space:nowrap;margin:4px 0 4px">======================================================</div>
+                <div style="font-weight:700;margin:0 0 4px">pdf Beilage:</div>
               </div>
               <p style="margin:0 0 4px">Sehr geehrte Damen und Herren,</p>'''
 
-          s2, n = pattern.subn(replacement, s, count=1)
-          if n != 1:
-              raise SystemExit(f'Expected one target block, found {n}')
-
-          # The short email body is now static; prevent duplicate dynamic PDF text loading.
-          s2 = re.sub(
-              r'''\n    var existenzPdfText = section\.querySelector\('#existenz-postfach-pdf-text'\);\n    if \(existenzPdfText\) loadPdfText\(existenzPdfText, EXISTENZ_POSTFACH_PDF_URL\);''',
-              '',
-              s2,
-              count=1
-          )
-
-          p.write_text(s2, encoding='utf-8')
+          if old not in s:
+              raise SystemExit('Exact current intro block not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
           PY
       - name: Commit exact format
         run: |
