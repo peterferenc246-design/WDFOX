@@ -28,6 +28,9 @@
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
+  window.downloadFile = downloadFile;
+  window.GUTSCHEIN_URL = GUTSCHEIN_URL;
+  window.FREUND_SK_PDF_URL = FREUND_SK_PDF_URL;
 
   function styleFacebookIcon(fb, size){
     fb.href = FACEBOOK_URL;
