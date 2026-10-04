@@ -1,0 +1,55 @@
+name: Compact Jobcenter spacing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compact-jobcenter-spacing.yml'
+      - 'src/pages/jobcenter/index.astro'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compact-spacing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Reduce spacing only in Jobcenter existence message
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('src/pages/jobcenter/index.astro')
+          text = path.read_text(encoding='utf-8')
+          replacements = {
+              '#jobcenter-existenz-message-2026-10-04 .outlook-view-body{padding:12px 16px!important;line-height:1.35!important}': '#jobcenter-existenz-message-2026-10-04 .outlook-view-body{padding:10px 14px!important;line-height:1.28!important}',
+              '#jobcenter-existenz-message-2026-10-04 .outlook-view-body p{margin:0 0 6px!important;line-height:1.35!important}': '#jobcenter-existenz-message-2026-10-04 .outlook-view-body p{margin:0 0 3px!important;line-height:1.28!important}',
+              '#jobcenter-existenz-message-2026-10-04 .outlook-view-body ul,#jobcenter-existenz-message-2026-10-04 .outlook-view-body ol{margin:2px 0 8px!important}': '#jobcenter-existenz-message-2026-10-04 .outlook-view-body ul,#jobcenter-existenz-message-2026-10-04 .outlook-view-body ol{margin:1px 0 5px!important}',
+              '#jobcenter-existenz-message-2026-10-04 .outlook-view-body li{margin-bottom:3px!important;line-height:1.35!important}': '#jobcenter-existenz-message-2026-10-04 .outlook-view-body li{margin-bottom:2px!important;line-height:1.28!important}',
+              '#jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text{line-height:1.35!important}': '#jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text{line-height:1.28!important}',
+              '#jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text p{margin:0 0 5px!important}': '#jobcenter-existenz-message-2026-10-04 #existenz-postfach-pdf-text p{margin:0 0 2px!important}',
+          }
+          original = text
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+          if text == original:
+              print('No spacing changes needed.')
+          else:
+              path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit spacing fix
+        shell: bash
+        run: |
+          if git diff --quiet -- src/pages/jobcenter/index.astro; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/jobcenter/index.astro
+          git commit -m 'Tighten spacing in Jobcenter existence message'
+          git push
