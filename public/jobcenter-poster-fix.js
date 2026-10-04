@@ -228,7 +228,7 @@
             <div class="outlook-view-head"><div class="outlook-view-meta"><strong>Datum:</strong> 04.10.2026 | 15:21<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Jobcenter Landkreis Landshut<br><strong>Betreff:</strong> Sofortiger Schutz meiner Existenz</div></div>
             <div class="outlook-view-body" style="padding:10px 14px;line-height:1.32;text-align:justify;text-justify:inter-word;hyphens:auto;white-space:normal">
               <div class="existenz-email-intro" style="margin:0;padding:0;line-height:1.28;white-space:normal">
-                <div style="font-weight:700;margin:0 0 4px">postfachnachricht-04.10.2026 15_21</div>
+                <div style="font-weight:700;margin:0">postfachnachricht-04.10.2026 15_21</div>
                 <p style="margin:0">Sehr geehrte Damen und Herren,</p>
                 <p style="margin:0">anbei übersende ich Ihnen mein Schreiben zur unverzüglichen finanziellen Sicherung meiner Existenz sowie zur Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit. Ich bitte um sofortige Bearbeitung und um eine schriftliche Bestätigung der darin genannten Maßnahmen und Fristen.</p>
                 <p style="margin:0">Mit freundlichen Grüßen<br>Peter Ferenc</p>
@@ -239,7 +239,7 @@
                 <div style="font-weight:700;margin:0">pdf Anhang:</div>
               </div>
               <p style="margin:0">Sehr geehrte Damen und Herren,</p>
-              <p style="margin:0 0 4px">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr. Ich benötige <strong>eine tatsächliche finanzielle Absicherung meiner grundlegenden Lebensbedürfnisse</strong> und zugleich die Mittel, die es mir ermöglichen, so schnell wie möglich durch die geplante selbständige Tätigkeit ein eigenes Einkommen aufzubauen.</p>
+              <p style="margin:0">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr. Ich benötige <strong>eine tatsächliche finanzielle Absicherung meiner grundlegenden Lebensbedürfnisse</strong> und zugleich die Mittel, die es mir ermöglichen, so schnell wie möglich durch die geplante selbständige Tätigkeit ein eigenes Einkommen aufzubauen.</p>
               <p style="margin:0 0 4px">Daher erwarte ich vom Jobcenter eine konkrete finanzielle Lösung innerhalb der folgenden Fristen:</p>
               <ul style="padding-left:24px;margin:2px 0 5px">
                 <li style="margin-bottom:2px"><strong>am Montag, den 05.10.2026</strong>, fordere ich die Überweisung von <strong>200 € auf mein Konto zur Begleichung aufgelaufener und überfälliger notwendiger Zahlungen</strong>, zusätzlich die <strong>Erstattung der bereits eingereichten Vodafone-Rechnung</strong>, sowie <strong>150 € zur Sicherstellung meiner Ernährung für den Monat Oktober 2026</strong>;</li>
