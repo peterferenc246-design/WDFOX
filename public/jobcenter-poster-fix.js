@@ -229,16 +229,16 @@
             <div class="outlook-view-body" style="padding:10px 14px;line-height:1.32;text-align:justify;text-justify:inter-word;hyphens:auto;white-space:normal">
               <div class="existenz-email-intro" style="margin:0;padding:0;line-height:1.28;white-space:normal">
                 <div style="font-weight:700;margin:0">postfachnachricht-04.10.2026 15_21</div>
-                <p style="margin:0">Sehr geehrte Damen und Herren,</p>
+                <p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>
                 <p style="margin:0">anbei übersende ich Ihnen mein Schreiben zur unverzüglichen finanziellen Sicherung meiner Existenz sowie zur Unterstützung bei der Aufnahme meiner selbständigen Tätigkeit. Ich bitte um sofortige Bearbeitung und um eine schriftliche Bestätigung der darin genannten Maßnahmen und Fristen.</p>
-                <p style="margin:0">Mit freundlichen Grüßen<br>Peter Ferenc</p>
-                <div data-wdfox-reference-links="1" style="margin:0;line-height:1.2;white-space:normal">
-                  <a href="${JOBCENTER_PAGE_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.foxprof.club/jobcenter/</a><span> </span><a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.facebook.com/photo?fbid=980105415133071&amp;set=a.858080437335570</a>
+                <p style="margin:0">Mit freundlichen Grüßen</p><p style="margin:0 0 10px">Peter Ferenc</p>
+                <div data-wdfox-reference-links="1" style="display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:0;line-height:1.2;white-space:normal">
+                  <a href="${JOBCENTER_PAGE_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.foxprof.club/jobcenter/</a><a href="${EXISTENZ_REFERENCE_FACEBOOK_URL}" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline;word-break:break-all">https://www.facebook.com/photo?fbid=980105415133071&amp;set=a.858080437335570</a>
                 </div>
                 <div style="font-family:monospace;color:#666;overflow:hidden;white-space:nowrap;margin:0">======================================================</div>
                 <div style="font-weight:700;margin:0">pdf Anhang:</div>
               </div>
-              <p style="margin:0">Sehr geehrte Damen und Herren,</p>
+              <p style="margin:0 0 10px">Sehr geehrte Damen und Herren,</p>
               <p style="margin:0">meine Situation ist inzwischen keine Frage weiteren Wartens, weiterer Erklärungen oder der fortlaufenden Ausgabe einzelner Gutscheine mehr. Ich benötige <strong>eine tatsächliche finanzielle Absicherung meiner grundlegenden Lebensbedürfnisse</strong> und zugleich die Mittel, die es mir ermöglichen, so schnell wie möglich durch die geplante selbständige Tätigkeit ein eigenes Einkommen aufzubauen.</p>
               <p style="margin:0 0 4px">Daher erwarte ich vom Jobcenter eine konkrete finanzielle Lösung innerhalb der folgenden Fristen:</p>
               <ul style="padding-left:24px;margin:2px 0 5px">
