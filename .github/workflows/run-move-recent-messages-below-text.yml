@@ -1,0 +1,31 @@
+name: Restore recent messages below main text
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/run-move-recent-messages-below-text.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move recent message blocks below main text
+        run: python3 .github/scripts/move_recent_messages_below_main_text.py
+      - name: Commit change
+        run: |
+          if git diff --quiet -- public/jobcenter-poster-fix.js; then
+            echo 'No source changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/jobcenter-poster-fix.js
+          git commit -m 'Restore recent Jobcenter messages below main text'
+          git push origin HEAD:main
