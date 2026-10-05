@@ -1,0 +1,1 @@
+Trigger Vercel from preview head.
