@@ -1,0 +1,31 @@
+name: Group Freund with 05.10 runtime
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/run-group-freund-same-day-runtime.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Group both 05.10 messages at runtime
+        run: python3 .github/scripts/group_freund_same_day_runtime.py
+      - name: Commit change
+        run: |
+          if git diff --quiet -- public/jobcenter-poster-fix.js; then
+            echo 'No source changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/jobcenter-poster-fix.js
+          git commit -m 'Group both 05.10 messages in one visible day block'
+          git push origin HEAD:main
