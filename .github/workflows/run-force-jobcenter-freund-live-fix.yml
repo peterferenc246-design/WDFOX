@@ -1,0 +1,31 @@
+name: Force Jobcenter Freund live fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/run-force-jobcenter-freund-live-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Jobcenter live loader
+        run: python3 .github/scripts/force_jobcenter_freund_live_fix.py
+      - name: Commit live fix
+        run: |
+          if git diff --quiet -- src/pages/jobcenter/index.astro; then
+            echo 'No source changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/jobcenter/index.astro
+          git commit -m 'Force latest Freund email attachments on live Jobcenter page'
+          git push origin HEAD:main
