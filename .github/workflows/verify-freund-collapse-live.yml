@@ -1,0 +1,32 @@
+name: Verify Freund email collapse live
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-freund-collapse-live.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Freund email is closed by default and toggleable
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://www.foxprof.club/jobcenter/?collapse_verify=${GITHUB_SHA}"
+          tmp="$(mktemp)"
+          for attempt in 1 2 3 4 5 6 7 8; do
+            code="$(curl -L --silent --show-error --max-time 30 -A 'WDFOX-Freund-Collapse-Verify/1.0' -o "$tmp" -w '%{http_code}' "$url" || true)"
+            if [[ "$code" == "200" ]] \
+              && grep -F -q 'id="wdfox-freund-email-details"' "$tmp" \
+              && grep -F -q 'E-Mail anzeigen / ausblenden' "$tmp" \
+              && grep -F -q 'Text tela emailu_SK.pdf' "$tmp" \
+              && ! grep -E -q '<details[^>]*id="wdfox-freund-email-details"[^>]* open([ >])' "$tmp"; then
+              echo 'LIVE_FREUND_COLLAPSE=OK'
+              exit 0
+            fi
+            sleep 8
+          done
+          echo 'LIVE_FREUND_COLLAPSE=FAIL'
+          exit 1
