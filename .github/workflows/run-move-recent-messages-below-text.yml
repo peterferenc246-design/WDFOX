@@ -27,7 +27,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/jobcenter-poster-fix.js
-          git commit -m 'Restore recent Jobcenter messages below main text'
+          git commit -m 'Group both 04.10 messages under one update block'
           git push origin HEAD:main
 
-# rerun with corrected Daniel Freund 04.10 section id
+# rerun: remove intermediate divider and duplicate update date for 04.10
