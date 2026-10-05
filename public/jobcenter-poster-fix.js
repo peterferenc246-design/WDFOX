@@ -553,6 +553,14 @@
       if (node && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor);
     });
 
+    var freund04 = document.getElementById('daniel-freund-letter-2026-10-04');
+    if (freund04) {
+      Array.from(freund04.children).forEach(function(child){
+        if (child.classList && (child.classList.contains('evidence-divider') || child.classList.contains('update-date'))) child.remove();
+      });
+      freund04.style.marginTop = '16px';
+    }
+
     return true;
   }
 
