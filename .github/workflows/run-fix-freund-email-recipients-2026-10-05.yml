@@ -29,3 +29,4 @@ jobs:
           git add public/jobcenter-poster-fix.js
           git commit -m 'Correct Freund email recipient metadata and visible Cc list'
           git push origin HEAD:main
+# retry after robust recipient patch
