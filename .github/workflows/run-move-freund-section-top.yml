@@ -1,0 +1,45 @@
+name: Move Freund email section to top
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/run-move-freund-section-top.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move section
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('public/jobcenter-source.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '<section id="daniel-freund-email-2026-10-05"'
+          a = s.find(marker)
+          if a < 0: raise SystemExit('Freund section not found')
+          b = s.find('</section>', a)
+          if b < 0: raise SystemExit('Freund section closing tag not found')
+          b += len('</section>')
+          section = s[a:b]
+          s = s[:a] + s[b:]
+          h = s.find('</h1>')
+          if h < 0: raise SystemExit('H1 not found')
+          h += len('</h1>')
+          s = s[:h] + '\n' + section + '\n' + s[h:]
+          if s.count('id="daniel-freund-email-2026-10-05"') != 1: raise SystemExit('Freund section count invalid')
+          for name in ['DRINGEND – Existenzsicherung Krankenversicherung.pdf','Text tela emailu_SK.pdf','postfachnachricht-05.10.2026 10_16.pdf']:
+              if name not in section: raise SystemExit('Missing attachment: ' + name)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/jobcenter-source.html
+          git commit -m 'Move Daniel Freund email section to top of Jobcenter page'
+          git push origin HEAD:main
