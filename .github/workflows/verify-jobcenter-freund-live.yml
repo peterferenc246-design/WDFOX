@@ -1,0 +1,30 @@
+name: Verify Jobcenter Freund email live
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/jobcenter-source.html'
+      - '.github/workflows/verify-jobcenter-freund-live.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Daniel Freund section and downloads on live Jobcenter page
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://www.foxprof.club/jobcenter/?freund_verify=${GITHUB_SHA}"
+          for attempt in 1 2 3 4 5 6 7 8; do
+            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Jobcenter-Verify/1.0' "$url" || true)"
+            if grep -q 'id="daniel-freund-email-2026-10-05"' <<<"$html" \
+              && grep -q 'DRINGEND – Existenzsicherung Krankenversicherung.pdf' <<<"$html" \
+              && grep -q 'Text tela emailu_SK.pdf' <<<"$html" \
+              && grep -q 'postfachnachricht-05.10.2026 10_16.pdf' <<<"$html"; then
+              echo 'LIVE_JOBCENTER_FREUND_EMAIL=OK'
+              exit 0
+            fi
+            sleep 8
+          done
+          echo 'LIVE_JOBCENTER_FREUND_EMAIL=FAIL'
+          exit 1
