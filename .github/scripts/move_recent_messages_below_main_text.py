@@ -23,22 +23,17 @@ if 'function moveRecentMessagesBelowMainText()' not in text:
       'daniel-freund-letter'
     ];
 
-    var moved = false;
     ids.forEach(function(id){
       var node = document.getElementById(id);
-      if (node && anchor.parentNode) {
-        anchor.parentNode.insertBefore(node, anchor);
-        moved = true;
-      }
+      if (node && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor);
     });
 
-    return moved;
+    return true;
   }
 
 '''
     text = text.replace(marker, helper + marker, 1)
 
-# Add the ordering call after all sections are created.
 needle = "    addStandalonePoster();\n"
 replacement = "    addStandalonePoster();\n    moveRecentMessagesBelowMainText();\n"
 if replacement not in text:
@@ -46,13 +41,12 @@ if replacement not in text:
         raise SystemExit('Primary run insertion point not found')
     text = text.replace(needle, replacement, 1)
 
-# Also enforce the position in the delayed second pass after all dynamic blocks exist.
-old_timeout = "setTimeout(function(){ addTopFacebookIcon(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); }, 1200);"
-new_timeout = "setTimeout(function(){ addTopFacebookIcon(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); moveRecentMessagesBelowMainText(); }, 1200);"
-if old_timeout in text:
-    text = text.replace(old_timeout, new_timeout, 1)
-elif new_timeout not in text:
-    raise SystemExit('Delayed run insertion point not found')
+# Run once more after the delayed rendering pass without depending on its exact source text.
+if 'setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);' not in text:
+    run_end = "  }\n\n  if (document.readyState === 'loading')"
+    if run_end not in text:
+        raise SystemExit('run() closing marker not found')
+    text = text.replace(run_end, "    setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);\n  }\n\n  if (document.readyState === 'loading')", 1)
 
 path.write_text(text, encoding='utf-8')
-print('Moved 05.10 and 04.10 message sections below the main text, directly before the 03.10 documents block.')
+print('Moved the 05.10 and 04.10 message sections back below the main text and before the 03.10 documents block.')
