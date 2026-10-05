@@ -20,7 +20,7 @@ if 'function moveRecentMessagesBelowMainText()' not in text:
       'jobcenter-krankenversicherung-2026-10-05',
       'daniel-freund-email-2026-10-05',
       'jobcenter-existenz-message-2026-10-04',
-      'daniel-freund-letter'
+      'daniel-freund-letter-2026-10-04'
     ];
 
     ids.forEach(function(id){
@@ -33,6 +33,8 @@ if 'function moveRecentMessagesBelowMainText()' not in text:
 
 '''
     text = text.replace(marker, helper + marker, 1)
+else:
+    text = text.replace("      'daniel-freund-letter'", "      'daniel-freund-letter-2026-10-04'")
 
 needle = "    addStandalonePoster();\n"
 replacement = "    addStandalonePoster();\n    moveRecentMessagesBelowMainText();\n"
@@ -41,7 +43,6 @@ if replacement not in text:
         raise SystemExit('Primary run insertion point not found')
     text = text.replace(needle, replacement, 1)
 
-# Run once more after the delayed rendering pass without depending on its exact source text.
 if 'setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);' not in text:
     run_end = "  }\n\n  if (document.readyState === 'loading')"
     if run_end not in text:
@@ -49,4 +50,4 @@ if 'setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);' not in 
     text = text.replace(run_end, "    setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);\n  }\n\n  if (document.readyState === 'loading')", 1)
 
 path.write_text(text, encoding='utf-8')
-print('Moved the 05.10 and 04.10 message sections back below the main text and before the 03.10 documents block.')
+print('Moved all 05.10 and 04.10 message sections below the main text, including the Daniel Freund letter from 04.10.2026.')
