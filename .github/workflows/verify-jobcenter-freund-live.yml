@@ -15,16 +15,32 @@ jobs:
         run: |
           set -euo pipefail
           url="https://www.foxprof.club/jobcenter/?freund_verify=${GITHUB_SHA}"
-          for attempt in 1 2 3 4 5 6 7 8; do
-            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Jobcenter-Verify/1.0' "$url" || true)"
-            if grep -q 'id="daniel-freund-email-2026-10-05"' <<<"$html" \
-              && grep -q 'DRINGEND – Existenzsicherung Krankenversicherung.pdf' <<<"$html" \
-              && grep -q 'Text tela emailu_SK.pdf' <<<"$html" \
-              && grep -q 'postfachnachricht-05.10.2026 10_16.pdf' <<<"$html"; then
-              echo 'LIVE_JOBCENTER_FREUND_EMAIL=OK'
-              exit 0
+          tmp="$(mktemp)"
+          code="$(curl -L --silent --show-error --max-time 30 -A 'WDFOX-Jobcenter-Verify/2.0' -o "$tmp" -w '%{http_code}' "$url" || true)"
+          echo "HTTP_STATUS=$code"
+          echo "BYTES=$(wc -c < "$tmp")"
+          echo "TITLE=$(grep -o '<title>[^<]*</title>' "$tmp" | head -1 || true)"
+          for marker in \
+            'daniel-freund-email-2026-10-05' \
+            'DRINGEND – Existenzsicherung Krankenversicherung.pdf' \
+            'Text tela emailu_SK.pdf' \
+            'postfachnachricht-05.10.2026 10_16.pdf'; do
+            if grep -F -q "$marker" "$tmp"; then
+              echo "FOUND: $marker"
+            else
+              echo "MISSING: $marker"
             fi
-            sleep 8
           done
+          echo 'FREUND_SNIPPET_BEGIN'
+          grep -o -E '.{0,120}(Daniel Freund|Freund).{0,220}' "$tmp" | head -10 || true
+          echo 'FREUND_SNIPPET_END'
+          if [[ "$code" == "200" ]] \
+            && grep -F -q 'daniel-freund-email-2026-10-05' "$tmp" \
+            && grep -F -q 'DRINGEND – Existenzsicherung Krankenversicherung.pdf' "$tmp" \
+            && grep -F -q 'Text tela emailu_SK.pdf' "$tmp" \
+            && grep -F -q 'postfachnachricht-05.10.2026 10_16.pdf' "$tmp"; then
+            echo 'LIVE_JOBCENTER_FREUND_EMAIL=OK'
+            exit 0
+          fi
           echo 'LIVE_JOBCENTER_FREUND_EMAIL=FAIL'
           exit 1
