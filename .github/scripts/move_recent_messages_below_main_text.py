@@ -28,6 +28,14 @@ if 'function moveRecentMessagesBelowMainText()' not in text:
       if (node && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor);
     });
 
+    var freund04 = document.getElementById('daniel-freund-letter-2026-10-04');
+    if (freund04) {
+      Array.from(freund04.children).forEach(function(child){
+        if (child.classList && (child.classList.contains('evidence-divider') || child.classList.contains('update-date'))) child.remove();
+      });
+      freund04.style.marginTop = '16px';
+    }
+
     return true;
   }
 
@@ -35,6 +43,12 @@ if 'function moveRecentMessagesBelowMainText()' not in text:
     text = text.replace(marker, helper + marker, 1)
 else:
     text = text.replace("      'daniel-freund-letter'", "      'daniel-freund-letter-2026-10-04'")
+    old = """    ids.forEach(function(id){\n      var node = document.getElementById(id);\n      if (node && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor);\n    });\n\n    return true;"""
+    new = """    ids.forEach(function(id){\n      var node = document.getElementById(id);\n      if (node && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor);\n    });\n\n    var freund04 = document.getElementById('daniel-freund-letter-2026-10-04');\n    if (freund04) {\n      Array.from(freund04.children).forEach(function(child){\n        if (child.classList && (child.classList.contains('evidence-divider') || child.classList.contains('update-date'))) child.remove();\n      });\n      freund04.style.marginTop = '16px';\n    }\n\n    return true;"""
+    if old not in text and "var freund04 = document.getElementById('daniel-freund-letter-2026-10-04');" not in text:
+        raise SystemExit('moveRecentMessagesBelowMainText body not found')
+    if old in text:
+        text = text.replace(old, new, 1)
 
 needle = "    addStandalonePoster();\n"
 replacement = "    addStandalonePoster();\n    moveRecentMessagesBelowMainText();\n"
@@ -50,4 +64,4 @@ if 'setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);' not in 
     text = text.replace(run_end, "    setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);\n  }\n\n  if (document.readyState === 'loading')", 1)
 
 path.write_text(text, encoding='utf-8')
-print('Moved all 05.10 and 04.10 message sections below the main text, including the Daniel Freund letter from 04.10.2026.')
+print('Grouped both 04.10.2026 messages under one update block: removed the intermediate orange divider and duplicate update date from the Daniel Freund section.')
