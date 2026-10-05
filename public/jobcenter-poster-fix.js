@@ -545,7 +545,7 @@
       'jobcenter-krankenversicherung-2026-10-05',
       'daniel-freund-email-2026-10-05',
       'jobcenter-existenz-message-2026-10-04',
-      'daniel-freund-letter'
+      'daniel-freund-letter-2026-10-04'
     ];
 
     ids.forEach(function(id){
