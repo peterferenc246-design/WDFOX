@@ -30,4 +30,4 @@ jobs:
           git commit -m 'Restore recent Jobcenter messages below main text'
           git push origin HEAD:main
 
-# rerun after patch-script correction
+# rerun with corrected Daniel Freund 04.10 section id
