@@ -1,0 +1,1 @@
+Trigger deployment for current preview head including Lexware accounting integration.
