@@ -338,10 +338,10 @@
           <p>Vielen Dank für die Kenntnisnahme der Unterlagen. Ich erwarte Ihre Reaktion.</p>
           <p>Mit freundlichen Grüßen<br>Peter Ferenc<br>Kumhausen, Deutschland</p>
 
-          <div class="wdfox-nested-downloads">
-            <div class="label">Anhänge / Downloads</div>
-            <a href="${FREUND_EMAIL_SK_PDF_URL}" onclick="event.preventDefault();downloadFile(FREUND_EMAIL_SK_PDF_URL,'Text tela emailu_SK.pdf')">⬇️ Text tela emailu_SK.pdf herunterladen</a>
+          <div class="wdfox-nested-downloads" data-freund-download-count="3">
+            <div class="label">Anhänge / Downloads (3)</div>
             <a href="${FREUND_EMAIL_KRANKEN_PDF_URL}" onclick="event.preventDefault();downloadFile(FREUND_EMAIL_KRANKEN_PDF_URL,'DRINGEND – Existenzsicherung Krankenversicherung.pdf')">⬇️ DRINGEND – Existenzsicherung Krankenversicherung.pdf herunterladen</a>
+            <a href="${FREUND_EMAIL_SK_PDF_URL}" onclick="event.preventDefault();downloadFile(FREUND_EMAIL_SK_PDF_URL,'Text tela emailu_SK.pdf')">⬇️ Text tela emailu_SK.pdf herunterladen</a>
             <a href="${FREUND_EMAIL_POSTFACH_PDF_URL}" onclick="event.preventDefault();downloadFile(FREUND_EMAIL_POSTFACH_PDF_URL,'postfachnachricht-05.10.2026 10_16.pdf')">⬇️ postfachnachricht-05.10.2026 10_16.pdf herunterladen</a>
           </div>
         </div>
