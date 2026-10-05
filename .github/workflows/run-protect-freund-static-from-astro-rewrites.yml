@@ -1,0 +1,48 @@
+name: Protect Freund static section from Astro rewrites
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/run-protect-freund-static-from-astro-rewrites.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Jobcenter Astro transform
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('src/pages/jobcenter/index.astro')
+          s = p.read_text(encoding='utf-8')
+          if 'WDFOX_FREUND_SECTION_PROTECT_BEGIN' in s:
+              print('Protection already present')
+              raise SystemExit(0)
+          needle = "let html = fs.readFileSync(sourcePath, 'utf8');"
+          if needle not in s:
+              raise SystemExit('Source read line not found')
+          capture = '''\n\n// WDFOX_FREUND_SECTION_PROTECT_BEGIN\n// Keep the Daniel Freund evidence block out of generic HTML replacements below,\n// then reinsert the unchanged block after all transformations are finished.\nconst freundMarker = '<section id="daniel-freund-email-2026-10-05"';\nconst freundStart = html.indexOf(freundMarker);\nlet freundSection = '';\nif (freundStart !== -1) {\n  const freundClose = html.indexOf('</section>', freundStart);\n  if (freundClose !== -1) {\n    const freundEnd = freundClose + '</section>'.length;\n    freundSection = html.slice(freundStart, freundEnd);\n    html = html.slice(0, freundStart) + html.slice(freundEnd);\n  }\n}\n// WDFOX_FREUND_SECTION_PROTECT_CAPTURE_END\n'''
+          s = s.replace(needle, needle + capture, 1)
+          close = s.rfind('---')
+          if close <= 3:
+              raise SystemExit('Astro frontmatter closing marker not found')
+          restore = '''\n// WDFOX_FREUND_SECTION_PROTECT_RESTORE\nif (freundSection) {\n  html = html.replace('</h1>', '</h1>\\n' + freundSection);\n}\n// WDFOX_FREUND_SECTION_PROTECT_END\n\n'''
+          s = s[:close] + restore + s[close:]
+          p.write_text(s, encoding='utf-8')
+          print('Protected Freund section from generic Astro HTML replacements.')
+          PY
+      - name: Commit patch
+        run: |
+          if git diff --quiet -- src/pages/jobcenter/index.astro; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/pages/jobcenter/index.astro
+          git commit -m 'Protect Daniel Freund section from generic Jobcenter HTML rewrites'
+          git push origin HEAD:main
