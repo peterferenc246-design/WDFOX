@@ -1,0 +1,1 @@
+Vercel current preview head trigger.
