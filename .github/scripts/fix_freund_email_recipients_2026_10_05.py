@@ -66,9 +66,13 @@ visible_cc = [
     'WAZ – zentralredaktion@waz.de',
     'Assistentin eines Europaabgeordneten – veronika.blazejova@europarl.europa.eu',
 ]
-cc_html = ''.join('<li style="margin:0 0 2px">' + item.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;') + '</li>' for item in visible_cc)
-new_head = (
-    '<div class="outlook-view-head"><div class="outlook-view-meta">'
+
+def esc(text):
+    return text.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+
+cc_html = ''.join('<li style="margin:0 0 2px">' + esc(item) + '</li>' for item in visible_cc)
+recipient_panel = (
+    '<div class="wdfox-freund-recipient-meta" style="margin:10px 0;padding:10px 12px;border:1px solid #d9d9d9;border-radius:8px;background:#f5f7fa;line-height:1.35">'
     '<strong>Datum:</strong> 05.10.2026<br>'
     '<strong>Absender:</strong> Peter Ferenc<br>'
     '<strong>Empfänger (An):</strong> Daniel Freund – Mitglied des Europäischen Parlaments (daniel.freund@europarl.europa.eu)<br>'
@@ -76,50 +80,60 @@ new_head = (
     '<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700">Sichtbare Empfängerliste (An / Cc) anzeigen / ausblenden</summary>'
     '<div style="margin-top:6px"><div><strong>An:</strong> Daniel Freund – daniel.freund@europarl.europa.eu</div>'
     '<div style="margin-top:5px"><strong>Cc:</strong></div><ul style="margin:3px 0 0;padding-left:22px">' + cc_html + '</ul></div></details>'
-    '</div></div>'
+    '</div>'
 )
-block, n = re.subn(r'<div class="outlook-view-head"><div class="outlook-view-meta">.*?</div></div>', new_head, block, count=1, flags=re.S)
-if n != 1:
-    raise SystemExit('Freund email metadata block not replaced')
 
-block, n = re.subn(
-    r'<div class="outlook-card-note">.*?</div>',
-    '<div class="outlook-card-note">Am 05.10.2026 per E-Mail an Herrn Daniel Freund übermittelt; weitere sichtbare Empfänger waren im Cc-Verteiler aufgeführt.</div>',
-    block,
-    count=1,
-    flags=re.S,
-)
-if n != 1:
-    raise SystemExit('Freund email note not replaced')
+if 'Sichtbare Empfängerliste (An / Cc)' not in block:
+    # Correct any wrongly reused Jobcenter recipient metadata inside this Freund-only section.
+    block = block.replace(
+        '<strong>Empfänger:</strong> Jobcenter Landkreis Landshut',
+        '<strong>Empfänger (An):</strong> Daniel Freund – Mitglied des Europäischen Parlaments (daniel.freund@europarl.europa.eu)',
+        1,
+    )
+    # Insert the authoritative Freund metadata directly after the card note, regardless of the old internal markup.
+    pattern = r'(<div class="outlook-card-note">.*?</div>)'
+    block, n = re.subn(pattern, r'\1' + recipient_panel, block, count=1, flags=re.S)
+    if n != 1:
+        raise SystemExit('Freund email card note anchor not found')
 
-block, n = re.subn(
-    r'<div class="outlook-card-title">.*?</div>',
-    '<div class="outlook-card-title">📨 E-Mail an Daniel Freund – Ergänzende Dokumentation zu meinem Fall</div>',
-    block,
-    count=1,
-    flags=re.S,
-)
-if n != 1:
-    raise SystemExit('Freund email title not replaced')
+    block, n = re.subn(
+        r'<div class="outlook-card-note">.*?</div>',
+        '<div class="outlook-card-note">Am 05.10.2026 per E-Mail an Herrn Daniel Freund übermittelt; weitere sichtbare Empfänger waren im Cc-Verteiler aufgeführt.</div>',
+        block,
+        count=1,
+        flags=re.S,
+    )
+    if n != 1:
+        raise SystemExit('Freund email note not replaced')
 
-# Privacy guard: these hidden-recipient addresses must never appear in the public Freund section.
+    block, n = re.subn(
+        r'<div class="outlook-card-title">.*?</div>',
+        '<div class="outlook-card-title">📨 E-Mail an Daniel Freund – Ergänzende Dokumentation zu meinem Fall</div>',
+        block,
+        count=1,
+        flags=re.S,
+    )
+    if n != 1:
+        raise SystemExit('Freund email title not replaced')
+
+# Privacy guard: hidden/Bcc recipient addresses must never appear in the public Freund section.
 for forbidden in ('advokat@advokatpeli.sk','ferencandrej97@gmail.com','jozefk09@gmail.com','pravnik@sbdtn.sk','mr.majka@gmail.com','cg.munich@mzv.sk'):
     if forbidden in block:
         raise SystemExit('Privacy guard failed: hidden recipient found')
 
-if 'Daniel Freund – Mitglied des Europäischen Parlaments' not in block:
-    raise SystemExit('Daniel Freund recipient metadata missing')
-if 'Sichtbare Empfängerliste (An / Cc)' not in block:
-    raise SystemExit('Visible recipient list missing')
-if 'tomas.zdechovsky@europarl.europa.eu' not in block:
-    raise SystemExit('Visible Cc verification failed')
+for required in (
+    'Daniel Freund – Mitglied des Europäischen Parlaments',
+    'Sichtbare Empfängerliste (An / Cc)',
+    'tomas.zdechovsky@europarl.europa.eu',
+):
+    if required not in block:
+        raise SystemExit('Required Freund recipient data missing: ' + required)
 
 s = s[:start] + block + s[end:]
-# Historical Jobcenter portal message must remain correctly identified as sent to Jobcenter.
+# Historical portal message remains a separate Jobcenter submission and must keep that recipient.
 health_start = s.index(end_marker)
-health_end = s.find('  function addDanielFreundLetter(){', health_start)
-health_block = s[health_start:health_end if health_end != -1 else len(s)]
-if 'Jobcenter Landkreis Landshut' not in health_block:
+health_tail = s[health_start:]
+if 'Empfänger:</strong> Jobcenter Landkreis Landshut' not in health_tail:
     raise SystemExit('Historical Jobcenter recipient evidence was unexpectedly altered')
 
 p.write_text(s, encoding='utf-8')
