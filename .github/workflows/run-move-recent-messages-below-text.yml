@@ -29,3 +29,5 @@ jobs:
           git add public/jobcenter-poster-fix.js
           git commit -m 'Restore recent Jobcenter messages below main text'
           git push origin HEAD:main
+
+# rerun after patch-script correction
