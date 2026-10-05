@@ -16,10 +16,21 @@ jobs:
           set -euo pipefail
           url="https://www.foxprof.club/jobcenter/?freund_verify=${GITHUB_SHA}"
           tmp="$(mktemp)"
-          code="$(curl -L --silent --show-error --max-time 30 -A 'WDFOX-Jobcenter-Verify/2.0' -o "$tmp" -w '%{http_code}' "$url" || true)"
+          code="$(curl -L --silent --show-error --max-time 30 -A 'WDFOX-Jobcenter-Verify/3.0' -o "$tmp" -w '%{http_code}' "$url" || true)"
           echo "HTTP_STATUS=$code"
           echo "BYTES=$(wc -c < "$tmp")"
-          echo "TITLE=$(grep -o '<title>[^<]*</title>' "$tmp" | head -1 || true)"
+          python3 - "$tmp" <<'PY'
+          from pathlib import Path
+          import sys
+          text = Path(sys.argv[1]).read_text(encoding='utf-8', errors='replace')
+          marker = 'daniel-freund-email-2026-10-05'
+          i = text.find(marker)
+          print('MARKER_INDEX=', i)
+          if i >= 0:
+              print('SECTION_CHUNK_BEGIN')
+              print(text[max(0, i-300):i+7000])
+              print('SECTION_CHUNK_END')
+          PY
           for marker in \
             'daniel-freund-email-2026-10-05' \
             'DRINGEND – Existenzsicherung Krankenversicherung.pdf' \
@@ -31,9 +42,6 @@ jobs:
               echo "MISSING: $marker"
             fi
           done
-          echo 'FREUND_SNIPPET_BEGIN'
-          grep -o -E '.{0,120}(Daniel Freund|Freund).{0,220}' "$tmp" | head -10 || true
-          echo 'FREUND_SNIPPET_END'
           if [[ "$code" == "200" ]] \
             && grep -F -q 'daniel-freund-email-2026-10-05' "$tmp" \
             && grep -F -q 'DRINGEND – Existenzsicherung Krankenversicherung.pdf' "$tmp" \
