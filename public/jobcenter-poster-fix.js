@@ -533,6 +533,29 @@
     return true;
   }
 
+
+  function moveRecentMessagesBelowMainText(){
+    var documentsHeading = Array.from(document.querySelectorAll('h2')).find(function(el){
+      return (el.textContent || '').trim() === 'Dokumente des Jobcenters / Nachweise';
+    });
+    if (!documentsHeading) return false;
+
+    var anchor = documentsHeading.closest('section') || documentsHeading;
+    var ids = [
+      'jobcenter-krankenversicherung-2026-10-05',
+      'daniel-freund-email-2026-10-05',
+      'jobcenter-existenz-message-2026-10-04',
+      'daniel-freund-letter'
+    ];
+
+    ids.forEach(function(id){
+      var node = document.getElementById(id);
+      if (node && anchor.parentNode) anchor.parentNode.insertBefore(node, anchor);
+    });
+
+    return true;
+  }
+
   function run(){
     addTopFacebookIcon();
     addDanielFreundEmail20261005();
@@ -542,7 +565,9 @@
     addExistenzMessage();
     addPostfachCards();
     addStandalonePoster();
+    moveRecentMessagesBelowMainText();
     setTimeout(function(){ addTopFacebookIcon(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
+    setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
