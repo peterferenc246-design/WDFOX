@@ -1,0 +1,1 @@
+Ensure preview deployment hook fires for current preview head.
