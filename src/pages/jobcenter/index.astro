@@ -5,6 +5,23 @@ import path from 'node:path';
 const sourcePath = path.join(process.cwd(), 'public', 'jobcenter-source.html');
 let html = fs.readFileSync(sourcePath, 'utf8');
 
+// WDFOX_FREUND_SECTION_PROTECT_BEGIN
+// Keep the Daniel Freund evidence block out of generic HTML replacements below,
+// then reinsert the unchanged block after all transformations are finished.
+const freundMarker = '<section id="daniel-freund-email-2026-10-05"';
+const freundStart = html.indexOf(freundMarker);
+let freundSection = '';
+if (freundStart !== -1) {
+  const freundClose = html.indexOf('</section>', freundStart);
+  if (freundClose !== -1) {
+    const freundEnd = freundClose + '</section>'.length;
+    freundSection = html.slice(freundStart, freundEnd);
+    html = html.slice(0, freundStart) + html.slice(freundEnd);
+  }
+}
+// WDFOX_FREUND_SECTION_PROTECT_CAPTURE_END
+
+
 html = html.replace(
   '<head>',
   '<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="wdfox-jobcenter-version" content="2026-10-05-1338">'
@@ -326,5 +343,12 @@ html = html.replace(
   '</body>',
   '<script src="/jobcenter-poster-fix.js?v=2026-10-05-1338"></script></body>'
 );
+
+// WDFOX_FREUND_SECTION_PROTECT_RESTORE
+if (freundSection) {
+  html = html.replace('</h1>', '</h1>\n' + freundSection);
+}
+// WDFOX_FREUND_SECTION_PROTECT_END
+
 ---
 <Fragment set:html={html} />
