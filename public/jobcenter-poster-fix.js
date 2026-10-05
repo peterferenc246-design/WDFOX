@@ -513,15 +513,36 @@
     return true;
   }
 
+  function groupFreundWithKranken05Oct(){
+    var krank = document.getElementById('jobcenter-krankenversicherung-2026-10-05');
+    var freund = document.getElementById('daniel-freund-email-2026-10-05');
+    if (!krank || !freund) return false;
+    if (freund.parentElement === krank && freund.getAttribute('data-wdfox-same-day') === '1') return true;
+
+    // The 05.10 Jobcenter message and the 05.10 Freund email belong to one visual day block.
+    // Keep one top orange divider/date and move the Freund card below the first 05.10 message.
+    Array.from(freund.querySelectorAll(':scope > .evidence-divider, :scope > .update-date')).forEach(function(el){ el.remove(); });
+    freund.className = 'wdfox-same-day-followup';
+    freund.setAttribute('data-wdfox-same-day', '1');
+    freund.style.marginTop = '22px';
+    freund.style.pageBreakBefore = 'auto';
+    freund.style.breakBefore = 'auto';
+    var heading = freund.querySelector(':scope > h2');
+    if (heading) heading.style.marginTop = '0';
+    krank.appendChild(freund);
+    return true;
+  }
+
   function run(){
     addTopFacebookIcon();
     addDanielFreundEmail20261005();
     addDanielFreundLetter();
     addKrankenversicherungMessage();
+    groupFreundWithKranken05Oct();
     addExistenzMessage();
     addPostfachCards();
     addStandalonePoster();
-    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); }, 1200);
+    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
