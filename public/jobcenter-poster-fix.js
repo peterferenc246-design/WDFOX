@@ -20,6 +20,7 @@
   var FREUND_EMAIL_SK_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Text%20tela%20emailu_SK.pdf';
   var FREUND_EMAIL_KRANKEN_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/DRINGEND%20%E2%80%93%20Existenzsicherung%20Krankenversicherung.pdf';
   var FREUND_EMAIL_POSTFACH_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-05.10.2026%2010_16.pdf';
+  var REGIONAL_BESCHWERDE_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Beschwerde_Jobcenter_Landkreis_LA_Regionaldirektion%20Bayern_DE_SK.pdf';
 
   async function downloadFile(url, filename){
     try {
@@ -287,6 +288,64 @@
 
 
 
+  function addRegionaldirektionBeschwerde20261006(){
+    if (document.getElementById('jobcenter-regionaldirektion-beschwerde-2026-10-06')) return true;
+    var section = document.createElement('section');
+    section.id = 'jobcenter-regionaldirektion-beschwerde-2026-10-06';
+    section.className = 'attachment evidence-section';
+    section.style.marginTop = '18px';
+    section.innerHTML =
+      '<style>' +
+      '#jobcenter-regionaldirektion-beschwerde-2026-10-06 .outlook-card{border:2px solid #1877F2;background:#f7fbff}' +
+      '#jobcenter-regionaldirektion-beschwerde-2026-10-06 .outlook-view-body{padding:12px 14px!important;display:block!important;white-space:normal!important;line-height:1.3!important;text-align:justify;text-justify:inter-word;hyphens:auto}' +
+      '#jobcenter-regionaldirektion-beschwerde-2026-10-06 .outlook-view-body p{margin:0 0 4px!important;padding:0!important;min-height:0!important;line-height:1.3!important}' +
+      '#jobcenter-regionaldirektion-beschwerde-2026-10-06 .jc-compact-separator{font-family:monospace;color:#666;overflow:hidden;white-space:nowrap;margin:4px 0}' +
+      '#jobcenter-regionaldirektion-beschwerde-2026-10-06 .jc-pdf-label{font-weight:700;margin:0 0 5px}' +
+      '#jobcenter-regionaldirektion-beschwerde-2026-10-06 .wdfox-signature{margin-top:6px;line-height:1.25}' +
+      '</style>' +
+      '<hr class="evidence-divider">' +
+      '<p class="update-date">Aktualisiert am: 06.10.2026 | Aktualisierung Nr. 1</p>' +
+      '<h2>Beschwerde wegen Untätigkeit und Bearbeitung meines Falles – Regionaldirektion Bayern</h2>' +
+      '<div class="outlook-card">' +
+        '<div class="outlook-card-title">📨 Beschwerde wegen Untätigkeit und Bearbeitung meines Falles – Jobcenter Landkreis Landshut</div>' +
+        '<div class="outlook-card-note">Am 06.10.2026 an die Regionaldirektion Bayern übermittelt.</div>' +
+        '<details class="outlook-details">' +
+          '<summary class="outlook-summary">📄 Begleittext und Anlage im Browser anzeigen / ausblenden</summary>' +
+          '<div class="outlook-view">' +
+            '<div class="outlook-view-head"><div class="outlook-view-meta"><strong>Datum:</strong> 06.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Regionaldirektion Bayern – Kundenreaktionsmanagement<br><strong>Betreff:</strong> Beschwerde wegen Untätigkeit und Bearbeitung meines Falles – Jobcenter Landkreis Landshut</div></div>' +
+            '<div class="outlook-view-body">' +
+              '<p><strong>Betreff / Predmet:</strong> Beschwerde wegen Untätigkeit und Bearbeitung meines Falles – Jobcenter Landkreis Landshut</p>' +
+              '<p><strong>Sehr geehrte Damen und Herren,</strong></p>' +
+              '<p>anbei übersende ich Ihnen meine formelle Beschwerde bezüglich des bisherigen Vorgehens des Jobcenters Landkreis Landshut in meinem Fall.</p>' +
+              '<p>Das beigefügte Dokument enthält eine Zusammenfassung der aktuellen Situation, meine konkreten Anliegen sowie ergänzende Nachweise und eine slowakische Übersetzung des Haupttextes.</p>' +
+              '<p>Aufgrund meiner akuten existenziellen und gesundheitlichen Situation bitte ich um eine unverzügliche Prüfung der Angelegenheit, um eine Bestätigung des Eingangs dieser Beschwerde sowie um eine Information über das weitere Vorgehen.</p>' +
+              '<p>Mit freundlichen Grüßen</p>' +
+              '<p>Details:<br><a href="' + JOBCENTER_PAGE_URL + '" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline">https://www.foxprof.club/jobcenter/</a></p>' +
+              '<div class="wdfox-signature"><strong><a href="https://foxprof.club/" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline">WebDesignFOX</a> Peter Ferenc</strong><br><strong>Rammelkam 2,<br>84036 Kumhausen</strong><br>📞 Mobil: +49 157 317 3333 2<br>📠 +1 231 538 6409<br>📧 <a href="mailto:info@foxprof.club" style="color:#0b57d0;text-decoration:underline">info@foxprof.club</a> | <a href="http://www.foxprof.club/" target="_blank" rel="noopener noreferrer" style="color:#0b57d0;text-decoration:underline">www.foxprof.club</a></div>' +
+              '<div class="jc-compact-separator">======================================================</div>' +
+              '<div class="jc-pdf-label">pdf Anhang: Beschwerde_Jobcenter_Landkreis_LA_Regionaldirektion Bayern_DE_SK.pdf</div>' +
+              '<div id="regional-beschwerde-pdf-text" style="margin:0 0 5px;line-height:1.3">Anhangtext wird beim Öffnen geladen ...</div>' +
+              '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:7px 0 0"><a href="' + REGIONAL_BESCHWERDE_PDF_URL + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:9px 12px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;text-decoration:none">📄 Original-PDF öffnen</a></div>' +
+            '</div>' +
+          '</div>' +
+        '</details>' +
+      '</div>';
+    var details = section.querySelector('details');
+    if (details) details.addEventListener('toggle', function(){
+      if (!details.open) return;
+      var target = document.getElementById('regional-beschwerde-pdf-text');
+      if (target) loadPdfText(target, REGIONAL_BESCHWERDE_PDF_URL);
+    });
+    var krank = document.getElementById('jobcenter-krankenversicherung-2026-10-05');
+    if (krank && krank.parentNode) krank.insertAdjacentElement('beforebegin', section);
+    else {
+      var firstEvidence = document.querySelector('section.attachment.evidence-section');
+      if (firstEvidence && firstEvidence.parentNode) firstEvidence.insertAdjacentElement('beforebegin', section);
+      else document.body.appendChild(section);
+    }
+    return true;
+  }
+
   function addDanielFreundEmail20261005(){
     if (document.getElementById('daniel-freund-email-2026-10-05')) return true;
     var section = document.createElement('section');
@@ -542,6 +601,7 @@
 
     var anchor = documentsHeading.closest('section') || documentsHeading;
     var ids = [
+      'jobcenter-regionaldirektion-beschwerde-2026-10-06',
       'jobcenter-krankenversicherung-2026-10-05',
       'daniel-freund-email-2026-10-05',
       'jobcenter-existenz-message-2026-10-04',
@@ -566,6 +626,7 @@
 
   function run(){
     addTopFacebookIcon();
+    addRegionaldirektionBeschwerde20261006();
     addDanielFreundEmail20261005();
     addDanielFreundLetter();
     addKrankenversicherungMessage();
@@ -574,7 +635,7 @@
     addPostfachCards();
     addStandalonePoster();
     moveRecentMessagesBelowMainText();
-    setTimeout(function(){ addTopFacebookIcon(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
+    setTimeout(function(){ addTopFacebookIcon(); addRegionaldirektionBeschwerde20261006(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
     setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);
   }
 
