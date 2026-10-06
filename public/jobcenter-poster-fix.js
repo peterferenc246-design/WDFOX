@@ -416,7 +416,19 @@
       '<img src="' + FREUND_WARNUNG_IMAGE_URL + '" alt="Daniel Freund" style="display:block;max-width:240px;width:44%;height:auto;margin:12px auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)">' +
       '<div style="margin:10px 0 0;padding:10px 12px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;line-height:1.35">' +
       '<strong>Datum:</strong> 06.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Daniel Freund – Mitglied des Europäischen Parlaments<br><strong>Betreff:</strong> Warnung' +
-      '</div></div>';
+      '</div>' +
+      '<details class="outlook-details" style="margin-top:10px">' +
+      '<summary class="outlook-summary">📄 Nachricht im Browser anzeigen / ausblenden</summary>' +
+      '<div class="outlook-view"><div class="outlook-view-body" style="padding:12px 14px;line-height:1.3;text-align:justify;hyphens:auto">' +
+      '<p>Herr Freund,</p>' +
+      '<p>aus Ihrer bisherigen Untätigkeit gewinne ich den Eindruck, dass Ihr öffentliches Mandat im Europäischen Parlament in meinem Fall lediglich formalen und deklarativen Charakter hat.</p>' +
+      '<p>Bürger wählen ihre politischen Vertreter nicht dafür, dass diese lediglich hohe öffentliche Bezüge erhalten, sondern dafür, dass sie bei schwerwiegenden Problemen der Bürger handeln, kommunizieren und Verantwortung für die Ausübung ihres Mandats übernehmen.</p>' +
+      '<p>Auf mein Anliegen bezüglich meiner existenziellen Situation, meines Krankenversicherungsschutzes und des Vorgehens des Jobcenters habe ich von Ihnen bislang keine sachliche Antwort erhalten.</p>' +
+      '<p>Ich halte es für legitim, öffentlich darauf hinzuweisen, wenn ein gewählter Vertreter trotz der Schwere eines vorgetragenen Anliegens nicht reagiert. Ebenso halte ich es für legitim, die Öffentlichkeit darüber zu informieren, wie einzelne öffentliche Mandatsträger ihr Mandat ausüben und ob sie Bürgern, die sich an sie wenden, tatsächliche Unterstützung oder zumindest eine sachliche Antwort geben.</p>' +
+      '<p>Ich erwarte daher von Ihnen eine klare Stellungnahme zu meinem Anliegen und die Information, ob Sie beabsichtigen, sich mit meinem Fall zu befassen.</p>' +
+      '<p>Mit freundlichen Grüßen</p>' +
+      '<p><strong>Peter Ferenc</strong></p>' +
+      '</div></div></details></div>';
     var sozial = document.getElementById('jobcenter-sozialgericht-ea-2026-10-06');
     if (sozial && sozial.parentNode) sozial.insertAdjacentElement('afterend', section);
     else document.body.appendChild(section);
