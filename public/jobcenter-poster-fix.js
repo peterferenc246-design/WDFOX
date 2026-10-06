@@ -21,6 +21,8 @@
   var FREUND_EMAIL_KRANKEN_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/DRINGEND%20%E2%80%93%20Existenzsicherung%20Krankenversicherung.pdf';
   var FREUND_EMAIL_POSTFACH_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/postfachnachricht-05.10.2026%2010_16.pdf';
   var REGIONAL_BESCHWERDE_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Beschwerde_Jobcenter_Landkreis_LA_Regionaldirektion%20Bayern_DE_SK.pdf';
+  var SOZIALGERICHT_DE_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/15_Sozialgericht_LA_Antrag_auf_einstweilige_Anordnung_DE_v2.pdf';
+  var SOZIALGERICHT_SK_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/15_Sozialgericht%20LA_Antrag%20auf%20einstweilige%20Anordnung_SK.pdf';
 
   async function downloadFile(url, filename){
     try {
@@ -346,6 +348,58 @@
     return true;
   }
 
+  function addSozialgerichtEA20261006(){
+    if (document.getElementById('jobcenter-sozialgericht-ea-2026-10-06')) return true;
+    var section = document.createElement('section');
+    section.id = 'jobcenter-sozialgericht-ea-2026-10-06';
+    section.className = 'attachment evidence-section';
+    section.style.marginTop = '18px';
+    section.innerHTML =
+      '<style>' +
+      '#jobcenter-sozialgericht-ea-2026-10-06 .outlook-card{border:2px solid #1877F2;background:#f7fbff}' +
+      '#jobcenter-sozialgericht-ea-2026-10-06 .sg-docs{display:flex;flex-direction:column;gap:10px;margin-top:10px}' +
+      '#jobcenter-sozialgericht-ea-2026-10-06 .sg-doc{padding:10px 12px;border:1px solid #d9d9d9;border-radius:8px;background:#fff}' +
+      '#jobcenter-sozialgericht-ea-2026-10-06 .sg-doc-title{font-weight:700;margin:0 0 7px}' +
+      '#jobcenter-sozialgericht-ea-2026-10-06 .sg-actions{display:flex;flex-wrap:wrap;gap:8px}' +
+      '#jobcenter-sozialgericht-ea-2026-10-06 .sg-actions a,#jobcenter-sozialgericht-ea-2026-10-06 .sg-actions button{display:inline-block;padding:8px 11px;border:1px solid #1877F2;border-radius:7px;background:#fff;color:#0b57d0;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}' +
+      '</style>' +
+      '<hr class="evidence-divider">' +
+      '<p class="update-date">Aktualisiert am: 06.10.2026 | Aktualisierung Nr. 2</p>' +
+      '<h2>ANTRAG AUF ERLASS EINER EINSTWEILIGEN ANORDNUNG<br><span style="font-size:.92em">gemäß § 86b Abs. 2 SGG</span></h2>' +
+      '<div class="outlook-card">' +
+        '<div class="outlook-card-title">📨 Antrag an das Sozialgericht Landshut</div>' +
+        '<div class="outlook-card-note">Am 06.10.2026 über MJP an das Sozialgericht Landshut übermittelt. Kein Begleittext – übermittelt wurden ausschließlich die beiden PDF-Dokumente.</div>' +
+        '<div class="sg-docs">' +
+          '<div class="sg-doc">' +
+            '<div class="sg-doc-title">🇩🇪 15_Sozialgericht_LA_Antrag_auf_einstweilige_Anordnung_DE_v2.pdf</div>' +
+            '<div class="sg-actions">' +
+              '<a href="' + SOZIALGERICHT_DE_PDF_URL + '" target="_blank" rel="noopener noreferrer">📄 PDF anzeigen</a>' +
+              '<button type="button" data-download="de">⬇ PDF herunterladen</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="sg-doc">' +
+            '<div class="sg-doc-title">🇸🇰 15_Sozialgericht LA_Antrag auf einstweilige Anordnung_SK.pdf</div>' +
+            '<div class="sg-actions">' +
+              '<a href="' + SOZIALGERICHT_SK_PDF_URL + '" target="_blank" rel="noopener noreferrer">📄 PDF anzeigen</a>' +
+              '<button type="button" data-download="sk">⬇ PDF herunterladen</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    var deBtn = section.querySelector('[data-download="de"]');
+    var skBtn = section.querySelector('[data-download="sk"]');
+    if (deBtn) deBtn.addEventListener('click', function(){ downloadFile(SOZIALGERICHT_DE_PDF_URL, '15_Sozialgericht_LA_Antrag_auf_einstweilige_Anordnung_DE_v2.pdf'); });
+    if (skBtn) skBtn.addEventListener('click', function(){ downloadFile(SOZIALGERICHT_SK_PDF_URL, '15_Sozialgericht LA_Antrag auf einstweilige Anordnung_SK.pdf'); });
+    var regional = document.getElementById('jobcenter-regionaldirektion-beschwerde-2026-10-06');
+    if (regional && regional.parentNode) regional.insertAdjacentElement('afterend', section);
+    else {
+      var krank = document.getElementById('jobcenter-krankenversicherung-2026-10-05');
+      if (krank && krank.parentNode) krank.insertAdjacentElement('beforebegin', section);
+      else document.body.appendChild(section);
+    }
+    return true;
+  }
+
   function addDanielFreundEmail20261005(){
     if (document.getElementById('daniel-freund-email-2026-10-05')) return true;
     var section = document.createElement('section');
@@ -602,6 +656,7 @@
     var anchor = documentsHeading.closest('section') || documentsHeading;
     var ids = [
       'jobcenter-regionaldirektion-beschwerde-2026-10-06',
+      'jobcenter-sozialgericht-ea-2026-10-06',
       'jobcenter-krankenversicherung-2026-10-05',
       'daniel-freund-email-2026-10-05',
       'jobcenter-existenz-message-2026-10-04',
@@ -627,6 +682,7 @@
   function run(){
     addTopFacebookIcon();
     addRegionaldirektionBeschwerde20261006();
+    addSozialgerichtEA20261006();
     addDanielFreundEmail20261005();
     addDanielFreundLetter();
     addKrankenversicherungMessage();
@@ -635,7 +691,7 @@
     addPostfachCards();
     addStandalonePoster();
     moveRecentMessagesBelowMainText();
-    setTimeout(function(){ addTopFacebookIcon(); addRegionaldirektionBeschwerde20261006(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
+    setTimeout(function(){ addTopFacebookIcon(); addRegionaldirektionBeschwerde20261006(); addSozialgerichtEA20261006(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
     setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);
   }
 
