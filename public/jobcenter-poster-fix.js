@@ -23,6 +23,7 @@
   var REGIONAL_BESCHWERDE_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/Beschwerde_Jobcenter_Landkreis_LA_Regionaldirektion%20Bayern_DE_SK.pdf';
   var SOZIALGERICHT_DE_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/15_Sozialgericht_LA_Antrag_auf_einstweilige_Anordnung_DE_v2.pdf';
   var SOZIALGERICHT_SK_PDF_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/15_Sozialgericht%20LA_Antrag%20auf%20einstweilige%20Anordnung_SK.pdf';
+  var FREUND_WARNUNG_IMAGE_URL = 'https://raw.githubusercontent.com/peterferenc246-design/WDFOX/main/privat/16_Freund.jpg';
 
   async function downloadFile(url, filename){
     try {
@@ -400,6 +401,28 @@
     return true;
   }
 
+  function addFreundWarnung20261006(){
+    if (document.getElementById('jobcenter-freund-warnung-2026-10-06')) return true;
+    var section = document.createElement('section');
+    section.id = 'jobcenter-freund-warnung-2026-10-06';
+    section.className = 'attachment evidence-section';
+    section.style.marginTop = '18px';
+    section.innerHTML = '<hr class="evidence-divider">' +
+      '<p class="update-date">Aktualisiert am: 06.10.2026 | Aktualisierung Nr. 3</p>' +
+      '<h2>Warnung – Nachricht an Daniel Freund</h2>' +
+      '<div class="outlook-card" style="border:2px solid #1877F2;background:#f7fbff">' +
+      '<div class="outlook-card-title">📨 Warnung</div>' +
+      '<div class="outlook-card-note">Am 06.10.2026 per E-Mail an Daniel Freund, Mitglied des Europäischen Parlaments, übermittelt.</div>' +
+      '<img src="' + FREUND_WARNUNG_IMAGE_URL + '" alt="Daniel Freund" style="display:block;max-width:240px;width:44%;height:auto;margin:12px auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)">' +
+      '<div style="margin:10px 0 0;padding:10px 12px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;line-height:1.35">' +
+      '<strong>Datum:</strong> 06.10.2026<br><strong>Absender:</strong> Peter Ferenc<br><strong>Empfänger:</strong> Daniel Freund – Mitglied des Europäischen Parlaments<br><strong>Betreff:</strong> Warnung' +
+      '</div></div>';
+    var sozial = document.getElementById('jobcenter-sozialgericht-ea-2026-10-06');
+    if (sozial && sozial.parentNode) sozial.insertAdjacentElement('afterend', section);
+    else document.body.appendChild(section);
+    return true;
+  }
+
   function addDanielFreundEmail20261005(){
     if (document.getElementById('daniel-freund-email-2026-10-05')) return true;
     var section = document.createElement('section');
@@ -657,6 +680,7 @@
     var ids = [
       'jobcenter-regionaldirektion-beschwerde-2026-10-06',
       'jobcenter-sozialgericht-ea-2026-10-06',
+      'jobcenter-freund-warnung-2026-10-06',
       'jobcenter-krankenversicherung-2026-10-05',
       'daniel-freund-email-2026-10-05',
       'jobcenter-existenz-message-2026-10-04',
@@ -683,6 +707,7 @@
     addTopFacebookIcon();
     addRegionaldirektionBeschwerde20261006();
     addSozialgerichtEA20261006();
+    addFreundWarnung20261006();
     addDanielFreundEmail20261005();
     addDanielFreundLetter();
     addKrankenversicherungMessage();
@@ -691,7 +716,7 @@
     addPostfachCards();
     addStandalonePoster();
     moveRecentMessagesBelowMainText();
-    setTimeout(function(){ addTopFacebookIcon(); addRegionaldirektionBeschwerde20261006(); addSozialgerichtEA20261006(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
+    setTimeout(function(){ addTopFacebookIcon(); addRegionaldirektionBeschwerde20261006(); addSozialgerichtEA20261006(); addFreundWarnung20261006(); addDanielFreundEmail20261005(); addDanielFreundLetter(); addKrankenversicherungMessage(); groupFreundWithKranken05Oct(); addExistenzMessage(); addPostfachCards(); addStandalonePoster(); groupFreundWithKranken05Oct(); }, 1200);
     setTimeout(function(){ moveRecentMessagesBelowMainText(); }, 1500);
   }
 
