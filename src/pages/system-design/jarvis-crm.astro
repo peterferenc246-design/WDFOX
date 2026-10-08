@@ -1,0 +1,61 @@
+---
+const modules=[
+{title:"CRM jadro",items:["Kontakty, firmy, leady, obchodné prípady, úlohy a poznámky","História aktivít, súhlasy, stav klienta, audit log","Viacklientská izolácia dát a oprávnenia"]},
+{title:"Jarvis / Supervisor",items:["Textový a hlasový vstup s rozpoznaním zámeru","Context Engine + MCP/API nástroje + n8n orchestrácia","Vyhľadanie leadov, návrh follow-upov, sumarizácia dňa","Schvaľovanie odosielania správ, volaní a zmien v CRM"]},
+{title:"Denný hlasový briefing",items:["Plánovaný čas, časové pásmo a výslovný súhlas používateľa","Nové leady, follow-upy, hovory, rezervované stretnutia, otvorené úlohy","TTS alebo telefonický briefing cez povoleného poskytovateľa","Fallback: email/text, história doručenia a kontrola chýb"]},
+{title:"Integrácie a náklady",items:["Outlook e-mail a kalendár, Tawk.to, webové formuláre","Telefónia cez WebRTC alebo SIP poskytovateľa podľa potreby","Model Router pre LLM, obrázky a video ako samostatné služby","Limity spotreby, rozpočty, GDPR a monitorovanie"]}
+];
+const milestones=[
+["MVP 1","CRM kontakty, leady, úlohy, dashboard a denný textový prehľad"],
+["MVP 2","Jarvis príkazy na čítanie CRM, prípravu follow-upov a potvrdené zápisy"],
+["MVP 3","Denný hlasový briefing v zvolenom čase, opt-in a fallback"],
+["MVP 4","Telefónia, viac klientov, generovanie médií, reporting a nákladové limity"]
+];
+const original=`A CRM with UNLIMITED AI. And your own Jarvis running the whole thing.
+Unlimited voice calling.
+
+Unlimited image generation.
+
+Unlimited video generation.
+
+Unlimited LLM usage.
+
+Everything you expect from a traditional CRM, with an AI operating layer built on top.
+
+Your own Jarvis style assistant that can actually operate your CRM.
+
+Need to follow up with leads?
+
+Need to check today’s activity?
+
+Need to find out what needs your attention?
+
+Just tell it.
+
+It can handle the work across your CRM and keep everything connected.
+
+And it doesn’t stop there.
+
+You can have it call you every day at a time you choose and give you a complete business update.
+
+New leads.
+
+Follow ups.
+
+Calls.
+
+Booked meetings.
+
+Pending tasks.
+
+What needs your attention.
+
+All in one daily briefing.
+
+We actually built this.
+
+Sharing a few screenshots below 👇
+
+Comment “CRM” and I’ll send you a detailed video showing exactly how it works.`;
+---
+<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WDFOX Jarvis CRM – architektúra</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#143342,#06090e 55%);color:#edf9ff;font:16px system-ui,sans-serif}.wrap{max-width:1100px;margin:auto;padding:28px 18px 70px}nav{display:flex;flex-wrap:wrap;gap:8px}nav a{color:#a5f1d3;text-decoration:none;border:1px solid #3e6673;padding:9px 13px;border-radius:22px}h1{font-size:clamp(2rem,5vw,3.4rem);color:#9ee9d1}h2{color:#9ee9d1}p,li{color:#bbccd6;line-height:1.65}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.card,.stage{background:#0f1d27;border:1px solid #365866;border-radius:16px;padding:20px}.flow{text-align:center;max-width:740px;margin:28px auto}.flow div{padding:15px;border:1px solid #4b7a76;border-radius:12px;background:#12252d}.flow span{display:block;padding:7px;color:#a2c6c4}.stages{display:grid;gap:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0a151d;border:1px solid #3a5867;border-radius:12px;padding:18px;color:#d4e6ed;font:inherit;line-height:1.6}.notice{margin:20px 0;border-left:3px solid #9ee9d1;padding:15px;background:#10212b}@media(max-width:720px){.cards{grid-template-columns:1fr}}</style></head><body><main class="wrap"><nav><a href="/system-design">🌳 Hlavná mapa</a><a href="/system-design/ai-tools">🧰 Tool Vault</a><a href="/system-design/communication">💬 Komunikácia</a></nav><h1>🦊 WDFOX Jarvis CRM</h1><p>Plán vlastného CRM systému s AI riadiacim asistentom, hlasovým a textovým ovládaním, orchestráciou agentov a voliteľným denným telefonickým briefingom.</p><div class="flow"><div>👤 Majiteľ / klient: hlas alebo text</div><span>↓</span><div>🧠 Jarvis Supervisor + Context Engine</div><span>↓</span><div>🔀 n8n + MCP / API + schvaľovanie akcií</div><span>↓</span><div>📇 CRM • Outlook • kalendár • Tawk.to • voice • marketing</div><span>↓</span><div>📊 Dashboard • úlohy • denný hlasový briefing</div></div><section class="cards">{modules.map(m=><article class="card"><h2>{m.title}</h2><ul>{m.items.map(i=><li>{i}</li>)}</ul></article>)}</section><h2>Vývojový plán</h2><section class="stages">{milestones.map(([title,desc])=><article class="stage"><strong>{title}</strong><p>{desc}</p></article>)}</section><div class="notice"><strong>Stav: návrh, nie hotový systém.</strong> Neobmedzené používanie AI, telefonovania, obrázkov či videa nie je overené a nemožno ho automaticky sľubovať. Každá služba má reálne náklady, limity a licenčné podmienky. Externé volania, odosielanie a platené akcie vyžadujú schválenie a oprávnenia.</div><h2>Pôvodný anglický text – referencia</h2><p>Doslovný reklamný text dodaný používateľom. Je uložený na zachovanie požiadaviek a nápadov; nie je dôkazom funkčnosti ani ceny cudzieho produktu.</p><pre>{original}</pre></main></body></html>
