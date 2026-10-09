@@ -1,31 +1,36 @@
-/* WDFOX Jobcenter predproduction patch. PREVIEW ONLY v2. */
+/* WDFOX Jobcenter predproduction patch – 07.10.2026 personal visit */
 (function(){
   'use strict';
-  function addJobcenterPersonalVisit20261007(){
+
+  function addJobcenterVisit20261007(){
     if (document.getElementById('jobcenter-personal-visit-2026-10-07')) return true;
+
+    var regional = document.getElementById('jobcenter-regionaldirektion-beschwerde-2026-10-06');
+    if (!regional || !regional.parentNode) return false;
+
     var section = document.createElement('section');
     section.id = 'jobcenter-personal-visit-2026-10-07';
     section.className = 'attachment evidence-section';
     section.style.marginTop = '18px';
-    section.innerHTML = \`
+    section.innerHTML = `
       <style>
         #jobcenter-personal-visit-2026-10-07 .outlook-card{border:2px solid #1877F2;background:#f7fbff}
-        #jobcenter-personal-visit-2026-10-07 .visit-lang-card{margin-top:10px;padding:12px 14px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;line-height:1.35;text-align:justify;text-justify:inter-word;hyphens:auto}
-        #jobcenter-personal-visit-2026-10-07 .visit-lang-card p{margin:0 0 6px}
-        #jobcenter-personal-visit-2026-10-07 .visit-lang-card ul{margin:2px 0 8px;padding-left:24px}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-card{margin-top:10px;padding:12px 14px;border:1px solid #d9d9d9;border-radius:8px;background:#fff;line-height:1.38;text-align:justify;text-justify:inter-word;hyphens:auto}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-card p{margin:0 0 8px}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-card ul{margin:3px 0 10px;padding-left:24px}
         #jobcenter-personal-visit-2026-10-07 .visit-lang-card li{margin:0 0 3px}
-        #jobcenter-personal-visit-2026-10-07 .visit-lang-card h3{margin:12px 0 7px;font-size:1.05em}
-        #jobcenter-personal-visit-2026-10-07 .visit-translate-btn{display:inline-block;margin:10px 0 2px;padding:9px 13px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;cursor:pointer}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-card h3{margin:14px 0 8px;font-size:1.05em}
+        #jobcenter-personal-visit-2026-10-07 [data-jobcenter-lang-toggle]{display:inline-block;margin:10px 0 2px;padding:9px 13px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;cursor:pointer}
       </style>
       <hr class="evidence-divider">
       <p class="update-date">Aktualisiert am: 07.10.2026 | Aktualisierung Nr. 1</p>
       <h2>Persönlicher Besuch beim Jobcenter – verweigerte sachliche Klärung, unangemessene Behandlung und weitere Verschärfung meiner existenziellen Situation</h2>
       <div class="outlook-card">
         <div class="outlook-card-title">📨 Dokumentation meines persönlichen Besuchs beim Jobcenter Landkreis Landshut am 07.10.2026</div>
-        <div class="outlook-card-note">Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.</div>
+        <div class="outlook-card-note">Dokumentation des persönlichen Termins beim Jobcenter und der anschließenden Vorsprache bei der AOK.</div>
         <details class="outlook-details">
           <summary class="outlook-summary">📄 Nachricht im Browser anzeigen / ausblenden</summary>
-          <button type="button" class="visit-translate-btn" data-jobcenter-lang-toggle data-lang="de">Preložiť do EN</button>
+          <button type="button" data-jobcenter-lang-toggle data-lang="de">Preložiť do EN</button>
 
           <div class="visit-lang-card" data-panel="de">
             <p>Am <strong>07.10.2026</strong> erschien ich persönlich beim Jobcenter Landkreis Landshut. Den Termin hatte ich bereits am Montag vereinbart, weil ich persönlich mit einer vorgesetzten Mitarbeiterin, einem vorgesetzten Mitarbeiter oder einer anderen zuständigen Person darüber sprechen wollte, dass meine Angelegenheiten betreffend <strong>Grundsicherungsgeld</strong>, Krankenversicherung und Unterstützung beim Beginn meiner selbständigen Erwerbstätigkeit weiterhin ungelöst sind.</p>
@@ -40,14 +45,7 @@
             <p>Statt eines neuen Gutscheins, mit dem ich die grundlegenden Lebensmittel entsprechend meinem tatsächlichen Bedarf in einem normalen Geschäft hätte kaufen können, erhielt ich eine Bescheinigung für den kostenlosen Bezug von Lebensmitteln aus Ausgabestellen der Lebensmittelhilfe, zu denen auch Lebensmittel nach Ablauf des Mindesthaltbarkeitsdatums gehören können.</p>
             <p>Eine solche Lösung behebt meine tatsächliche existenzielle Situation jedoch nicht.</p>
             <p>In diesen Ausgabestellen sind nicht regelmäßig alle grundlegenden Lebensmittel verfügbar, die ich für eine normale Ernährung benötige, zum Beispiel:</p>
-            <ul>
-              <li>Mehl,</li>
-              <li>Hefe,</li>
-              <li>Salz,</li>
-              <li>Fleisch,</li>
-              <li>Grundnahrungsmittel zum Kochen und Backen,</li>
-              <li>weitere gewöhnliche Lebensmittel entsprechend dem aktuellen Bedarf.</li>
-            </ul>
+            <ul><li>Mehl,</li><li>Hefe,</li><li>Salz,</li><li>Fleisch,</li><li>Grundnahrungsmittel zum Kochen und Backen,</li><li>weitere gewöhnliche Lebensmittel entsprechend dem aktuellen Bedarf.</li></ul>
             <p>Ich habe daher keine Möglichkeit zu entscheiden, was ich tatsächlich kaufen muss, sondern bin ausschließlich darauf angewiesen, was mir gerade zugeteilt wird.</p>
             <p><strong>Eine solche Behandlung vermittelt mir das Gefühl, dass mit mir nicht wie mit einem Menschen umgegangen wird, der ein Recht auf eine menschenwürdige Existenz hat, sondern lediglich wie mit einem Problem, das administrativ möglichst billig beiseitegeschoben werden soll.</strong></p>
             <p>Ich verlange keinen Luxus.</p>
@@ -73,15 +71,7 @@
             <h3>Schlussfolgerung</h3>
             <p>Am 07.10.2026 kam ich zum Jobcenter, um endlich konkrete Informationen und eine Lösung zu erhalten.</p>
             <p>Stattdessen:</p>
-            <ul>
-              <li>kam ich nicht zu einer Führungskraft,</li>
-              <li>erhielt ich keine konkrete Information über den Bearbeitungsstand meiner Angelegenheiten,</li>
-              <li>erhielt ich keinen normalen Ersatz für den abgelaufenen Gutschein,</li>
-              <li>wurde ich auf eine eingeschränkte Lebensmittelhilfe verwiesen, statt normal einkaufen zu können,</li>
-              <li>wurde ich hinsichtlich der Krankenversicherung erneut an die AOK verwiesen,</li>
-              <li>bestätigte mir die AOK anschließend, dass die entscheidenden Schritte zunächst durch das Jobcenter geklärt werden müssen,</li>
-              <li>und meine grundlegenden existenziellen und gesundheitlichen Probleme blieben erneut ungelöst.</li>
-            </ul>
+            <ul><li>kam ich nicht zu einer Führungskraft,</li><li>erhielt ich keine konkrete Information über den Bearbeitungsstand meiner Angelegenheiten,</li><li>erhielt ich keinen normalen Ersatz für den abgelaufenen Gutschein,</li><li>wurde ich auf eine eingeschränkte Lebensmittelhilfe verwiesen, statt normal einkaufen zu können,</li><li>wurde ich hinsichtlich der Krankenversicherung erneut an die AOK verwiesen,</li><li>bestätigte mir die AOK anschließend, dass die entscheidenden Schritte zunächst durch das Jobcenter geklärt werden müssen,</li><li>und meine grundlegenden existenziellen und gesundheitlichen Probleme blieben erneut ungelöst.</li></ul>
             <p><strong>Ein solches Vorgehen betrachte ich nicht mehr als bloße administrative Unannehmlichkeit. Es hat unmittelbare Auswirkungen auf meine Ernährung, meine Gesundheit, meine Würde und meine Fähigkeit, ein normales Leben zu führen.</strong></p>
             <p>Ich bin ein Bürger, der sich in einer existenziellen Notlage an eine öffentliche Institution gewandt hat.</p>
             <p><strong>Ich erwarte eine Lösung und nicht das Weiterschieben von einer Institution zur anderen, Ersatzlösungen bei der Lebensmittelversorgung und die Verweigerung konkreter Antworten.</strong></p>
@@ -101,14 +91,7 @@
             <p>Instead of a new voucher that would allow me to buy basic food in a normal shop according to my actual needs, I was given a certificate for the free collection of food from food-aid distribution points, which may also include food after the best-before date.</p>
             <p>Such a solution, however, does not resolve my real existential situation.</p>
             <p>These distribution points do not regularly provide all the basic food that I need for normal nutrition, for example:</p>
-            <ul>
-              <li>flour,</li>
-              <li>yeast,</li>
-              <li>salt,</li>
-              <li>meat,</li>
-              <li>basic ingredients for cooking and baking,</li>
-              <li>other ordinary food according to current need.</li>
-            </ul>
+            <ul><li>flour,</li><li>yeast,</li><li>salt,</li><li>meat,</li><li>basic ingredients for cooking and baking,</li><li>other ordinary food according to current need.</li></ul>
             <p>I therefore have no possibility to decide what I actually need to buy, but I am dependent only on what happens to be allocated to me.</p>
             <p><strong>Such treatment gives me the feeling that I am not being treated as a person who has the right to a dignified existence, but merely as a problem that should be administratively pushed aside as cheaply as possible.</strong></p>
             <p>I am not asking for luxury.</p>
@@ -134,15 +117,7 @@
             <h3>Conclusion</h3>
             <p>On 07.10.2026, I came to Jobcenter in order finally to obtain concrete information and a solution.</p>
             <p>Instead:</p>
-            <ul>
-              <li>I was not given access to a manager,</li>
-              <li>I was not provided with concrete information about the status of my matters,</li>
-              <li>I did not receive a normal replacement for the expired voucher,</li>
-              <li>I was referred to restricted food assistance instead of being able to shop normally,</li>
-              <li>I was again referred to AOK regarding health insurance,</li>
-              <li>AOK subsequently confirmed to me that the decisive steps first have to be resolved by Jobcenter,</li>
-              <li>and my basic existential and health problems once again remained unresolved.</li>
-            </ul>
+            <ul><li>I was not given access to a manager,</li><li>I was not provided with concrete information about the status of my matters,</li><li>I did not receive a normal replacement for the expired voucher,</li><li>I was referred to restricted food assistance instead of being able to shop normally,</li><li>I was again referred to AOK regarding health insurance,</li><li>AOK subsequently confirmed to me that the decisive steps first have to be resolved by Jobcenter,</li><li>and my basic existential and health problems once again remained unresolved.</li></ul>
             <p><strong>I no longer regard such a procedure as an ordinary administrative inconvenience. It has a direct impact on my nutrition, my health, my dignity and my ability to lead a normal life.</strong></p>
             <p>I am a citizen who turned to a public institution while in an existential emergency.</p>
             <p><strong>I expect a solution, not being moved from one institution to another, substitute food arrangements and the refusal to provide concrete answers.</strong></p>
@@ -162,14 +137,7 @@
             <p>Namiesto nového Gutscheinu, ktorý by mi umožnil nakúpiť si základné potraviny v bežnom obchode podľa mojich skutočných potrieb, mi bolo poskytnuté potvrdenie na odber bezplatných potravín, ktoré pochádzajú z výdajní potravinovej pomoci a môžu zahŕňať aj potraviny po uplynutí dátumu minimálnej trvanlivosti.</p>
             <p>Takéto riešenie však nerieši moju reálnu existenčnú situáciu.</p>
             <p>V týchto výdajniach nie sú pravidelne dostupné všetky základné potraviny, ktoré potrebujem na normálne stravovanie, napríklad:</p>
-            <ul>
-              <li>múka,</li>
-              <li>droždie,</li>
-              <li>soľ,</li>
-              <li>mäso,</li>
-              <li>základné suroviny na varenie a pečenie,</li>
-              <li>ďalšie bežné potraviny podľa aktuálnej potreby.</li>
-            </ul>
+            <ul><li>múka,</li><li>droždie,</li><li>soľ,</li><li>mäso,</li><li>základné suroviny na varenie a pečenie,</li><li>ďalšie bežné potraviny podľa aktuálnej potreby.</li></ul>
             <p>Nemám preto možnosť rozhodnúť sa, čo si potrebujem kúpiť, ale som odkázaný iba na to, čo mi bude práve pridelené.</p>
             <p><strong>Takéto zaobchádzanie vo mne vyvoláva pocit, že sa so mnou nezaobchádza ako s človekom, ktorý má právo na dôstojnú existenciu, ale iba ako s problémom, ktorý treba čo najlacnejšie administratívne odsunúť.</strong></p>
             <p>Nežiadam luxus.</p>
@@ -195,46 +163,36 @@
             <h3>Záver</h3>
             <p>Dňa 07.10.2026 som prišiel na Jobcenter preto, aby som konečne získal konkrétne informácie a riešenie.</p>
             <p>Namiesto toho:</p>
-            <ul>
-              <li>som sa nedostal k vedúcemu pracovníkovi,</li>
-              <li>nebola mi poskytnutá konkrétna informácia o stave mojich vecí,</li>
-              <li>nedostal som normálnu náhradu za prepadnutý Gutschein,</li>
-              <li>bol som odkázaný na obmedzenú potravinovú pomoc namiesto možnosti normálneho nákupu,</li>
-              <li>vo veci zdravotného poistenia som bol znovu odkázaný na AOK,</li>
-              <li>AOK mi následne potvrdila, že rozhodujúce kroky musí najprv vyriešiť Jobcenter,</li>
-              <li>a moje základné existenčné a zdravotné problémy zostali opäť bez riešenia.</li>
-            </ul>
+            <ul><li>som sa nedostal k vedúcemu pracovníkovi,</li><li>nebola mi poskytnutá konkrétna informácia o stave mojich vecí,</li><li>nedostal som normálnu náhradu za prepadnutý Gutschein,</li><li>bol som odkázaný na obmedzenú potravinovú pomoc namiesto možnosti normálneho nákupu,</li><li>vo veci zdravotného poistenia som bol znovu odkázaný na AOK,</li><li>AOK mi následne potvrdila, že rozhodujúce kroky musí najprv vyriešiť Jobcenter,</li><li>a moje základné existenčné a zdravotné problémy zostali opäť bez riešenia.</li></ul>
             <p><strong>Takýto postup už nepovažujem za obyčajnú administratívnu nepríjemnosť. Má priamy dopad na moje stravovanie, moje zdravie, moju dôstojnosť a moju schopnosť viesť normálny život.</strong></p>
             <p>Som občan, ktorý sa obrátil na verejnú inštitúciu v existenčnej núdzi.</p>
             <p><strong>Očakávam riešenie, nie presúvanie z jednej inštitúcie na druhú, náhradné potravinové riešenia a odmietanie konkrétnych odpovedí.</strong></p>
             <p>A pokiaľ bude tento stav pokračovať, budem ho naďalej dokumentovať a predkladať príslušným kontrolným orgánom a súdom ako súčasť celkového priebehu môjho prípadu.</p>
           </div>
         </details>
-      </div>\`;
+      </div>`;
 
-    var btn = section.querySelector('.visit-translate-btn');
+    var button = section.querySelector('[data-jobcenter-lang-toggle]');
     var order = ['de','en','sk'];
-    if (btn) btn.addEventListener('click', function(){
-      var current = btn.getAttribute('data-lang') || 'de';
-      var idx = order.indexOf(current);
-      var next = order[(idx + 1) % order.length];
+    if (button) button.addEventListener('click', function(){
+      var current = button.getAttribute('data-lang') || 'de';
+      var index = order.indexOf(current);
+      var next = order[(index + 1) % order.length];
       section.querySelectorAll('[data-panel]').forEach(function(panel){
         panel.hidden = panel.getAttribute('data-panel') !== next;
       });
-      btn.setAttribute('data-lang', next);
-      btn.textContent = next === 'de' ? 'Preložiť do EN' : (next === 'en' ? 'Preložiť do SK' : 'Preložiť do DE');
+      button.setAttribute('data-lang', next);
+      button.textContent = next === 'de' ? 'Preložiť do EN' : (next === 'en' ? 'Preložiť do SK' : 'Preložiť do DE');
     });
 
-    var regional = document.getElementById('jobcenter-regionaldirektion-beschwerde-2026-10-06');
-    if (regional && regional.parentNode) regional.insertAdjacentElement('beforebegin', section);
-    else {
-      var firstEvidence = document.querySelector('section.attachment.evidence-section');
-      if (firstEvidence && firstEvidence.parentNode) firstEvidence.insertAdjacentElement('beforebegin', section);
-      else document.body.appendChild(section);
-    }
+    regional.insertAdjacentElement('beforebegin', section);
     return true;
   }
-  addJobcenterPersonalVisit20261007();
-  setTimeout(addJobcenterPersonalVisit20261007,500);
-  setTimeout(addJobcenterPersonalVisit20261007,1500);
+
+  function run(){
+    if (!addJobcenterVisit20261007()) setTimeout(addJobcenterVisit20261007, 800);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once:true});
+  else run();
 })();
