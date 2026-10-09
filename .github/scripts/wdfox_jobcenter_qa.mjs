@@ -151,28 +151,52 @@ async function productionUntouched(browser){
 
 async function testTranslation(frame){
   if (!translationCycle) return {required:false,pass:true};
-  if (!expectedSectionId) return {required:true,pass:false,error:'expected_section_id required for translation cycle'};
+  if (!expectedSectionId) return {required:true,pass:false,error:'expected_section_id required for translation controls'};
   const root=frame.locator('#'+expectedSectionId);
   const details=root.locator('details').first();
   if (await details.count()) await details.evaluate(el => { el.open = true; });
-  const btn=root.locator('[data-jobcenter-lang-toggle]').first();
-  if ((await btn.count())!==1) return {required:true,pass:false,error:'translation button missing'};
-  const sequence=[];
+
+  const note=root.locator('[data-jobcenter-localized-note]').first();
+  const direct=root.locator('[data-jobcenter-lang-select]');
+  if ((await direct.count())!==3) return {required:true,pass:false,error:'three direct language buttons are required'};
+  if ((await note.count())!==1) return {required:true,pass:false,error:'localized note is missing'};
+
+  const expectedNotes={
+    de:'Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.',
+    en:'Documentation of the personal appointment and the subsequent visit to AOK.',
+    sk:'Dokumentácia osobného termínu a následnej návštevy v AOK.'
+  };
+
   const read=async()=>{
     const visible=await root.locator('[data-panel]').evaluateAll(nodes=>nodes.filter(n=>!n.hidden && getComputedStyle(n).display!=='none').map(n=>n.getAttribute('data-panel')));
-    const text=await btn.innerText().catch(()=> '');
-    return {visible,button:text.trim()};
+    const noteText=(await note.innerText().catch(()=> '')).trim();
+    const buttons=await direct.evaluateAll(nodes=>nodes.map(n=>({
+      lang:n.getAttribute('data-jobcenter-lang-select'),
+      text:(n.textContent||'').trim(),
+      pressed:n.getAttribute('aria-pressed')
+    })));
+    return {visible,note:noteText,buttons};
   };
-  sequence.push(await read());
-  for(let i=0;i<3;i++){
+
+  const sequence=[];
+  sequence.push({step:'initial',...(await read())});
+  for (const lang of ['en','de','sk','de']) {
+    const btn=root.locator('[data-jobcenter-lang-select="'+lang+'"]').first();
     await btn.click({timeout:10000});
     await frame.waitForTimeout(250);
-    sequence.push(await read());
+    sequence.push({step:lang,...(await read())});
   }
+
+  const expectedSequence=['de','en','de','sk','de'];
   const langs=sequence.map(x=>x.visible.length===1?x.visible[0]:null);
-  const expected=['de','en','sk','de'];
-  const pass=langs.length===4 && expected.every((x,i)=>langs[i]===x);
-  return {required:true,pass,sequence,expected};
+  const languagePass=expectedSequence.every((x,i)=>langs[i]===x);
+  const notePass=sequence.every((x,i)=>x.note===expectedNotes[expectedSequence[i]]);
+  const labelMap={en:'into EN',de:'into DE',sk:'into SK'};
+  const labelsPass=sequence.every(x=>x.buttons.length===3 && x.buttons.every(b=>b.text===labelMap[b.lang]));
+  const pressedPass=sequence.every((x,i)=>x.buttons.filter(b=>b.pressed==='true').length===1 && x.buttons.find(b=>b.pressed==='true')?.lang===expectedSequence[i]);
+  const pass=languagePass&&notePass&&labelsPass&&pressedPass;
+
+  return {required:true,pass,sequence,expected_sequence:expectedSequence,checks:{language_pass:languagePass,note_translation_pass:notePass,button_labels_pass:labelsPass,active_button_pass:pressedPass}};
 }
 
 async function runVisual(browser){
