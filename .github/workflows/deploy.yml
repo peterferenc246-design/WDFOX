@@ -146,10 +146,20 @@ jobs:
           if not files:
               raise SystemExit('No built HTML files found in dist')
 
+          preview_wrapper = Path('dist/privat/jobcenter-predproduction/index.html')
+
           for path in files:
               text = clean(path.read_text(encoding='utf-8'))
               if '</body>' not in text:
                   raise SystemExit(f'Missing </body> in {path}')
+
+              # The predproduction wrapper embeds the real /jobcenter/ page in an iframe.
+              # It must NOT receive its own Tawk package, otherwise two chat launchers appear:
+              # one on the wrapper and one inside the Jobcenter iframe.
+              if path == preview_wrapper:
+                  path.write_text(text, encoding='utf-8')
+                  continue
+
               text = text.replace('</body>', snippet + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
 
@@ -187,6 +197,17 @@ jobs:
             echo 'Legacy fox-tawk-button still present in production build'
             exit 1
           fi
+
+          # Predproduction wrapper must stay Tawk-free. The embedded /jobcenter/ iframe
+          # carries the single approved production Tawk package.
+          preview_wrapper='dist/privat/jobcenter-predproduction/index.html'
+          test -s "$preview_wrapper"
+          grep -q 'id="jobcenter-preview"' "$preview_wrapper"
+          if grep -E -q 'fox-tawk-language-loader|fox-tawk-native-force|fox-tawk-avatar-fix|embed\.tawk\.to|Tawk_API' "$preview_wrapper"; then
+            echo 'Blocked duplicate Tawk package in Jobcenter predproduction wrapper'
+            exit 1
+          fi
+          echo 'JOBCENTER_PREDPRODUCTION_WRAPPER_TAWK=NONE'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
