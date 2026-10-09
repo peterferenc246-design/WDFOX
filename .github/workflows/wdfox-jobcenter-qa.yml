@@ -1,0 +1,140 @@
+name: WDFOX Jobcenter QA
+
+run-name: WDFOX Jobcenter QA
+
+on:
+  push:
+    branches: [qa-requests]
+    paths:
+      - "ops/jobcenter-qa/requests/*.json"
+
+permissions:
+  contents: write
+
+jobs:
+  jobcenter-qa:
+    name: Jobcenter Playwright QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout request revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Resolve request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          request_path="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^ops/jobcenter-qa/requests/.*\.json$' | tail -n 1)"
+          [[ -n "$request_path" && -f "$request_path" ]] || { echo "Jobcenter QA request file not found"; exit 2; }
+          QA_TYPE="$(jq -r '.qa_type // empty' "$request_path")"
+          TARGET_URL="$(jq -r '.target_url // empty' "$request_path")"
+          PRODUCTION_URL="$(jq -r '.production_url // "https://www.foxprof.club/jobcenter/"' "$request_path")"
+          APPROVED="$(jq -r '.approved_preview_commit // empty' "$request_path")"
+          REQUEST_ID="$(jq -r '.request_id // empty' "$request_path")"
+          EXPECTED_SECTION_ID="$(jq -r '.expected_section_id // empty' "$request_path")"
+          TRANSLATION_CYCLE="$(jq -r '.translation_cycle // false' "$request_path")"
+
+          [[ "$QA_TYPE" == "visual" || "$QA_TYPE" == "functional" ]] || { echo "Invalid qa_type"; exit 2; }
+          [[ "$TARGET_URL" =~ ^https:// ]] || { echo "target_url must use https"; exit 2; }
+          [[ "$PRODUCTION_URL" =~ ^https:// ]] || { echo "production_url must use https"; exit 2; }
+          [[ "$APPROVED" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "Invalid approved preview SHA"; exit 2; }
+          [[ "$REQUEST_ID" =~ ^[A-Za-z0-9._-]{3,120}$ ]] || { echo "Invalid request_id"; exit 2; }
+
+          echo "qa_type=$QA_TYPE" >> "$GITHUB_OUTPUT"
+          echo "target_url=$TARGET_URL" >> "$GITHUB_OUTPUT"
+          echo "production_url=$PRODUCTION_URL" >> "$GITHUB_OUTPUT"
+          echo "approved=$APPROVED" >> "$GITHUB_OUTPUT"
+          echo "request_id=$REQUEST_ID" >> "$GITHUB_OUTPUT"
+          echo "expected_section_id=$EXPECTED_SECTION_ID" >> "$GITHUB_OUTPUT"
+          echo "translation_cycle=$TRANSLATION_CYCLE" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout runner code from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNTIME=/tmp/wdfox-jobcenter-qa
+          rm -rf "$RUNTIME"
+          mkdir -p "$RUNTIME"
+          cp .github/scripts/wdfox_jobcenter_qa.mjs "$RUNTIME/wdfox_jobcenter_qa.mjs"
+          cd "$RUNTIME"
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run Jobcenter QA
+        shell: bash
+        env:
+          QA_TYPE: ${{ steps.request.outputs.qa_type }}
+          TARGET_URL: ${{ steps.request.outputs.target_url }}
+          PRODUCTION_URL: ${{ steps.request.outputs.production_url }}
+          APPROVED_PREVIEW_COMMIT: ${{ steps.request.outputs.approved }}
+          REQUEST_ID: ${{ steps.request.outputs.request_id }}
+          EXPECTED_SECTION_ID: ${{ steps.request.outputs.expected_section_id }}
+          TRANSLATION_CYCLE: ${{ steps.request.outputs.translation_cycle }}
+        run: |
+          set +e
+          mkdir -p "$GITHUB_WORKSPACE/qa-artifacts"
+          cd /tmp/wdfox-jobcenter-qa
+          QA_OUT_DIR="$GITHUB_WORKSPACE/qa-artifacts" node ./wdfox_jobcenter_qa.mjs
+          code=$?
+          cd "$GITHUB_WORKSPACE"
+          if [[ ! -s qa-artifacts/report.json ]]; then
+            jq -n --arg request_id "$REQUEST_ID" --arg qa_type "$QA_TYPE" --arg approved "$APPROVED_PREVIEW_COMMIT" \
+              '{schema:"wdfox-jobcenter-qa/v1",request_id:$request_id,qa_type:$qa_type,stage:"predproduction",approved_preview_commit:$approved,verdict:"FAIL",failures:["runner did not produce report"],results:[]}' \
+              > qa-artifacts/report.json
+          fi
+          echo "runner_exit=$code" >> "$GITHUB_ENV"
+          exit 0
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdfox-jobcenter-${{ steps.request.outputs.qa_type }}-${{ steps.request.outputs.request_id }}
+          path: qa-artifacts/
+          retention-days: 14
+
+      - name: Persist result to qa-results
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QA_TYPE: ${{ steps.request.outputs.qa_type }}
+          REQUEST_ID: ${{ steps.request.outputs.request_id }}
+        run: |
+          set -euo pipefail
+          report_b64="$(base64 -w0 qa-artifacts/report.json)"
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/ops/jobcenter-qa/results/${REQUEST_ID}-${QA_TYPE}.json"
+          existing="$(curl --silent --show-error -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "${api}?ref=qa-results")"
+          existing_sha="$(jq -r '.sha // empty' <<<"$existing")"
+          if [[ -n "$existing_sha" ]]; then
+            payload="$(jq -n --arg msg "Jobcenter QA ${REQUEST_ID} ${QA_TYPE}" --arg content "$report_b64" --arg sha "$existing_sha" '{message:$msg,content:$content,branch:"qa-results",sha:$sha}')"
+          else
+            payload="$(jq -n --arg msg "Jobcenter QA ${REQUEST_ID} ${QA_TYPE}" --arg content "$report_b64" '{message:$msg,content:$content,branch:"qa-results"}')"
+          fi
+          curl --fail-with-body --silent --show-error -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$api" -d "$payload"
+
+      - name: Enforce verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          verdict="$(jq -r '.verdict' qa-artifacts/report.json)"
+          cat qa-artifacts/report.json >> "$GITHUB_STEP_SUMMARY"
+          [[ "$verdict" == "PASS" ]]
