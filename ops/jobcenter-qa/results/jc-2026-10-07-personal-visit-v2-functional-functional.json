@@ -1,0 +1,40 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-2026-10-07-personal-visit-v2-functional",
+  "qa_type": "functional",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "f7369eec04262ac38a988d6a70bc299c5986d5b8",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": true,
+  "started_at": "2026-10-09T10:22:45.259Z",
+  "verdict": "FAIL",
+  "failures": [
+    "functional check failed"
+  ],
+  "results": [
+    {
+      "profile": "functional",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": false,
+      "new_section_before_regional": false,
+      "translation": {
+        "required": true,
+        "pass": false,
+        "error": "translation button missing"
+      },
+      "production_untouched": true,
+      "pass": false
+    }
+  ],
+  "finished_at": "2026-10-09T10:22:49.588Z",
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1
+  }
+}
