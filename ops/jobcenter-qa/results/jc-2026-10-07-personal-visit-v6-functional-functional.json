@@ -1,0 +1,69 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-2026-10-07-personal-visit-v6-functional",
+  "qa_type": "functional",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "b1adcd976bb509f4f7d03b3944e1aa849233108f",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": true,
+  "started_at": "2026-10-09T11:04:31.761Z",
+  "verdict": "PASS",
+  "failures": [],
+  "results": [
+    {
+      "profile": "functional",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "translation": {
+        "required": true,
+        "pass": true,
+        "sequence": [
+          {
+            "visible": [
+              "de"
+            ],
+            "button": "Preložiť do EN"
+          },
+          {
+            "visible": [
+              "en"
+            ],
+            "button": "Preložiť do SK"
+          },
+          {
+            "visible": [
+              "sk"
+            ],
+            "button": "Preložiť do DE"
+          },
+          {
+            "visible": [
+              "de"
+            ],
+            "button": "Preložiť do EN"
+          }
+        ],
+        "expected": [
+          "de",
+          "en",
+          "sk",
+          "de"
+        ]
+      },
+      "production_untouched": true,
+      "pass": true
+    }
+  ],
+  "finished_at": "2026-10-09T11:04:39.390Z",
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}
