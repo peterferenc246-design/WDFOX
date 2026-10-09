@@ -1,4 +1,4 @@
-/* WDFOX Jobcenter predproduction patch. PREVIEW ONLY v3. */
+/* WDFOX Jobcenter predproduction patch. PREVIEW ONLY v4. */
 (function(){
   'use strict';
   function addJobcenterPersonalVisit20261007(){
@@ -15,17 +15,24 @@
         #jobcenter-personal-visit-2026-10-07 .visit-lang-card ul{margin:2px 0 8px;padding-left:24px}
         #jobcenter-personal-visit-2026-10-07 .visit-lang-card li{margin:0 0 3px}
         #jobcenter-personal-visit-2026-10-07 .visit-lang-card h3{margin:12px 0 7px;font-size:1.05em}
-        #jobcenter-personal-visit-2026-10-07 .visit-translate-btn{display:inline-block;margin:10px 0 2px;padding:9px 13px;border:1px solid #1877F2;border-radius:8px;background:#fff;color:#0b57d0;font-weight:700;cursor:pointer}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-btn{display:inline-block;min-width:104px;padding:9px 13px;border:1px solid #0b57d0;border-radius:8px;background:#0b57d0;color:#fff;font-weight:700;cursor:pointer}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-btn:hover{filter:brightness(.94)}
+        #jobcenter-personal-visit-2026-10-07 .visit-lang-btn.is-active{background:#fff;color:#0b57d0;box-shadow:inset 0 0 0 1px #0b57d0}
       </style>
       <hr class="evidence-divider">
       <p class="update-date">Aktualisiert am: 07.10.2026 | Aktualisierung Nr. 1</p>
       <h2>Persönlicher Besuch beim Jobcenter – verweigerte sachliche Klärung, unangemessene Behandlung und weitere Verschärfung meiner existenziellen Situation</h2>
       <div class="outlook-card">
         <div class="outlook-card-title">📨 Dokumentation meines persönlichen Besuchs beim Jobcenter Landkreis Landshut am 07.10.2026</div>
-        <div class="outlook-card-note">Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.</div>
+        <div class="outlook-card-note" data-jobcenter-localized-note>Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.</div>
         <details class="outlook-details">
           <summary class="outlook-summary">📄 Nachricht im Browser anzeigen / ausblenden</summary>
-          <button type="button" class="visit-translate-btn" data-jobcenter-lang-toggle data-lang="de">Preložiť do EN</button>
+          <div class="visit-lang-buttons" role="group" aria-label="Language selection">
+            <button type="button" class="visit-lang-btn" data-jobcenter-lang-select="en" aria-pressed="false">into EN</button>
+            <button type="button" class="visit-lang-btn is-active" data-jobcenter-lang-select="de" aria-pressed="true">into DE</button>
+            <button type="button" class="visit-lang-btn" data-jobcenter-lang-select="sk" aria-pressed="false">into SK</button>
+          </div>
 
           <div class="visit-lang-card" data-panel="de">
             <p>Am <strong>07.10.2026</strong> erschien ich persönlich beim Jobcenter Landkreis Landshut. Den Termin hatte ich bereits am Montag vereinbart, weil ich persönlich mit einer vorgesetzten Mitarbeiterin, einem vorgesetzten Mitarbeiter oder einer anderen zuständigen Person darüber sprechen wollte, dass meine Angelegenheiten betreffend <strong>Grundsicherungsgeld</strong>, Krankenversicherung und Unterstützung beim Beginn meiner selbständigen Erwerbstätigkeit weiterhin ungelöst sind.</p>
@@ -212,18 +219,32 @@
         </details>
       </div>`;
 
-    var btn = section.querySelector('.visit-translate-btn');
-    var order = ['de','en','sk'];
-    if (btn) btn.addEventListener('click', function(){
-      var current = btn.getAttribute('data-lang') || 'de';
-      var idx = order.indexOf(current);
-      var next = order[(idx + 1) % order.length];
+    var localizedNote = section.querySelector('[data-jobcenter-localized-note]');
+    var localizedNotes = {
+      de: 'Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.',
+      en: 'Documentation of the personal appointment and the subsequent visit to AOK.',
+      sk: 'Dokumentácia osobného termínu a následnej návštevy v AOK.'
+    };
+
+    function selectLanguage(language){
+      if (!localizedNotes[language]) return;
       section.querySelectorAll('[data-panel]').forEach(function(panel){
-        panel.hidden = panel.getAttribute('data-panel') !== next;
+        panel.hidden = panel.getAttribute('data-panel') !== language;
       });
-      btn.setAttribute('data-lang', next);
-      btn.textContent = next === 'de' ? 'Preložiť do EN' : (next === 'en' ? 'Preložiť do SK' : 'Preložiť do DE');
+      section.querySelectorAll('[data-jobcenter-lang-select]').forEach(function(button){
+        var active = button.getAttribute('data-jobcenter-lang-select') === language;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      if (localizedNote) localizedNote.textContent = localizedNotes[language];
+    }
+
+    section.querySelectorAll('[data-jobcenter-lang-select]').forEach(function(button){
+      button.addEventListener('click', function(){
+        selectLanguage(button.getAttribute('data-jobcenter-lang-select'));
+      });
     });
+    selectLanguage('de');
 
     var regional = document.getElementById('jobcenter-regionaldirektion-beschwerde-2026-10-06');
     if (regional && regional.parentNode) regional.insertAdjacentElement('beforebegin', section);
