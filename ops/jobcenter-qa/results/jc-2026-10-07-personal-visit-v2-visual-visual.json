@@ -1,0 +1,47 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-2026-10-07-personal-visit-v2-visual",
+  "qa_type": "visual",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "f7369eec04262ac38a988d6a70bc299c5986d5b8",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": false,
+  "started_at": "2026-10-09T10:18:40.044Z",
+  "verdict": "FAIL",
+  "failures": [
+    "desktop: visual check failed",
+    "mobile: visual check failed"
+  ],
+  "results": [
+    {
+      "profile": "desktop",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": false,
+      "new_section_before_regional": false,
+      "pass": false,
+      "error": "locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#jobcenter-personal-visit-2026-10-07')\n"
+    },
+    {
+      "profile": "mobile",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": false,
+      "new_section_before_regional": false,
+      "pass": false,
+      "error": "locator.boundingBox: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#jobcenter-personal-visit-2026-10-07')\n"
+    }
+  ],
+  "finished_at": "2026-10-09T10:19:44.970Z",
+  "summary": {
+    "total": 2,
+    "passed": 0,
+    "failed": 2
+  }
+}
