@@ -1,0 +1,35 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-2026-10-07-personal-visit-v3-functional",
+  "qa_type": "functional",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "500ecd96f4e9f30fcfb1b0825d565535ffa80576",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": true,
+  "started_at": "2026-10-09T10:56:44.435Z",
+  "verdict": "FAIL",
+  "failures": [
+    "functional check failed"
+  ],
+  "results": [
+    {
+      "profile": "functional",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "pass": false,
+      "error": "locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#jobcenter-personal-visit-2026-10-07').locator('[data-jobcenter-lang-toggle]').first()\n    - locator resolved to <button type=\"button\" data-lang=\"de\" class=\"visit-translate-btn\" data-jobcenter-lang-toggle=\"\">Preložiť do EN</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    19 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+    }
+  ],
+  "finished_at": "2026-10-09T10:56:57.242Z",
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1
+  }
+}
