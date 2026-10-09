@@ -1,0 +1,11 @@
+{
+  "schema": "wdfox-jobcenter-qa-request/v1",
+  "qa_type": "functional",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "b1adcd976bb509f4f7d03b3944e1aa849233108f",
+  "request_id": "jc-2026-10-07-personal-visit-v5-functional",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": true,
+  "created_at": "2026-10-09T11:01:42.972Z"
+}
