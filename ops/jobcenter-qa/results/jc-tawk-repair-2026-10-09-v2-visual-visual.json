@@ -1,0 +1,96 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-tawk-repair-2026-10-09-v2-visual",
+  "qa_type": "visual",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "924dfd27a19db5caeb62daddf22e0e42b904986a",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": false,
+  "started_at": "2026-10-09T12:30:41.036Z",
+  "verdict": "PASS",
+  "failures": [],
+  "results": [
+    {
+      "profile": "desktop",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "tawk_topology": {
+        "pass": true,
+        "outer": {
+          "loader": 0,
+          "native_force": 0,
+          "avatar_fix": 0,
+          "embed_scripts": 0,
+          "visible_launchers": 0
+        },
+        "inner": {
+          "loader": 1,
+          "native_force": 1,
+          "avatar_fix": 1,
+          "embed_scripts": 1,
+          "visible_launchers": 1
+        },
+        "checks": {
+          "top_level_predproduction_tawk_zero": true,
+          "embedded_jobcenter_tawk_single_package": true,
+          "visible_tawk_launcher_exactly_one": true,
+          "no_second_fox_or_tawk_launcher_outside_iframe": true
+        }
+      },
+      "section_visible": true,
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/jobcenter-desktop.png",
+      "screenshot_review": "PASS_AUTOMATED_RENDER_AND_TAWK_TOPOLOGY",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "tawk_topology": {
+        "pass": true,
+        "outer": {
+          "loader": 0,
+          "native_force": 0,
+          "avatar_fix": 0,
+          "embed_scripts": 0,
+          "visible_launchers": 0
+        },
+        "inner": {
+          "loader": 1,
+          "native_force": 1,
+          "avatar_fix": 1,
+          "embed_scripts": 1,
+          "visible_launchers": 1
+        },
+        "checks": {
+          "top_level_predproduction_tawk_zero": true,
+          "embedded_jobcenter_tawk_single_package": true,
+          "visible_tawk_launcher_exactly_one": true,
+          "no_second_fox_or_tawk_launcher_outside_iframe": true
+        }
+      },
+      "section_visible": true,
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/jobcenter-mobile.png",
+      "screenshot_review": "PASS_AUTOMATED_RENDER_AND_TAWK_TOPOLOGY",
+      "pass": true
+    }
+  ],
+  "finished_at": "2026-10-09T12:30:49.719Z",
+  "tawk_gate": "PASS",
+  "screenshot_gate": "PASS",
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0
+  }
+}
