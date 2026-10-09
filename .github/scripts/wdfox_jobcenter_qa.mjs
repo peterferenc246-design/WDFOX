@@ -47,11 +47,13 @@ async function getInner(page){
 }
 
 async function countVisibleTawkLaunchers(scope){
-  return await scope.locator('iframe').evaluateAll(nodes => nodes.filter((el) => {
+  const selector = '#fox-tawk-launcher, iframe[title*="chat widget" i], iframe[src*="tawk"]';
+  return await scope.locator(selector).evaluateAll(nodes => nodes.filter((el) => {
     const style = getComputedStyle(el);
     const box = el.getBoundingClientRect();
     if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) return false;
     if (box.width < 20 || box.height < 20) return false;
+    if (el.id === 'fox-tawk-launcher') return true;
     const hay = [
       el.getAttribute('src') || '',
       el.getAttribute('title') || '',
