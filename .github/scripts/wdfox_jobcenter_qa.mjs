@@ -46,6 +46,69 @@ async function getInner(page){
   return frame;
 }
 
+async function countVisibleTawkLaunchers(scope){
+  return await scope.locator('iframe').evaluateAll(nodes => nodes.filter((el) => {
+    const style = getComputedStyle(el);
+    const box = el.getBoundingClientRect();
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) return false;
+    if (box.width < 20 || box.height < 20) return false;
+    const hay = [
+      el.getAttribute('src') || '',
+      el.getAttribute('title') || '',
+      el.id || '',
+      typeof el.className === 'string' ? el.className : ''
+    ].join(' ').toLowerCase();
+    return hay.includes('tawk') || hay.includes('chat widget');
+  }).length);
+}
+
+async function checkTawkTopology(page, frame){
+  await page.waitForTimeout(1800);
+
+  const outer = {
+    loader: await page.locator('script#fox-tawk-language-loader').count(),
+    native_force: await page.locator('script#fox-tawk-native-force').count(),
+    avatar_fix: await page.locator('script#fox-tawk-avatar-fix').count(),
+    embed_scripts: await page.locator('script[src*="embed.tawk.to"]').count(),
+    visible_launchers: await countVisibleTawkLaunchers(page)
+  };
+
+  const inner = {
+    loader: await frame.locator('script#fox-tawk-language-loader').count(),
+    native_force: await frame.locator('script#fox-tawk-native-force').count(),
+    avatar_fix: await frame.locator('script#fox-tawk-avatar-fix').count(),
+    embed_scripts: await frame.locator('script[src*="embed.tawk.to"]').count(),
+    visible_launchers: await countVisibleTawkLaunchers(frame)
+  };
+
+  const outerPackageAbsent =
+    outer.loader === 0 &&
+    outer.native_force === 0 &&
+    outer.avatar_fix === 0 &&
+    outer.embed_scripts === 0;
+
+  const innerPackageSingle =
+    inner.loader === 1 &&
+    inner.native_force === 1 &&
+    inner.avatar_fix <= 1;
+
+  const launcherTopology =
+    outer.visible_launchers === 0 &&
+    inner.visible_launchers === 1;
+
+  return {
+    pass: outerPackageAbsent && innerPackageSingle && launcherTopology,
+    outer,
+    inner,
+    checks: {
+      top_level_predproduction_tawk_zero: outerPackageAbsent,
+      embedded_jobcenter_tawk_single_package: innerPackageSingle,
+      visible_tawk_launcher_exactly_one: launcherTopology,
+      no_second_fox_or_tawk_launcher_outside_iframe: outer.visible_launchers === 0
+    }
+  };
+}
+
 async function basicChecks(page, frame){
   const banner = await page.locator('.preview-badge').innerText().catch(()=> '');
   const errorVisible = await page.locator('#preview-error').isVisible().catch(()=>false);
@@ -61,13 +124,15 @@ async function basicChecks(page, frame){
       return !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
     }, expectedSectionId);
   }
+  const tawkTopology = await checkTawkTopology(page, frame);
   return {
     banner_ok:banner.trim()==='PREDPRODUCTION',
     preview_error_visible:errorVisible,
     regional_exists:regionalExists===1,
     patch_script_injected:patchScript===1,
     expected_section_exists:sectionExists===1,
-    new_section_before_regional:beforeRegional
+    new_section_before_regional:beforeRegional,
+    tawk_topology:tawkTopology
   };
 }
 
@@ -127,7 +192,8 @@ async function runVisual(browser){
       const shot=path.join(outDir,`jobcenter-${profile.name}.png`);
       await page.screenshot({path:shot,fullPage:true});
       row.screenshot=shot;
-      row.pass=row.banner_ok&&!row.preview_error_visible&&row.regional_exists&&row.patch_script_injected&&row.expected_section_exists&&row.new_section_before_regional&&row.section_visible;
+      row.screenshot_review = row.tawk_topology?.pass ? 'PASS_AUTOMATED_RENDER_AND_TAWK_TOPOLOGY' : 'FAIL';
+      row.pass=row.banner_ok&&!row.preview_error_visible&&row.regional_exists&&row.patch_script_injected&&row.expected_section_exists&&row.new_section_before_regional&&row.section_visible&&row.tawk_topology?.pass===true;
     }catch(e){row.pass=false;row.error=String(e.message||e);}
     if(!row.pass) report.failures.push(`${profile.name}: visual check failed`);
     report.results.push(row);
@@ -144,7 +210,7 @@ async function runFunctional(browser){
     Object.assign(row,await basicChecks(page,frame));
     row.translation=await testTranslation(frame);
     row.production_untouched=await productionUntouched(browser);
-    row.pass=row.banner_ok&&!row.preview_error_visible&&row.regional_exists&&row.patch_script_injected&&row.expected_section_exists&&row.new_section_before_regional&&row.translation.pass&&row.production_untouched;
+    row.pass=row.banner_ok&&!row.preview_error_visible&&row.regional_exists&&row.patch_script_injected&&row.expected_section_exists&&row.new_section_before_regional&&row.translation.pass&&row.production_untouched&&row.tawk_topology?.pass===true;
   }catch(e){row.pass=false;row.error=String(e.message||e);}
   if(!row.pass) report.failures.push('functional check failed');
   report.results.push(row);
@@ -158,6 +224,13 @@ try{
 } finally {await browser.close();}
 
 report.finished_at=new Date().toISOString();
+report.tawk_gate = report.results.length > 0 && report.results.every(x => x.tawk_topology?.pass === true) ? 'PASS' : 'FAIL';
+if (report.tawk_gate !== 'PASS' && !report.failures.includes('TAWK_DUPLICATE_CHECK failed')) {
+  report.failures.push('TAWK_DUPLICATE_CHECK failed');
+}
+report.screenshot_gate = qaType === 'visual'
+  ? (report.results.length > 0 && report.results.every(x => x.screenshot && x.screenshot_review === 'PASS_AUTOMATED_RENDER_AND_TAWK_TOPOLOGY') ? 'PASS' : 'FAIL')
+  : 'NOT_APPLICABLE';
 report.verdict=report.failures.length===0?'PASS':'FAIL';
 report.summary={total:report.results.length,passed:report.results.filter(x=>x.pass).length,failed:report.results.filter(x=>!x.pass).length};
 fs.writeFileSync(path.join(outDir,'report.json'),JSON.stringify(report,null,2));
