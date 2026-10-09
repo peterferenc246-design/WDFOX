@@ -1,0 +1,197 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-lang-buttons-2026-10-09-functional",
+  "qa_type": "functional",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "1b2163dc89ba90142dfc6d75c028c1235dc7a93b",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": true,
+  "started_at": "2026-10-09T13:01:55.200Z",
+  "verdict": "PASS",
+  "failures": [],
+  "results": [
+    {
+      "profile": "functional",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "tawk_topology": {
+        "pass": true,
+        "outer": {
+          "loader": 0,
+          "native_force": 0,
+          "avatar_fix": 0,
+          "embed_scripts": 0,
+          "visible_launchers": 0
+        },
+        "inner": {
+          "loader": 1,
+          "native_force": 1,
+          "avatar_fix": 1,
+          "embed_scripts": 1,
+          "visible_launchers": 1
+        },
+        "checks": {
+          "top_level_predproduction_tawk_zero": true,
+          "embedded_jobcenter_tawk_single_package": true,
+          "visible_tawk_launcher_exactly_one": true,
+          "no_second_fox_or_tawk_launcher_outside_iframe": true
+        }
+      },
+      "translation": {
+        "required": true,
+        "pass": true,
+        "sequence": [
+          {
+            "step": "initial",
+            "visible": [
+              "de"
+            ],
+            "note": "Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.",
+            "buttons": [
+              {
+                "lang": "en",
+                "text": "into EN",
+                "pressed": "false"
+              },
+              {
+                "lang": "de",
+                "text": "into DE",
+                "pressed": "true"
+              },
+              {
+                "lang": "sk",
+                "text": "into SK",
+                "pressed": "false"
+              }
+            ]
+          },
+          {
+            "step": "en",
+            "visible": [
+              "en"
+            ],
+            "note": "Documentation of the personal appointment and the subsequent visit to AOK.",
+            "buttons": [
+              {
+                "lang": "en",
+                "text": "into EN",
+                "pressed": "true"
+              },
+              {
+                "lang": "de",
+                "text": "into DE",
+                "pressed": "false"
+              },
+              {
+                "lang": "sk",
+                "text": "into SK",
+                "pressed": "false"
+              }
+            ]
+          },
+          {
+            "step": "de",
+            "visible": [
+              "de"
+            ],
+            "note": "Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.",
+            "buttons": [
+              {
+                "lang": "en",
+                "text": "into EN",
+                "pressed": "false"
+              },
+              {
+                "lang": "de",
+                "text": "into DE",
+                "pressed": "true"
+              },
+              {
+                "lang": "sk",
+                "text": "into SK",
+                "pressed": "false"
+              }
+            ]
+          },
+          {
+            "step": "sk",
+            "visible": [
+              "sk"
+            ],
+            "note": "Dokumentácia osobného termínu a následnej návštevy v AOK.",
+            "buttons": [
+              {
+                "lang": "en",
+                "text": "into EN",
+                "pressed": "false"
+              },
+              {
+                "lang": "de",
+                "text": "into DE",
+                "pressed": "false"
+              },
+              {
+                "lang": "sk",
+                "text": "into SK",
+                "pressed": "true"
+              }
+            ]
+          },
+          {
+            "step": "de",
+            "visible": [
+              "de"
+            ],
+            "note": "Dokumentation des persönlichen Termins und der anschließenden Vorsprache bei der AOK.",
+            "buttons": [
+              {
+                "lang": "en",
+                "text": "into EN",
+                "pressed": "false"
+              },
+              {
+                "lang": "de",
+                "text": "into DE",
+                "pressed": "true"
+              },
+              {
+                "lang": "sk",
+                "text": "into SK",
+                "pressed": "false"
+              }
+            ]
+          }
+        ],
+        "expected_sequence": [
+          "de",
+          "en",
+          "de",
+          "sk",
+          "de"
+        ],
+        "checks": {
+          "language_pass": true,
+          "note_translation_pass": true,
+          "button_labels_pass": true,
+          "active_button_pass": true
+        }
+      },
+      "production_untouched": true,
+      "pass": true
+    }
+  ],
+  "finished_at": "2026-10-09T13:02:02.432Z",
+  "tawk_gate": "PASS",
+  "screenshot_gate": "NOT_APPLICABLE",
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}
