@@ -1,0 +1,46 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jobcenter-visit-2026-10-07-v1-visual",
+  "qa_type": "visual",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "1a32c82398dd8e02ce7703fa6ebd81972970d108",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": false,
+  "started_at": "2026-10-09T10:49:41.382Z",
+  "verdict": "PASS",
+  "failures": [],
+  "results": [
+    {
+      "profile": "desktop",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "section_visible": true,
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/jobcenter-desktop.png",
+      "pass": true
+    },
+    {
+      "profile": "mobile",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "section_visible": true,
+      "screenshot": "/home/runner/work/WDFOX/WDFOX/qa-artifacts/jobcenter-mobile.png",
+      "pass": true
+    }
+  ],
+  "finished_at": "2026-10-09T10:49:46.545Z",
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0
+  }
+}
