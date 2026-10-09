@@ -86,6 +86,8 @@ async function testTranslation(frame){
   if (!translationCycle) return {required:false,pass:true};
   if (!expectedSectionId) return {required:true,pass:false,error:'expected_section_id required for translation cycle'};
   const root=frame.locator('#'+expectedSectionId);
+  const details=root.locator('details').first();
+  if (await details.count()) await details.evaluate(el => { el.open = true; });
   const btn=root.locator('[data-jobcenter-lang-toggle]').first();
   if ((await btn.count())!==1) return {required:true,pass:false,error:'translation button missing'};
   const sequence=[];
