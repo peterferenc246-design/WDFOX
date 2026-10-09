@@ -1,0 +1,94 @@
+{
+  "schema": "wdfox-jobcenter-qa/v1",
+  "request_id": "jc-tawk-repair-2026-10-09-functional",
+  "qa_type": "functional",
+  "stage": "predproduction",
+  "target_url": "https://www.foxprof.club/privat/jobcenter-predproduction/",
+  "production_url": "https://www.foxprof.club/jobcenter/",
+  "approved_preview_commit": "dbb07620d7218c8bf889ca3e5defb5e789b35828",
+  "expected_section_id": "jobcenter-personal-visit-2026-10-07",
+  "translation_cycle": true,
+  "started_at": "2026-10-09T12:26:56.184Z",
+  "verdict": "PASS",
+  "failures": [],
+  "results": [
+    {
+      "profile": "functional",
+      "banner_ok": true,
+      "preview_error_visible": false,
+      "regional_exists": true,
+      "patch_script_injected": true,
+      "expected_section_exists": true,
+      "new_section_before_regional": true,
+      "tawk_topology": {
+        "pass": true,
+        "outer": {
+          "loader": 0,
+          "native_force": 0,
+          "avatar_fix": 0,
+          "embed_scripts": 0,
+          "visible_launchers": 0
+        },
+        "inner": {
+          "loader": 1,
+          "native_force": 1,
+          "avatar_fix": 1,
+          "embed_scripts": 1,
+          "visible_launchers": 1
+        },
+        "checks": {
+          "top_level_predproduction_tawk_zero": true,
+          "embedded_jobcenter_tawk_single_package": true,
+          "visible_tawk_launcher_exactly_one": true,
+          "no_second_fox_or_tawk_launcher_outside_iframe": true
+        }
+      },
+      "translation": {
+        "required": true,
+        "pass": true,
+        "sequence": [
+          {
+            "visible": [
+              "de"
+            ],
+            "button": "Preložiť do EN"
+          },
+          {
+            "visible": [
+              "en"
+            ],
+            "button": "Preložiť do SK"
+          },
+          {
+            "visible": [
+              "sk"
+            ],
+            "button": "Preložiť do DE"
+          },
+          {
+            "visible": [
+              "de"
+            ],
+            "button": "Preložiť do EN"
+          }
+        ],
+        "expected": [
+          "de",
+          "en",
+          "sk",
+          "de"
+        ]
+      },
+      "production_untouched": true,
+      "pass": true
+    }
+  ],
+  "finished_at": "2026-10-09T12:27:04.195Z",
+  "tawk_gate": "PASS",
+  "screenshot_gate": "NOT_APPLICABLE",
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}
