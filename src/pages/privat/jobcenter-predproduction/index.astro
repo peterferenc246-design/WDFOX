@@ -1,0 +1,59 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+const patchPath = path.join(process.cwd(), 'privat', 'jobcenter-predproduction', 'preview-patch.js');
+const previewPatch = fs.existsSync(patchPath) ? fs.readFileSync(patchPath, 'utf8') : '';
+---
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <title>Jobcenter – Predproduction Preview</title>
+    <style>
+      html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif;background:#eef2f6}
+      .preview-bar{height:52px;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:0 16px;background:#111827;color:#fff;font-size:14px;font-weight:700}
+      .preview-badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#ff5a00;color:#fff}
+      .preview-note{font-weight:400;opacity:.9}
+      #jobcenter-preview{display:block;width:100%;height:calc(100vh - 52px);border:0;background:#fff}
+      #preview-error{display:none;padding:14px 16px;background:#fee2e2;color:#991b1b;font-weight:700}
+      @media (max-width:700px){.preview-bar{height:auto;min-height:52px;flex-wrap:wrap;padding:10px 12px}#jobcenter-preview{height:calc(100vh - 72px)}}
+    </style>
+  </head>
+  <body>
+    <div class="preview-bar">
+      <span class="preview-badge">PREDPRODUCTION</span>
+      <span>Jobcenter</span>
+      <span class="preview-note">Náhľad pred schválením – produkcia /jobcenter/ sa nemení.</span>
+    </div>
+    <div id="preview-error"></div>
+    <iframe id="jobcenter-preview" src="/jobcenter/" title="Jobcenter predproduction preview"></iframe>
+
+    <script define:vars={{ previewPatch }}>
+      const frame = document.getElementById('jobcenter-preview');
+      const errorBox = document.getElementById('preview-error');
+
+      function applyPreviewPatch() {
+        try {
+          const doc = frame.contentDocument || frame.contentWindow.document;
+          if (!doc || !doc.body) throw new Error('Preview document is not available.');
+          const previous = doc.getElementById('wdfox-jobcenter-predproduction-patch');
+          if (previous) previous.remove();
+
+          const script = doc.createElement('script');
+          script.id = 'wdfox-jobcenter-predproduction-patch';
+          script.textContent = previewPatch;
+          doc.body.appendChild(script);
+          errorBox.style.display = 'none';
+        } catch (error) {
+          errorBox.textContent = 'Predprodukčný patch sa nepodarilo načítať: ' + (error && error.message ? error.message : error);
+          errorBox.style.display = 'block';
+        }
+      }
+
+      frame.addEventListener('load', applyPreviewPatch);
+    </script>
+  </body>
+</html>
