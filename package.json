@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "astro dev --host",
-    "build": "astro build",
+    "build": "astro build && python .github/scripts/wdfox_package_tawk.py",
     "start": "astro preview --host",
     "preview": "astro preview --host",
     "check": "astro check",
