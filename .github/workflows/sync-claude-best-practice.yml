@@ -1,0 +1,43 @@
+name: Sync Claude Code Best Practice subtree
+on:
+  workflow_dispatch:
+  push:
+    branches: [preview]
+    paths:
+      - '.github/workflows/sync-claude-best-practice.yml'
+  schedule:
+    - cron: '23 5 * * 1'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: claude-code-best-practice-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout WDFOX preview with history
+        uses: actions/checkout@v4
+        with:
+          ref: preview
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Import or update isolated upstream subtree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git remote add claude-best-practice https://github.com/shanraisshan/claude-code-best-practice.git
+          git fetch claude-best-practice main
+          if [ -d external/claude-code-best-practice ]; then
+            git subtree pull --prefix=external/claude-code-best-practice claude-best-practice main --squash -m "chore: sync Claude Code Best Practice upstream"
+          else
+            git subtree add --prefix=external/claude-code-best-practice claude-best-practice main --squash -m "chore: import Claude Code Best Practice upstream"
+          fi
+          git push origin HEAD:preview
