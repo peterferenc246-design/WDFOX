@@ -1,0 +1,14 @@
+---
+const source = 'https://github.com/shanraisshan/claude-code-best-practice';
+const topics = [
+['Subagents','Samostatní agenti na konkrétne úlohy','Adaptovať pre WDFOX Supervisor a špecializovaných agentov'],
+['Skills','Znovupoužiteľné postupy a schopnosti','Adaptovať do našich agentov a dokumentácie'],
+['Commands','Spúšťacie príkazy pre pracovné postupy','Claude príkazy nefungujú automaticky v ChatGPT; vytvoriť vlastné akcie'],
+['MCP Servers','Prepojenie agenta s nástrojmi a dátami','Využiť náš MCP a n8n ekosystém'],
+['Hooks','Reakcie na udalosti pri vývoji','Adaptovať cez GitHub Actions a n8n webhooky'],
+['Memory a Context','Pravidlá, dokumentácia a kontext projektu','WDFOX znalosti, audit a oprávnenia'],
+['Orchestration','Command → Agent → Skill; Research → Plan → Execute → Review → Ship','Vysoká priorita pre koordináciu vývoja'],
+['Code Review a GitHub Actions','Kontrola zmien a automatické testy','Napojenie na Git Control Center a preview workflow']
+];
+---
+<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WDFOX – Claude Code Best Practice</title><style>body{background:#07111b;color:#ecf4fc;font:16px/1.6 system-ui;margin:0}main{max-width:920px;margin:auto;padding:28px 18px 65px}h1{color:#69d9ff}h2{color:#8ce6bb}a{color:#8bdcff}.card{background:#111e2b;border:1px solid #304558;border-radius:13px;padding:16px;margin:12px 0}.tag{color:#ffe1a0}small{color:#b8c8d5}</style></head><body><main><p><a href="/system-design">← Architektonická mapa WDFOX</a></p><h1>🧠 Claude Code Best Practice</h1><p class="tag"><strong>VYSOKÁ PRIORITA NA PRESKÚMANIE</strong> · externý zdroj · návrh adaptácie, nie hotová integrácia</p><p>Repozitár autora shanraisshan dokumentuje praktiky pre agentické programovanie v Claude Code. Obsahuje príklady agentov, Skills, Commands, MCP, Hooks, pamäte, orchestrácie a automatizácie vývoja.</p><p><strong>Originálny repozitár:</strong> <a href={source} target="_blank" rel="noopener noreferrer">{source}</a></p><h2>Čo obsahuje a ako to využijeme</h2>{topics.map(t=><section class="card"><h3>{t[0]}</h3><p>{t[1]}</p><small>WDFOX: {t[2]}</small></section>)}<h2>Odporúčaný vývojový postup</h2><div class="card">Požiadavka → výskum → plán → špecializovaní agenti a Skills → implementácia → test a Code Review → GitHub preview → schválenie človekom → produkcia</div><h2>Licencie a bezpečnosť</h2><p>Repozitár deklaruje MIT licenciu. Licencie odkazovaných projektov a závislostí treba posudzovať osobitne. Pred prevzatím konfigurácií preveriť oprávnenia, prístup k súborom, API kľúče, spúšťanie príkazov a dodatočné náklady.</p><p>Príklady v adresároch .claude sú určené pre Claude Code a nie sú priamo spustiteľným WDFOX orchestrátorom. Adaptácia pre ChatGPT, MCP, GitHub a n8n vyžaduje samostatnú implementáciu.</p><p><a href={source} target="_blank" rel="noopener noreferrer">🔗 Otvoriť GitHub repozitár</a></p></main></body></html>
