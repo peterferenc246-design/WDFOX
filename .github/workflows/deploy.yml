@@ -103,7 +103,7 @@ jobs:
               re.I | re.S,
           )
           external_tawk = re.compile(
-              r'<script\b[^>]*src=["\'][^"\']*(?:embed\.tawk\.to|tawk-language-loader\.js|tawk-native-force\.js|tawk-avatar-fix\.js|tawk-preview-[^"\']+\.js)[^"\']*["\'][^>]*>\s*</script\s*>',
+              r'<script\b[^>]*src=["\'][^"\']*(?:embed\.tawk\.to|tawk-language-loader\.js|tawk-native-force\.js|tawk-avatar-fix\.js|tawk-native-bootstrap\.js|tawk-preview-[^"\']+\.js)[^"\']*["\'][^>]*>\s*</script\s*>',
               re.I | re.S,
           )
           inline_scripts = re.compile(r'<script\b[^>]*>.*?</script\s*>', re.I | re.S)
@@ -122,6 +122,7 @@ jobs:
                       'tawk-language-loader',
                       'tawk-native-force',
                       'tawk-avatar-fix',
+                      'tawk-native-bootstrap',
                       'tawk-preview-',
                   )
                   return '' if any(marker in block for marker in markers) else block
@@ -137,6 +138,8 @@ jobs:
           )
           if avatar_exists:
               snippet += f'\n<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
+          chat_snippet = snippet
+          snippet = ''
           if evidence_exists:
               snippet += f'\n<script id="wdfox-jobcenter-vodafone-evidence" src="/jobcenter-vodafone-evidence.js?v={sha}"></script>'
           if poster_fix_exists:
@@ -156,17 +159,29 @@ jobs:
               # The predproduction wrapper embeds the real /jobcenter/ page in an iframe.
               # It must NOT receive its own Tawk package, otherwise two chat launchers appear:
               # one on the wrapper and one inside the Jobcenter iframe.
+              # Neither document owns chat under the home-only policy.
               if path == preview_wrapper:
                   path.write_text(text, encoding='utf-8')
                   continue
 
-              text = text.replace('</body>', snippet + '\n</body>', 1)
+              # Explicit allowlist: the root is a redirect, and tools/subpages never own chat.
+              home_pages = {f'{lang}/index.html' for lang in ('sk', 'de', 'en', 'hr', 'fr', 'it', 'pl', 'es', 'sv')}
+              page_snippet = snippet
+              if path.relative_to('dist').as_posix() in home_pages:
+                  page_snippet = chat_snippet + '\n' + page_snippet
+              text = text.replace('</body>', page_snippet + '\n</body>', 1)
               path.write_text(text, encoding='utf-8')
 
           for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js', 'dist/jobcenter-vodafone-evidence.js', 'dist/jobcenter-poster-fix.js'):
               if not Path(required).is_file():
                   raise SystemExit(f'Missing production asset: {required}')
           PY
+
+      - name: Prevent chat outside home pages
+        run: |
+          node --test tests/tawk-scope.test.mjs
+          python -m unittest discover -s tests -p test_*.py
+          python .github/scripts/validate_tawk_scope.py dist
 
       - name: Validate production Tawk wiring
         shell: bash
@@ -198,8 +213,7 @@ jobs:
             exit 1
           fi
 
-          # Predproduction wrapper must stay Tawk-free. The embedded /jobcenter/ iframe
-          # carries the single approved production Tawk package.
+          # All secondary pages, including both Jobcenter documents, stay Tawk-free.
           preview_wrapper='dist/privat/jobcenter-predproduction/index.html'
           test -s "$preview_wrapper"
           grep -q 'id="jobcenter-preview"' "$preview_wrapper"
@@ -232,6 +246,9 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Verify live approved Tawk package
         shell: bash
         run: |
@@ -258,9 +275,11 @@ jobs:
                 avatar="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$avatar_url" || true)"
                 grep -q 'wdfox-tawk-trigger-avatar-fix' <<<"$avatar" || { sleep 8; continue; }
               fi
+              python .github/scripts/validate_tawk_scope.py --live https://www.foxprof.club --version "${GITHUB_SHA}" || { sleep 8; continue; }
               echo 'LIVE_APPROVED_TAWK_PACKAGE=OK'
               exit 0
             fi
             sleep 8
           done
           echo 'LIVE_APPROVED_TAWK_PACKAGE=FAIL'
+          exit 1
