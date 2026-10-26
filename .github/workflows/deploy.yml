@@ -85,89 +85,6 @@ jobs:
       - name: Build Astro site
         run: pnpm run build
 
-      - name: Install approved production Tawk package
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import os
-          import re
-          from pathlib import Path
-
-          sha = os.environ.get("GITHUB_SHA", "production")
-
-          legacy_ui = re.compile(
-              r'<style\b[^>]*id=["\']fox-tawk-button-style["\'][^>]*>.*?</style\s*>\s*'
-              r'<div\b[^>]*id=["\']fox-tawk-button["\'][^>]*>.*?</div\s*>\s*'
-              r'<script\b[^>]*id=["\']fox-tawk-lazy["\'][^>]*>.*?</script\s*>',
-              re.I | re.S,
-          )
-          external_tawk = re.compile(
-              r'<script\b[^>]*src=["\'][^"\']*(?:embed\.tawk\.to|tawk-language-loader\.js|tawk-native-force\.js|tawk-avatar-fix\.js|tawk-preview-[^"\']+\.js)[^"\']*["\'][^>]*>\s*</script\s*>',
-              re.I | re.S,
-          )
-          inline_scripts = re.compile(r'<script\b[^>]*>.*?</script\s*>', re.I | re.S)
-
-          def clean(text: str) -> str:
-              text = legacy_ui.sub('', text)
-              text = external_tawk.sub('', text)
-
-              def keep(match):
-                  block = match.group(0)
-                  markers = (
-                      'embed.tawk.to',
-                      'Tawk_API',
-                      'fox-tawk-launcher',
-                      'fox-tawk-button',
-                      'tawk-language-loader',
-                      'tawk-native-force',
-                      'tawk-avatar-fix',
-                      'tawk-preview-',
-                  )
-                  return '' if any(marker in block for marker in markers) else block
-
-              return inline_scripts.sub(keep, text)
-
-          avatar_exists = Path('dist/tawk-avatar-fix.js').is_file()
-          evidence_exists = Path('dist/jobcenter-vodafone-evidence.js').is_file()
-          poster_fix_exists = Path('dist/jobcenter-poster-fix.js').is_file()
-          snippet = (
-              f'<script id="fox-tawk-language-loader" src="/tawk-language-loader.js?v={sha}"></script>\n'
-              f'<script id="fox-tawk-native-force" src="/tawk-native-force.js?v={sha}"></script>'
-          )
-          if avatar_exists:
-              snippet += f'\n<script id="fox-tawk-avatar-fix" src="/tawk-avatar-fix.js?v={sha}"></script>'
-          if evidence_exists:
-              snippet += f'\n<script id="wdfox-jobcenter-vodafone-evidence" src="/jobcenter-vodafone-evidence.js?v={sha}"></script>'
-          if poster_fix_exists:
-              snippet += f'\n<script id="wdfox-jobcenter-poster-fix" src="/jobcenter-poster-fix.js?v={sha}"></script>'
-
-          files = list(Path('dist').rglob('*.html'))
-          if not files:
-              raise SystemExit('No built HTML files found in dist')
-
-          preview_wrapper = Path('dist/privat/jobcenter-predproduction/index.html')
-
-          for path in files:
-              text = clean(path.read_text(encoding='utf-8'))
-              if '</body>' not in text:
-                  raise SystemExit(f'Missing </body> in {path}')
-
-              # The predproduction wrapper embeds the real /jobcenter/ page in an iframe.
-              # It must NOT receive its own Tawk package, otherwise two chat launchers appear:
-              # one on the wrapper and one inside the Jobcenter iframe.
-              if path == preview_wrapper:
-                  path.write_text(text, encoding='utf-8')
-                  continue
-
-              text = text.replace('</body>', snippet + '\n</body>', 1)
-              path.write_text(text, encoding='utf-8')
-
-          for required in ('dist/tawk-language-loader.js', 'dist/tawk-native-force.js', 'dist/jobcenter-vodafone-evidence.js', 'dist/jobcenter-poster-fix.js'):
-              if not Path(required).is_file():
-                  raise SystemExit(f'Missing production asset: {required}')
-          PY
-
       - name: Validate production Tawk wiring
         shell: bash
         run: |
@@ -236,31 +153,53 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          url="https://www.foxprof.club/sk/?tawk_verify=${GITHUB_SHA}"
-          loader_url="https://www.foxprof.club/tawk-language-loader.js?v=${GITHUB_SHA}"
-          avatar_url="https://www.foxprof.club/tawk-avatar-fix.js?v=${GITHUB_SHA}"
+          origin="https://www.foxprof.club"
+          agent='WDFOX-Tawk-Verify/5.0'
+          locales=(sk de en hr fr it pl es sv)
+          loader_ref="/tawk-language-loader.js?v=${GITHUB_SHA}"
+          launcher_ref="/tawk-native-force.js?v=${GITHUB_SHA}"
+          avatar_ref="/tawk-avatar-fix.js?v=${GITHUB_SHA}"
           for attempt in 1 2 3 4 5 6; do
-            html="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$url" || true)"
-            loader="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$loader_url" || true)"
-            base_ok=false
-            if grep -q 'id="fox-tawk-language-loader"' <<<"$html" \
-              && grep -q '/tawk-language-loader.js' <<<"$html" \
-              && grep -q 'id="fox-tawk-native-force"' <<<"$html" \
-              && grep -q '/tawk-native-force.js' <<<"$html" \
-              && ! grep -q 'id="fox-tawk-button"' <<<"$html" \
-              && grep -q 'Tawk_API.endChat' <<<"$loader" \
-              && ! grep -F -q '#fixed-lang-layer a.language-flag[data-language]' <<<"$loader" \
-              && ! grep -q 'Tawk_API.switchWidget' <<<"$loader"; then
-              base_ok=true
-            fi
-            if [[ "$base_ok" == "true" ]]; then
-              if grep -q 'id="fox-tawk-avatar-fix"' <<<"$html"; then
-                avatar="$(curl -L --fail --silent --show-error --max-time 30 -A 'WDFOX-Tawk-Verify/4.1' "$avatar_url" || true)"
-                grep -q 'wdfox-tawk-trigger-avatar-fix' <<<"$avatar" || { sleep 8; continue; }
+            echo "Production validation attempt ${attempt}/6 for ${GITHUB_SHA}"
+            pass=true
+            for lang in "${locales[@]}"; do
+              html="$(curl --location --fail --silent --show-error --max-time 30 --user-agent "$agent" "$origin/$lang/?tawk_verify=${GITHUB_SHA}" || true)"
+              if [[ -z "$html" ]] \
+                || ! grep -Fq "id=\"fox-tawk-language-loader\" src=\"$loader_ref\"" <<<"$html" \
+                || ! grep -Fq "id=\"fox-tawk-native-force\" src=\"$launcher_ref\"" <<<"$html" \
+                || grep -Fq 'id="fox-tawk-button"' <<<"$html"; then
+                echo "FAIL: route /$lang/ missing approved SHA-matched Tawk package"
+                pass=false
               fi
+            done
+            loader="$(curl --location --fail --silent --show-error --max-time 30 --user-agent "$agent" "$origin$loader_ref" || true)"
+            launcher="$(curl --location --fail --silent --show-error --max-time 30 --user-agent "$agent" "$origin$launcher_ref" || true)"
+            if [[ -z "$loader" || -z "$launcher" ]] \
+              || ! grep -Fq 'Tawk_API.endChat' <<<"$loader" \
+              || grep -Fq 'Tawk_API.switchWidget' <<<"$loader" \
+              || grep -Fq '#fixed-lang-layer a.language-flag[data-language]' <<<"$loader" \
+              || ! grep -Fq 'fox-tawk-concealed' <<<"$launcher"; then
+              echo 'FAIL: loader or launcher unavailable or invalid'
+              pass=false
+            fi
+            sk_html="$(curl --location --fail --silent --show-error --max-time 30 --user-agent "$agent" "$origin/sk/?tawk_verify=${GITHUB_SHA}" || true)"
+            if grep -Fq 'id="fox-tawk-avatar-fix"' <<<"$sk_html"; then
+              if ! grep -Fq "id=\"fox-tawk-avatar-fix\" src=\"$avatar_ref\"" <<<"$sk_html"; then
+                echo 'FAIL: avatar version mismatch'
+                pass=false
+              else
+                avatar="$(curl --location --fail --silent --show-error --max-time 30 --user-agent "$agent" "$origin$avatar_ref" || true)"
+                if ! grep -Fq 'wdfox-tawk-trigger-avatar-fix' <<<"$avatar"; then
+                  echo 'FAIL: missing avatar asset'
+                  pass=false
+                fi
+              fi
+            fi
+            if [[ "$pass" == "true" ]]; then
               echo 'LIVE_APPROVED_TAWK_PACKAGE=OK'
               exit 0
             fi
-            sleep 8
+            if (( attempt < 6 )); then sleep 8; fi
           done
           echo 'LIVE_APPROVED_TAWK_PACKAGE=FAIL'
+          exit 1
