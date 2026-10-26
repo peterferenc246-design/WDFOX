@@ -4,6 +4,28 @@
 
 WDFOX musí pri prvej návšteve zvoliť podporovaný jazyk podľa prehliadača. Po ručnom výbere vlajky musia stránka aj Tawk.to chat používať rovnaký jazyk. Starý chat nesmie prenášať hlavičku, uvítanie ani históriu do nového jazykového widgetu.
 
+## Rozsah chatu (od 26. 10. 2026)
+
+Tawk.to sa načítava iba na hlavnej stránke v deviatich jazykových verziách
+`/sk/`, `/de/`, `/en/`, `/hr/`, `/fr/`, `/it/`, `/pl/`, `/es/`, `/sv/`.
+Koreň `/` iba presmerúva. Analyzátor, Jobcenter, predprodukčné obaly a ostatné
+podstránky chat nemajú, ani keď sú otvorené samostatne. V iframe sa Tawk nikdy
+neinicializuje; pri vloženom analyzátore zostáva jediným vlastníkom chatu rodičovská
+hlavná stránka.
+
+Toto pravidlo vynucujú tri vrstvy: allowlist v nasadzovacom workflow, skorý návrat
+v chatových skriptoch (zachovaný aj generátorom synchronizácie) a validácia všetkých
+vygenerovaných HTML súborov pred publikovaním. Kontrola živého webu overuje aj
+verziu skriptov a pri neúspechu ukončí workflow chybou.
+
+Regresné kontroly:
+
+```sh
+node --test tests/tawk-scope.test.mjs
+python -m unittest discover -s tests -p 'test_*.py'
+python .github/scripts/validate_tawk_scope.py dist
+```
+
 ## Podporované jazyky a widgety
 
 Všetky widgety patria do Tawk.to property `6a951d52c3c46c344587662a`.

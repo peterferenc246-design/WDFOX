@@ -139,6 +139,14 @@ def transform_avatar(text):
     )
     return text
 
+HOME_ONLY_GUARD = '  // Tawk belongs only to top-level localized home pages, never embedded tools.\n  if (window.self !== window.top ||\n      !/^\\/(?:sk|de|en|hr|fr|it|pl|es|sv)\\/(?:index\\.html)?$/.test(window.location.pathname)) return;\n'
+
+def restrict_to_home(text):
+    marker = '  "use strict";'
+    require(text, marker, "production chat scope")
+    return text.replace(marker, marker + "\n\n" + HOME_ONLY_GUARD, 1)
+
+
 def validate(loader, launcher, avatar):
     for widget in WIDGETS.values():
         require(loader, widget, "generated production loader")
@@ -178,6 +186,7 @@ def main():
     launcher = transform_launcher((src / "tawk-preview-launcher.js").read_text(encoding="utf-8"))
     avatar = transform_avatar((src / "tawk-preview-avatar-fix.js").read_text(encoding="utf-8"))
 
+    loader, launcher, avatar = map(restrict_to_home, (loader, launcher, avatar))
     validate(loader, launcher, avatar)
 
     (out / "tawk-language-loader.js").write_text(loader, encoding="utf-8")

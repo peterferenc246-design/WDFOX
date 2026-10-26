@@ -2,6 +2,11 @@
 (function () {
   "use strict";
 
+  // Tawk belongs only to top-level localized home pages, never embedded tools.
+  if (window.self !== window.top ||
+      !/^\/(?:sk|de|en|hr|fr|it|pl|es|sv)\/(?:index\.html)?$/.test(window.location.pathname)) return;
+
+
   function injectJobcenterPortalEvidence() {
     if (window.location.pathname !== "/jobcenter/" && window.location.pathname !== "/jobcenter") return;
     if (document.getElementById("portal-ausfall-2026-10-02")) return;

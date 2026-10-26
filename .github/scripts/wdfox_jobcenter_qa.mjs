@@ -89,23 +89,24 @@ async function checkTawkTopology(page, frame){
     outer.avatar_fix === 0 &&
     outer.embed_scripts === 0;
 
-  const innerPackageSingle =
-    inner.loader === 1 &&
-    inner.native_force === 1 &&
-    inner.avatar_fix <= 1;
+  const innerPackageAbsent =
+    inner.loader === 0 &&
+    inner.native_force === 0 &&
+    inner.avatar_fix === 0 &&
+    inner.embed_scripts === 0;
 
   const launcherTopology =
     outer.visible_launchers === 0 &&
-    inner.visible_launchers === 1;
+    inner.visible_launchers === 0;
 
   return {
-    pass: outerPackageAbsent && innerPackageSingle && launcherTopology,
+    pass: outerPackageAbsent && innerPackageAbsent && launcherTopology,
     outer,
     inner,
     checks: {
       top_level_predproduction_tawk_zero: outerPackageAbsent,
-      embedded_jobcenter_tawk_single_package: innerPackageSingle,
-      visible_tawk_launcher_exactly_one: launcherTopology,
+      embedded_jobcenter_tawk_zero: innerPackageAbsent,
+      visible_tawk_launchers_zero: launcherTopology,
       no_second_fox_or_tawk_launcher_outside_iframe: outer.visible_launchers === 0
     }
   };
