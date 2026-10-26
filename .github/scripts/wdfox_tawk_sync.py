@@ -137,6 +137,9 @@ def transform_avatar(text):
         "/* WDFOX production: visual workaround promoted from the tested PREVIEW avatar fix for Widget 4.x. */",
         1,
     )
+    marker = '  var AVATAR_ID = '
+    require(text, marker, 'preview avatar fix')
+    text = text[:text.index(marker)] + '  // Native Tawk avatars must be configured in Tawk, never painted over the iframe.\n  var AVATAR_ID = "wdfox-tawk-trigger-avatar-fix";\n  var staleOverlay = document.getElementById(AVATAR_ID);\n  if (staleOverlay) staleOverlay.remove();\n})();\n'
     return text
 
 HOME_ONLY_GUARD = '  // Tawk belongs only to top-level localized home pages, never embedded tools.\n  if (window.self !== window.top ||\n      !/^\\/(?:sk|de|en|hr|fr|it|pl|es|sv)\\/(?:index\\.html)?$/.test(window.location.pathname)) return;\n'

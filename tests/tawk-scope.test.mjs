@@ -5,6 +5,24 @@ import vm from 'node:vm';
 
 const files = ['tawk-language-loader.js', 'tawk-native-force.js', 'tawk-avatar-fix.js', 'tawk-native-bootstrap.js'];
 const locales = ['sk', 'de', 'en', 'hr', 'fr', 'it', 'pl', 'es', 'sv'];
+for (const locale of locales) {
+  test(`avatar cleanup never paints over native chat on /${locale}/`, () => {
+    const source = readFileSync(new URL('../public/tawk-avatar-fix.js', import.meta.url), 'utf8');
+    let removed = false;
+    const window = { location: { pathname: `/${locale}/` }, setInterval() { assert.fail('Avatar polling is forbidden'); } };
+    window.self = window.top = window;
+    const document = {
+      getElementById(id) {
+        assert.equal(id, 'wdfox-tawk-trigger-avatar-fix');
+        return { remove() { removed = true; } };
+      },
+      createElement() { assert.fail('Manual chat avatar must never be created'); },
+      querySelectorAll() { assert.fail('Chat frame geometry must not be guessed'); },
+    };
+    vm.runInNewContext(source, { window, document });
+    assert.equal(removed, true);
+  });
+}
 test('gallery does not inject or control chat', () => {
   const gallery = readFileSync(new URL('../public/cunderlik-gallery-runtime.js', import.meta.url), 'utf8');
   assert.doesNotMatch(gallery, /tawk|Tawk_API/i);
