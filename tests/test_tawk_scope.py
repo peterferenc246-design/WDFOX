@@ -62,6 +62,21 @@ class ScopeTests(unittest.TestCase):
         self.assertIn(sync.HOME_ONLY_GUARD, text)
         self.assertLess(text.index(sync.HOME_ONLY_GUARD), text.index('initialize();'))
 
+    def test_sync_removes_preview_avatar_overlay(self):
+        preview = '''(function () {
+  "use strict";
+  var host = String(window.location.hostname);
+  var isPreviewHost = true;
+  if (!isPreviewHost) return;
+  var AVATAR_ID = "wdfox-tawk-trigger-avatar-fix";
+  var timer = window.setInterval(positionAvatar, 180);
+})();'''
+        generated = sync.restrict_to_home(sync.transform_avatar(preview))
+        self.assertIn('staleOverlay.remove()', generated)
+        self.assertIn(sync.HOME_ONLY_GUARD, generated)
+        self.assertNotIn('setInterval', generated)
+        self.assertNotIn('positionAvatar', generated)
+
 
 if __name__ == '__main__':
     unittest.main()
