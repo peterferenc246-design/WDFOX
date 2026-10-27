@@ -131,7 +131,10 @@
     if (chatOpen || Date.now() < openingUntil) return;
     concealTawk();
     var tawk = api();
-    try { if (typeof tawk.hideWidget === "function") tawk.hideWidget(); } catch (_) {}
+    try {
+      if (typeof tawk.isChatHidden === "function" && tawk.isChatHidden()) return;
+      if (typeof tawk.hideWidget === "function") tawk.hideWidget();
+    } catch (_) {}
   }
 
   function reconcileState() {
@@ -280,12 +283,11 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
   else mount();
 
-  var guardRuns = 0;
-  var guard = window.setInterval(function () {
-    guardRuns += 1;
-    reconcileState();
-    if (guardRuns >= 400) window.clearInterval(guard);
-  }, 300);
+  // Tawk can restore its native launcher after a delayed trigger or reconnect.
+  // Keep the custom-launcher state consistent for the whole page lifetime.
+  window.setInterval(function () {
+    if (!document.hidden) reconcileState();
+  }, 1000);
 
   window.addEventListener("focus", reconcileState);
   document.addEventListener("visibilitychange", function () {
