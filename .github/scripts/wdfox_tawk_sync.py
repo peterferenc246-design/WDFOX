@@ -128,6 +128,23 @@ def transform_launcher(text):
             marker + '    ".live-chat-bubble:not(#fox-tawk-launcher){display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}" +\n',
             1,
         )
+    legacy_guard = '''  var guardRuns = 0;
+  var guard = window.setInterval(function () {
+    guardRuns += 1;
+    reconcileState();
+    if (guardRuns >= 400) window.clearInterval(guard);
+  }, 300);'''
+    require(text, legacy_guard, "preview launcher lifetime guard")
+    text = text.replace(legacy_guard, '''  // Keep the custom launcher consistent after delayed triggers and reconnects.
+  window.setInterval(function () {
+    if (!document.hidden) reconcileState();
+  }, 1000);''', 1)
+    legacy_hide = '    try { if (typeof tawk.hideWidget === "function") tawk.hideWidget(); } catch (_) {}'
+    require(text, legacy_hide, "preview launcher hide guard")
+    text = text.replace(legacy_hide, '''    try {
+      if (typeof tawk.isChatHidden === "function" && tawk.isChatHidden()) return;
+      if (typeof tawk.hideWidget === "function") tawk.hideWidget();
+    } catch (_) {}''', 1)
     return text
 
 def transform_avatar(text):

@@ -20,6 +20,28 @@ sync = load('wdfox_tawk_sync')
 
 
 class ScopeTests(unittest.TestCase):
+    def test_sync_preserves_launcher_lifetime_guard(self):
+        production = (ROOT / 'public/tawk-native-force.js').read_text(encoding='utf-8')
+        preview = production.replace(sync.HOME_ONLY_GUARD, '')
+        preview = preview.replace('  "use strict";', '  "use strict";\n  var host = String(window.location.hostname);\n  var isPreviewHost = true;\n  if (!isPreviewHost) return;', 1)
+        start = preview.index('  // Tawk can restore its native launcher')
+        end = preview.index('\n  window.addEventListener("focus"', start)
+        preview = preview[:start] + '''  var guardRuns = 0;
+  var guard = window.setInterval(function () {
+    guardRuns += 1;
+    reconcileState();
+    if (guardRuns >= 400) window.clearInterval(guard);
+  }, 300);
+''' + preview[end:]
+        preview = preview.replace('''    try {
+      if (typeof tawk.isChatHidden === "function" && tawk.isChatHidden()) return;
+      if (typeof tawk.hideWidget === "function") tawk.hideWidget();
+    } catch (_) {}''', '    try { if (typeof tawk.hideWidget === "function") tawk.hideWidget(); } catch (_) {}')
+        generated = sync.transform_launcher(preview)
+        self.assertNotIn('guardRuns', generated)
+        self.assertIn('if (!document.hidden) reconcileState();', generated)
+        self.assertIn('tawk.isChatHidden()) return;', generated)
+
     def test_real_deployment_injection_and_validation(self):
         workflow = (ROOT / '.github/workflows/deploy.yml').read_text(encoding='utf-8')
         step = workflow.split('      - name: Install approved production Tawk package')[1]
