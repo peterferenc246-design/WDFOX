@@ -179,7 +179,7 @@ jobs:
 
       - name: Prevent chat outside home pages
         run: |
-          node --test tests/tawk-scope.test.mjs
+          node --test tests/tawk-scope.test.mjs tests/tawk-launcher-lifecycle.test.mjs
           python -m unittest discover -s tests -p test_*.py
           python .github/scripts/validate_tawk_scope.py dist
 
