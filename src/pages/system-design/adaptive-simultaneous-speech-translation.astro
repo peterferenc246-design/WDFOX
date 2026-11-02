@@ -1,0 +1,45 @@
+---
+const title = 'Adaptívny simultánny preklad reči – WDFOX AI Meeting Terminal';
+---
+<html lang="sk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{title}</title>
+  <meta name="description" content="Wait-k a adaptívny simultánny preklad reči: rozhodovanie READ/WRITE, streaming ASR, titulky, TTS a odporúčaná architektúra WDFOX."/>
+  <style>
+    :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#09141d;color:#eff6fd;font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}
+    main{max-width:920px;margin:0 auto;padding:30px 18px 70px}h1{line-height:1.2;font-size:clamp(1.85rem,5vw,2.85rem);color:#83ecc9}h2{font-size:1.23rem;color:#95ddff}h3{font-size:1.06rem;color:#f9b7d3}a{color:#83ecc9}section{background:#10232f;border:1px solid #315164;border-radius:15px;padding:20px;margin:18px 0}li{margin:8px 0}.priority{color:#ffb3cb;font-weight:900}
+    .compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:15px}.compare section{margin:0}.steps{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.step{border:1px solid #478ea2;background:#0a2531;border-radius:8px;padding:8px 10px;font-weight:700;font-size:.9rem}.arrow{color:#89edc9;font-weight:800}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:470px}th,td{border-bottom:1px solid #375164;text-align:left;padding:10px;vertical-align:top}th{color:#9bdcff}.muted{color:#adbdc9}.upload{display:inline-block;border:1px solid #60b9a3;border-radius:10px;padding:10px 14px;margin:8px 0;text-decoration:none;font-weight:700}
+  </style>
+</head>
+<body><main>
+  <a href="/system-design">← Architektonická mapa WDFOX</a>
+  <h1>🗣️ Adaptívny simultánny preklad reči</h1>
+  <p class="priority">❤️ 10/10 · Priorita P1 · architektonický návrh, nie hotová produkčná funkcia</p>
+  <p>Rozhodovacím problémom živého prekladu je, či systém v danom momente ešte počúva zdrojovú reč (<strong>READ</strong>), alebo už môže vytvoriť časť prekladu (<strong>WRITE</strong>). Príliš skorý výstup môže chybne predvídať sloveso či význam; príliš dlhé čakanie znižuje použiteľnosť rozhovoru.</p>
+  <div class="compare">
+    <section><h2>wait-k: pevné oneskorenie</h2><p>Pri stratégii wait-k sa čaká na k zdrojových tokenov/slov a potom sa ďalej strieda čítanie a generovanie podľa pevného pravidla. Prístup je jednoduchý a predvídateľný, ale pri dlhých závislostiach vo vetách sa môže rozhodnúť predčasne.</p><p><strong>Na obrázku:</strong> k = 2; systém začína generovať pred príchodom neskoršieho slovesa.</p></section>
+    <section><h2>Adaptive: rozhodnutie podľa kontextu</h2><p>Adaptívna stratégia môže odložiť generovanie podľa kontextu, neistoty a rozpočtu na latenciu. Práh sa musí kalibrovať na reálnych dátach; nejde o univerzálny parameter.</p><p><strong>Na obrázku:</strong> ilustračná hodnota p = 0,92 a prah 0,8.</p></section>
+  </div>
+  <section><h2>Príklad s nemeckým slovosledom</h2><p><strong>Zdroj:</strong> „Ich habe das Buch gekauft.“</p><p><strong>Preklad:</strong> „Kúpil som tú knihu.“ (alebo anglicky „I bought the book“).</p><p>V nemčine sa plnovýznamové sloveso v minulom čase môže objaviť až na konci vety. Ak tlmočník predčasne odhadne nesprávne sloveso, musí opraviť titulky; už prehratý hlasový výstup však späť nevezme.</p></section>
+  <section><h2>Odporúčaný dátový tok WDFOX</h2>
+    <div class="steps"><span class="step">Mikrofón / audio stream</span><span class="arrow">→</span><span class="step">Streaming ASR</span><span class="arrow">→</span><span class="step">Stabilizácia prepisu</span><span class="arrow">→</span><span class="step">Adaptívne READ/WRITE</span><span class="arrow">→</span><span class="step">Streaming preklad</span><span class="arrow">→</span><span class="step">Titulky + potvrdené TTS</span></div>
+    <ul>
+      <li><strong>Priebežné titulky:</strong> jasne označiť predbežný a potvrdený text; umožniť opravy ešte nestabilných segmentov.</li>
+      <li><strong>Prehrávaný hlas:</strong> generovať prednostne z potvrdených segmentov; pri neistote krátko počkať namiesto hlasového opravovania.</li>
+      <li><strong>Viacjazyčnosť:</strong> samostatne merať kvalitu a zdržanie pre DE↔SK, EN a ďalšie podporované jazyky.</li>
+      <li><strong>Ochrana údajov:</strong> súhlas so spracovaním audia podľa použitia, kontrola prístupu do miestnosti, uchovávanie a oddelenie klientskych dát.</li>
+    </ul>
+  </section>
+  <section><h2>Ako merať úspech</h2><div class="table-wrap"><table><thead><tr><th>Metodika</th><th>Čo hodnotiť</th></tr></thead><tbody>
+    <tr><td>Latencia</td><td>Čas od vyslovenia frázy po titulok a prvý prehratý zvuk; rozdiel pri krátkych a dlhých vetách.</td></tr>
+    <tr><td>Kvalita</td><td>Presnosť prekladu, vlastné mená, terminológia klienta, číslovky a nemecký slovosled.</td></tr>
+    <tr><td>Stabilita</td><td>Počet opráv titulkov, nesprávnych predikcií a hlasových opráv.</td></tr>
+    <tr><td>Náklady</td><td>Spotreba API, streamovaných tokenov, TTS a výpočtov na minútu rozhovoru.</td></tr>
+  </tbody></table></div></section>
+  <section><h2>Pôvodná animácia</h2><p class="muted">Originálny GIF zatiaľ nie je v repozitári. Nahraj <code>SmartSelect_20261102-193916_Facebook.gif</code> do <code>public/system-design/</code> vo vetve <code>preview</code>. Po overení ho pripojíme na detail, do katalógu aj galérie architektonickej mapy.</p>
+    <a class="upload" href="https://github.com/peterferenc246-design/WDFOX/upload/preview/public/system-design" target="_blank" rel="noopener noreferrer">Nahrať GIF do GitHubu</a>
+    <p><a href="https://www.facebook.com/share/v/19XZ2wpr7k/" target="_blank" rel="noopener noreferrer">Pôvodný zdroj na Facebooku</a></p>
+  </section>
+</main></body></html>
