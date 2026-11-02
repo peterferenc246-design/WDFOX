@@ -10,6 +10,90 @@ Tracks updates to the AGENT COLLECTIONS table in `README.md`.
 
 ---
 
+## [2026-11-02 08:43 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Star | msitarzewski/agency-agents ★ unchanged (165,900 exact; rounds to 166k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 2 | LOW | Count | msitarzewski/agency-agents agents 279 → ~278 (per-dir: engineering/66 + specialized/59 + marketing/37 + gis/13 + security/12 + design/10 + testing/9 + sales/9 + paid-media/7 + project-management/7 + product/6 + support/6 + academic/6 + spatial-computing/6 + game-development/18 + finance/5 + healthcare/3 + research/1 = ~278; conf 0.78 < 0.88 threshold; RECURRING oscillation; game-development includes root+unity+unreal-engine+godot+blender=18, roblox-studio unchecked; within oscillation band; no change) | INVALID (RECURRING oscillation; conf 0.78 below 0.88 threshold; within oscillation band; no change) |
+| 3 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26,300 exact; rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 4 | LOW | Count | VoltAgent/awesome-claude-code-subagents agents 164 → 165 (per-dir: 01:13+02:30+03:16+04:19+05:13+06:16+07:16+08:19+09:12+10:11=165; conf 0.87 < 0.88 threshold; RECURRING oscillation; Oct 30 ponder-auditor PR#336 + Oct 21 ux-microcopy-reviewer already counted; +1 boundary is counting artifact; within oscillation band; no change) | INVALID (RECURRING oscillation; conf 0.87 below 0.88 threshold; Oct 31 COMPLETE established 164 at conf 0.93; within oscillation band; no change) |
+| 5 | LOW | Sort | Verify sort order (166k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
+## [2026-11-01 08:36 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Star | msitarzewski/agency-agents ★ unchanged (165,700+ exact; rounds to 166k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 2 | LOW | Count | msitarzewski/agency-agents agents 279 → ~283 (per-dir: engineering/66 + specialized/59 + marketing/37 + gis/13 + security/12 + design/10 + testing/9 + sales/9 + paid-media/7 + project-management/7 + product/6 + support/6 + academic/6 + spatial-computing/6 + game-development/21 + finance/5 + healthcare/3 + research/1 = 283; conf 0.78 < 0.88 threshold; within oscillation band; Oct 19 batch 30+ PRs merged + Oct 25 Electrical Engineer PR #1177) | INVALID (RECURRING oscillation; conf 0.78 below 0.88 threshold; within oscillation band; no change) |
+| 3 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26,200 exact; rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 4 | LOW | Count | VoltAgent/awesome-claude-code-subagents agents 164 → 165 (in-repo .md files via WebFetch category dirs: 01:13+02:30+03:16+04:19+05:13+06:16+07:16+08:19+09:16+10:11=169 README bullets − 4 external-link entries cat09 = 165 stored; conf 0.85 < 0.88 threshold; Oct 31 COMPLETE established 164 at conf 0.93; ponder-auditor Oct 28 + ux-microcopy-reviewer Oct 21 already counted; RECURRING oscillation) | INVALID (RECURRING oscillation; conf 0.85 below 0.88 threshold; Oct 31 COMPLETE established 164 at conf 0.93; within oscillation band; no change) |
+| 5 | LOW | Sort | Verify sort order (166k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
+## [2026-10-31 08:41 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Star | Update msitarzewski/agency-agents ★ from 165k to 166k | COMPLETE (GitHub search_code: 165,529 exact; 165,529 > 165,500 threshold → rounds to 166k; k-boundary crossed; RECURRING — milestone crossing; conf 0.82) |
+| 2 | MED | Count | Update VoltAgent/awesome-claude-code-subagents agents from 163 to 164 | COMPLETE (two-page search_code exhaustive: exactly 164 non-README .md files under categories/; ponder-auditor Oct 28 + ux-microcopy-reviewer Oct 21; conf 0.93 > 0.88 threshold; NEW) |
+| 3 | LOW | Count | msitarzewski/agency-agents agents 279 → ~272 (search_code total 294 − 22 non-agent = ~272; conf 0.82 < 0.88 threshold; within oscillation band; Oct 19 batch 30+ PRs merged) | INVALID (RECURRING oscillation; conf 0.82 below 0.88 threshold; within oscillation band; no change) |
+| 4 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26,217 exact; rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 5 | LOW | Sort | Verify sort order (166k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
+## [2026-10-30 08:41 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Star | msitarzewski/agency-agents ★ unchanged (165,202 exact; rounds to 165k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 2 | LOW | Count | msitarzewski/agency-agents agents 279 → ~268 (code search total_count ~308 − ~40 non-agent files = ~268; conf 0.78 below 0.88 threshold; October active: 25 Electrical Engineer PR #1177 + mass-merge ~30 PRs Oct 19 "content batch 5-6"; within oscillation band 254-310; RECURRING oscillation) | INVALID (RECURRING oscillation; conf 0.78 below 0.88 threshold; within oscillation band; no change) |
+| 3 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26,192 exact; rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 4 | LOW | Count | VoltAgent/awesome-claude-code-subagents agents 163 = 163 (search total_count 173 − 10 category README.md = 163; all 10 category dirs: 01:8 + 02:30 + 03:16 + 04:18 + 05:13 + 06:16 + 07:16 + 08:18 + 09:16 + 10:11 = 162–163; conf 0.88; exact match; last push Oct 11) | INVALID (exact match; RECURRING) |
+| 5 | LOW | Sort | Verify sort order (165k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
+## [2026-10-29 08:41 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Star | msitarzewski/agency-agents ★ unchanged (164,900 exact from web; rounds to 165k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 2 | LOW | Count | msitarzewski/agency-agents agents 279 → ~268 top-level (per-dir: engineering/66 + specialized/59 + marketing/37 + gis/13 + security/12 + design/10 + testing/9 + sales/9 + paid-media/7 + project-management/7 + academic/6 + product/6 + support/6 + spatial-computing/6 + finance/5 + healthcare/3 + research/1 + strategy/3 = 268 top-level; game-development/6 root only, unity/ and godot/ subdirs uncounted; conf 0.65 below 0.88 threshold; within oscillation band) | INVALID (RECURRING oscillation; conf 0.65 below 0.88 threshold; game-development and strategy subdirectories uncounted again; same band 280-310 estimated with subdirs; no change) |
+| 3 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26.2k rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 4 | LOW | Count | VoltAgent/awesome-claude-code-subagents agents 163 = 163 (all 10 category dirs: 01:13 + 02:30 + 03:16 + 04:18 + 05:13 + 06:16 + 07:16 + 08:18 + 09:12 + 10:11 = 163; conf 0.92; exact match; Oct 11 surgeon-reviewer + telegram-ads-analyst already counted in Oct 25 COMPLETE) | INVALID (exact match; RECURRING) |
+| 5 | LOW | Sort | Verify sort order (165k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
+## [2026-10-28 08:41 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Star | Update msitarzewski/agency-agents ★ from 164k to 165k | COMPLETE (GitHub API: 164,571 exact; 164,571 > 164,500 threshold → rounds to 165k; k-boundary crossed; RECURRING — milestone crossing; conf 0.87) |
+| 2 | LOW | Count | msitarzewski/agency-agents agents 279→284 (git tree API: 330 total .md − 46 non-agent = 284; conf 0.87 below 0.88 threshold; within oscillation band) | INVALID (RECURRING oscillation; conf 0.87 below 0.88 threshold; within oscillation band; no change) |
+| 3 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26,120 exact; rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 4 | LOW | Count | VoltAgent/awesome-claude-code-subagents agents 163 = 163 (181 total .md enumerated; 163 agent files; conf 0.91; exact match) | INVALID (exact match; RECURRING) |
+| 5 | LOW | Sort | Verify sort order (165k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
+## [2026-10-27 08:42 AM PKT] Agent Collections Update
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Star | msitarzewski/agency-agents ★ unchanged (164,299 exact; rounds to 164k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 2 | LOW | Count | msitarzewski/agency-agents agents 279→272 (per-dir: engineering/66 + specialized/59 + marketing/37 + gis/13 + security/12 + design/10 + testing/9 + sales/9 + paid-media/7 + project-management/7 + finance/5 + spatial-computing/6 + game-development/6 + academic/6 + product/6 + support/6 + strategy/3 + healthcare/3 + integrations/1 + research/1 = 272; conf 0.82 < 0.88 threshold) | INVALID (RECURRING oscillation; conf 0.82 below 0.88 threshold; within oscillation band; no change) |
+| 3 | LOW | Star | VoltAgent/awesome-claude-code-subagents ★ unchanged (26,094 exact; rounds to 26k; no k-boundary crossed) | INVALID (no k-boundary crossed; RECURRING) |
+| 4 | LOW | Count | VoltAgent/awesome-claude-code-subagents agents 163→164 (+1 in category 03-infrastructure; per-dir: 01:13 + 02:30 + 03:17 + 04:18 + 05:13 + 06:16 + 07:16 + 08:18 + 09:12 + 10:11 = 164; conf 0.91; last repo push Oct 11; Oct 25 found 163 at conf 0.97) | INVALID (RECURRING oscillation; Oct 25 count at higher conf 0.97 established 163; no repo push since Oct 11; +1 in single category is counting artifact; no change) |
+| 5 | LOW | Sort | Verify sort order (164k > 26k — stars descending) | COMPLETE (order preserved; RECURRING) |
+
+---
+
 ## [2026-10-25 08:41 AM PKT] Agent Collections Update
 
 | # | Priority | Type | Action | Status |
