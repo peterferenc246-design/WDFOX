@@ -1460,3 +1460,94 @@ No new drift detected — frontmatter fields (20) and bundled skills (25) are fu
 | 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.301–v2.1.310) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
 | 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — docs-rendering inconsistency persists: skills page omits bundled classification; report says "Introduced v2.1.261" but docs say v2.1.252+; no changelog corroboration of removal in last 10 versions (v2.1.301–v2.1.310) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
 | 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.309, v2.1.304, v2.1.300; no changelog corroboration of removal in last 10 versions (v2.1.301–v2.1.310) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-10-27 10:04 AM PKT] Claude Code v2.1.311
+
+No new drift detected — frontmatter fields (20) and bundled skills (25) are fully synchronized with official docs in v2.1.302–v2.1.311. No new bundled skills or frontmatter fields in this range. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.302–v2.1.311) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.302–v2.1.311) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.309, v2.1.304, v2.1.300; no changelog corroboration of removal in last 10 versions (v2.1.302–v2.1.311) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-10-28 10:03 AM PKT] Claude Code v2.1.312
+
+No new drift detected — frontmatter fields (20) and bundled skills (25) are fully synchronized with official docs in v2.1.303–v2.1.312. No new bundled skills or frontmatter fields in this range. Version badge updated v2.1.311 → v2.1.312. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.303–v2.1.312) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.303–v2.1.312) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.312, v2.1.309, v2.1.304; no changelog corroboration of removal in last 10 versions (v2.1.303–v2.1.312) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-10-29 10:04 AM PKT] Claude Code v2.1.312
+
+No drift detected — frontmatter fields (20) and bundled skills (25) are fully synchronized with official docs in v2.1.302–v2.1.312. No new bundled skills or frontmatter fields in this range. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.302–v2.1.312) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.302–v2.1.312) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.312, v2.1.309, v2.1.304; no changelog corroboration of removal in last 10 versions (v2.1.302–v2.1.312) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-10-30 10:05 AM PKT] Claude Code v2.1.314
+
+No new drift detected — frontmatter fields (20) and bundled skills (25 in report vs 20 in official docs) are unchanged from previous run. No new bundled skills or frontmatter fields in v2.1.304–v2.1.314. Version badge updated v2.1.312 → v2.1.314. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; v2.1.314 changelog calls it "a prompt-based command"; no changelog corroboration of removal in last 10 versions (v2.1.304–v2.1.314) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.304–v2.1.314) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.314, v2.1.312, v2.1.309; no changelog corroboration of removal in last 10 versions (v2.1.304–v2.1.314) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-10-31 10:03 AM PKT] Claude Code v2.1.316
+
+No new drift detected — frontmatter fields (20) and bundled skills (25 in report vs 20 in official docs) are unchanged from previous run. No new bundled skills or frontmatter fields in v2.1.305–v2.1.316. Version badge updated v2.1.314 → v2.1.316. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.305–v2.1.316) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.305–v2.1.316) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.316, v2.1.314, v2.1.312; no changelog corroboration of removal in last 10 versions (v2.1.305–v2.1.316) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-11-01 10:04 AM PKT] Claude Code v2.1.316
+
+No new drift detected — frontmatter fields (20) and bundled skills (25 in report vs 20 tagged [Skill] in official docs) are unchanged from previous run. No new bundled skills or frontmatter fields in v2.1.303–v2.1.316. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.303–v2.1.316) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.303–v2.1.316) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.316, v2.1.314, v2.1.312; no changelog corroboration of removal in last 10 versions (v2.1.303–v2.1.316) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |
+
+---
+
+## [2026-11-02 10:03 AM PKT] Claude Code v2.1.316
+
+No new drift detected — frontmatter fields (20) and bundled skills (25 in report vs 20 tagged [Skill] in official docs) are unchanged from previous run. No new bundled skills or frontmatter fields in v2.1.305–v2.1.316. Four recurring ON HOLD removals continue.
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Removed Skill | Remove `review` (row 15) — confirmed alias of `/code-review` since v2.1.223; skills page states "Its alias `/review` is also bundled" confirming alias-only status; row 15 description still describes pre-v2.1.223 standalone fast-single-pass PR review behavior. Count should update 25→24 after removal | ✋ ON HOLD (recurring from 2026-07-30; autonomous run cannot remove without human review) |
+| 2 | MED | Potential Removed Skill | `security-review` (row 16) — official docs state "A few built-in commands are also available through the Skill tool, including `/init` and `/security-review`", classifying it as a built-in command reachable via Skill tool, not a distinct bundled skill; commands reference carries no [Skill] marker; no changelog corroboration of removal in last 10 versions (v2.1.305–v2.1.316) | ✋ ON HOLD (recurring from 2026-07-30; awaiting human review before removing or reclassifying) |
+| 3 | MED | Potential Removed Skill | `skill-doctor` (row 18) — commands reference does not mark it [Skill]; official docs list it as a built-in command requiring v2.1.252+; docs-rendering inconsistency persists across multiple runs; no changelog corroboration of removal in last 10 versions (v2.1.305–v2.1.316) | ✋ ON HOLD (recurring from 2026-09-15; awaiting human review before removing or reclassifying) |
+| 4 | MED | Potential Removed Skill | `plugin-authoring` (row 25) — commands reference does not mark it [Skill]; docs describe it as "a skill from a built-in plugin, which you can turn off in `/plugin`", not a traditional bundled skill; changelog confirms "the built-in `plugin-authoring` skill" in v2.1.316, v2.1.314, v2.1.312; no changelog corroboration of removal in last 10 versions (v2.1.305–v2.1.316) | ✋ ON HOLD (recurring from 2026-10-17; awaiting human review before removing or reclassifying) |

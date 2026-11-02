@@ -1464,3 +1464,87 @@ No priority action items — report is fully in sync with official documentation
 ## [2026-10-26 11:07 AM PKT] Claude Code v2.1.310
 
 No priority action items — report is fully in sync with official documentation (20 frontmatter fields, 94 built-in commands).
+
+---
+
+## [2026-10-27 11:05 AM PKT] Claude Code v2.1.311
+
+No priority action items — report is fully in sync with official documentation (20 frontmatter fields, 94 built-in commands).
+
+---
+
+## [2026-10-28 11:06 AM PKT] Claude Code v2.1.312
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | MED | Changed Description | Update `/plugin [subcommand]` — docs add that Claude Code can activate a plugin during install; install summary says whether it did or whether to run `/reload-plugins` | ✅ COMPLETE (auto-activation note appended to description at #48 in Extensions tag) |
+| 2 | LOW | Changed Description | Update `/setup-bedrock` — docs say "Hidden from the command menu until `CLAUDE_CODE_USE_BEDROCK=1` is set; type it in full" instead of "Only visible when... is set" | ✅ COMPLETE (wording updated and "type it in full" added at #4 in Auth tag) |
+| 3 | LOW | Changed Description | Update `/setup-vertex` — docs say "Hidden from the command menu until `CLAUDE_CODE_USE_VERTEX=1` is set; type it in full" instead of "Only visible when... is set" | ✅ COMPLETE (wording updated and "type it in full" added at #5 in Auth tag) |
+| 4 | LOW | Changed Description | Update `/config` — drop "From v2.1.181," version qualifier (no longer in docs); add `/config thinking=false` as a third example | ✅ COMPLETE (qualifier removed and thinking=false example added at #9 in Config tag) |
+| 5 | LOW | Changed Description | Update `/keybindings` — docs say "Open your keyboard shortcuts file"; report said "Open or create your keybindings configuration file" | ✅ COMPLETE (description updated at #12 in Config tag) |
+| 6 | LOW | Changed Description | Update `/usage-credits` — docs now say "opens billing settings in your browser"; Team/Enterprise non-billing users "confirm in a dialog that the request notifies their admins" (not "from the CLI instead of opening the browser") | ✅ COMPLETE (description reframed at #34 in Context tag) |
+| 7 | LOW | Changed Description | Update `/effort` — add "on v2.1.205 or later" to "Works in `-p`" version qualifier | ✅ COMPLETE (version qualifier added at #55 in Model tag) |
+| 8 | LOW | Changed Description | Update `/fast` — docs add "Availability in non-interactive mode with `-p` is limited." | ✅ COMPLETE (note appended to description at #56 in Model tag) |
+| 9 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring from 2026-10-27 — official docs table not yet updated; defer until docs catch up) |
+
+## [2026-10-29 11:08 AM PKT] Claude Code v2.1.312
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | New Command | Add `/design consent`, `/design revoke` to Auth tag — Grant Claude access to Claude Design (claude.ai/design), or withdraw it; reverses INVALID determinations from 2026-10-22 and 2026-10-25 based on current agent finding that these are standalone built-in commands, not subcommands of the bundled `/design` skill; count updated 94 → 95 | ✅ COMPLETE (added as row #1 in Auth tag; all rows renumbered 1–94 → 2–95) |
+| 2 | MED | Changed Argument | Update `/focus` — revert signature from `/focus [on\|off]` back to plain `/focus`; the `[on\|off]` argument is documented in the description for Remote Control clients only (v2.1.281+), not as a general top-level signature; reverses the signature change applied in the 2026-10-11 run | ✅ COMPLETE (command column updated at row #11 in Config tag; description unchanged) |
+
+---
+
+## [2026-10-30 11:09 AM PKT] Claude Code v2.1.314
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | New Command | Add `/restart` to Session tag — restart Claude Code and resume session to apply update; Alias: `/update`; missing since v2.1.288; count updated 95 → 96 | ✅ COMPLETE (added as #91 in Session tag between `/rename` and `/resume`; downstream rows 91–95 renumbered 92–96; count heading updated to 96) |
+| 2 | MED | Changed Description | Update `/usage-credits` — reworded to "Configure usage credits, or request them from your admin, when you hit a limit"; Team/Enterprise members send a request from the CLI; URL print note now includes v2.1.205 requirement explicitly | ✅ COMPLETE (description updated at #35 in Context tag) |
+| 3 | MED | Changed Description | Update `/terminal-setup` — remove "Only visible in terminals that need it, like" clause; adopt official imperative wording "Install a Shift+Enter keybinding for newlines in VS Code, Cursor…" | ✅ COMPLETE (description updated at #23 in Config tag) |
+| 4 | MED | Changed Description | Update `/effort` — remove "at the current level", historical v2.1.284 notes ("The `on` and `off` arguments… `Invalid argument`"), and the "Before v2.1.242, Claude Code decided from a feature flag…" sentence | ✅ COMPLETE (description trimmed at #56 in Model tag) |
+| 5 | MED | Changed Description | Update `/model` — simplify "Before v2.1.242, Claude Code decided from a feature flag…" to "Before v2.1.242, it could wait." | ✅ COMPLETE (description updated at #58 in Model tag) |
+| 6 | LOW | Changed Description | Update `/advisor` — "Fable 5 access" → "Fable access"; non-interactive scope reworded to "In a session without an interactive terminal, or over Remote Control" | ✅ COMPLETE (description updated at #55 in Model tag) |
+| 7 | LOW | Changed Description | Update `/artifacts` — drop v2.1.208/v2.1.216 version requirements no longer in official docs | ✅ COMPLETE (version qualifiers removed at #78 in Session tag) |
+| 8 | LOW | Changed Description | Update `/design-login` — add "Sign in with `/design-login` whenever `/design-sync` or `/design consent` tells you to"; "closes on" → "closes by December 14, 2026" | ✅ COMPLETE (description updated at #2 in Auth tag) |
+| 9 | LOW | Changed Description | Update `/insights` — reword to "including which projects you work in, how you use Claude Code, where things go wrong, and features to try" per official docs | ✅ COMPLETE (description updated at #30 in Context tag) |
+| 10 | LOW | Changed Description | Update `/bug` — add "When you are signed in on a first-party connection, the report goes to Anthropic" and "a local archive you forward yourself" | ✅ COMPLETE (description updated at #36 in Debug tag) |
+| 11 | LOW | Changed Description | Update `/fork` — add "except when the copy edits in place" to worktree instruction | ✅ COMPLETE (description updated at #86 in Session tag) |
+| 12 | LOW | Changed Description | Update `/skills` — add "to Claude and the `/` menu" to cycling text; add `--settings` flag to exclusion list | ✅ COMPLETE (description updated at #53 in Extensions tag) |
+| 13 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-10-31 11:05 AM PKT] Claude Code v2.1.316
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | MED | Changed Description | Add "Ultra" plan tier to `/privacy-settings` — docs now say "Pro, Max, and Ultra plan subscribers" | ✅ COMPLETE (updated at #17 in Config tag) |
+| 2 | MED | Changed Description | Add "Ultra" plan tier to `/usage` — docs now say "Pro, Max, Ultra, Team, or Enterprise plan" | ✅ COMPLETE (updated at #34 in Context tag) |
+| 3 | MED | Changed Description | Add "Ultra" plan tier to `/restart` — docs now say "Pro, Max, or Ultra plan" | ✅ COMPLETE (updated at #91 in Session tag) |
+| 4 | MED | Changed Description | Add "Ultra" plan tier to `/auto-mode-setup` — docs now say "Pro, Max, Ultra, and Team plans" | ✅ COMPLETE (updated at #8 in Config tag) |
+| 5 | MED | Changed Description | Update `/effort` — docs add `(requires v2.1.284 or later)` qualifier to the `ultracode on`/`ultracode off` arguments | ✅ COMPLETE (qualifier added at #56 in Model tag) |
+| 6 | MED | Changed Description | Update `/install-github-app` — docs add "Walks you through selecting a repo and configuring the integration" | ✅ COMPLETE (added walkthrough sentence at #70 in Remote tag) |
+| 7 | MED | Changed Description | Update `/team-onboarding` — docs add "a teammate can paste as a first message to get set up quickly" | ✅ COMPLETE (added paste-detail at #66 in Project tag) |
+| 8 | LOW | Changed Description | Update `/clear` — docs clarify that restoring from the rewind menu works "in the same Claude Code process, via the previous-session entry" | ✅ COMPLETE (clarification added at #83 in Session tag) |
+| 9 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-01 11:05 AM PKT] Claude Code v2.1.316
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | MED | Changed Description | Update `/ultrareview` — docs now say "Includes 3 free runs on Pro, Max, and Ultra"; report still said "Pro and Max" | ✅ COMPLETE (added "Ultra" to free-runs list at #67 in Project tag) |
+| 2 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-02 11:07 AM PKT] Claude Code v2.1.316
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 1 → Nov 2, 2026._
