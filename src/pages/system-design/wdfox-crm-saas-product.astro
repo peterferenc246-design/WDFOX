@@ -1,0 +1,47 @@
+---
+const title = 'WDFOX CRM SaaS – produkt na predaj | Architektúra';
+const modules = [
+{ title: '1. CRM jadro', priority: 'MVP', description: 'Kontakty a organizácie, leady, obchodné príležitosti, fázy obchodného procesu, úlohy, poznámky, história aktivít, vyhľadávanie a export.' },
+{ title: '2. AI Meeting Terminal', priority: 'MVP / integrácia', description: 'Zjednotená história zákazníckej komunikácie z vlastného webového chatu. Preklad a audio podľa pripravenosti samostatných modulov.' },
+{ title: '3. WDFOX Agent Builder + n8n', priority: 'Etapa 2', description: 'Asistenti navrhujú odpovede, sumarizujú konverzácie a pripravujú následné kroky. Vykonanie citlivých operácií až po kontrole a schválení.' },
+{ title: '4. Komerčná SaaS vrstva', priority: 'Pred predajom', description: 'Organizácie, používatelia, RBAC, onboarding, predplatné, fakturácia, limity a meranie spotreby AI/API.' },
+{ title: '5. Integrácie a API', priority: 'Postupne', description: 'E-mail, kalendár, n8n, oficiálne WhatsApp Business API a ďalšie autorizované konektory podľa potrieb zákazníkov.' }
+];
+const stages = [
+{ id: '01', title: 'Interné MVP', text: 'Postaviť databázový model, zabezpečené API, prihlásenie a dashboard kontaktov, leadov, obchodných príležitostí a úloh. Najprv iba interné údaje WebDesignFOX.' },
+{ id: '02', title: 'AI a komunikačné prepojenie', text: 'Otestovať prepojenie s AI Meeting Terminalom, sumarizáciu konverzácie a návrh odpovede. Pred zápisom alebo odoslaním potvrdenie používateľa.' },
+{ id: '03', title: 'Súkromná beta', text: 'Oddelené organizácie, roly, audit a automatické testy tenant izolácie. Pilot s dobrovoľnými testovacími zákazníkmi a spätnou väzbou.' },
+{ id: '04', title: 'Produkt na predaj', text: 'Zmluvné podmienky, GDPR dokumentácia a zmluvy so sprostredkovateľmi, backup/recovery, monitoring, fakturácia, licencie, onboarding a zákaznícka podpora.' }
+];
+---
+<!doctype html><html lang="sk"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{title}</title>
+<meta name="description" content="WDFOX CRM SaaS: plán vlastného komerčného CRM produktu pre firmy, prepojeného s AI Meeting Terminalom, agentmi a n8n."/>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0a1520;color:#eff7fd;font:16px/1.62 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:1000px;margin:0 auto;padding:30px 18px 80px}h1{font-size:clamp(1.85rem,5vw,2.8rem);line-height:1.2;color:#90f0cb}h2{color:#a4dcff;font-size:1.3rem;margin-top:0}h3{font-size:1.08rem;margin:0 0 5px;color:#fff}a{color:#9deed1}section{background:#102536;border:1px solid #344f64;border-radius:15px;padding:18px;margin:18px 0}.tag{color:#ffb5c9;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:13px}.grid section{margin:0}.steps{display:flex;align-items:stretch;flex-wrap:wrap;gap:9px}.step{flex:1;min-width:160px;background:#0b3140;border:1px solid #4a8d9a;border-radius:11px;padding:12px;text-align:center;font-weight:700}.arrow{color:#8ee9ca;align-self:center}.muted{color:#b5c3cc}.priority{font-size:.77rem;color:#8fe9c4;letter-spacing:.04em;text-transform:uppercase;font-weight:800}li{margin:7px 0}.upload{display:inline-block;border-radius:10px;border:1px solid #74bca6;padding:10px 14px;text-decoration:none;font-weight:700}code{color:#b8e2ff}.notice{border-left:4px solid #f6b56a;padding-left:12px}.pill{display:inline-block;border:1px solid #4b7a86;border-radius:999px;padding:3px 9px;font-size:.83rem;margin:4px 3px}
+</style>
+</head><body><main>
+<a href="/system-design">← Späť na architektonickú mapu WDFOX</a>
+<h1>💼 WDFOX CRM SaaS – vlastný systém na predaj</h1>
+<p class="tag">❤️ 10/10 · Priorita P1 · komerčný produktový plán – zatiaľ nie hotový softvér</p>
+<p><strong>Cieľ:</strong> vytvoriť a vlastniť predajný systém CRM pre menšie a stredné firmy, ktorý kombinuje riadenie zákazníkov, obchodný proces, viacjazyčný AI Meeting Terminal a bezpečných AI agentov. Predaj môže prebiehať formou licencovaného SaaS; neskôr zvážiť samostatnú inštaláciu pre väčších zákazníkov.</p>
+<section><h2>Čo bude WDFOX CRM ponúkať?</h2><div class="grid">{modules.map(m=><section><p class="priority">{m.priority}</p><h3>{m.title}</h3><p>{m.description}</p></section>)}</div></section>
+<section><h2>Technická architektúra produktu</h2>
+<div class="steps"><div class="step">🌐 Astro + React + TypeScript<br/>CRM administrácia a zákaznícky portál</div><span class="arrow">→</span><div class="step">🔐 Autentifikované serverové API<br/>RBAC a audit</div><span class="arrow">→</span><div class="step">🗄️ PostgreSQL<br/>Organizácie, používatelia, kontakty, obchodné prípady</div></div>
+<div class="steps" style="margin-top:10px"><div class="step">💬 AI Meeting Terminal<br/>Chat, správy a stretnutia</div><span class="arrow">↔</span><div class="step">🤖 WDFOX Agent Builder + n8n<br/>Schvaľované automatizácie</div><span class="arrow">↔</span><div class="step">🔌 Externé API / MCP<br/>E-mail, kalendár, oficiálne konektory</div></div>
+<p class="muted">Tieto vrstvy predstavujú zamýšľaný produkt, nie potvrdené funkčné produkčné nasadenie.</p>
+<ul><li>Identita a autorizácia musia byť kontrolované <strong>na serveri</strong>, nielen v React UI. CORS nenahrádza prihlasovanie.</li><li>Každý databázový dopyt musí byť obmedzený na organizáciu zákazníka; testovať úniky dát medzi tenantmi.</li><li>Šifrovanie prenosu, správa tajomstiev, právo na export/výmaz dát, zálohy, monitoring a obnoviteľnosť.</li><li>AI agenti nesmú automaticky odosielať, mazať, účtovať alebo meniť záznamy mimo udelených oprávnení a pravidiel schvaľovania.</li></ul></section>
+<section><h2>Etapy vývoja až po predaj</h2><div class="grid">{stages.map(stage=><section><p class="priority">ETAPA {stage.id}</p><h3>{stage.title}</h3><p>{stage.text}</p></section>)}</div></section>
+<section><h2>Obchodný model a produktové varianty</h2>
+<ul><li><strong>Starter:</strong> kontakty, leady, obchodná tabuľa a jednoduché úlohy.</li><li><strong>Business:</strong> tímová spolupráca, reporty, automatizácie a integrácia komunikátora.</li><li><strong>AI:</strong> agenti, návrhy odpovedí, sumarizácie a meraná spotreba modelových volaní.</li></ul>
+<p>Ide o možné varianty, nie o schválený cenník ani garantované funkcie. Pred cenotvorbou treba spočítať hosting, databázu, API/LLM náklady, zákaznícku podporu, dané limity a predpokladané využitie.</p>
+<p>Možná konkurenčná výhoda: lokalizácia a viacjazyčná komunikácia s AI, vlastný terminál a modulárne prepojenia bez potreby rozsiahlej enterprise implementácie.</p></section>
+<section><h2>Vzťah k existujúcim modulom WDFOX</h2>
+<ul><li><a href="/system-design/jarvis-crm">Jarvis CRM</a> – návrh hlasového asistenta a automatizácií CRM.</li><li><a href="/system-design/crm-vs-cms">CRM vs CMS</a> – oddelenie obchodných dát od správy obsahu webu.</li><li><a href="/system-design/wdfox-ai-agent-builder-hubspot-breeze">WDFOX AI Agent Builder</a> – návrhy vlastných AI agentov z textového zadania.</li><li><a href="/system-design/whatsapp-n8n-ai-agent-multichannel-terminal">WhatsApp + n8n agent</a> – budúci doplnkový komunikačný kanál.</li></ul></section>
+<section><h2>Referencia z Microsoft Dynamics 365 CRM</h2>
+<p>Priložený obrázok je reklamou spoločnosti COSMO CONSULT na webinár „What's New in Microsoft Dynamics 365 CRM?“ s dátumom 21. októbra 2026. Neukazuje funkčné zadanie, databázový model ani cenník. Slúži len ako <strong>trhová referencia</strong> existencie rozsiahlych CRM platforiem, nie ako licencia alebo implementačný návod.</p>
+<p class="notice">WDFOX CRM vyvíjame ako vlastnú aplikáciu. Nekopírujeme dizajn, zdrojový kód, obchodnú značku ani licencované komponenty Microsoft Dynamics 365.</p>
+<p class="muted">Originálny screenshot <code>Screenshot_20261107-204040_Facebook.jpg</code> ešte nie je nahratý do vetvy <code>preview</code>. Po nahratí ho pripojíme do galérie a katalógu.</p>
+<p><a class="upload" href="https://github.com/peterferenc246-design/WDFOX/upload/preview/public/system-design" target="_blank" rel="noopener noreferrer">Nahrať referenčný obrázok do GitHubu</a></p></section>
+</main></body></html>
