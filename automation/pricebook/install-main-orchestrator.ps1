@@ -13,6 +13,12 @@ $items = @(Get-Content -Raw -Encoding UTF8 (Join-Path $backupDir 'pricing-origin
 $matches = @($items | Where-Object { $_.id -eq $pricingId })
 if ($matches.Count -ne 1) { throw 'Expected one existing pricing workflow.' }
 $pricing = $matches[0]
+# Windows PowerShell 5.1 can retain an outer JSON array in pipeline output.
+while ($pricing -is [System.Array]) {
+    if ($pricing.Count -ne 1) { throw 'Expected exactly one workflow in export.' }
+    $pricing = $pricing[0]
+}
+if (-not $pricing.PSObject.Properties['nodes']) { throw 'Export has no workflow nodes.' }
 if ($pricing.name -notmatch '^50[.,]2') { throw 'Expected renamed 50.2 pricing workflow. No changes made.' }
 if ($pricing.active) { throw 'Pricing workflow is active. This installer expects an unpublished TEST workflow.' }
 $reqNodes = @($pricing.nodes | Where-Object { $_.name -eq 'Test Request' -and $_.type -eq 'n8n-nodes-base.code' })
