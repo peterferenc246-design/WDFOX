@@ -1,0 +1,9 @@
+const raw=$input.first()?.json||{};
+const incoming=typeof raw.instruction==='string'&&raw.instruction.trim().length>0;
+if(Object.keys(raw).length&&!incoming)throw new Error('Missing pricing instruction');
+if(incoming&&raw.environment!=='TEST')throw new Error('Only TEST input allowed');
+const instruction=incoming?raw.instruction.trim():'Pridaj navigáciu medzi dokumentmi na stránke Jobcenter: jeden zoznam najviac 10 odkazov na sekcie.';
+const quantity=incoming?raw.quantity:1;
+const request_id=incoming?String(raw.request_id||''):'test-'+$execution.id;
+if(!instruction||instruction.length>4000||!Number.isSafeInteger(quantity)||quantity<1||quantity>100||!/^[-A-Za-z0-9_.]{3,100}$/.test(request_id))throw new Error('Invalid request');
+return [{json:{request_id,instruction,quantity,environment:'TEST',pricebook_version:'TEST-2026-11-v1',model:'text-embedding-3-small',dimensions:1536,score_threshold:0.55,score_margin:0.08}}];
