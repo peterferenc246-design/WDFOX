@@ -1,0 +1,269 @@
+{
+  "id": "wdfox50main00001",
+  "name": "50.0 — WDFOX TEST Main Orchestrator v1",
+  "active": false,
+  "nodes": [
+    {
+      "id": "ac7d1b8f-614f-531f-9e69-728fd4b672f9",
+      "name": "Manual TEST Order",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ae4e8140-25e0-5724-b520-b42994751cf5",
+      "name": "Receive TEST Order",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        480
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "18791796-69be-55a1-a182-9a1d81adceba",
+      "name": "Validate TEST Order",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const raw=$input.first()?.json||{};\nconst fixture=Object.keys(raw).length===0;\nconst instruction=String(fixture?'Pridaj navigáciu medzi dokumentmi na stránke Jobcenter: jeden zoznam najviac 10 odkazov na sekcie.':raw.instruction||'').trim();\nconst quantity=fixture?1:raw.quantity;\nconst request_id=fixture?'test-order-'+$execution.id:String(raw.request_id||'');\nif(!instruction||instruction.length>4000||!Number.isSafeInteger(quantity)||quantity<1||quantity>100||!/^[-A-Za-z0-9_.]{3,100}$/.test(request_id)) throw new Error('Invalid TEST request: provide request_id, instruction and integer quantity');\nif(!fixture&&raw.environment!=='TEST')throw new Error('Only TEST requests allowed');\n// Single trusted internal test identity. No public webhook or customer-supplied tenant.\nreturn [{json:{request_id,client_id:'test-owner',site_url:'https://www.foxprof.club/jobcenter/',instruction,quantity,environment:'TEST',pricebook_version:'TEST-2026-11-v1'}}];"
+      }
+    },
+    {
+      "id": "e79b7b93-461c-5b02-b377-f966b1ab15a2",
+      "name": "Ensure TEST Request Table",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE SCHEMA IF NOT EXISTS wdfox_test;\nCREATE TABLE IF NOT EXISTS wdfox_test.client_requests (\n request_id text PRIMARY KEY,client_id text NOT NULL,site_url text NOT NULL,\n instruction text NOT NULL,quantity integer NOT NULL CHECK(quantity>0),\n environment text NOT NULL CHECK(environment='TEST'),pricebook_version text NOT NULL,\n status text NOT NULL DEFAULT 'RECEIVED',quote_report jsonb,\n created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now()\n);",
+        "options": {}
+      }
+    },
+    {
+      "id": "0faf1f64-1839-5fdd-9d6b-91336974afa2",
+      "name": "Store TEST Order",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH inserted AS (\n INSERT INTO wdfox_test.client_requests (request_id,client_id,site_url,instruction,quantity,environment,pricebook_version)\n VALUES ($1,$2,$3,$4,$5,'TEST',$6) ON CONFLICT (request_id) DO NOTHING RETURNING *\n)\nSELECT * FROM inserted UNION ALL\nSELECT * FROM wdfox_test.client_requests WHERE request_id=$1 AND NOT EXISTS(SELECT 1 FROM inserted);",
+        "options": {
+          "queryReplacement": "={{ [ $('Validate TEST Order').first().json.request_id, $('Validate TEST Order').first().json.client_id, $('Validate TEST Order').first().json.site_url, $('Validate TEST Order').first().json.instruction, $('Validate TEST Order').first().json.quantity, $('Validate TEST Order').first().json.pricebook_version ] }}"
+        }
+      }
+    },
+    {
+      "id": "9f5a23da-f6f3-548b-b943-20f12933496d",
+      "name": "Check Request Identity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const expected=$('Validate TEST Order').first().json;\nfor(const key of ['request_id','client_id','site_url','instruction','quantity','environment','pricebook_version'])if($json[key]!==expected[key])throw new Error('Existing request_id belongs to a different request; use a new ID');\nreturn [{json:expected}];"
+      }
+    },
+    {
+      "id": "75badf6a-5d84-5ad0-aa28-4c4941314af3",
+      "name": "Run 50.2 Pricing",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": "wdfox50ragquote01",
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "c657f555-7f67-5799-82ce-99aee35bcd14",
+      "name": "Validate Price Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const req=$('Validate TEST Order').first().json;\nconst r=$json;\nif(r.request_id!==req.request_id||r.instruction!==req.instruction||r.environment!=='TEST'||r.pricebook_version!==req.pricebook_version||r.billing_enabled!==false||r.customer_approved!==false||r.production_touched!==false||!['TEST_QUOTE_DRAFT','NEEDS_CLARIFICATION','PRICE_NOT_AVAILABLE'].includes(r.status))throw new Error('Unexpected price report');\nif(r.status==='TEST_QUOTE_DRAFT'&&(r.quantity!==req.quantity||!Number.isSafeInteger(r.total_excl_vat_cents)||r.total_excl_vat_cents<=0||r.payable_total_cents!==null))throw new Error('Invalid draft amount');\nreturn [{json:{request_id:req.request_id,client_id:req.client_id,status:r.status==='TEST_QUOTE_DRAFT'?'DRAFT_REQUIRES_SCOPE_REVIEW':r.status,report:r}}];"
+      }
+    },
+    {
+      "id": "9d368aac-d51b-5a5a-a8b0-0448bfb91824",
+      "name": "Save Price Draft",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE wdfox_test.client_requests SET status=$3,quote_report=$4::jsonb,updated_at=now() WHERE request_id=$1 AND client_id=$2 AND environment='TEST' AND status IN ('RECEIVED','DRAFT_REQUIRES_SCOPE_REVIEW','NEEDS_CLARIFICATION','PRICE_NOT_AVAILABLE') RETURNING request_id,client_id,site_url,status,quote_report,created_at,updated_at;",
+        "options": {
+          "queryReplacement": "={{ [ $json.request_id, $json.client_id, $json.status, JSON.stringify($json.report) ] }}"
+        }
+      }
+    },
+    {
+      "id": "d2210f70-549d-57fa-9f3a-8db7e3445c73",
+      "name": "Order Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        300
+      ],
+      "parameters": {
+        "jsCode": "if(!$json.request_id||!$json.quote_report)throw new Error('Request was not persisted');\nreturn [{json:{ok:true,...$json,billing_enabled:false,production_touched:false,customer_approved:false,next_action:$json.status==='DRAFT_REQUIRES_SCOPE_REVIEW'?'Review service scope, then present versioned draft for customer approval. Approval UI is not yet connected.':'Clarify or review the pricing result.',implemented_stage:'Intake, RAG pricing and persisted TEST draft only'}}];"
+      }
+    },
+    {
+      "id": "ab640901-c352-5705-aaea-d5e49d63a343",
+      "name": "SETUP — 50.0 TEST",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -50
+      ],
+      "parameters": {
+        "width": 1000,
+        "height": 280,
+        "content": "## 50.0 — Main orchestrator (TEST prototype)\nSelect SAME Postgres credential in all 3 PostgreSQL nodes. Run 50.2 Pricing points to existing workflow ID wdfox50ragquote01. 50.2 requires the Receive Pricing Request trigger and dynamic Test Request patch installed by setup script.\nManual trigger uses one navigation sample; internal trigger requires request_id, instruction, quantity, environment=TEST. No public webhook. No caller-controlled tenant; this pilot supports only test-owner / Jobcenter.\nOrders and quote snapshots persist in wdfox_test.client_requests. Request ID cannot be reused with changed contents. Re-pricing is allowed only for draft states.\nNo site edits, approval recording, invoices, payments or deployments implemented yet. No need to publish. Check Order Report and stored draft before adding next stages."
+      }
+    }
+  ],
+  "connections": {
+    "Manual TEST Order": {
+      "main": [
+        [
+          {
+            "node": "Validate TEST Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive TEST Order": {
+      "main": [
+        [
+          {
+            "node": "Validate TEST Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate TEST Order": {
+      "main": [
+        [
+          {
+            "node": "Ensure TEST Request Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure TEST Request Table": {
+      "main": [
+        [
+          {
+            "node": "Store TEST Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store TEST Order": {
+      "main": [
+        [
+          {
+            "node": "Check Request Identity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Request Identity": {
+      "main": [
+        [
+          {
+            "node": "Run 50.2 Pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run 50.2 Pricing": {
+      "main": [
+        [
+          {
+            "node": "Validate Price Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Price Report": {
+      "main": [
+        [
+          {
+            "node": "Save Price Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Price Draft": {
+      "main": [
+        [
+          {
+            "node": "Order Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
