@@ -1,14 +1,18 @@
+param([string]$ExistingPricingBackup)
 $ErrorActionPreference = 'Stop'
 $pricingId = 'wdfox50ragquote01'
 $backupDir = Join-Path 'D:\AI\backups' ('orchestrator-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
 
-# Export current 50.2 before modifying it. This export preserves credential references,
-# not decrypted credential secrets; any inline values remain local in the backup.
-docker exec n8n n8n export:workflow "--id=$pricingId" --output=/tmp/wdfox-pricing-backup.json
-if ($LASTEXITCODE -ne 0) { throw 'Pricing workflow export failed. No changes made.' }
-docker cp n8n:/tmp/wdfox-pricing-backup.json (Join-Path $backupDir 'pricing-original.json')
-if ($LASTEXITCODE -ne 0) { throw 'Backup copy failed. No changes made.' }
+if ($ExistingPricingBackup) {
+    if (-not (Test-Path -LiteralPath $ExistingPricingBackup -PathType Leaf)) { throw 'Existing backup file not found.' }
+    Copy-Item -LiteralPath $ExistingPricingBackup -Destination (Join-Path $backupDir 'pricing-original.json')
+} else {
+    docker exec n8n n8n export:workflow "--id=$pricingId" --output=/tmp/wdfox-pricing-backup.json
+    if ($LASTEXITCODE -ne 0) { throw 'Export command failed. No changes made; check whether export file exists.' }
+    docker cp n8n:/tmp/wdfox-pricing-backup.json (Join-Path $backupDir 'pricing-original.json')
+    if ($LASTEXITCODE -ne 0) { throw 'Backup copy failed. No changes made.' }
+}
 $items = @(Get-Content -Raw -Encoding UTF8 (Join-Path $backupDir 'pricing-original.json') | ConvertFrom-Json)
 $matches = @($items | Where-Object { $_.id -eq $pricingId })
 if ($matches.Count -ne 1) { throw 'Expected one existing pricing workflow.' }
