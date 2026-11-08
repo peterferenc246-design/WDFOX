@@ -1,0 +1,39 @@
+---
+const title = "WDFOX AI Development Orchestrator – 3 roly a kontrola vývoja";
+const roles = [
+{title:"1. Hlavný vývojár",label:"WRITE",description:"Pochopí požiadavku, navrhne plán, upraví iba potrebné súbory a pripraví čitateľný diff. V ilustrácii túto úlohu hrá Sonnet."},
+{title:"2. Paralelní pomocníci",label:"SEARCH / GREP / TESTS",description:"Samostatne mapujú repozitár, hľadajú miesta použitia a spúšťajú relevantné testy. V ilustrácii sú označení Haiku."},
+{title:"3. Nezávislý reviewer",label:"VERIFY",description:"Pred začatím overí plán a na konci preskúma diff, testy a riziká. Pri opakovanom zlyhaní zastaví nekonečné skúšanie. V ilustrácii je to Opus."}
+];
+const pipeline = [
+{n:"01",name:"Plán",text:"Identifikovať súbory, očakávané správanie, riziká a spôsob overenia."},
+{n:"02",name:"Analýza paralelne",text:"Čítanie repozitára, referencií a testov v oddelených úlohách bez zbytočných zápisov."},
+{n:"03",name:"Implementácia",text:"Malý, vysvetliteľný patch iba vo vetve preview; žiadny priamy zásah do main."},
+{n:"04",name:"Kontroly",text:"Kontrola typov, build, testy, diff review a bezpečnosť; pri opakovanej rovnakej chybe zastaviť cyklus."},
+{n:"05",name:"Preview + schválenie",text:"Zistiť stav nasadenia Vercel a overiť UI aj na mobile. V prípade produkčného nasadenia vyžiadať schválenie."},
+{n:"06",name:"Dokumentácia",text:"Zhrnúť commity, súbory, výsledky testov, zostávajúce riziká; prípadne zapísať do OneNote."}
+];
+---
+<!doctype html><html lang="sk"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>{title}</title>
+<meta name="description" content="Architektonický návrh AI Development Orchestratora pre WDFOX: tri agentné roly, paralelné kontroly, GitHub preview, code review a testy."/>
+<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#08131d;color:#f0f7ff;font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:980px;margin:auto;padding:30px 18px 80px}h1{color:#82f0d1;font-size:clamp(1.7rem,5vw,2.7rem);line-height:1.22}h2{color:#a9e1ff;font-size:1.27rem;margin-top:0}h3{font-size:1.12rem;margin:0 0 7px;color:#e8f6ff}a{color:#8bead3}section{background:#102530;border:1px solid #355366;padding:19px;border-radius:16px;margin:18px 0}li{margin:8px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:13px}.grid section{margin:0}.status{color:#ffb1d0;font-weight:850}.meta{color:#a7b7c7}.role{font-size:.8rem;color:#91ead3;font-weight:800;letter-spacing:.045em}.number{font-weight:850;color:#9de8d6}.upload{display:inline-block;padding:10px 14px;border:1px solid #7ae2c5;border-radius:10px;text-decoration:none;font-weight:700}code{color:#abedcc}.notes{border-left:3px solid #f3bb72;padding-left:13px}.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.step{padding:9px 13px;background:#0b3040;border:1px solid #3b859a;border-radius:10px;font-weight:750}.arrow{color:#92e9d1}
+</style></head><body><main>
+<a href="/system-design">← Architektonická mapa WDFOX</a>
+<h1>🧪 AI Development Orchestrator – tri modelové roly</h1>
+<p class="status">❤️ 10/10 · Priorita P1 · návrh vývojovej automatizácie, nie potvrdené nasadenie</p>
+<p>Ukážka „Claude Code · 3 Models“ predstavuje rozdelenie softvérového vývoja na hlavnú pracovnú reláciu, menších paralelných pomocníkov a nezávislého reviewera. Konkrétne označenia modelov <strong>Sonnet 5.5, Haiku 5.5 a Opus 5.5</strong>, ani percentá a počty behu v animácii, nepovažujeme bez ďalšieho overenia za faktický výsledok alebo potvrdenú ponuku modelov.</p>
+<section><h2>Tri roly v jednej úlohe</h2><div class="grid">{roles.map(role=><section><p class="role">{role.label}</p><h3>{role.title}</h3><p>{role.description}</p></section>)}</div></section>
+<section><h2>Kontrolný tok pre repozitár WDFOX</h2><div class="flow"><div class="step">Zadanie</div><span class="arrow">→</span><div class="step">Plán</div><span class="arrow">→</span><div class="step">Paralelná analýza</div><span class="arrow">→</span><div class="step">Úprava kódu</div><span class="arrow">→</span><div class="step">Build + testy</div><span class="arrow">→</span><div class="step">Review</div><span class="arrow">→</span><div class="step">Vercel preview</div></div>
+<p>Kontrolór porovná výsledok so zadaním a s pôvodným plánom. Pri rovnakom zlyhaní opakovanom dvakrát v pilotnom nastavení pozastaví ďalšie pokusy, uloží dôkazy a požiada o nový plán alebo ľudské rozhodnutie. Hodnota dva je návrh politiky, nie univerzálne pravidlo.</p>
+<div class="grid">{pipeline.map(stage=><section><p class="role">ETAPA {stage.n}</p><h3>{stage.name}</h3><p>{stage.text}</p></section>)}</div></section>
+<section><h2>Bezpečnostné a prevádzkové pravidlá</h2><ul>
+<li>Žiadny automatický zápis do vetvy <code>main</code> ani schválenie produkčného nasadenia bez používateľa.</li>
+<li>Agenti potrebujú obmedzené GitHub oprávnenia, chránené tajomstvá a audit jednotlivých nástrojových volaní.</li>
+<li>Review musí byť nezávislá kontrola, nie slepé potvrdzovanie výstupu autora.</li>
+<li>Výsledok <code>npm run build</code>, typové kontroly, testy a stav Vercel sa musia skutočne vykonať a overiť; nesmú sa iba deklarovať.</li>
+<li>Paralelizácia má zmysel pri zložitejších úlohách, kde úspora času prevýši náklady na viaceré modelové volania.</li>
+</ul></section>
+<section><h2>Vzťah k WDFOX</h2><p>Tento orchestrátor môže pomôcť pri vývoji CRM SaaS, AI Meeting Terminalu, Agent Buildera a viacjazyčných integrácií. V budúcnosti ho možno spojiť s GitHub workflow, n8n a dokumentačným agentom OneNote, ale bez samostatného overenia nepredpokladáme, že tieto integrácie sú už funkčné.</p><p><a href="/system-design/claude-code-best-practice">Súvisiaca kapitola: Claude Code Best Practice</a> · <a href="/system-design/wdfox-crm-saas-product">WDFOX CRM SaaS</a> · <a href="/system-design/wdfox-ai-agent-builder-hubspot-breeze">WDFOX Agent Builder</a></p></section>
+<section><h2>Referenčná animácia</h2><p class="meta">Originálny GIF <code>SmartSelect_20261108-220548_Facebook.gif</code> zatiaľ nie je v GitHube. Po nahratí ho pripojíme sem, do vyhľadávateľného katalógu a do galérie mapy.</p><p><a class="upload" href="https://github.com/peterferenc246-design/WDFOX/upload/preview/public/system-design" target="_blank" rel="noopener noreferrer">Nahrať GIF do GitHubu (preview)</a></p><p><a href="https://www.facebook.com/share/v/1KmmxmWq6k/" target="_blank" rel="noopener noreferrer">Pôvodné video na Facebooku</a></p></section>
+</main></body></html>
