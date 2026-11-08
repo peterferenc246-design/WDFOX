@@ -1,0 +1,361 @@
+{
+  "name": "50.0 — WDFOX TEST Pricebook RAG Import v1",
+  "nodes": [
+    {
+      "id": "8cf89abb-e614-5e77-969b-4d20f1f347cd",
+      "name": "Manual TEST Import",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "077e5a76-bd30-52a6-8783-720df6b83759",
+      "name": "Store TEST Pricebook",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "BEGIN;\nCREATE SCHEMA IF NOT EXISTS wdfox_test;\nCREATE TABLE IF NOT EXISTS wdfox_test.pricebook_items (\n pricebook_version text NOT NULL, service_code text NOT NULL, point_id uuid NOT NULL UNIQUE,\n title text NOT NULL, description text NOT NULL,\n unit_price_cents integer NOT NULL CHECK(unit_price_cents > 0),\n currency text NOT NULL DEFAULT 'EUR' CHECK(currency='EUR'),\n environment text NOT NULL DEFAULT 'TEST' CHECK(environment='TEST'),\n minimum_order_cents integer NOT NULL DEFAULT 1500,\n tax_mode text NOT NULL DEFAULT 'NOT_CONFIGURED',\n embedding_model text NOT NULL DEFAULT 'text-embedding-3-small',\n embedding_dimensions integer NOT NULL DEFAULT 1536,\n indexed_at timestamptz,\n PRIMARY KEY(pricebook_version,service_code)\n);\nINSERT INTO wdfox_test.pricebook_items\n (pricebook_version,service_code,point_id,title,description,unit_price_cents)\n VALUES ('TEST-2026-11-v1','TXT-01','8a92fe91-971f-56ab-8534-8375d9ca2527'::uuid,'Úprava dodaného textu','Jeden blok do 500 slov, bez zmeny rozloženia. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',1500),\n('TEST-2026-11-v1','IMG-01','3e8659d2-89d6-540c-8bd7-a16cc94d7f0e'::uuid,'Výmena obrázka','Jeden dodaný obrázok vrátane optimalizácie a alternatívneho textu. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',1000),\n('TEST-2026-11-v1','DOC-01','9ab00369-d085-5bb0-849d-64d858c344ab'::uuid,'Pridanie dokumentu','Jedno dodané PDF, odkaz a popis do 100 slov. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',1200),\n('TEST-2026-11-v1','LINK-01','1c3a0c6a-09e8-5717-9ab2-a0b798c0df38'::uuid,'Úprava odkazu alebo tlačidla','Jeden prvok, cieľová adresa a popis. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',800),\n('TEST-2026-11-v1','STYLE-01','0bc095e1-c3ab-5caf-91ac-c9477a1eaed4'::uuid,'Drobná vizuálna úprava','Jedna existujúca sekcia: farby, písmo alebo medzery. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',2500),\n('TEST-2026-11-v1','NAV-01','ff5db697-e54c-5a4d-8e2f-7879c109ac46'::uuid,'Navigácia v rámci stránky','Jeden zoznam najviac 10 odkazov na sekcie. Napríklad navigácia medzi správami a dokumentmi Jobcenter. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',4500),\n('TEST-2026-11-v1','SECTION-01','dc2d9061-74ad-5a5c-9418-6c166a69a8a6'::uuid,'Nová jednoduchá sekcia','Do 500 slov a jeden obrázok, bez formulára a API. Vloženie textu a obrázka je zahrnuté, neúčtuje sa druhýkrát. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',5500),\n('TEST-2026-11-v1','MOBILE-01','905d5ff8-0291-518c-8dfc-66d5c2416e67'::uuid,'Oprava mobilného zobrazenia','Jedna konkrétna chyba v existujúcej sekcii. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',3500),\n('TEST-2026-11-v1','SEO-01','ba5b21bb-c350-5e65-9aed-13d2726cf84c'::uuid,'Základné SEO metadáta','Titulok a meta popis jednej stránky. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',1500),\n('TEST-2026-11-v1','DEV-01','e13807cd-b420-54fd-a484-8abb3062b33e'::uuid,'Individuálna programátorská práca','30 minút práce podľa vopred schváleného odhadu. Vyžaduje maximálny schválený počet jednotiek. Zahŕňa prípravu na TEST, kontrolu, náhľad a jedno kolo pripomienok v pôvodnom rozsahu. Oprava chyby spôsobenej úpravou sa neúčtuje navyše. Iba testovanie, bez skutočného účtovania. Pri nejasnom rozsahu vyžiadať spresnenie.',2500)\nON CONFLICT (pricebook_version,service_code) DO NOTHING;\nCOMMIT;\nSELECT * FROM wdfox_test.pricebook_items\n WHERE pricebook_version='TEST-2026-11-v1' AND environment='TEST'\n ORDER BY service_code;",
+        "options": {}
+      }
+    },
+    {
+      "id": "a8c66eca-dd3c-592b-9f02-134f071d2525",
+      "name": "Prepare Documents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i=>i.json).filter(r=>r.service_code);\nif(rows.length!==10 || new Set(rows.map(r=>r.service_code)).size!==10) throw new Error('Expected exactly 10 services');\nfor(const r of rows) if(r.environment!=='TEST'||r.pricebook_version!=='TEST-2026-11-v1'||r.embedding_dimensions!==1536||r.embedding_model!=='text-embedding-3-small') throw new Error('Invalid pricebook configuration');\nreturn [{json:{rows, model:'text-embedding-3-small', dimensions:1536,input:rows.map(r=>r.service_code+' — '+r.title+'\\n'+r.description)}}];"
+      }
+    },
+    {
+      "id": "898d73c7-1021-5be9-89c9-c6f7b2b8fd4d",
+      "name": "Embed Pricebook Descriptions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:$json.model,dimensions:$json.dimensions,input:$json.input}) }}",
+        "options": {
+          "timeout": 120000
+        }
+      }
+    },
+    {
+      "id": "c62c7b21-e092-5a7a-913d-ab6e9eb0555f",
+      "name": "Validate Embeddings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const source=$('Prepare Documents').first().json;\nconst data=$json.data;\nif(!Array.isArray(data)||data.length!==source.rows.length) throw new Error('Embedding count mismatch');\nconst seen=new Set();\nfor(const d of data){if(!Number.isInteger(d.index)||d.index<0||d.index>=source.rows.length||seen.has(d.index)||!Array.isArray(d.embedding)||d.embedding.length!==1536||d.embedding.some(x=>!Number.isFinite(x))) throw new Error('Invalid embedding'); seen.add(d.index);}\nreturn [{json:{points:data.map(d=>{const r=source.rows[d.index];return {id:r.point_id,vector:d.embedding,payload:{service_code:r.service_code,pricebook_version:r.pricebook_version,environment:'TEST',language:'sk',title:r.title,text:source.input[d.index],embedding_model:source.model,embedding_dimensions:1536,price_source:'PostgreSQL:wdfox_test.pricebook_items'}};})}}];"
+      }
+    },
+    {
+      "id": "32c9c4e7-11ca-5d1a-9207-ecb5f341bea2",
+      "name": "Ensure Qdrant TEST Collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "http://qdrant:6333/collections/wdfox_pricebook_test",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"vectors\":{\"size\":1536,\"distance\":\"Cosine\"}}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "ba121b37-2534-551c-9ea6-264afcdf540b",
+      "name": "Check Collection Creation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const status=Number($json.statusCode);const message=JSON.stringify($json.body||{});\nif(!((status>=200&&status<300)||((status===409||status===400)&&/already exists/i.test(message)))) throw new Error('Qdrant collection creation failed; inspect credentials/network and response');\nreturn [{json:{ok:true}}];"
+      }
+    },
+    {
+      "id": "138d1c01-2b1e-5516-8fe3-c28f2c55b231",
+      "name": "Read Qdrant Collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        300
+      ],
+      "parameters": {
+        "url": "http://qdrant:6333/collections/wdfox_pricebook_test",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "7c74498c-5371-55e3-869b-5c6cbe489ae8",
+      "name": "Verify Vector Configuration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const v=$json.result?.config?.params?.vectors;\nif(!v||v.size!==1536||v.distance!=='Cosine') throw new Error('Collection vector configuration mismatch; do not delete an existing collection');\nreturn [{json:$('Validate Embeddings').first().json}];"
+      }
+    },
+    {
+      "id": "bb5368b4-6011-5491-8dd4-e785dad16b96",
+      "name": "Upsert TEST Vectors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2160,
+        300
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "http://qdrant:6333/collections/wdfox_pricebook_test/points?wait=true",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({points:$json.points}) }}",
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "e9abbc98-5c1b-581b-aee7-770427c6af0f",
+      "name": "Confirm Qdrant Write",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        300
+      ],
+      "parameters": {
+        "jsCode": "if($json.status!=='ok'||$json.result?.status!=='completed') throw new Error('Qdrant did not confirm the write');\nreturn [{json:{confirmed:true}}];"
+      }
+    },
+    {
+      "id": "8e6041a0-7f52-5746-8593-2d2e86dc61ff",
+      "name": "Mark Indexed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2640,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE wdfox_test.pricebook_items SET indexed_at=now() WHERE pricebook_version='TEST-2026-11-v1' AND environment='TEST' RETURNING service_code,pricebook_version,unit_price_cents,currency,indexed_at;",
+        "options": {}
+      }
+    },
+    {
+      "id": "c347586d-5d18-5f7f-be37-f9e13eed1b11",
+      "name": "Import Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(i=>i.json).filter(r=>r.service_code);\nif(rows.length!==10) throw new Error('Index status count mismatch');\nreturn [{json:{ok:true,environment:'TEST',pricebook_version:'TEST-2026-11-v1',indexed_services:rows.length,collection:'wdfox_pricebook_test',model:'text-embedding-3-small',dimensions:1536,prices_from:'PostgreSQL',billing_enabled:false,production_touched:false,note:'Import only. Semantic retrieval and customer quotations require a separate workflow.',services:rows}}];"
+      }
+    },
+    {
+      "id": "118fd81c-56b2-5fab-bef9-29741a58aa08",
+      "name": "SETUP — TEST ONLY",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -100
+      ],
+      "parameters": {
+        "width": 920,
+        "height": 300,
+        "content": "## WDFOX cenník → PostgreSQL + Qdrant (TEST)\nImport as NEW workflow. Manual trigger only.\n1. Select the same PostgreSQL credential in BOTH Postgres nodes (database n8n, host postgres). Only schema wdfox_test is touched.\n2. Select OpenAI API credential in Embed node. API usage is billed separately from ChatGPT.\n3. Qdrant nodes use internal Docker DNS qdrant:6333. If API-key protection is enabled, configure an n8n HTTP Header credential api-key in ALL 3 Qdrant HTTP nodes. Never paste secrets into JSON.\n4. Run manually; require report indexed_services=10. Re-runs reuse stable IDs, no duplicates.\nPricebook version is immutable: conflicting rows are not overwritten; use a NEW version for price changes. No production deploy, payment, invoice or external webhook."
+      }
+    }
+  ],
+  "connections": {
+    "Manual TEST Import": {
+      "main": [
+        [
+          {
+            "node": "Store TEST Pricebook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store TEST Pricebook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Documents": {
+      "main": [
+        [
+          {
+            "node": "Embed Pricebook Descriptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embed Pricebook Descriptions": {
+      "main": [
+        [
+          {
+            "node": "Validate Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Ensure Qdrant TEST Collection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure Qdrant TEST Collection": {
+      "main": [
+        [
+          {
+            "node": "Check Collection Creation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Collection Creation": {
+      "main": [
+        [
+          {
+            "node": "Read Qdrant Collection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Qdrant Collection": {
+      "main": [
+        [
+          {
+            "node": "Verify Vector Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Vector Configuration": {
+      "main": [
+        [
+          {
+            "node": "Upsert TEST Vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert TEST Vectors": {
+      "main": [
+        [
+          {
+            "node": "Confirm Qdrant Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Qdrant Write": {
+      "main": [
+        [
+          {
+            "node": "Mark Indexed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Indexed": {
+      "main": [
+        [
+          {
+            "node": "Import Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
