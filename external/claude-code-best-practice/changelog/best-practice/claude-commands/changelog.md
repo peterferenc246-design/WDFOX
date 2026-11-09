@@ -1548,3 +1548,72 @@ No priority action items — report is fully in sync with official documentation
 | 1 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
 
 _No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 1 → Nov 2, 2026._
+
+---
+
+## [2026-11-03 11:05 AM PKT] Claude Code v2.1.317
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge bumped v2.1.316 → v2.1.317._
+
+---
+
+## [2026-11-04 11:06 AM PKT] Claude Code v2.1.318
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | MED | Changed Description | Update `/auto-mode-setup` — "Pro, Max, Ultra, and Team plans require v2.1.228..." → "On a Pro, Max, Ultra, or Team plan, requires Claude Code v2.1.228 or later, or v2.1.233 or later on native Windows. On an Enterprise plan or with a Claude Console API key, requires v2.1.283 or later." | ✅ COMPLETE (description updated at #8 in Config tag) |
+| 2 | LOW | Changed Description | Update `/design-login` — "Signs in to the standalone Claude Design site" → "This sign-in is for the standalone Claude Design site"; add migration guide link | ✅ COMPLETE (description updated at #2 in Auth tag) |
+| 3 | LOW | Changed Description | Update `/permissions` — remove mid-turn sentences ("When you run it while Claude is responding..." and "Before v2.1.234, Claude Code queued..."); only "Alias: `/allowed-tools`" remains | ✅ COMPLETE (description updated at #15 in Config tag) |
+| 4 | LOW | Changed Description | Update `/effort` — inline "(requires v2.1.284 or later)" in `ultracode off` sentence → split to separate sentence "The `on` and `off` arguments require Claude Code v2.1.284 or later. If you run `/effort` while Claude is working, see when the new level starts." | ✅ COMPLETE (description updated at #56 in Model tag) |
+| 5 | LOW | Changed Description | Update `/review` — add "such as `/review 1234`"; "Accepts" → "and takes"; "reuses" → "the review reuses"; add "see Review locally with `/code-review` for the exact rules"; add "listing open PRs to pick from when run with no argument"; "same engine" → "same multi-agent engine" | ✅ COMPLETE (description updated at #64 in Project tag) |
+| 6 | LOW | Changed Description | Update `/team-onboarding` — "and produces a markdown guide" → ". It produces a markdown guide a teammate can paste as a first message to get set up quickly." (split into two sentences) | ✅ COMPLETE (description updated at #66 in Project tag) |
+| 7 | LOW | Changed Description | Update `/install-github-app` — add "To run Claude Code from GitLab pipelines, see GitLab CI/CD." at end | ✅ COMPLETE (description updated at #70 in Remote tag) |
+| 8 | LOW | Changed Description | Update `/clear` — "restore it from the rewind menu (in the same Claude Code process, via the previous-session entry)" → "restore it from the rewind menu's previous-session entry, in the same Claude Code process" | ✅ COMPLETE (description updated at #83 in Session tag) |
+| 9 | LOW | Changed Description | Update `/fork` — "Claude Code instructs the copy to create its own worktree..., except when the copy edits in place (requires...)" → "Except when the copy edits in place, Claude Code instructs it to create a worktree of its own...; the isolation instruction requires..." | ✅ COMPLETE (description updated at #86 in Session tag) |
+| 10 | LOW | Changed Description | Update `/resume` — "Resuming a running background session attaches this terminal to it and moves your current conversation to the background —" → "Resuming one that is still running, from the picker or by ID or name, opens that session: your current conversation moves to the background and this terminal attaches to the running one." | ✅ COMPLETE (description updated at #92 in Session tag) |
+| 11 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-06 11:05 AM PKT] Claude Code v2.1.318
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 04 → Nov 06, 2026._
+
+---
+
+## [2026-11-07 11:04 AM PKT] Claude Code v2.1.319
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge bumped v2.1.318 → v2.1.319._
+
+---
+
+## [2026-11-08 11:04 AM PKT] Claude Code v2.1.319
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 07 → Nov 08, 2026._
+
+---
+
+## [2026-11-09 11:10 AM PKT] Claude Code v2.1.319
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | Update `/advisor` — clarify that in non-interactive and Remote Control sessions you can pass a model name or `off` as an argument (not only print current state); requires v2.1.260 or later | ✅ COMPLETE (added "pass a model name or `off` to change it" to the non-interactive/RC sentence) |
+| 2 | LOW | Changed Description | Update `/rename` — docs note that the control-character replacement and 200-character cap apply from every rename surface, including claude.ai and the Claude Code desktop app | ✅ COMPLETE (appended multi-surface note to description) |
+| 3 | LOW | Changed Description | Update `/heapdump` — docs say outright not to share the `.heapsnapshot` file; strengthen phrasing from "Share only…" to "Do not share…" | ✅ COMPLETE (rephrased to lead with "Do not share the .heapsnapshot file") |
+| 4 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
