@@ -1,0 +1,42 @@
+---
+const title = 'REST vs gRPC – návrh API architektúry WDFOX';
+const restExample = 'GET /users/42\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n' + JSON.stringify({id:42,name:'Alice'},null,2);
+const protoExample = 'syntax = "proto3";\nservice UserService {\n  rpc GetUser (UserRequest) returns (User);\n}\nmessage UserRequest { int32 id = 1; }\nmessage User {\n  int32 id = 1;\n  string name = 2;\n}';
+const comparisons = [
+{label:'Primárny štýl',rest:'Adresy zdrojov a HTTP metódy',grpc:'Metódy vzdialenej služby (RPC)'},
+{label:'Bežné dáta',rest:'JSON, prípadne iné formáty',grpc:'Protobuf v štandardnom gRPC'},
+{label:'Prenos',rest:'HTTP/1.1, HTTP/2 a novšie varianty',grpc:'HTTP/2 pri tradičnom gRPC'},
+{label:'Kontrakt',rest:'Voliteľný OpenAPI a podobné schémy',grpc:'Typovaný .proto kontrakt'},
+{label:'Streaming',rest:'Možný cez SSE, WebSocket a ďalšie',grpc:'Klientsky, serverový a obojstranný RPC streaming'},
+{label:'Prehliadač',rest:'Prístupný bežným fetch/HTTP klientom',grpc:'Spravidla gRPC-Web, Connect alebo gateway'}
+];
+const roadmap=[
+{n:'1',title:'Aktuálny REST základ',text:'Ponechať REST API pre Astro/React, CRM, verejné integrácie, n8n webhooky a Agent Builder.'},
+{n:'2',title:'Reálne merania',text:'Zmerať p95 latenciu, objem dát, počet požiadaviek, počet služieb, vyťaženosť a chyby.'},
+{n:'3',title:'Interný gRPC pilot, ak treba',text:'Vybrať jednu výpočtovo alebo dátovo intenzívnu internú službu; porovnať implementáciu, zložitosť a výkon s REST.'},
+{n:'4',title:'Produkčné pravidlá',text:'mTLS/TLS, autorizácia, timeouty, retry, tracing, schémy, verzovanie a automatizované kontraktové testy.'}
+];
+---
+<!doctype html><html lang="sk"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>{title}</title>
+<meta name="description" content="REST vs gRPC pre WDFOX: HTTP JSON, Protocol Buffers, streaming, prehliadače, interné služby a bezpečná API architektúra."/>
+<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#09141d;color:#ecf6ff;font:16px/1.62 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:980px;margin:auto;padding:30px 18px 75px}h1{color:#8bf2c8;font-size:clamp(1.8rem,5vw,2.65rem);line-height:1.2}h2{color:#9fdfff;font-size:1.25rem;margin-top:0}h3{font-size:1.05rem;color:#f8f8ff;margin:0 0 6px}section{background:#112432;border:1px solid #355264;padding:19px;border-radius:15px;margin:18px 0}a{color:#89eec9}li{margin:7px 0}.pill{color:#ffb4d0;font-weight:900}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px}.grid section{margin:0}.tag{color:#8ceaca;font-size:.82rem;font-weight:800}.muted{color:#b7c5d2}.notice{border-left:4px solid #ffc47a;padding-left:13px}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:530px}th,td{border-bottom:1px solid #395263;text-align:left;padding:9px;vertical-align:top}th{color:#9de3ff}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#091b26;border:1px solid #2d5566;border-radius:10px;padding:13px;color:#c9f4e4;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.upload{display:inline-block;border:1px solid #6edec1;border-radius:10px;padding:9px 13px;text-decoration:none;font-weight:800}</style>
+</head><body><main>
+<a href="/system-design">← Architektonická mapa WDFOX</a>
+<h1>🔌 REST vs gRPC – API architektúra WDFOX</h1>
+<p class="pill">❤️ 10/10 · P1 – výber architektúry; gRPC zatiaľ nie je nasadené</p>
+<p>Obrázok porovnáva dva prístupy k API. REST využíva bežné HTTP požiadavky nad zdrojmi; gRPC definuje vzdialené volania a typované správy v Protobuf schémach. Ani jeden nie je univerzálne lepší.</p>
+<div class="grid"><section><h2>REST – HTTP + JSON</h2><p>Jednoduchý štýl vhodný pre verejné API, webové prehliadače, integračné služby a webhooky.</p><pre>{restExample}</pre><p class="muted">JSON je typický, nie jediný možný formát REST.</p></section>
+<section><h2>gRPC – Protobuf</h2><p>Typovaný kontrakt určuje služby, metódy a správy. Výhodou býva efektívna vnútorná komunikácia, generovanie klientov a podpora streamingu.</p><pre>{protoExample}</pre><p class="muted">Kód je ilustračný; nejde o hotový backend WDFOX.</p></section></div>
+<section><h2>Technické porovnanie</h2><div class="tablewrap"><table><thead><tr><th>Vlastnosť</th><th>REST</th><th>gRPC</th></tr></thead><tbody>{comparisons.map(x=><tr><th scope="row">{x.label}</th><td>{x.rest}</td><td>{x.grpc}</td></tr>)}</tbody></table></div>
+<p>gRPC nebýva automaticky rýchlejšie v každom scenári. Rozhodujú veľkosť správ, štruktúra služby, sieť, server, podporovaní klienti a počet volaní.</p></section>
+<section><h2>Konkrétne využitie vo WDFOX</h2>
+<ul><li><strong>Astro/React frontend → API:</strong> používať REST na CRM, profily zákazníkov, Agent Builder, dokumentáciu a bežné akcie.</li>
+<li><strong>n8n, MCP a externé služby:</strong> pokračovať cez existujúce HTTP API a webhooky podľa integrácií.</li>
+<li><strong>Interné backendové služby:</strong> pri škálovaní sa môže oplatiť gRPC s kontraktom a generovanými klientmi; najprv treba výkonové merania.</li>
+<li><strong>Hlasové stretnutia:</strong> živý transport prehliadač ↔ server posudzovať osobitne (WebRTC, WebSocket). gRPC môže byť interný prvok pipeline, nie automatická náhrada WebRTC.</li>
+<li><strong>Bezpečnosť:</strong> TLS, autentifikácia, autorizácia, validácia vstupov, limity, observabilita a ochrana medzi zákazníkmi sú potrebné pri oboch typoch API.</li></ul></section>
+<section><h2>Realizačný plán</h2><div class="grid">{roadmap.map(step=><section><p class="tag">KROK {step.n}</p><h3>{step.title}</h3><p>{step.text}</p></section>)}</div>
+<p class="notice"><strong>Odporúčanie:</strong> REST je predvolená možnosť pre súčasný WDFOX. gRPC nech je voliteľným ďalším krokom, až keď jeho prínos v konkrétnej službe preukážeme testom.</p></section>
+<section><h2>Vzťah k ostatným referenciám</h2><p><a href="/system-design/rest-vs-graphql">REST vs GraphQL</a> · <a href="/system-design/top-6-api-architecture-styles">Top 6 API Architecture Styles</a> · <a href="/system-design/load-balancer-reverse-proxy-api-gateway">Load Balancer / Reverse Proxy / API Gateway</a> · <a href="/system-design/mcp-vs-api-ai-agent-integration">MCP vs API</a></p></section>
+<section><h2>Referenčný obrázok</h2><p class="muted">Používateľom dodaný screenshot <code>41782.jpeg</code> ešte nie je v GitHube vetvy <code>preview</code>. Po nahratí ho pripojíme priamo sem, do katalógu a galérie architektonickej mapy.</p><p><a class="upload" href="https://github.com/peterferenc246-design/WDFOX/upload/preview/public/system-design" target="_blank" rel="noopener noreferrer">Nahrať obrázok (preview)</a></p><p><a href="https://www.facebook.com/share/r/19eYppxrkP/" target="_blank" rel="noopener noreferrer">Pôvodný Facebook zdroj</a></p></section>
+</main></body></html>
