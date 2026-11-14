@@ -14,5 +14,22 @@ const pageTitle = "WDFOX AI Agent Builder – vlastný tvorca AI agentov";
 <section><h2>Bezpečnosť pred automatizáciou</h2><ul><li>Každý agent potrebuje explicitné nástroje a minimálne oprávnenia.</li><li>Čítanie a zápis do CRM oddeliť; priradenia, odoslania a mazanie riešiť s potvrdením.</li><li>Oddelenie dát zákazníkov, správa tokenov, limity API, GDPR a záznam vykonaných akcií.</li><li>Testovacie prostredie a simulované vstupy pred produkciou.</li></ul></section>
 <section><h2>Prvý realistický prototyp</h2><ol><li>Jednoduchý formulár „Čo má agent robiť?“ na webe WDFOX.</li><li>Vygenerovanie návrhu štruktúrovanej konfigurácie agenta s ľudskou revíziou.</li><li>Výber povolených akcií: napríklad prečítať kontakt a navrhnúť hodnotenie.</li><li>Spustiť test v n8n alebo v izolovanom prostredí s fiktívnymi údajmi.</li><li>Zobraziť výsledok, log, náklady a tlačidlo na schválenie publikovania.</li></ol>
 <p><strong>Stav:</strong> zdokumentovaná architektúra; samotný Agent Builder týmto commitom ešte nevzniká.</p></section>
+<section id="claude-10-krokov"><h2>Claude – ako vytvoriť AI agenta v 10 krokoch</h2>
+<p>Tento postup vychádza z obrázka „How to Build AI Agent with Claude in 10 Minutes“. Je to <strong>referenčný zjednodušený návod</strong>, nie potvrdenie, že Claude ponúka každý krok ako osobitnú funkciu alebo že produkčný agent vznikne vždy do 10 minút.</p>
+<ol>
+<li><strong>Go to Claude:</strong> otvorenie <a href="https://claude.ai/" target="_blank" rel="noopener noreferrer">claude.ai</a> a prihlásenie.</li>
+<li><strong>Use the right prompt:</strong> opísať, čo má agent robiť, a nechať si položiť doplňujúce otázky.</li>
+<li><strong>Add a skill:</strong> podľa dostupnosti pridať schopnosti na prácu s webom, súbormi či kódom.</li>
+<li><strong>Connect your tools:</strong> pripojiť podporované aplikácie a API s povolením používateľa.</li>
+<li><strong>Set up your agent:</strong> určiť názov, cieľ, rozsah úloh a pokyny.</li>
+<li><strong>Configure settings:</strong> definovať štýl odpovedí, prístup k údajom a povolené akcie.</li>
+<li><strong>Test your agent:</strong> skúsiť jednoduché zadania a overiť výstupy.</li>
+<li><strong>Make it live:</strong> uložiť a používať konfiguráciu v rámci schopností dostupného prostredia.</li>
+<li><strong>Improve over time:</strong> priebežne upravovať zadanie a nástroje na základe výsledkov.</li>
+<li><strong>Enjoy your AI agent:</strong> používať výsledného asistenta – pri prevádzke ďalej sledovať spoľahlivosť a náklady.</li>
+</ol>
+<p><strong>Pre WDFOX Agent Builder:</strong> prevziať zrozumiteľný onboarding, nie kopírovať cudzie rozhranie. Náš proces rozšírime o validáciu nástrojov, bezpečné testovacie prostredie, schvaľovanie rizikových akcií, verzovanie a audit pred publikovaním agenta.</p>
+<p><a href="https://www.facebook.com/share/r/1E6xAPHMQQ/" target="_blank" rel="noopener noreferrer">Originálny Facebook zdroj – Claude 10 krokov</a></p>
+<p>Originálny obrázok <code>Screenshot_20261114-185217_Facebook.jpg</code> zatiaľ nie je nahratý vo vetve <code>preview</code>. Po jeho nahratí ho pripojíme sem aj do galérie mapy. <a href="https://github.com/peterferenc246-design/WDFOX/upload/preview/public/system-design" target="_blank" rel="noopener noreferrer">Nahrať obrázok do GitHubu</a>.</p></section>
 <section><h2>Referenčný obrázok</h2><figure style="margin:16px auto;max-width:580px;text-align:center"><img src="/system-design/Screenshot_20261102-212308_Facebook.jpg" alt="Referenčná reklama HubSpot Breeze Agent Builder s tvorbou agenta z prirodzeného zadania" width="460" height="670" loading="lazy" decoding="async" style="display:block;width:100%;height:auto;max-width:460px;margin:auto;border:1px solid #315467;border-radius:12px"/><figcaption class="muted" style="margin-top:10px">HubSpot Breeze – ukážka princípu tvorby AI agenta bez kódu; WDFOX vyvíja vlastné riešenie.</figcaption></figure><p><a href="https://www.facebook.com/share/19wUvBQn3Q/" target="_blank" rel="noopener noreferrer">Pôvodný Facebook príspevok</a></p></section>
 </main></body></html>
