@@ -1,0 +1,125 @@
+{
+  "name": "WDFOX - WhatsApp n8n sandbox (DRY-RUN, NO SEND)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wdfox-manual-001",
+      "name": "1 - Manual test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// SAFE DEMO ONLY: no real phone numbers, Meta credentials or outbound sends.\nconst examples = [\n  { id: 'wamid.WDFOX.TEST.SK.001', text: 'Dobrý deň, potrebujem cenovú ponuku na web stránku.' },\n  { id: 'wamid.WDFOX.TEST.DE.002', text: 'Guten Tag, ich brauche ein Angebot für eine Website.' },\n  { id: 'wamid.WDFOX.TEST.EN.003', text: 'Hi, I need a quote for my website.' },\n  { id: 'wamid.WDFOX.TEST.SK.001', text: 'Dobrý deň, potrebujem cenovú ponuku na web stránku.' }, // test duplicate\n];\nreturn examples.map((e) => ({ json: {\n  body: { object: 'whatsapp_business_account', entry: [{\n    id: 'WABA_TEST_ONLY', changes: [{\n      field: 'messages',\n      value: { messaging_product: 'whatsapp',\n        metadata: { display_phone_number: 'TEST', phone_number_id: 'PHONE_ID_TEST_ONLY' },\n        messages: [{ from: 'SENDER_TEST_ONLY', id: e.id, timestamp: '1700000000', type: 'text', text: { body: e.text } }]\n      }\n    }]\n  }] }\n}}));"
+      },
+      "id": "wdfox-mock-002",
+      "name": "2 - Mock WhatsApp events",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        470,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Extract only message fields used by WDFOX; reject non-text and status-only events.\nconst output = [];\nfor (const input of $input.all()) {\n  const body = input.json.body ?? input.json;\n  const entries = Array.isArray(body.entry) ? body.entry : [];\n  for (const entry of entries) {\n    for (const change of (entry.changes ?? [])) {\n      const value = change.value ?? {};\n      for (const message of (value.messages ?? [])) {\n        if (message.type !== 'text' || typeof message.text?.body !== 'string') continue;\n        const text = message.text.body.trim();\n        const messageId = String(message.id ?? '');\n        if (!messageId || !text || text.length > 4000) continue;\n        output.push({ json: {\n          source: 'whatsapp_mock', tenant_id: 'WDFOX-TEST-ONLY',\n          message_id: messageId, phone_number_id: String(value.metadata?.phone_number_id ?? ''),\n          sender: 'SENDER_REDACTED', text,\n          transport: 'dry-run', received_at: new Date().toISOString()\n        } });\n      }\n    }\n  }\n}\nreturn output;"
+      },
+      "id": "wdfox-normalize-003",
+      "name": "3 - Normalize inbound text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Deduplicate within this single execution ONLY. For production use persistent storage.\nconst seen = new Set();\nreturn $input.all().map((item) => {\n  const data = item.json;\n  const duplicate = seen.has(data.message_id);\n  if (!duplicate) seen.add(data.message_id);\n  return { json: { ...data, duplicate, status: duplicate ? 'ignored_duplicate' : 'pending_review' } };\n});"
+      },
+      "id": "wdfox-dedup-004",
+      "name": "4 - Deduplicate demo IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        930,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Deterministic draft replies: no LLM, Meta API, CRM write or external call.\nreturn $input.all().map((item) => {\n  const msg = item.json;\n  if (msg.duplicate) return { json: {\n    message_id: msg.message_id, tenant_id: msg.tenant_id,\n    status: 'ignored_duplicate', language: null, intent: null,\n    reply_preview: null, approval_required: false,\n    outbound_enabled: false, crm_write_enabled: false\n  } };\n  const t = msg.text.toLocaleLowerCase();\n  const language = /[äöüß]|\\b(guten|ich|brauche|für|angebot)\\b/.test(t) ? 'de'\n    : /[áäčďéíĺľňóôŕšťúýž]|\\b(dobrý|potrebujem|ponuku|stránku)\\b/.test(t) ? 'sk' : 'en';\n  const intent = /cenov|ponuk|angebot|quote|estimate/.test(t) ? 'sales_quote' : 'customer_support';\n  const replies = {\n    sk: 'Dobrý deň! Ďakujeme za správu. Prosím, napíšte, akú webovú stránku potrebujete a aký je požadovaný termín. Radi pripravíme návrh.',\n    de: 'Guten Tag! Vielen Dank für Ihre Nachricht. Bitte beschreiben Sie Ihre gewünschte Website und den Zeitrahmen. Wir erstellen gern einen Vorschlag.',\n    en: 'Hello! Thanks for your message. Please tell us what kind of website you need and your timeline. We can prepare a proposal.'\n  };\n  return { json: {\n    message_id: msg.message_id, tenant_id: msg.tenant_id,\n    source: msg.source, detected_language: language, intent,\n    original_text_demo: msg.text,\n    reply_preview: replies[language],\n    status: 'needs_human_approval', approval_required: true,\n    outbound_enabled: false, crm_write_enabled: false,\n    production_ready: false\n  } };\n});"
+      },
+      "id": "wdfox-draft-005",
+      "name": "5 - Draft only / no send",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "1 - Manual test": {
+      "main": [
+        [
+          {
+            "node": "2 - Mock WhatsApp events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2 - Mock WhatsApp events": {
+      "main": [
+        [
+          {
+            "node": "3 - Normalize inbound text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3 - Normalize inbound text": {
+      "main": [
+        [
+          {
+            "node": "4 - Deduplicate demo IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4 - Deduplicate demo IDs": {
+      "main": [
+        [
+          {
+            "node": "5 - Draft only / no send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
