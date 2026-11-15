@@ -1,0 +1,37 @@
+---
+const pageTitle = "SQL vs NoSQL – dátová architektúra WDFOX CRM";
+const dataComparison = [
+{label:"Dátový model",sql:"Vzťahové tabuľky s väzbami; možná normalizácia",nosql:"Dokumenty, key-value, grafy či stĺpcové modely (NoSQL nie je jeden typ)"},
+{label:"Otvorenie produktovej stránky",sql:"JOIN naprieč products, brands, reviews – potenciálne jeden SQL dotaz",nosql:"Jeden agregovaný dokument môže obsiahnuť všetky potrebné položky"},
+{label:"Zmena názvu značky",sql:"Ak je značka normalizovaná, zmena jediného riadka",nosql:"Ak je názov kopírovaný do produktov, môže vyžadovať hromadnú aktualizáciu"},
+{label:"Konzistencia a transakcie",sql:"PostgreSQL má silné transakčné mechanizmy a integritu vzťahov",nosql:"Závisí od konkrétnej databázy; niektoré podporujú ACID transakcie"},
+{label:"Flexibilita schémy",sql:"PostgreSQL vie aj JSON/JSONB a rozšírenia",nosql:"Dokumentové DB prirodzene prijímajú rôzne tvary dokumentov"},
+{label:"Škálovanie",sql:"Indexy, partitioning, repliky, podľa potreby sharding",nosql:"Spôsob škálovania závisí od konkrétnej implementácie"}
+];
+const components = [
+{title:"PostgreSQL – hlavné CRM dáta",text:"Organizácie, účty, zákazníci, kontakty, obchodné prípady, fakturačné údaje, oprávnenia, audit a transakcie. Priorita P1."},
+{title:"Redis – dočasný stav",text:"Cache, rate limiting alebo krátkodobý stav podľa prevádzkových požiadaviek. Nie je automaticky primárnou databázou zákazníckych záznamov."},
+{title:"Qdrant – vektorové vyhľadávanie",text:"Embeddings, podobnosť a RAG nad dokumentmi s kontrolou oprávnení. Nie je náhradou relačného obchodného jadra."}
+];
+---
+<!doctype html><html lang="sk"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{pageTitle}</title>
+<meta name="description" content="SQL vs NoSQL na animovanom príklade produktov, značiek a recenzií. Návrh PostgreSQL, Redis a Qdrant pre WDFOX CRM a AI Meeting Terminal."/>
+<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0a1723;color:#eef7ff;font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:980px;margin:0 auto;padding:28px 18px 76px}h1{font-size:clamp(1.8rem,5vw,2.75rem);line-height:1.2;color:#87ebc9}h2{font-size:1.25rem;color:#a5dcff;margin-top:0}h3{font-size:1.04rem;margin:0 0 7px;color:#edfaff}a{color:#8aeccd}section{margin:18px 0;background:#102838;border:1px solid #345366;border-radius:15px;padding:20px}.priority{color:#ffb7d1;font-weight:850}.muted{color:#b0c0cd}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.grid section{margin:0}.tableScroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:610px}th,td{border-bottom:1px solid #385365;padding:10px;text-align:left;vertical-align:top}th{color:#a4e5ff}.note{border-left:4px solid #ffcc77;padding-left:13px}.upload{display:inline-block;padding:9px 13px;border:1px solid #79dcc3;border-radius:9px;text-decoration:none;font-weight:750}code{color:#9febcd}li{margin:8px 0}
+</style></head><body><main><a href="/system-design">← Architektonická mapa WDFOX</a>
+<h1>🗄️ SQL vs NoSQL – dátová architektúra WDFOX</h1>
+<p class="priority">❤️ 10/10 · P1 · databázová referencia a návrh WDFOX CRM SaaS</p>
+<p>Animácia @thachdv.it predstavuje model produktovej stránky s tabuľkami <code>products</code>, <code>brands</code> a <code>reviews</code> a porovnáva ho s NoSQL dokumentmi, v ktorých sú informácie uložené pohromade. Jej počty zápisov a načítaní sú len <strong>ilustračné pre zvolený dátový model</strong>, nie všeobecný benchmark SQL a NoSQL.</p>
+<section><h2>Čo presne ukazuje animácia</h2><ol><li><strong>Otvorenie produktu:</strong> na SQL strane sa kombinujú údaje z troch súvisiacich tabuliek. Na NoSQL strane stačí pre konkrétny dizajn dokumentu jeden prístup. SQL to však môže zvládnuť jedným dotazom s JOIN; počet tabuliek nie je počet sieťových round-tripov.</li><li><strong>Premenovanie značky:</strong> SQL zmení názov v tabuľke <code>brands</code>; všetky produkty naň odkazujú pomocou kľúča. Pri NoSQL s duplikovaným názvom vo veľa produktových dokumentoch musí aplikácia aktualizovať každú kópiu alebo vyriešiť synchronizáciu. Dokumentová databáza však môže používať referencie alebo iné modelovanie.</li></ol>
+<p class="note"><strong>Oprava zjednodušenia:</strong> čísla „1 vs 1 000 writes“ a „3 vs 1 lookups“ zo schémy nie sú univerzálnou vlastnosťou databázových technológií. SQL môže obsahovať denormalizáciu a NoSQL databáza môže používať referencie aj transakcie.</p></section>
+<section><h2>Technické rozdiely</h2><div class="tableScroll"><table><thead><tr><th>Vlastnosť</th><th>SQL / PostgreSQL</th><th>NoSQL</th></tr></thead><tbody>{dataComparison.map(item=><tr><th scope="row">{item.label}</th><td>{item.sql}</td><td>{item.nosql}</td></tr>)}</tbody></table></div></section>
+<section><h2>Odporúčaná databázová zostava WDFOX</h2><div class="grid">{components.map(x=><section><h3>{x.title}</h3><p>{x.text}</p></section>)}</div>
+<p>Relačné jadro vyhovuje CRM a obchodným väzbám; pre voľnejšie polia môžeme používať aj PostgreSQL JSONB. Redis a Qdrant sa zavádzajú iba tam, kde ich prínos odôvodnia konkrétne požiadavky. Rozhodnutie testujeme na skutočných dotazoch a pri správnej autorizácii tenantov.</p></section>
+<section><h2>Postup vývoja</h2><ol><li>Vytvoriť databázový model organizácií, používateľov, kontaktov, leadov, obchodných prípadov a aktivít.</li><li>Doplniť cudzie kľúče, indexy a pravidlá oddelenia klientov; testovať prístup ku každému záznamu na serveri.</li><li>Pripraviť migrácie, zálohovanie, obnovu, audit a meranie pomalých dotazov.</li><li>Podľa potreby pridať cache alebo vektorový index, nie celú NoSQL vrstvu bez konkrétneho použitia.</li><li>Skontrolovať výkon pre bežné dotazy, súbežný zápis a zmeny zdieľaných údajov.</li></ol>
+<p><strong>Stav:</strong> ide o návrh architektúry; táto dokumentačná zmena nevytvorila produkčnú PostgreSQL databázu.</p></section>
+<section><h2>Súvisiace kapitoly</h2><p><a href="/system-design/wdfox-crm-saas-product">WDFOX CRM SaaS</a> · <a href="/system-design/sharding-partitioning-replication">Sharding, Partitioning, Replication</a> · <a href="/system-design/redis-iris-agent-memory">Redis a pamäť agentov</a> · <a href="/system-design/rag-funnel-grounded-answer">RAG Funnel</a></p></section>
+<section><h2>Zdrojová animácia</h2><p class="muted">Originálny GIF <code>SmartSelect_20261115-033859_Facebook.gif</code> zatiaľ nie je nahratý do <code>public/system-design/</code> vo vetve <code>preview</code>. Po nahratí ho pripojíme sem, do katalógu aj galérie.</p>
+<p><a class="upload" href="https://github.com/peterferenc246-design/WDFOX/upload/preview/public/system-design" target="_blank" rel="noopener noreferrer">Nahrať originálny GIF do GitHubu</a></p>
+<p><a href="https://www.facebook.com/share/r/1A7akze4rC/" target="_blank" rel="noopener noreferrer">Pôvodný Facebook zdroj</a></p></section>
+</main></body></html>
