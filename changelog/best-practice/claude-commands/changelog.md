@@ -1617,3 +1617,78 @@ _No frontmatter or command drift (20 frontmatter fields, 96 built-in commands st
 | 2 | LOW | Changed Description | Update `/rename` — docs note that the control-character replacement and 200-character cap apply from every rename surface, including claude.ai and the Claude Code desktop app | ✅ COMPLETE (appended multi-surface note to description) |
 | 3 | LOW | Changed Description | Update `/heapdump` — docs say outright not to share the `.heapsnapshot` file; strengthen phrasing from "Share only…" to "Do not share…" | ✅ COMPLETE (rephrased to lead with "Do not share the .heapsnapshot file") |
 | 4 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-10 11:08 AM PKT] Claude Code v2.1.322
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | Update `/usage` — add "Behind a Claude apps gateway that tracks spend, shows your spend through the gateway." (matches v2.1.319 changelog entry) | ✅ COMPLETE (gateway spend sentence appended to description at #34 in Context tag) |
+| 2 | LOW | Changed Description | Update `/review` — docs dropped version-history sentence ("Before v2.1.223, /review was a separate command…; from v2.1.186 through v2.1.201…"); trimmed to match current docs | ✅ COMPLETE (history sentence removed from description at #64 in Project tag) |
+| 3 | LOW | Changed Description | Update `/list-agents` — docs dropped version requirement ("Requires Claude Code v2.1.224 or later; earlier versions report Unknown command: /list-agents"); removed to match current docs | ✅ COMPLETE (version requirement removed from description at #88 in Session tag) |
+| 4 | LOW | Scope Decision | `/plugin-authoring` — present in official docs without [Skill] marker but self-describes as "a skill from a built-in plugin" | ❌ INVALID (recurring — bundled plugin skill, excluded per report's existing scope disclaimer) |
+| 5 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-11 11:05 AM PKT] Claude Code v2.1.322
+
+No priority action items — report is fully in sync with official documentation (20 frontmatter fields, 96 built-in commands).
+
+---
+
+## [2026-11-12 11:09 AM PKT] Claude Code v2.1.322
+
+No priority action items — report is fully in sync with official documentation (20 frontmatter fields, 96 built-in commands).
+
+---
+
+## [2026-11-13 11:05 AM PKT] Claude Code v2.1.323
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/stickers` — v2.1.323 changelog: changed to say the sticker pack is all claimed for now, instead of opening a page in the browser; official docs still say "Order Claude Code stickers" | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 2 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 3 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 4 | LOW | Changed Description | `/usage-credits` — v2.1.323 changelog: no longer gives a web address in cloud sessions or under Remote Control; official docs table not yet updated | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 5 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-14 11:05 AM PKT] Claude Code v2.1.325
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | HIGH | Changed Description | Update `/stickers` — "Order Claude Code stickers" → "Check Claude Code sticker availability" per official docs (v2.1.323; resolves ON HOLD from 2026-11-13) | ✅ COMPLETE (description updated at #22 in Config tag) |
+| 2 | HIGH | Changed Description | Update `/upgrade` — add "in your browser"; reverse prior "without printing the URL" text to URL-print behavior: "the command prints the page's URL above its sign-in prompt. Printing the URL requires Claude Code v2.1.323 or later" per official docs (v2.1.323) | ✅ COMPLETE (description updated at #7 in Auth tag) |
+| 3 | LOW | Changed Description | Update `/usage-credits` — remove "after confirming in a dialog that the request notifies their admins" (dialog detail no longer present in official docs; resolves ON HOLD from 2026-11-13) | ✅ COMPLETE (description updated at #35 in Context tag) |
+| 4 | LOW | Changed Description | Update `/goal` — add "or the goal clears for another reason" at end of active-goal removal sentence per official docs | ✅ COMPLETE (description updated at #87 in Session tag) |
+| 5 | LOW | Changed Description | Update `/theme` — change `"Auto (match terminal)"` to `` `auto` (match terminal) `` per official docs | ✅ COMPLETE (description updated at #24 in Config tag) |
+| 6 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 7 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 8 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-15 11:03 AM PKT] Claude Code v2.1.325
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-14 — official docs still do not reflect this change) |
+| 2 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-14 — official docs still do not reflect this change) |
+| 3 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 14 → Nov 15, 2026._
+
+---
+
+## [2026-11-16 11:05 AM PKT] Claude Code v2.1.325
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-15 — official docs still do not reflect this change) |
+| 2 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-15 — official docs still do not reflect this change) |
+| 3 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 15 → Nov 16, 2026._
