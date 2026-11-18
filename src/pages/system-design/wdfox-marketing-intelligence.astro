@@ -1,0 +1,45 @@
+---
+const metrics = [
+  ['ROAS','Atribuované tržby / spend','Rovnaká mena, obdobie a atribučný model.'],
+  ['CAC','Náklady na akvizíciu / noví zákazníci','Výdavky a deduplikovaní noví zákazníci z CRM; rozsah nákladov explicitný.'],
+  ['CPA','Spend / počet cieľových akcií','Definovať konverznú akciu a atribúciu.'],
+  ['MER','Celkové tržby / celkové marketingové náklady','Započítať všetky relevantné kanály a náklady.'],
+  ['CVR','Počet konverzií / oprávnené návštevy alebo kliky × 100 %','Menovateľ musí byť uvedený.'],
+  ['LTV','Hodnota zákazníka počas zvoleného horizontu','Označiť historický výpočet alebo modelový odhad a horizont.']
+];
+const stages = [
+  ['01 · Import','Autorizovaný zber nákladov, metrík, návštev, konverzií a výnosov z Google Ads, Meta Ads, GA4, CRM a voliteľne Stripe; n8n plánuje a monitoruje import.'],
+  ['02 · Normalizácia','PostgreSQL: tenant_id, zdroj, čas, mena, ID kampane; deduplikácia, verzovanie, kontrola úplnosti a audit zdrojov.'],
+  ['03 · Metrics Engine','Deterministické pravidlá a SQL/Python výpočty; chýbajúci menovateľ alebo nulové náklady znamenajú N/A, nie vymyslené číslo.'],
+  ['04 · Campaign Intelligence','Porovnanie období, detekcia anomálií a odporúčania SCALE / OPTIMIZE / INVESTIGATE podľa dát, vzorky, atribúcie a limitov.'],
+  ['05 · AI Ads Engine','Existujúca Google Ads AI Automation: landing page, marketingové uhly a persony, masové varianty, Composer, kontrola duplicít, pravdivosti a formátov.'],
+  ['06 · Approval & Evaluation','Manuálne schválenie konkrétneho návrhu a oprávnení; neskôr autorizovaný upload v PAUSED stave, samostatné schválenie aktivácie a rozpočtu, meranie výsledkov.']
+];
+---
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>WDFOX Marketing Intelligence – architektúra a AI Ads Engine</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#123040,#07111d 55%);color:#f0f6ff;font:16px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:28px 18px 70px}a{color:#89e2ff}nav{display:flex;flex-wrap:wrap;gap:10px}h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.15;color:#9bf2d3}h2{color:#a6f0d6}h3{color:#a6f0d6;margin:0 0 8px}p{color:#becfda}.pill{display:inline-block;border:1px solid #668b78;padding:5px 12px;border-radius:20px;color:#ffe1a7}.panel,.card{background:#102436;border:1px solid #365b75;border-radius:14px;padding:18px;margin:12px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.grid .card{margin:0}.flow{display:grid;gap:8px;text-align:center}.flow div{border:1px solid #4b8178;border-radius:12px;padding:14px;background:#132730}.flow span{color:#9bf2d3}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}td,th{padding:12px;text-align:left;border-bottom:1px solid #365b75;vertical-align:top}th{color:#a6f0d6}figure{margin:24px auto;max-width:540px}figure img{display:block;width:100%;height:auto;border:1px solid #365b75;border-radius:16px}figcaption{color:#b9cbd7;font-size:.9rem}.notice{border-left:4px solid #ffc76c;background:#26232a;padding:14px;margin:18px 0}
+</style>
+</head><body><main>
+<nav><a href="/system-design">← Hlavná architektonická mapa</a><a href="/system-design/marketing-ai">Marketing AI</a><a href="/system-design/google-ads-ai-automation">Google Ads AI Automation</a><a href="/system-design/technology-catalog">Katalóg technológií</a></nav>
+<h1>🦊 WDFOX Marketing Intelligence</h1>
+<span class="pill">P2 · 9/10 · Architektonický návrh produktu</span>
+<p>Vlastná analytická a rozhodovacia vrstva WDFOX Marketing AI. Meria obchodný prínos marketingu na základe dát a odovzdáva podložené odporúčania existujúcemu AI Ads Engine. LLM je interpretačná vrstva, nie zdroj pravdy pre čísla.</p>
+<div class="notice"><strong>Stav ku 18. 11. 2026:</strong> plán, nie funkčný reklamný systém. Žiadne reklamné účty nie sú týmto návrhom pripojené, kampane neboli vytvorené a nevznikli reklamné náklady.</div>
+<h2>Architektúra dátového a reklamného cyklu</h2>
+<section class="flow"><div>Google Ads · Meta Ads · GA4 · web · CRM · Stripe (voliteľné)</div><span>↓</span><div>n8n / lokálny Docker → normalizácia a PostgreSQL</div><span>↓</span><div>Metrics Engine → Campaign Intelligence → dashboard + LLM interpretácia</div><span>↓</span><div>AI Ads Engine → validácia → ľudské schválenie</div><span>↓</span><div>Autorizovaný PAUSED upload → samostatné schválenie aktivácie → meranie → spätná väzba</div></section>
+<h2>Moduly a zodpovednosti</h2><section class="grid">{stages.map(([title,desc])=><article class="card"><h3>{title}</h3><p>{desc}</p></article>)}</section>
+<h2>Metrics Engine – zdroj pravdy</h2><div class="table-wrap"><table><thead><tr><th>Metrika</th><th>Výpočet</th><th>Podmienky</th></tr></thead><tbody>{metrics.map(([name,formula,note])=><tr><th scope="row">{name}</th><td>{formula}</td><td>{note}</td></tr>)}</tbody></table></div>
+<p>Príklad syntetických údajov: spend 500 € a atribuované tržby 2 000 € znamenajú ROAS 4,0. Atribuované tržby z rôznych reklamných platforiem nespočítavať bez deduplikácie a zjednotenia atribúcie. MMM a kauzálne vyhodnocovanie patria až do neskoršej etapy s dostatkom dát.</p>
+<h2 id="ads-engine">AI Ads Engine – referenčný workflow</h2>
+<figure><img src="/system-design/marketing-intelligence-ads-reference-20261118.jpg" alt="Štyri snímky referenčnej animácie: Google Ads import, Frameworks, Composer, Google Ads Upload" loading="lazy"/><figcaption>Štyri snímky z dodaného GIFu Antigravity CLI Agent Kit (18. 11. 2026). Ide o inšpiráciu, nie dôkaz nasadenia alebo dostupnosti open-source licencie.</figcaption></figure>
+<p>Referenčná animácia ukazuje import existujúcich reklám, tvorbu variantov cez marketingové frameworky, Composer a pozastavené nahratie. WDFOX použije vlastnú implementáciu a nadviaže na <a href="/system-design/google-ads-ai-automation">existujúci návrh Google Ads AI Automation</a>. Pri responzívnych vyhľadávacích reklamách Google Ads kontrolovať maximálne 30 znakov pre nadpis a 90 pre opis; ďalšie formáty majú vlastné pravidlá. Kontroly WDFOX nenahrádzajú posúdenie reklamnou platformou.</p>
+<p><a href="https://developers.google.com/google-ads/api/docs/responsive-search-ads/create-responsive-search-ads">Oficiálna dokumentácia Google Ads API</a></p>
+<section class="panel"><h2>Technológie a bezpečnosť</h2><p>Astro + React/TypeScript dashboard; Python/FastAPI alebo Node.js pre analytiku a API; PostgreSQL; lokálny n8n/Docker; LLM cez schválený model router. Autorizované konektory Google Ads, Meta Ads, GA4 a CRM. Prístup len k povoleným údajom, oddelenie tenantov, minimálne oprávnenia, ochrana tajomstiev, súhlasy s meraním, audit, rozpočtové limity a schválenie každého zápisu. Neposielať osobné údaje modelu bez oprávnenia.</p></section>
+<section class="panel"><h2>Implementačné míľniky</h2><ol><li>MVP offline: syntetické kampane, testy výpočtov, chýbajúcich údajov a anomálií; n8n dry-run bez účtov a platených volaní.</li><li>Read-only pilot: jeden autorizovaný účet Google Ads, GA4 a CRM; overiť zhodu s reportmi, atribúciu a oneskorenia.</li><li>AI interpretácia a generovanie návrhov, test formátov a kontrolný panel; bez publikovania.</li><li>Po samostatnom schválení: testovací PAUSED upload; aktivácia a rozpočet vyžadujú ďalšie výslovné povolenie.</li><li>Rozšírenie: Meta Ads, výnosy, zákaznícke dashboardy a viacnájomnícke reporty.</li></ol></section>
+<p>Prepojenia: <a href="/system-design/wdfox-seo-intelligence">SEO Intelligence</a> · <a href="/system-design/wdfox-crm-saas-product">CRM SaaS</a> · <a href="/system-design/jarvis-crm">Jarvis CRM</a> · <a href="/system-design/live-docker-ai-map">Docker / n8n</a>.</p>
+</main></body></html>
