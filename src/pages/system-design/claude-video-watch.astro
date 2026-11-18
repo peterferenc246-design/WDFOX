@@ -1,0 +1,95 @@
+---
+const repoUrl = 'https://github.com/bradautomates/claude-video';
+const fbUrl = 'https://www.facebook.com/share/r/19uYpar8Tn/';
+---
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>WDFOX – Claude Video /watch – výskum a integrácia</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#071019;color:#eaf5ff;font:16px/1.65 system-ui,sans-serif}main{max-width:1050px;margin:0 auto;padding:32px 18px 72px}
+h1{color:#7cebc5;line-height:1.2}h2{color:#8adcf7;line-height:1.3;margin-top:34px}p,li{color:#cddbe8}a{color:#87d8fa;text-underline-offset:3px}
+a:focus-visible{outline:3px solid #77ebc4;outline-offset:4px}.panel{background:#111d29;border:1px solid #2d4659;border-radius:14px;padding:18px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.grid .panel{margin:0}
+.notice{padding:14px 18px;background:#12271f;border-left:4px solid #7cebc5}.warning{padding:14px 18px;background:#2a2315;border-left:4px solid #e9b65d}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#c2efff}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#07111b;border:1px solid #2d4659;border-radius:10px;padding:15px}
+li{margin:6px 0}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #304558;padding:10px;text-align:left;vertical-align:top}footer{margin-top:38px;color:#9db5c8;font-size:.9rem}
+</style>
+</head>
+<body><main>
+<p><a href="/system-design">← Architektonická mapa WDFOX</a> · <a href="/system-design/watch-skill-integration">Súvisiaci: Watch Skill / DeepWatch</a></p>
+<h1>🎥 Claude Video /watch – video analýza pre WDFOX</h1>
+<p><strong>P2 · 8/10</strong> · výskum 18. 11. 2026 · stav: preskúmané GitHub súbory, zatiaľ nenasadené</p>
+<div class="notice"><strong>Identifikácia:</strong> GitHub na dodanom screenshote z Facebook videa zodpovedá repozitáru <a href={repoUrl}>bradautomates/claude-video</a>, verzia skillu v prezretom repozitári 0.3.2, licencia MIT. Facebook reel sa nepodarilo priamo načítať, takže tvrdenia o funkciách sú prevzaté z primárneho GitHub README a SKILL.md, nie z prehratého videa.</div>
+<h2>Čo dokáže</h2>
+<div class="grid">
+<section class="panel"><h3>Lokálne /watch</h3><p>Vstup: verejná video URL alebo súbor. Python + yt-dlp + ffmpeg vyberú snímky v čase, titulky alebo voliteľný prepis reči. Agent dostane snímky a časový text ako dôkaz.</p></section>
+<section class="panel"><h3>Gemini režim</h3><p>Pri nastavenom Gemini API kľúči môže systém analyzovať video cez model Gemini. Pri iných URL než YouTube video stiahne a odošle do Google Files API. Nemožno ho označiť za lokálne súkromný režim.</p></section>
+<section class="panel"><h3>Integrácia ako skill</h3><p>Podpora Claude Code, Codex a ďalších lokálnych Agent Skills hostiteľov; v ChatGPT chate sa samotný skill automaticky nespustí. Originálny projekt neponúka hotový Watch Skill/DeepWatch MCP či REST server.</p></section>
+</div>
+<h2>Nezamieňať dva projekty</h2>
+<div class="panel">
+<table><thead><tr><th>Vlastnosť</th><th>bradautomates/claude-video</th><th>oxbshw/watch-skill</th></tr></thead>
+<tbody>
+<tr><td>Hlavná úloha</td><td>Spracovanie videa pre AI agenta ako /watch skill</td><td>Indexácia videí + overovacie kontrakty</td></tr>
+<tr><td>Priame MCP/REST</td><td>Nie je deklarované ako hotové verejné rozhranie</td><td>Áno, dokumentované MCP a REST</td></tr>
+<tr><td>n8n integrácia</td><td>Vlastný bezpečný CLI worker alebo API adaptér</td><td>HTTP Request na existujúce REST API</td></tr>
+<tr><td>Deterministický QA verdikt</td><td>Nie ako jeho základná súčasť</td><td>Áno, samostatné overovacie kontrakty</td></tr>
+</tbody></table>
+</div>
+<h2>WDFOX: navrhovaný integračný reťazec</h2>
+<div class="panel"><pre>Web WDFOX / testovacie video / nahrávka obrazovky
+                    ↓
+           WDFOX n8n orchestrátor
+                    ↓
+     izolovaný video-analysis worker (Python)
+                    ↓
+          claude-video /watch skripty
+                    ↓
+       snímky + titulky + časový prepis
+                    ↓
+           WDFOX AI / Gemini / Codex
+                    ↓
+        zhrnutie, nález chyby, report
+                    ↓
+    WDFOX Website QA / neskôr DeepWatch
+       (nezávislé regresné kontroly)</pre>
+<p>Pre samotné volanie z ChatGPT existujú dve rozdielne cesty: (1) skill nainštalovaný v lokálnom Codex, (2) nami vytvorená bezpečná API/MCP služba nad workerom. To druhé zatiaľ neexistuje a nebolo testované.</p></div>
+<h2>Praktické využitie</h2>
+<ul>
+<li><strong>WDFOX Video Research Agent:</strong> analyzovať videonávody k AI, n8n, webom a vytiahnuť funkčné požiadavky so značkami času.</li>
+<li><strong>Tester prekladového komunikátora:</strong> porovnať video zo scenára SK ↔ DE, zaznamenať vizuálnu odozvu a prepis; chybu potvrdiť až nezávislým funkčným testom.</li>
+<li><strong>Website QA:</strong> nahrávka mobilného testu a automaticky vytvorený popis problému; doplniť Lighthouse, DOM a API kontrakty.</li>
+<li><strong>Klientsky záznam:</strong> spracovanie iba po povolení a pri splnení pravidiel ochrany údajov. Nie je to automatický prekladač živého hovoru.</li>
+</ul>
+<h2>Inštalačné podmienky a bezpečný pilot</h2>
+<div class="panel">
+<ol>
+<li>Testovať mimo produkčného webu, iba s verejným alebo vlastným krátkym videom a bez prihlasovacích cookies.</li>
+<li>V Windows alebo samostatnom Docker workeri overiť Python 3.10+, FFmpeg/ffprobe, yt-dlp a podľa zdroja runtime pre YouTube.</li>
+<li>Nainštalovať skill do lokálneho Codex/Claude Code alebo auditovane použiť jeho skripty; výber zdroja a výstupného adresára kontrolovať.</li>
+<li>Vyskúšať <code>--engine local</code>, titulky a extrakciu snímok bez odosielania videa do cloudového modelu.</li>
+<li>Len po schválení pridať možnosť Gemini API a prípadne cloudové STT; kontrolovať náklady, súhlas a retenčné nastavenia.</li>
+<li>Až potom vytvoriť minimálny n8n adaptér: povolené URL/prípony, limity veľkosti a času, oddelené používateľské práva, žiadny všeobecný shell/webhook z internetu.</li>
+</ol>
+<pre>npx skills add bradautomates/claude-video -g --skill watch
+
+# Alebo lokálny Codex:
+# Use $skill-installer to install from
+# https://github.com/bradautomates/claude-video/tree/main/skills/watch</pre>
+<p><em>Uvedené príkazy sú z dokumentácie projektu, v našom WDFOX systéme sa ešte nespustili.</em></p>
+</div>
+<div class="warning"><strong>Hranice:</strong> Instagram/Facebook odkazy môžu byť obmedzené prihlásením alebo ochranou proti sťahovaniu; samotná existencia yt-dlp nezaručuje ich spracovanie. Súkromné videá, klientsky hlas či osobné údaje nesmú byť bez súhlasu odovzdané externému modelu. Pri predvolenom <code>auto</code> môže prítomnosť Gemini kľúča prepnúť spracovanie do cloudu; pre pilot vynútiť <code>--engine local</code>.</div>
+<h2>Zdrojové odkazy</h2>
+<ul>
+<li><a href={repoUrl}>GitHub: bradautomates/claude-video (README)</a></li>
+<li><a href="https://github.com/bradautomates/claude-video/blob/main/skills/watch/SKILL.md">Originálny SKILL.md</a></li>
+<li><a href="https://github.com/bradautomates/claude-video/blob/main/LICENSE">Licencia MIT</a></li>
+<li><a href={fbUrl}>Dodané Facebook video – referencia (pri výskume nebolo priamo dostupné)</a></li>
+<li><a href="https://github.com/oxbshw/watch-skill">Samostatný projekt Watch Skill / DeepWatch</a></li>
+</ul>
+<footer>WDFOX System Design · vetva preview · zdokumentované, nie nainštalované · 18. 11. 2026</footer>
+</main></body></html>
