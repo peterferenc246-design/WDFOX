@@ -106,11 +106,16 @@ jobs:
               r'<script\b[^>]*src=["\'][^"\']*(?:embed\.tawk\.to|tawk-language-loader\.js|tawk-native-force\.js|tawk-avatar-fix\.js|tawk-native-bootstrap\.js|tawk-preview-[^"\']+\.js)[^"\']*["\'][^>]*>\s*</script\s*>',
               re.I | re.S,
           )
+          jobcenter_scripts = re.compile(
+              r'<script\b[^>]*src=["\'][^"\']*(?:jobcenter-vodafone-evidence|jobcenter-poster-fix)\.js[^"\']*["\'][^>]*>\s*</script\s*>',
+              re.I | re.S,
+          )
           inline_scripts = re.compile(r'<script\b[^>]*>.*?</script\s*>', re.I | re.S)
 
           def clean(text: str) -> str:
               text = legacy_ui.sub('', text)
               text = external_tawk.sub('', text)
+              text = jobcenter_scripts.sub('', text)
 
               def keep(match):
                   block = match.group(0)
@@ -166,7 +171,8 @@ jobs:
 
               # Explicit allowlist: the root is a redirect, and tools/subpages never own chat.
               home_pages = {f'{lang}/index.html' for lang in ('sk', 'de', 'en', 'hr', 'fr', 'it', 'pl', 'es', 'sv')}
-              page_snippet = snippet
+              page_path = path.relative_to('dist').as_posix()
+              page_snippet = snippet if page_path.startswith('jobcenter/') else ''
               if path.relative_to('dist').as_posix() in home_pages:
                   page_snippet = chat_snippet + '\n' + page_snippet
               text = text.replace('</body>', page_snippet + '\n</body>', 1)
