@@ -16,4 +16,5 @@ Hlavný HTML súbor: `public/docs/slovnik-pojmov.html`. Druhý, zapamätateľný
 
 - Web: `/docs/mapa-vyrazov.html`
 - Pôvodná trvalá adresa: `/docs/slovnik-pojmov.html`
+- Tematická podstránka skratiek (marketing, analytika, riadenie, obchod): `/docs/skratky.html`
 - Súvisiaca architektonická mapa: `/system-design`
