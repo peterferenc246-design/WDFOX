@@ -38,14 +38,15 @@ const certificates = [
       <div class="certificate-track">
       {certificates.map((cert,i) => <article class:list={["project-card","certificate-card",!cert.original && "certificate-sample"]} data-certificate-slide={i}>
         <div class="project-topline"><span>{cert.issuer}</span><span>{cert.score || "✦"}</span></div>
-        {cert.original ? <a class="project-window certificate-window" href={cert.image} target="_blank" rel="noopener noreferrer" aria-label={t[4]+": "+cert.title}><img src={cert.image} alt={cert.title+" – Peter Ferenc"} width="1277" height="898" loading="lazy" decoding="async"/></a> : <div class="project-window certificate-window sample-window"><div class="sample-certificate"><span class="sample-emblem" aria-hidden="true">✦</span><strong>CERTIFICATE</strong><span class="sample-rule"></span><span>{c[1]}</span><span class="sample-rule short"></span></div></div>}
-        <div class="project-info certificate-info"><h3>{cert.title}</h3>{cert.original ? <span class="certificate-links"><a href={cert.image} target="_blank" rel="noopener noreferrer">{t[4]} ↗</a><a href={cert.verify} target="_blank" rel="noopener noreferrer" title={t[6]}>{t[5]} ↗</a></span> : <span>{c[0]}</span>}</div>
+        {cert.original ? <a class="project-window certificate-window" href={cert.image} data-certificate-open={cert.image} aria-label={t[4]+": "+cert.title}><img src={cert.image} alt={cert.title+" – Peter Ferenc"} width="1277" height="898" loading="lazy" decoding="async"/></a> : <div class="project-window certificate-window sample-window"><div class="sample-certificate"><span class="sample-emblem" aria-hidden="true">✦</span><strong>CERTIFICATE</strong><span class="sample-rule"></span><span>{c[1]}</span><span class="sample-rule short"></span></div></div>}
+        <div class="project-info certificate-info"><h3>{cert.title}</h3>{cert.original ? <span class="certificate-links"><a href={cert.image} data-certificate-open={cert.image}>{t[4]} ↗</a><a href={cert.verify} target="_blank" rel="noopener noreferrer" title={t[6]}>{t[5]} ↗</a></span> : <span>{c[0]}</span>}</div>
       </article>)}
       </div>
     </div>
     <div class="certificate-controls" aria-label={t[1]+" "+t[2]}><button class="certificate-arrow" type="button" data-certificate-prev aria-label={c[3]}>‹</button><div class="certificate-dots">{certificates.map((cert,i)=><button type="button" class:list={["certificate-dot",i===0&&"is-active"]} data-certificate-dot={i} aria-label={cert.title} aria-current={i===0?"true":"false"}></button>)}</div><button class="certificate-arrow" type="button" data-certificate-next aria-label={c[4]}>›</button></div>
   </div>
   <p class="certificate-note">{t[6]}</p>
+  <dialog class="certificate-dialog" data-certificate-dialog aria-label={t[4]}><form method="dialog"><button type="submit" class="certificate-close" aria-label={{de:"Schließen",en:"Close",sk:"Zavrieť",fr:"Fermer",hr:"Zatvori",pl:"Zamknij",it:"Chiudi",es:"Cerrar",sv:"Stäng"}[locale]}>×</button></form><img data-certificate-full alt="AI Act Fundamentals – Peter Ferenc" width="1277" height="898" /></dialog>
 </section>
 <style>
 .certificates-section{padding-top:0}
@@ -68,8 +69,11 @@ const certificates = [
 .certificate-note{font-size:11px;color:#535b67;margin:8px 0 0}
 @media(max-width:900px){.certificate-card{flex-basis:calc((100% - 22px)/2)}.certificate-window{height:225px;min-height:225px}}
 @media(max-width:640px){.certificate-track{gap:14px}.certificate-card{flex-basis:100%}}
+.certificate-dialog{border:0;border-radius:16px;padding:38px 16px 16px;width:min(760px,92vw);max-height:90vh;background:#fff;overflow:auto;box-shadow:0 20px 65px #0005}.certificate-dialog::backdrop{background:#111827b3}.certificate-dialog img{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain}.certificate-close{position:absolute;top:6px;right:12px;border:0;background:transparent;font-size:29px;line-height:1;cursor:pointer;color:#17202c}
 </style>
 <script>
+document.querySelectorAll<HTMLElement>("[data-certificate-open]").forEach(link=>link.addEventListener("click",event=>{const dialog=document.querySelector<HTMLDialogElement>("[data-certificate-dialog]");const img=dialog?.querySelector<HTMLImageElement>("[data-certificate-full]");const src=link.dataset.certificateOpen;if(!dialog||!img||!src)return;event.preventDefault();img.src=src;dialog.showModal();}));
+document.querySelector<HTMLDialogElement>("[data-certificate-dialog]")?.addEventListener("click",event=>{const dialog=event.currentTarget as HTMLDialogElement;if(event.target===dialog)dialog.close();});
 document.querySelectorAll<HTMLElement>('[data-certificate-carousel]').forEach(carousel=>{
  const viewport=carousel.querySelector<HTMLElement>('[data-certificate-viewport]');
  const slides=Array.from(carousel.querySelectorAll<HTMLElement>('[data-certificate-slide]'));
