@@ -1,0 +1,53 @@
+---
+import type { Locale } from "../data/content";
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const labels = {
+  de: ["WEITERBILDUNG", "Zertifikate &", "Qualifikationen", "Prüfungsergebnis", "Zertifikat ansehen", "Überprüfen", "Privater Prüfungsnachweis, keine akkreditierte Zertifizierung."],
+  en: ["CONTINUING EDUCATION", "Certificates &", "Qualifications", "Exam score", "View certificate", "Verify", "Private exam certificate, not accredited certification."],
+  sk: ["ODBORNÉ VZDELÁVANIE", "Certifikáty a", "kvalifikácie", "Výsledok skúšky", "Zobraziť certifikát", "Overiť", "Súkromný doklad o skúške, nie akreditovaná certifikácia."],
+  fr: ["FORMATION CONTINUE", "Certificats et", "qualifications", "Résultat", "Voir le certificat", "Vérifier", "Attestation privée, certification non accréditée."],
+  hr: ["STRUČNO USAVRŠAVANJE", "Certifikati i", "kvalifikacije", "Rezultat ispita", "Pogledaj certifikat", "Provjeri", "Privatna potvrda o ispitu, neakreditirana certifikacija."],
+  pl: ["DOSKONALENIE ZAWODOWE", "Certyfikaty i", "kwalifikacje", "Wynik egzaminu", "Zobacz certyfikat", "Zweryfikuj", "Prywatne potwierdzenie egzaminu, bez akredytacji."],
+  it: ["FORMAZIONE CONTINUA", "Certificati e", "qualifiche", "Esito dell’esame", "Vedi certificato", "Verifica", "Attestato privato, non una certificazione accreditata."],
+  es: ["FORMACIÓN CONTINUA", "Certificados y", "cualificaciones", "Resultado del examen", "Ver certificado", "Verificar", "Certificado privado de examen, no acreditado."],
+  sv: ["FORTBILDNING", "Certifikat och", "kvalifikationer", "Provresultat", "Visa certifikat", "Verifiera", "Privat provintyg, inte ackrediterad certifiering."]
+} as const;
+const t = labels[locale];
+const certificates = [
+  {title:"AI Act Fundamentals", issuer:"Regulation AI", date:"2026-11-20", score:"93 %", image:"/images/certificates/ai-act-fundamentals.png", original:"https://www.regulation-ai.eu/de/certificate/?id=AI-2026-C0B609E0", verify:"https://www.regulation-ai.eu/de/verify/?id=AI-2026-C0B609E0"}
+];
+---
+<section class="section-wrap certificates-section" id="certifikaty" aria-labelledby="certificates-heading">
+  <div class="section-heading split-heading">
+    <div><p class="eyebrow">{t[0]}</p><h2 id="certificates-heading">{t[1]}<br/><span>{t[2]}</span></h2></div>
+  </div>
+  <div class="certificates-track" tabindex="0" aria-label={t[1] + " " + t[2]}>
+    {certificates.map(cert => <article class="certificate-card">
+      <div class="certificate-top"><span>{cert.issuer}</span><span class="certificate-score" title={t[3]}>{cert.score}</span></div>
+      <a class="certificate-image" href={cert.original} target="_blank" rel="noopener noreferrer" aria-label={t[4] + ": " + cert.title}><img src={cert.image} alt={cert.title + " – Peter Ferenc"} width="1277" height="898" loading="lazy" decoding="async"/></a>
+      <div class="certificate-info"><h3>{cert.title}</h3><time datetime={cert.date}>{new Intl.DateTimeFormat(locale,{dateStyle:"medium",timeZone:"UTC"}).format(new Date(cert.date))}</time><p>{t[6]}</p>
+      <div class="certificate-actions"><a href={cert.original} target="_blank" rel="noopener noreferrer">{t[4]} ↗</a><a href={cert.verify} target="_blank" rel="noopener noreferrer">{t[5]} ↗</a></div></div>
+    </article>)}
+  </div>
+</section>
+<style>
+.certificates-section{padding-top:24px;padding-bottom:24px}
+.certificates-track{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:8px 2px 16px}
+.certificate-card{flex:0 0 calc((100% - 44px)/3);min-width:0;scroll-snap-align:start;border:1px solid #dedede;border-radius:18px;overflow:hidden;background:#fff;color:#17202c;box-shadow:0 8px 24px #17202c0e}
+.certificate-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:14px;font-weight:700}
+.certificate-score{background:#fff1dc;color:#80510a;border-radius:999px;padding:6px 12px;white-space:nowrap}
+.certificate-image{display:block;background:#f5f5f5;aspect-ratio:1.65;overflow:hidden}
+.certificate-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
+.certificate-info{padding:16px}
+.certificate-info h3{font-size:20px;margin:0 0 5px}
+.certificate-info time,.certificate-info p{font-size:13px;color:#535b67}
+.certificate-info p{margin:8px 0 14px;line-height:1.4}
+.certificate-actions{display:flex;flex-wrap:wrap;gap:8px}
+.certificate-actions a{padding:9px 10px;border-radius:8px;border:1px solid #d9d9d9;color:#232323;font-size:13px;font-weight:700;text-decoration:none}
+.certificate-actions a:first-child{background:#f36a0a;color:#fff;border-color:#f36a0a}
+.certificate-actions a:hover,.certificate-image:hover{opacity:.85}
+.certificate-actions a:focus-visible,.certificate-image:focus-visible,.certificates-track:focus-visible{outline:3px solid #f36a0a;outline-offset:2px}
+@media(max-width:900px){.certificate-card{flex-basis:calc((100% - 22px)/2)}}
+@media(max-width:640px){.certificates-track{gap:14px}.certificate-card{flex-basis:100%}}
+</style>
