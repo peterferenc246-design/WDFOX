@@ -1692,3 +1692,109 @@ _No frontmatter or command drift (20 frontmatter fields, 96 built-in commands st
 | 3 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
 
 _No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped Nov 15 → Nov 16, 2026._
+
+---
+
+## [2026-11-17 11:05 AM PKT] Claude Code v2.1.326
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | `/add-dir` — remove "Before v2.1.234, Claude Code queued the command until the turn finished" historical note; rephrase mid-turn sentence to "If you run `/add-dir` while Claude is responding, Claude's next tool call can access the directory once you confirm the add" | ✅ COMPLETE (note removed; sentence reworded to match official docs) |
+| 2 | LOW | Changed Description | `/status` — remove "Before v2.1.221, `/status` didn't show this row." historical note; now dropped from official docs | ✅ COMPLETE (note removed to match official docs) |
+| 3 | LOW | Changed Description | `/security-review` — official docs updated: "pending changes on" → "the changes on", "and identifies" → "identifying", and new error reference added for `ambiguous argument` error | ✅ COMPLETE (wording and error reference updated at row #65 in Project tag) |
+| 4 | LOW | Changed Description | `/advisor` — restructured to match official docs: formats Accepts list as separate sentences, removes "Use `off` to disable", and rewrites non-interactive sentence | ✅ COMPLETE (description updated at row #55 in Model tag) |
+| 5 | LOW | Changed Description | `/goal` — move "or the goal clears for another reason" into the first sentence; remove it from end of last sentence per official docs | ✅ COMPLETE (restructured at row #87 in Session tag) |
+| 6 | LOW | Scope Decision | `/plugin-authoring` — present in official docs without [Skill] marker but describes itself as "a skill from a built-in plugin" | ❌ INVALID (recurring — bundled plugin skill, excluded per report's existing scope disclaimer) |
+| 7 | LOW | Scope Decision | `/deep-research` — marked [Workflow] in official docs, not a built-in command | ❌ INVALID (recurring — bundled workflow, excluded per report's existing scope disclaimer same as bundled skills) |
+| 8 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-16 — official docs still do not reflect this change) |
+| 9 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-16 — official docs still do not reflect this change) |
+| 10 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-18 11:05 AM PKT] Claude Code v2.1.327
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Argument | Update `/tui` — v2.1.327 changelog adds `/tui classic` as the name for the non-fullscreen renderer; docs still show `[default\|fullscreen]` signature | ✋ ON HOLD (changelog-only — official docs still show `[default\|fullscreen]`; defer until docs catch up) |
+| 2 | LOW | Changed Argument | Update `/help` — v2.1.326 changelog adds `/help <command>` for per-command help; official table row not yet updated | ✋ ON HOLD (changelog-only — official docs do not yet show argument syntax; defer until docs catch up) |
+| 3 | LOW | Changed Description | Update `/install-github-app` — v2.1.327 changelog: now asks for confirmation before it changes a repository; official docs table not yet updated | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 4 | LOW | Changed Description | Update `/status` — v2.1.327 changelog: now includes a list of broken files; official docs table not yet updated | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 5 | LOW | Changed Description | Update `/config` — v2.1.327 changelog: now shows a note when other settings override a row; official docs table not yet updated | ✋ ON HOLD (changelog-only — defer until official docs catch up) |
+| 6 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-17 — official docs still do not reflect this change) |
+| 7 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-17 — official docs still do not reflect this change) |
+| 8 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge bumped v2.1.326 → v2.1.327._
+
+---
+
+## [2026-11-19 11:05 AM PKT] Claude Code v2.1.328
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Argument | Update `/tui` — argument hint changed from `[default\|fullscreen]` to `[classic\|fullscreen]` per official docs (v2.1.327); `classic` requires v2.1.327 or later; `default` still works; description updated with `classic` availability note (resolves ON HOLD from 2026-11-18) | ✅ COMPLETE (signature and description updated at #25 in Config tag) |
+| 2 | LOW | Scope Decision | `/plugin-authoring` — present in official docs without [Skill] marker but self-describes as "a skill from a built-in plugin" | ❌ INVALID (recurring — bundled plugin skill, excluded per report's existing scope disclaimer) |
+| 3 | LOW | Changed Argument | `/help` — v2.1.326 changelog adds `/help <command>` for per-command help; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 4 | LOW | Changed Description | `/install-github-app` — v2.1.327 changelog: now asks for confirmation before it changes a repository; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 5 | LOW | Changed Description | `/status` — v2.1.327 changelog: now includes a list of broken files; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 6 | LOW | Changed Description | `/config` — v2.1.327 changelog: now shows a note when other settings override a row; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 7 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 8 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 9 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+---
+
+## [2026-11-20 11:05 AM PKT] Claude Code v2.1.329
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Argument | `/help` — v2.1.326 changelog adds `/help <command>` for per-command help; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 2 | LOW | Changed Description | `/install-github-app` — v2.1.327 changelog: now asks for confirmation before it changes a repository; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 3 | LOW | Changed Description | `/status` — v2.1.327 changelog: now includes a list of broken files; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 4 | LOW | Changed Description | `/config` — v2.1.327 changelog: now shows a note when other settings override a row; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 5 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 6 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 7 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge bumped v2.1.328 → v2.1.329._
+
+---
+
+## [2026-11-21 11:04 AM PKT] Claude Code v2.1.330
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Argument | `/help` — v2.1.326 changelog adds `/help <command>` for per-command help; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 2 | LOW | Changed Description | `/install-github-app` — v2.1.327 changelog: now asks for confirmation before it changes a repository; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 3 | LOW | Changed Description | `/status` — v2.1.327 changelog: now includes a list of broken files; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 4 | LOW | Changed Description | `/config` — v2.1.327 changelog: now shows a note when other settings override a row; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 5 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 6 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 7 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge bumped v2.1.329 → v2.1.330._
+
+---
+
+## [2026-11-22 11:04 AM PKT] Claude Code v2.1.330
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Argument | `/help` — v2.1.326 changelog adds `/help <command>` for per-command help; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 2 | LOW | Changed Description | `/install-github-app` — v2.1.327 changelog: now asks for confirmation before it changes a repository; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 3 | LOW | Changed Description | `/status` — v2.1.327 changelog: now includes a list of broken files; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 4 | LOW | Changed Description | `/config` — v2.1.327 changelog: now shows a note when other settings override a row; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-18 — official docs still do not reflect this change) |
+| 5 | LOW | Changed Description | `/security-review` — v2.1.323 changelog: now asks before Claude runs the review; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 6 | LOW | Changed Description | `/logout` — v2.1.323 changelog: in a background session now signs out every session on the computer and ends the session; official docs table not yet updated | ✋ ON HOLD (recurring from 2026-11-13 — official docs still do not reflect this change) |
+| 7 | LOW | Changed Description | `/autocompact` — per-model saving feature (v2.1.288 changelog) not yet in official docs table | ✋ ON HOLD (recurring since 2026-10-03 — official docs table still not updated; defer until docs catch up) |
+
+_No frontmatter or command drift (20 frontmatter fields, 96 built-in commands still in sync). Version badge date bumped 2026-11-21 → 2026-11-22._
+
+---
+
+## [2026-11-23 11:05 AM PKT] Claude Code v2.1.330
+
+| # | Priority | Type | Action | Status |
+|---|----------|------|--------|--------|
+| 1 | LOW | Changed Description | Update `/export [filename]` — docs add "and on v2.1.327 or later refuses one that already exists" to the filename behavior | ✅ COMPLETE (refuses-existing-file detail added to description at #43 in Export tag) |
